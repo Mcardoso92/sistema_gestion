@@ -1,8 +1,11 @@
-﻿namespace saas.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace saas.Models
 {
     public class Venta
     {
         public int Id { get; set; }
+        [DataType(DataType.Date)]
         public DateTime Fecha { get; set; }
         public decimal Total { get; set; }
         public bool Estado { get; set; }
