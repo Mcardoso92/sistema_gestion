@@ -15,6 +15,7 @@ namespace saas.Models
         public ICollection<Usuario>? Usuarios { get; set; }
         public ICollection<Producto>? Productos { get; set; }
         public ICollection<Venta>? Ventas { get; set; }
+        public ICollection<Categoria>? categorias { get; set; }
 
     }
 }

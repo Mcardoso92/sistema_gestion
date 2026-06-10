@@ -10,6 +10,8 @@ namespace saas.Models
         public string Nombre { get; set; }
         [StringLength(500)]
         public string Descripcion { get; set; }
+        public int CategoriaId { get; set; }
+        public Categoria? Categoria { get; set; }
         public decimal PrecioCosto { get; set; }
         public decimal PrecioVenta { get; set; }
         public int Stock { get; set; }
