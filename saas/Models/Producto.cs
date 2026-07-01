@@ -9,7 +9,7 @@ namespace saas.Models
         [StringLength(100)]
         public string Nombre { get; set; }
         [StringLength(500)]
-        public string Descripcion { get; set; }
+        public string? Descripcion { get; set; }
         public int CategoriaId { get; set; }
         public Categoria? Categoria { get; set; }
         public decimal PrecioCosto { get; set; }
@@ -18,15 +18,11 @@ namespace saas.Models
         public int PuntoReposicion { get; set; }
         public bool Estado { get; set; }
         [Url]
-        public string UrlImagen { get; set; }
+        public string? UrlImagen { get; set; }
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
         public int EmpresaId { get; set; }
         public Empresa? Empresa { get; set; }
         public ICollection<DetalleVenta>? DetallesVenta { get; set; }
-
-        //rowversion para control de concurrencia optimista
-        [Timestamp]
-        public byte[] RowVersion { get; set; }
     }
 }

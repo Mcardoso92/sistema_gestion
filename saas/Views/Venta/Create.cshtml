@@ -1,0 +1,31 @@
+﻿@using saas.ViewModel
+
+@model VentaCreateVM
+@{
+}
+<form asp-action="Create" method="post">
+
+    <label>Producto</label>
+
+    <select asp-for="ProductoId">
+        @foreach (var producto in ViewBag.Productos)
+        {
+            <option value="@producto.Id">
+                @producto.Nombre
+            </option>
+        }
+    </select>
+
+    <br />
+
+    <label>Cantidad</label>
+
+    <input asp-for="Cantidad" type="number" min="1" />
+
+    <br />
+
+    <button type="submit">
+        Guardar Venta
+    </button>
+
+</form>
