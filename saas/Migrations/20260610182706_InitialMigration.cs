@@ -32,7 +32,6 @@ namespace saas.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Nombre = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    ImagenEmpresa = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Estado = table.Column<bool>(type: "bit", nullable: false),
                     FechaAlta = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -100,28 +99,19 @@ namespace saas.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Productos",
+                name: "Categorias",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    PrecioCosto = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    PrecioVenta = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Stock = table.Column<int>(type: "int", nullable: false),
-                    PuntoReposicion = table.Column<int>(type: "int", nullable: false),
-                    Estado = table.Column<bool>(type: "bit", nullable: false),
-                    UrlImagen = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FechaAlta = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EmpresaId = table.Column<int>(type: "int", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    Nombre = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EmpresaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Productos", x => x.Id);
+                    table.PrimaryKey("PK_Categorias", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Productos_Empresas_EmpresaId",
+                        name: "FK_Categorias_Empresas_EmpresaId",
                         column: x => x.EmpresaId,
                         principalTable: "Empresas",
                         principalColumn: "Id");
@@ -241,6 +231,40 @@ namespace saas.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Productos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CategoriaId = table.Column<int>(type: "int", nullable: false),
+                    PrecioCosto = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    PrecioVenta = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Stock = table.Column<int>(type: "int", nullable: false),
+                    PuntoReposicion = table.Column<int>(type: "int", nullable: false),
+                    Estado = table.Column<bool>(type: "bit", nullable: false),
+                    UrlImagen = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FechaAlta = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmpresaId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Productos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Productos_Categorias_CategoriaId",
+                        column: x => x.CategoriaId,
+                        principalTable: "Categorias",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Productos_Empresas_EmpresaId",
+                        column: x => x.EmpresaId,
+                        principalTable: "Empresas",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DetallesVenta",
                 columns: table => new
                 {
@@ -312,6 +336,11 @@ namespace saas.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Categorias_EmpresaId",
+                table: "Categorias",
+                column: "EmpresaId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DetallesVenta_ProductoId",
                 table: "DetallesVenta",
                 column: "ProductoId");
@@ -320,6 +349,11 @@ namespace saas.Migrations
                 name: "IX_DetallesVenta_VentaId",
                 table: "DetallesVenta",
                 column: "VentaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Productos_CategoriaId",
+                table: "Productos",
+                column: "CategoriaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Productos_EmpresaId",
@@ -366,6 +400,9 @@ namespace saas.Migrations
 
             migrationBuilder.DropTable(
                 name: "Ventas");
+
+            migrationBuilder.DropTable(
+                name: "Categorias");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

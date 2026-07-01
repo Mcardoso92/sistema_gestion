@@ -12,7 +12,7 @@ using saas.Data;
 namespace saas.Migrations
 {
     [DbContext(typeof(SaasDbContext))]
-    [Migration("20260609032945_InitialMigration")]
+    [Migration("20260610182706_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -158,6 +158,28 @@ namespace saas.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("saas.Models.Categoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("EmpresaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmpresaId");
+
+                    b.ToTable("Categorias");
+                });
+
             modelBuilder.Entity("saas.Models.DetalleVenta", b =>
                 {
                     b.Property<int>("Id")
@@ -206,9 +228,6 @@ namespace saas.Migrations
                     b.Property<DateTime>("FechaAlta")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImagenEmpresa")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -227,8 +246,10 @@ namespace saas.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CategoriaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Descripcion")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -257,12 +278,6 @@ namespace saas.Migrations
                     b.Property<int>("PuntoReposicion")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
@@ -271,6 +286,8 @@ namespace saas.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoriaId");
 
                     b.HasIndex("EmpresaId");
 
@@ -452,6 +469,15 @@ namespace saas.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("saas.Models.Categoria", b =>
+                {
+                    b.HasOne("saas.Models.Empresa", "Empresa")
+                        .WithMany("categorias")
+                        .HasForeignKey("EmpresaId");
+
+                    b.Navigation("Empresa");
+                });
+
             modelBuilder.Entity("saas.Models.DetalleVenta", b =>
                 {
                     b.HasOne("saas.Models.Producto", "Producto")
@@ -473,11 +499,19 @@ namespace saas.Migrations
 
             modelBuilder.Entity("saas.Models.Producto", b =>
                 {
+                    b.HasOne("saas.Models.Categoria", "Categoria")
+                        .WithMany()
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("saas.Models.Empresa", "Empresa")
                         .WithMany("Productos")
                         .HasForeignKey("EmpresaId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Categoria");
 
                     b.Navigation("Empresa");
                 });
@@ -519,6 +553,8 @@ namespace saas.Migrations
                     b.Navigation("Usuarios");
 
                     b.Navigation("Ventas");
+
+                    b.Navigation("categorias");
                 });
 
             modelBuilder.Entity("saas.Models.Producto", b =>

@@ -8,7 +8,6 @@ namespace saas.Models
         [Required]
         [StringLength(50)]
         public string Nombre { get; set; }
-        public string? ImagenEmpresa { get; set; }
         public bool Estado { get; set; }
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
