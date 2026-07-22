@@ -20,8 +20,8 @@ builder.Services.AddIdentityCore<Usuario>(options =>
     options.Password.RequiredLength = 3;
 }
 )
-    .AddEntityFrameworkStores<SaasDbContext>()
     .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<SaasDbContext>()
     .AddSignInManager();
 
 //Incluir Manejo de cookies
