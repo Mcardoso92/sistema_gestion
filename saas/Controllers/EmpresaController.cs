@@ -56,18 +56,36 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nombre,ImagenEmpresa,Estado,FechaAlta")] Empresa empresa)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(empresa);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    empresa.FechaAlta = DateTime.Now; // Carga por defecto la fecha de alta al momento de crear la empresa
+                    empresa.Estado = true; // Carga por defecto el estado como activo al momento de crear la empresa
+
+                    _context.Add(empresa);
+                    await _context.SaveChangesAsync();
+
+                    TempData["Success"] = "Empresa creada correctamente.";
+
+                    return RedirectToAction(nameof(Index));
+                }
             }
+            catch
+            {
+                ModelState.AddModelError("", "Ocurrió un error al guardar la empresa.");
+
+                return View(empresa);
+            }
+
+            // Si el modelo no es válido, regresar la vista con el modelo para mostrar errores
             return View(empresa);
         }
 
         // GET: Empresa/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
             if (id == null)
             {
                 return NotFound();
@@ -88,7 +106,8 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,ImagenEmpresa,Estado,FechaAlta")] Empresa empresa)
         {
-            if (id != empresa.Id)
+            var empresaDb = await _context.Empresas.FindAsync(id);
+            if (empresaDb == null)
             {
                 return NotFound();
             }
@@ -97,7 +116,9 @@ namespace saas.Controllers
             {
                 try
                 {
-                    _context.Update(empresa);
+
+                    empresaDb.Nombre = empresa.Nombre;
+                    empresaDb.Estado = empresa.Estado;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -111,6 +132,9 @@ namespace saas.Controllers
                         throw;
                     }
                 }
+
+                TempData["Success"] = "Empresa modificada correctamente.";
+
                 return RedirectToAction(nameof(Index));
             }
             return View(empresa);
@@ -139,13 +163,23 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var empresa = await _context.Empresas.FindAsync(id);
-            if (empresa != null)
+            try
             {
-                _context.Empresas.Remove(empresa);
+                var empresa = await _context.Empresas.FindAsync(id);
+                if (empresa != null)
+                {
+                    _context.Empresas.Remove(empresa);
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Empresa eliminada correctamente.";
+            }
+            catch
+            {
+                TempData["Error"] = "No es posible eliminar la empresa porque tiene información relacionada.";
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 

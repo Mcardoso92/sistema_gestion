@@ -1,0 +1,275 @@
+﻿@using saas.ViewModel
+
+@model RegistroVM
+
+@{
+}
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+<style>
+    :root {
+        --bs-primary: #006c49;
+        --bs-primary-rgb: 0, 108, 73;
+        --emerald-bg: #f7f9fb;
+        --emerald-sidebar: #f8f9fa;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--emerald-bg);
+        color: #191c1e;
+    }
+
+    .sidebar {
+        width: 260px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background-color: var(--emerald-sidebar);
+        border-right: 1px solid #dee2e6;
+        z-index: 1030;
+    }
+
+    .top-nav {
+        height: 64px;
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: 260px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid #dee2e6;
+        z-index: 1020;
+    }
+
+    .main-content {
+        margin-left: 260px;
+        padding-top: 80px;
+        padding-bottom: 48px;
+    }
+
+    .btn-primary {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+
+        .btn-primary:hover {
+            background-color: #005236;
+            border-color: #005236;
+        }
+
+    .text-primary-emerald {
+        color: var(--bs-primary) !important;
+    }
+
+    .nav-link {
+        color: #495057;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+        .nav-link:hover {
+            background-color: #e9ecef;
+            color: var(--bs-primary);
+        }
+
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header {
+        background-color: #fff;
+        border-bottom: 1px solid #f1f1f1;
+        padding: 1rem 1.5rem;
+        border-top-left-radius: 0.75rem !important;
+        border-top-right-radius: 0.75rem !important;
+    }
+
+    .form-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6c757d;
+    }
+
+    .form-control, .form-select {
+        padding: 0.75rem 1rem;
+        border-color: #dee2e6;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(0, 108, 73, 0.1);
+        }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: "\e5cc";
+        font-family: 'Material Symbols Outlined';
+        font-size: 14px;
+        vertical-align: middle;
+    }
+</style>
+<main class="main-content">
+    <div class="container-fluid px-lg-5">
+        <div class="row justify-content">
+            <div class="col-xl-9">
+                <!-- Breadcrumb and Title -->
+                <div class="d-md-flex align-items-center justify-content-between mb-4 gap-3">
+                    <div>
+                        <nav aria-label="breadcrumb">
+                        </nav>
+                        <h2 class="fw-bold mb-1">Crear Nuevo Usuario</h2>
+                        <p class="text-muted small mb-0">Complete la información para dar de alta un nuevo ApplicationUser en el sistema.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-link text-muted text-decoration-none fw-semibold d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined">arrow_back</span>
+                            Volver al Listado
+                        </button>
+                        <button class="btn btn-primary fw-bold px-4 d-flex align-items-center gap-2 shadow-sm">
+                            <span class="material-symbols-outlined fs-5">save</span>
+                            Guardar Usuario
+                        </button>
+                    </div>
+                </div>
+                <form action="#" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <!-- Personal Information Card -->
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-light text-primary-emerald rounded p-2 d-flex">
+                                    <span class="material-symbols-outlined">person_add</span>
+                                </div>
+                                <h6 class="mb-0 fw-bold">Información Personal</h6>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="small fw-bold text-muted text-uppercase" style="letter-spacing: 1px;">Activo</span>
+                                <div class="form-check form-switch mb-0">
+                                    <input checked="" class="form-check-input" id="isActive" type="checkbox" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="Nombre"></label>
+                                    <input asp-for="Nombre" class="form-control" placeholder="Nombre del usuario"/>
+                                    <span asp-validation-for="Nombre" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="Apellido"></label>
+                                    <input asp-for="Apellido" class="form-control" placeholder="Apellido del usuario" />
+                                    <span asp-validation-for="Apellido" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="EmpresaId" class="form-label"></label>
+                                    <select asp-for="EmpresaId" asp-items="Model.Empresas" class="form-select">
+                                        <option value="">Seleccione una empresa</option>
+                                    </select>
+                                    <span asp-validation-for="EmpresaId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Security Credentials Card -->
+                    <div class="card">
+                        <div class="card-header d-flex align-items-center gap-3">
+                            <div class="bg-light text-info rounded p-2 d-flex">
+                                <span class="material-symbols-outlined">lock_open</span>
+                            </div>
+                            <h6 class="mb-0 fw-bold">Credenciales de Seguridad</h6>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <label class="form-label" asp-for="Email">Email (Nombre de Usuario)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white text-muted">
+                                            <span class="material-symbols-outlined fs-5">alternate_email</span>
+                                        </span>
+                                        <input asp-for="Email" class="form-control" placeholder="usuario@empresa.com"/>
+                                        <span asp-validation-for="Email" class="text-danger small"></span>
+                                    </div>
+                                    <div class="form-text small fst-italic mt-2">El correo electrónico servirá como identificador único para el inicio de sesión.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="Clave">Contraseña</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white text-muted">
+                                            <span class="material-symbols-outlined fs-5">password</span>
+                                        </span>
+                                        <input asp-for="Clave" autocomplete="new-password" class="form-control" placeholder="Ingrese su contraseña" type="password" />
+                                        <span asp-validation-for="Clave" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label" asp-for="ConfirmarClave">Confirmar Contraseña</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white text-muted">
+                                            <span class="material-symbols-outlined fs-5">key</span>
+                                        </span>
+                                        <input asp-for="ConfirmarClave" autocomplete="new-password" class="form-control" placeholder="Ingrese nuevamente su contraseña" type="password" />
+                                        <span asp-validation-for="ConfirmarClave" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-end align-items-center gap-3">
+                        <button asp-action="Login" class="btn btn-link text-muted text-decoration-none fw-semibold" type="button">Cancelar Operación</button>
+                        <button asp-action="Home" class="btn btn-primary fw-bold px-5 py-2 shadow-sm rounded-3" type="submit">Finalizar y Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalContent = submitBtn.innerHTML;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div> Procesando...
+        `;
+
+        setTimeout(() => {
+            submitBtn.classList.remove('btn-primary');
+            submitBtn.classList.add('btn-success');
+            submitBtn.innerHTML = `
+                <span class="material-symbols-outlined fs-5 me-2">check_circle</span> Usuario Creado
+            `;
+
+            setTimeout(() => {
+                submitBtn.classList.remove('btn-success');
+                submitBtn.classList.add('btn-primary');
+                submitBtn.innerHTML = originalContent;
+                submitBtn.disabled = false;
+            }, 2000);
+        }, 1500);
+    });
+</script>

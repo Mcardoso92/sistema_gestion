@@ -5,8 +5,8 @@ namespace saas.Models
     public class Empresa
     {
         public int Id { get; set; }
-        [Required]
-        [StringLength(50)]
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [StringLength(50, ErrorMessage = "Máximo 50 caracteres.")]
         public string Nombre { get; set; }
         public bool Estado { get; set; }
         [DataType(DataType.Date)]
