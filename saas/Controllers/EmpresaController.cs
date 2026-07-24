@@ -116,9 +116,9 @@ namespace saas.Controllers
             {
                 try
                 {
-
                     empresaDb.Nombre = empresa.Nombre;
                     empresaDb.Estado = empresa.Estado;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
