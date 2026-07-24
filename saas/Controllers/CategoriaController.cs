@@ -57,14 +57,38 @@ namespace saas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,EmpresaId")] Categoria categoria)
+        public async Task<IActionResult> Create(Categoria categoria)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(categoria);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    bool existeCategoria = await _context.Categorias.AnyAsync(c =>
+                        c.EmpresaId == categoria.EmpresaId &&
+                        c.Nombre.ToLower() == categoria.Nombre.ToLower());
+
+                    if (existeCategoria)
+                    {
+                        ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
+
+                        ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+                        return View(categoria);
+                    }
+
+                    categoria.Estado = true; // Cargar el valor predeterminado de Estado como true al crear una nueva categoría
+                    _context.Add(categoria);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Categoria creada correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
+            catch
+            {
+                ModelState.AddModelError("", "Ocurrió un error al Crear la Categoria.");
+
+                return View(categoria);
+            }            
+
             ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
             return View(categoria);
         }
@@ -91,9 +115,10 @@ namespace saas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,EmpresaId")] Categoria categoria)
+        public async Task<IActionResult> Edit(int id, Categoria categoria)
         {
-            if (id != categoria.Id)
+            var categoriaDb = await _context.Categorias.FindAsync(id);
+            if (categoriaDb == null)
             {
                 return NotFound();
             }
@@ -102,7 +127,23 @@ namespace saas.Controllers
             {
                 try
                 {
-                    _context.Update(categoria);
+                    bool existeCategoria = await _context.Categorias.AnyAsync(c =>
+                        c.EmpresaId == categoria.EmpresaId &&
+                        c.Nombre.ToLower() == categoria.Nombre.ToLower() &&
+                        c.Id != categoria.Id);
+
+                    if (existeCategoria)
+                    {
+                        ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
+
+                        ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+
+                        return View(categoria);
+                    }
+
+                    categoriaDb.Nombre = categoria.Nombre;
+                    categoriaDb.Estado = categoria.Estado;
+                    categoriaDb.EmpresaId = categoria.EmpresaId;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -116,6 +157,7 @@ namespace saas.Controllers
                         throw;
                     }
                 }
+                TempData["Success"] = "Categoria modificada correctamente.";
                 return RedirectToAction(nameof(Index));
             }
             ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
@@ -146,13 +188,23 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var categoria = await _context.Categorias.FindAsync(id);
-            if (categoria != null)
+            try
             {
-                _context.Categorias.Remove(categoria);
-            }
+                var categoria = await _context.Categorias.FindAsync(id);
+                if (categoria != null)
+                {
+                    _context.Categorias.Remove(categoria);
+                }
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Categoria eliminada correctamente.";
+            }
+            catch
+            {
+
+                TempData["Error"] = "No es posible eliminar la categoria porque tiene información relacionada.";
+            }
+            
             return RedirectToAction(nameof(Index));
         }
 
