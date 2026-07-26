@@ -24,6 +24,12 @@ namespace saas.Data
                 .WithMany(e => e.Ventas)
                 .HasForeignKey(v => v.EmpresaId)
                 .OnDelete(DeleteBehavior.NoAction);
+            
+            modelBuilder.Entity<Producto>()
+                .HasOne(p => p.Categoria)
+                .WithMany(e => e.Productos)
+                .HasForeignKey(p => p.CategoriaId)
+                .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<Producto>()
                 .HasOne(p => p.Empresa)
                 .WithMany(e => e.Productos)
@@ -40,6 +46,12 @@ namespace saas.Data
                 .HasOne(d => d.Venta)
                 .WithMany(v => v.Detalles)
                 .HasForeignKey(d => d.VentaId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Categoria>()
+                .HasOne(c => c.Empresa)
+                .WithMany(e => e.Categorias)
+                .HasForeignKey(c => c.EmpresaId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             // Configuración de precisión para campos decimales

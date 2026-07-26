@@ -1,66 +1,133 @@
-﻿@model IEnumerable<saas.Models.Producto>
+﻿@model IEnumerable<Producto>
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<main class="flex-grow-1 py-5 container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-semibold mb-1">Gestión de Productos</h1>
+            <p class="text-secondary mb-0">Administra tu inventario, precios y niveles de stock en tiempo real.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
+                <span class="material-symbols-outlined fs-5">inventory_2</span>
+                <span class="fw-medium small">Ajuste de Stock</span>
+            </button>
+            <a asp-action="Create" class="btn btn-primary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
+                <span class="material-symbols-outlined fs-5">add_circle</span>
+                <span class="fw-medium small">Nuevo Producto</span>
+            </a>
+        </div>
+    </div>
+    <!-- Filter Bar (Identical structure to SCREEN_11) -->
+    <div class="card mb-4">
+        <div class="card-body p-3">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-8 d-flex gap-2">
+                    <div class="search-input-wrapper flex-grow-1" style="max-width: 400px;">
+                        <span class="material-symbols-outlined">search</span>
+                        <input class="form-control form-control-md" id="tableSearch" placeholder="Buscar por ID, Producto o SKU..." type="text" />
+                    </div>
+                    <button class="btn btn-outline-secondary d-flex align-items-center gap-1 px-3">
+                        <span class="material-symbols-outlined fs-5">filter_list</span>
+                        <span class="small fw-medium">Filtros</span>
+                    </button>
+                </div>
+                <div class="col-md-4 d-flex justify-content-md-end">
+                    <button class="btn btn-outline-secondary d-flex align-items-center gap-1 px-3">
+                        <span class="material-symbols-outlined fs-5">file_download</span>
+                        <span class="small fw-medium">Exportar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Data Table Card -->
+    <div class="card shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-3 border-0">ID</th>
+                        <th class="px-4 py-3 border-0">Producto</th>
+                        <th class="px-4 py-3 border-0">Categoría</th>
+                        <th class="px-4 py-3 border-0 text-end">Precio Venta</th>
+                        <th class="px-4 py-3 border-0 text-center">Stock</th>
+                        <th class="px-4 py-3 border-0 text-center">Reposición</th>
+                        <th class="px-4 py-3 border-0 text-center">Estado</th>
+                        <th class="px-4 py-3 border-0 text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    @foreach (var producto in Model)
+                    {
+                        <tr>
+                            <td class="px-4 py-3">@producto.Id</td>
+                            <td class="px-4 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="product-img-wrapper">
+                                        <img alt="Producto" src="@producto.UrlImagen" />
+                                    </div>
+                                    <div>
+                                        <a class="product-name d-block" href="#">@producto.Nombre</a>                                        
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">@producto.Categoria.Nombre</td>
+                            <td class="px-4 py-3 text-end fw-semibold">@producto.PrecioVenta</td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="badge bg-light text-dark border p-2 rounded-1">@producto.Stock</span>
+                            </td>
+                            <td class="px-4 py-3 text-center small text-secondary">@producto.PuntoReposicion</td>
+                            <td class="px-4 py-3 text-center">
+                                @if (producto.Stock < producto.PuntoReposicion)
+                                {
+                                    <span class="badge-status status-activo">
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Imagen
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Categoria)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrecioCosto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PrecioVenta)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stock)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    <img src="@item.UrlImagen" alt="@item.Nombre" height="50" />
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Nombre)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Categoria.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PrecioCosto)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PrecioVenta)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Stock)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                                        <span class="dot"></span>Bajo Stock
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status status-inactivo">
+
+                                        <span class="dot"></span>Normal
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-4 py-3 text-end">
+                                <a asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-primary">Ver</a>
+                                <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                <a asp-action="Delete" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                            </td>
+                        </tr>
+                    }                                        
+                </tbody>
+            </table>
+        </div>
+        <!-- Pagination Footer (Identical to SCREEN_11) -->
+        <div class="card-footer bg-light border-top-0 px-4 py-3">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+                <span class="small text-secondary">Mostrando 1 a 4 de 1,284 productos</span>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0 align-items-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#"><span class="material-symbols-outlined fs-5">chevron_left</span></a>
+                        </li>
+                        <li class="page-item active"><a class="page-link text-white" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><span class="px-2 text-secondary">...</span></li>
+                        <li class="page-item"><a class="page-link" href="#">321</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#"><span class="material-symbols-outlined fs-5">chevron_right</span></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>

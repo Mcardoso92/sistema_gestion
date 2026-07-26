@@ -13,23 +13,19 @@ builder.Services.AddDbContext<SaasDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SaasDbContext")));
 
 //Incluir Indentity core
-builder.Services.AddIdentityCore<Usuario>(options =>
+builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 {
-    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 3;
+
+    options.User.RequireUniqueEmail = true;
 }
 )
-    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<SaasDbContext>()
-    .AddSignInManager();
-
-//Incluir Manejo de cookies
-builder.Services.AddAuthentication(opt =>
-{
-    opt.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-})
-    .AddIdentityCookies();
+    .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
