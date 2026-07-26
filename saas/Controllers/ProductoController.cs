@@ -49,8 +49,15 @@ namespace saas.Controllers
         // GET: Producto/Create
         public IActionResult Create()
         {
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Id");
+            ViewData["CategoriaId"] = new SelectList(
+                _context.Categorias.Where(c => c.Estado),
+                "Id",
+                "Nombre");
             ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre");
+            var producto = new Producto
+            {
+                Estado = true
+            };
             return View();
         }
 
@@ -59,16 +66,41 @@ namespace saas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,Stock,PuntoReposicion,Estado,UrlImagen,FechaAlta,EmpresaId")] Producto producto)
+        public async Task<IActionResult> Create(Producto producto)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(producto);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    bool existe = await _context.Productos.AnyAsync(p =>
+                        p.EmpresaId == producto.EmpresaId &&
+                        p.Nombre.ToLower() == producto.Nombre.ToLower());
+
+                    if (existe)
+                    {
+                        ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");
+
+                    }
+
+                    _context.Add(producto);
+                    producto.FechaAlta = DateTime.Now;
+                    producto.Estado = true;
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Producto creado correctamente.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Id", producto.CategoriaId);
+            catch
+            {
+
+                ModelState.AddModelError("", "Ocurrió un error al Crear el Producto.");
+
+                return View(producto);
+            }
+
+            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Nombre", producto.CategoriaId);
             ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", producto.EmpresaId);
+
             return View(producto);
         }
 
@@ -85,7 +117,7 @@ namespace saas.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Id", producto.CategoriaId);
+            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Nombre", producto.CategoriaId);
             ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", producto.EmpresaId);
             return View(producto);
         }
@@ -95,9 +127,11 @@ namespace saas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,Stock,PuntoReposicion,Estado,UrlImagen,FechaAlta,EmpresaId,RowVersion")] Producto producto)
+        public async Task<IActionResult> Edit(int id, Producto producto)
         {
-            if (id != producto.Id)
+            var productoDb = await _context.Productos.FindAsync(id);
+
+            if (productoDb == null)
             {
                 return NotFound();
             }
@@ -106,7 +140,27 @@ namespace saas.Controllers
             {
                 try
                 {
-                    _context.Update(producto);
+                    bool existe = await _context.Productos.AnyAsync(p =>
+                        p.EmpresaId == producto.EmpresaId &&
+                        p.Nombre.ToLower() == producto.Nombre.ToLower() &&
+                        p.Id != producto.Id); // Excluir el producto actual de la verificación de existencia
+
+                    if (existe)
+                    {
+                        ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");
+
+                    }
+                    productoDb.Nombre = producto.Nombre;
+                    productoDb.CodigoBarra = producto.CodigoBarra;
+                    productoDb.Descripcion = producto.Descripcion;
+                    productoDb.CategoriaId = producto.CategoriaId;
+                    productoDb.PrecioCosto = producto.PrecioCosto;
+                    productoDb.PrecioVenta = producto.PrecioVenta;
+                    productoDb.Stock = producto.Stock;
+                    productoDb.PuntoReposicion = producto.PuntoReposicion;
+                    productoDb.Estado = producto.Estado;
+                    productoDb.UrlImagen = producto.UrlImagen;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -120,10 +174,13 @@ namespace saas.Controllers
                         throw;
                     }
                 }
+                TempData["Success"] = "Producto modificado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Id", producto.CategoriaId);
+
+            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Nombre", producto.CategoriaId);
             ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", producto.EmpresaId);
+
             return View(producto);
         }
 

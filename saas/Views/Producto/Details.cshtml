@@ -4,81 +4,118 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>Producto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Categoria)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Categoria.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrecioCosto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrecioCosto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrecioVenta)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrecioVenta)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stock)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stock)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PuntoReposicion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PuntoReposicion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UrlImagen)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UrlImagen)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaAlta)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaAlta)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Empresa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Empresa.Nombre)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+<main class="container-fluid px-4">
+    <div class="row">
+        <!-- Form Column -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    Información del Producto
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" class="row g-4" id="productForm">
+                        <div class="col-md-8">
+                            <label asp-for="Nombre" class="form-label">Nombre del Producto</label>
+                            <input asp-for="Nombre" class="form-control" type="text" readonly />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="CodigoBarra" class="form-label">Codigo de Barras</label>
+                            <input asp-for="CodigoBarra" class="form-control" type="text" readonly />
+                            <span asp-validation-for="CodigoBarra" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CategoriaId" class="form-label">Categoría</label>
+                            <input class="form-control" value="@Model.Categoria?.Nombre" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PrecioCosto" class="form-label">Precio de Costo</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">$</span>
+                                <input asp-for="PrecioCosto" class="form-control border-start-0" placeholder="0.00" type="number" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PrecioVenta" class="form-label">Precio de Venta</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0">$</span>
+                                <input asp-for="PrecioVenta" class="form-control border-start-0" placeholder="0.00" type="number" readonly />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Stock" class="form-label">Stock Inicial</label>
+                            <input asp-for="Stock" class="form-control" placeholder="0" type="number" readonly />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
+                            <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" readonly />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                            <input class="form-control" value="@Model.Empresa?.Nombre" readonly />
+                        </div>
+                        <div class="col-md-12">
+                            <label asp-for="UrlImagen" class="form-label">Url Imagen</label>
+                            <input asp-for="UrlImagen" class="form-control" type="text" readonly />
+                            <span asp-validation-for="UrlImagen" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Descripcion" class="form-label">Descripción</label>
+                            <textarea asp-for="Descripcion" class="form-control" id="description" placeholder="Escriba las especificaciones técnicas o detalles del producto..." rows="4" readonly></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger" ></span>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="Estado" class="form-check-input" role="switch" disabled />
+                                <label asp-for="Estado" class="form-check-label fw-semibold" for="statusSwitch">Estado del Producto (Activo/Inactivo)</label>
+                            </div>
+                            <span asp-validation-for="Estado" class="text-danger"></span>
+                        </div>
+                        <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-outline">Editar</a>
+                            <a asp-action="Index" class="btn btn-v-primary">Volver</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Help Column -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2 text-primary">info</span>
+                    Guía de Ayuda
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">SKU &amp; Formato</h6>
+                        <p class="text-muted" style="font-size: 13px;">El SKU debe ser único. Recomendamos usar un prefijo de categoría seguido de un identificador numérico (ej. ELEC-001).</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Gestión de Stock</h6>
+                        <p class="text-muted" style="font-size: 13px;">El stock inicial será cargado en el almacén principal por defecto. Puede ajustarlo más tarde desde el módulo de Inventarios.</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Categorías</h6>
+                        <p class="text-muted" style="font-size: 13px;">Asignar una categoría correcta es vital para los reportes de ventas automáticos de final de mes.</p>
+                    </div>
+                    <div class="tip-box">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="material-symbols-outlined text-secondary me-2">lightbulb</span>
+                            <span class="fw-bold" style="font-size: 14px;">Tip de Organización</span>
+                        </div>
+                        <p class="mb-0 text-muted" style="font-size: 13px;">Mantenga descripciones cortas y use palabras clave. Esto facilita la búsqueda global dentro de la suite VELTIKA.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm mt-4">
+                <div style="height: 180px; position: relative;">
+                    <div class="w-100 h-100 rounded-top" data-alt="A clean, high-angle shot of a minimalist warehouse with neatly organized white shelves and boxes. The lighting is bright and industrial, emphasizing efficiency and order. Soft blue and teal accents reflect a corporate SaaS tech environment. Shot with a sharp focus and professional look." style="background-size: cover; background-position: center;"></div>
+                    <div class="position-absolute bottom-0 start-0 p-3 w-100" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
+                        <span class="badge bg-success">Actualización en tiempo real</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

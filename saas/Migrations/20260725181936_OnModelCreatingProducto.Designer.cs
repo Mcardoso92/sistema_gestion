@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using saas.Data;
 
@@ -11,9 +12,11 @@ using saas.Data;
 namespace saas.Migrations
 {
     [DbContext(typeof(SaasDbContext))]
-    partial class SaasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260725181936_OnModelCreatingProducto")]
+    partial class OnModelCreatingProducto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -476,9 +479,9 @@ namespace saas.Migrations
             modelBuilder.Entity("saas.Models.Categoria", b =>
                 {
                     b.HasOne("saas.Models.Empresa", "Empresa")
-                        .WithMany("Categorias")
+                        .WithMany("categorias")
                         .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Empresa");
@@ -514,7 +517,7 @@ namespace saas.Migrations
                     b.HasOne("saas.Models.Empresa", "Empresa")
                         .WithMany("Productos")
                         .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Categoria");
@@ -559,13 +562,13 @@ namespace saas.Migrations
 
             modelBuilder.Entity("saas.Models.Empresa", b =>
                 {
-                    b.Navigation("Categorias");
-
                     b.Navigation("Productos");
 
                     b.Navigation("Usuarios");
 
                     b.Navigation("Ventas");
+
+                    b.Navigation("categorias");
                 });
 
             modelBuilder.Entity("saas.Models.Producto", b =>
