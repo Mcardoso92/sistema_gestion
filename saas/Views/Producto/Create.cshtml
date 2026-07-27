@@ -10,10 +10,18 @@
         <div class="col-md-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header">
-                    Información del Producto
+                    Nuevo Producto
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Create" class="row g-4" id="productForm">
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <div class="alert alert-warning mb-4">
+                            Está creando un producto como SuperAdministrador.
+
+                            El producto será asociado a la empresa seleccionada. Verifique esta información antes de guardar.
+                        </div>
+                    }
+                    <form asp-action="Create" class="row g-4" id="productForm" novalidate>
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="col-md-8">
                             <label asp-for="Nombre" class="form-label">Nombre del Producto</label>
@@ -22,13 +30,13 @@
                         </div>
                         <div class="col-md-4">
                             <label asp-for="CodigoBarra" class="form-label">Codigo de Barras</label>
-                            <input asp-for="CodigoBarra" class="form-control" type="text" />
+                            <input asp-for="CodigoBarra" class="form-control" type="text" autocomplete="off" />
                             <span asp-validation-for="CodigoBarra" class="text-danger"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="CategoriaId" class="form-label">Categoría</label>
                             <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.CategoriaId">
-                                <option disabled="" selected="">Seleccionar categoría...</option>
+                                <option value="">-- Seleccione una categoría --</option>
                             </select>
                             <span asp-validation-for="CategoriaId" class="text-danger"></span>
                         </div>
@@ -36,7 +44,7 @@
                             <label asp-for="PrecioCosto" class="form-label">Precio de Costo</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0">$</span>
-                                <input asp-for="PrecioCosto" class="form-control border-start-0" placeholder="0.00" type="number" />
+                                <input asp-for="PrecioCosto" class="form-control border-start-0" placeholder="0.00" type="number" step="0.01" min="0" />
                                 <span asp-validation-for="PrecioCosto" class="text-danger"></span>
                             </div>
                         </div>
@@ -44,30 +52,33 @@
                             <label asp-for="PrecioVenta" class="form-label">Precio de Venta</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0">$</span>
-                                <input asp-for="PrecioVenta" class="form-control border-start-0" placeholder="0.00" type="number" />
+                                <input asp-for="PrecioVenta" class="form-control border-start-0" placeholder="0.00" type="number" step="0.01" min="0" />
                                 <span asp-validation-for="PrecioVenta" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <label asp-for="Stock" class="form-label">Stock Inicial</label>
-                            <input asp-for="Stock" class="form-control" placeholder="0" type="number" />
+                            <input asp-for="Stock" class="form-control" placeholder="0" type="number" min="0" />
                             <span asp-validation-for="Stock" class="text-danger"></span>
                         </div>
                         <div class="col-md-3">
                             <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
-                            <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" />
+                            <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" min="0" />
                             <span asp-validation-for="PuntoReposicion" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6">
-                            <label asp-for="EmpresaId" class="form-label">Empresa</label>
-                            <select asp-for="EmpresaId" class="form-select" asp-items="ViewBag.EmpresaId">
-                                <option disabled="" selected="">Seleccionar Empresa...</option>
-                            </select>
-                            <span asp-validation-for="EmpresaId" class="text-danger"></span>
-                        </div>
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                <select asp-for="EmpresaId" class="form-select" asp-items="ViewBag.EmpresaId">
+                                    <option value="">-- Seleccione una empresa --</option>
+                                </select>
+                                <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                            </div>
+                        }
                         <div class="col-md-12">
                             <label asp-for="UrlImagen" class="form-label">Url Imagen</label>
-                            <input asp-for="UrlImagen" class="form-control" type="text" />
+                            <input asp-for="UrlImagen" class="form-control" type="text" placeholder="https://..." />
                             <span asp-validation-for="UrlImagen" class="text-danger"></span>
                         </div>
                         <div class="col-12">
@@ -75,16 +86,9 @@
                             <textarea asp-for="Descripcion" class="form-control" id="description" placeholder="Escriba las especificaciones técnicas o detalles del producto..." rows="4"></textarea>
                             <span asp-validation-for="Descripcion" class="text-danger"></span>
                         </div>
-                        <div class="col-12">
-                            <div class="form-check form-switch mt-2">
-                                <input asp-for="Estado" checked="checked" class="form-check-input" role="switch" type="checkbox" />
-                                <label asp-for="Estado" class="form-check-label fw-semibold" for="statusSwitch">Estado del Producto (Activo/Inactivo)</label>
-                            </div>
-                            <span asp-validation-for="Estado" class="text-danger"></span>
-                        </div>
                         <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
                             <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
-                            <button type="submit" class="btn btn-v-primary">Guardar Producto</button>
+                            <button type="submit" class="btn btn-v-primary">Guardar</button>
                         </div>
                     </form>
                 </div>
