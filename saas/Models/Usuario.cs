@@ -11,7 +11,7 @@ namespace saas.Models
         [Required]
         [StringLength(50)]
         public string Apellido { get; set; }
-        public string ImagenPerfil { get; set; }
+        public string? ImagenPerfil { get; set; }
         public int EmpresaId { get; set; }
         public Empresa Empresa { get; set; }
         public bool Estado { get; set; }

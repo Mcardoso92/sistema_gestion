@@ -656,3 +656,141 @@ body {
     padding: 1rem;
     margin-top: 1rem;
 }
+
+/*Estilos de la vista Login*/
+:root {
+    /* Theme Color Tokens mapped from Design System */
+    --primary-color: #00355f;
+    --primary-container: #0f4c81;
+    --on-primary: #ffffff;
+    --surface: #f7f9fb;
+    --surface-container-low: #f2f4f6;
+    --surface-container-high: #e6e8ea;
+    --outline-variant: #c2c7d1;
+    --on-surface: #191c1e;
+    --on-surface-variant: #42474f;
+    --radius-xl: 0.5rem;
+    --radius-lg: 0.25rem;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--surface);
+    color: var(--on-surface);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+
+/* TopNavBar Implementation from JSON Logic */
+.top-nav-bar {
+    background-color: #ffffff; /* bg-surface-container-lowest */
+    border-bottom: 1px solid var(--outline-variant);
+    padding: 0.5rem 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* shadow-sm */
+}
+
+.brand-logo {
+    font-size: 24px; /* font-h3 */
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.nav-link-custom {
+    font-size: 14px; /* font-label-md */
+    font-weight: 500;
+    color: var(--on-surface-variant);
+    padding: 0.5rem 1rem;
+    transition: color 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+    .nav-link-custom:hover {
+        color: var(--primary-color);
+    }
+
+/* Login Card Specific Styles */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card {
+    background: #ffffff;
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    z-index: 10;
+}
+
+.btn-primary-custom {
+    background-color: var(--primary-container) !important;
+    border-color: var(--primary-container) !important;
+    color: white !important;
+    padding: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+}
+
+    .btn-primary-custom:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+.form-floating > label {
+    color: var(--on-surface-variant);
+}
+
+.form-control:focus {
+    border-color: var(--primary-container);
+    box-shadow: 0 0 0 0.25rem rgba(15, 76, 129, 0.1);
+}
+
+/* Footer Implementation from JSON Logic */
+footer {
+    background-color: var(--surface-container-high);
+    border-top: 1px solid var(--outline-variant);
+    padding: 1.5rem 0;
+    font-size: 12px; /* font-label-sm */
+}
+
+.footer-link {
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    margin: 0 0.75rem;
+}
+
+    .footer-link:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
+/* Material Symbols Utility */
+.material-symbols-outlined {
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+/* Background Visual Element */
+.bg-decorative {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    opacity: 0.4;
+    pointer-events: none;
+}
