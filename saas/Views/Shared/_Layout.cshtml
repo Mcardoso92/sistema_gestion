@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@using saas.Models
+@inject UserManager<Usuario> UserManager
+@{
+    var usuario = await UserManager.GetUserAsync(User);
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -20,35 +26,11 @@
             <div class="d-flex align-items-center">
                 <a class="h4 mb-0 text-white fw-bold text-uppercase me-4"" asp-area="" asp-controller="Home" asp-action="Index">Veltika</a>
                 <nav class="d-none d-md-flex align-items-center gap-4">
-                    <a class="text-white-50 text-decoration-none hover-white"
-                       asp-controller="Home"
-                       asp-action="Index">
-                        Inicio
-                    </a>
-
-                    <a class="text-white-50 text-decoration-none hover-white"
-                       asp-controller="Empresa"
-                       asp-action="Index">
-                        Empresas
-                    </a>
-
-                    <a class="text-white-50 text-decoration-none hover-white"
-                       asp-controller="Categoria"
-                       asp-action="Index">
-                        Categorías
-                    </a>
-
-                    <a class="text-white-50 text-decoration-none hover-white"
-                       asp-controller="Producto"
-                       asp-action="Index">
-                        Productos
-                    </a>
-
-                    <a class="text-white-50 text-decoration-none hover-white"
-                       asp-controller="Venta"
-                       asp-action="Index">
-                        Ventas
-                    </a>
+                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Home" asp-action="Index">Inicio</a>
+                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Empresa" asp-action="Index">Empresas</a>
+                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Categoria" asp-action="Index">Categorías</a>
+                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Producto" asp-action="Index">Productos</a>
+                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Venta" asp-action="Index">Ventas</a>
                 </nav>
             </div>
             <div class="d-flex align-items-center gap-3">
@@ -59,9 +41,20 @@
                     <button class="btn btn-link text-white p-1 text-decoration-none rounded-circle">
                         <span class="material-symbols-outlined">settings</span>
                     </button>
-                    <div class="ms-1" style="width: 32px; height: 32px;">
-                        <img alt="Profile" class="rounded-circle border border-light w-100 h-100 object-fit-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnAQ9i5QBWv13xvwmsPlFyI179VA3zTZX_vCYCMn6CCgpZsDoabb7Usja0lhkXpXR9pwx9CcbxGaH-GQ6_3b3O-BOWPJurnc8BxRx73D74S0qPhoHXoCLC3SIEox_dClgFlCNUtIGdt2Darn9LDqJf4qMu1nl2urwyM48wSiiHgnVwK-36E8L94860ylobpF72E_mOKMHvxCWUSJCHdQn9IkkCEWzfXRkDpVjpi3xPzU2jrEyH7P0IaOVYZIslfNPy4a8ns4ghpz5e" />
-                    </div>
+                        @if (usuario != null)
+                        {
+                            <small class="text-white-50 text-decoration-none hover-white">@usuario.Email</small>
+                            <form asp-controller="Usuario" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item">
+                                    Cerrar sesión
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <a class="text-white-50 text-decoration-none hover-white" asp-area="" asp-controller="Usuario" asp-action="Login">Iniciar sesión</a>
+                        }
                 </div>
             </div>
         </div>
