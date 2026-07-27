@@ -1,42 +1,73 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace saas.Controllers
 {
+    [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
     public class CategoriaController : Controller
     {
         private readonly SaasDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public CategoriaController(SaasDbContext context)
+        public CategoriaController(SaasDbContext context, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Categoria
         public async Task<IActionResult> Index()
         {
-            var saasDbContext = _context.Categorias.Include(c => c.Empresa);
-            return View(await saasDbContext.ToListAsync());
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            IQueryable<Categoria> categorias = _context.Categorias
+                .Include(c => c.Empresa);
+
+            // Si es SuperAdmin ve todas las categorías
+            if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            {
+                // Si no es SuperAdmin, solo ve las de su empresa
+                categorias = categorias.Where(c => c.EmpresaId == usuario.EmpresaId);
+            }
+
+            return View(await categorias
+                .OrderBy(c => c.Nombre)
+                .ToListAsync());
         }
 
         // GET: Categoria/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
             {
-                return NotFound();
+                return Challenge();
             }
 
-            var categoria = await _context.Categorias
-                .Include(c => c.Empresa)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            IQueryable<Categoria> consulta = _context.Categorias
+                .Include(c => c.Empresa);
+
+            if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            {
+                consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var categoria = await consulta.FirstOrDefaultAsync(c => c.Id == id);
+
             if (categoria == null)
             {
                 return NotFound();
@@ -46,9 +77,20 @@ namespace saas.Controllers
         }
 
         // GET: Categoria/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre");
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            if (await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            {
+                ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre");
+            }
+
             return View();
         }
 
@@ -61,36 +103,68 @@ namespace saas.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
+                if (!ModelState.IsValid)
                 {
-                    bool existeCategoria = await _context.Categorias.AnyAsync(c =>
+                    var usuarioModel = await _userManager.GetUserAsync(User);
+
+                    if (usuarioModel != null && await _userManager.IsInRoleAsync(usuarioModel, "SuperAdmin"))
+                    {
+                        ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+                    }
+
+                    return View(categoria);
+                }
+                var usuario = await _userManager.GetUserAsync(User);
+
+                if (usuario == null)
+                {
+                    return Challenge();
+                }
+
+                bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+                // Si NO es SuperAdmin, la empresa siempre es la del usuario
+                if (!esSuperAdmin)
+                {
+                    categoria.EmpresaId = usuario.EmpresaId;
+                }
+
+                bool existeCategoria = await _context.Categorias.AnyAsync(c =>
                         c.EmpresaId == categoria.EmpresaId &&
                         c.Nombre.ToLower() == categoria.Nombre.ToLower());
 
-                    if (existeCategoria)
+                if (existeCategoria)
+                {
+                    ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
+                    if (esSuperAdmin)
                     {
-                        ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
-
                         ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
-                        return View(categoria);
                     }
 
-                    categoria.Estado = true; // Cargar el valor predeterminado de Estado como true al crear una nueva categoría
-                    _context.Add(categoria);
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Categoria creada correctamente.";
-                    return RedirectToAction(nameof(Index));
+                    return View(categoria);
                 }
+
+                categoria.Estado = true; // Cargar el valor predeterminado de Estado como true al crear una nueva categoría
+                _context.Categorias.Add(categoria);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Categoria creada correctamente.";
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
-                ModelState.AddModelError("", "Ocurrió un error al Crear la Categoria.");
+
+                var usuario = await _userManager.GetUserAsync(User);
+
+                if (usuario != null &&
+                    await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+                {
+                    ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+                }
+
+                ModelState.AddModelError("", "Ocurrió un error al crear la categoría.");
 
                 return View(categoria);
-            }            
-
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
-            return View(categoria);
+            }
         }
 
         // GET: Categoria/Edit/5
@@ -101,12 +175,38 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            var categoria = await _context.Categorias.FindAsync(id);
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            IQueryable<Categoria> consulta = _context.Categorias;
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var categoria = await consulta.FirstOrDefaultAsync(c => c.Id == id);
+
             if (categoria == null)
             {
                 return NotFound();
             }
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+
+            if (esSuperAdmin)
+            {
+                ViewData["EmpresaId"] = new SelectList(
+                    _context.Empresas,
+                    "Id",
+                    "Nombre",
+                    categoria.EmpresaId);
+            }
+
             return View(categoria);
         }
 
@@ -117,51 +217,89 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Categoria categoria)
         {
-            var categoriaDb = await _context.Categorias.FindAsync(id);
-            if (categoriaDb == null)
+            if (id != categoria.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
             {
-                try
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            // Si no es SuperAdmin, siempre pertenece a su empresa
+            if (!esSuperAdmin)
+            {
+                categoria.EmpresaId = usuario.EmpresaId;
+            }
+
+            // Validación
+            if (!ModelState.IsValid)
+            {
+                if (esSuperAdmin)
                 {
-                    bool existeCategoria = await _context.Categorias.AnyAsync(c =>
-                        c.EmpresaId == categoria.EmpresaId &&
-                        c.Nombre.ToLower() == categoria.Nombre.ToLower() &&
-                        c.Id != categoria.Id);
-
-                    if (existeCategoria)
-                    {
-                        ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
-
-                        ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
-
-                        return View(categoria);
-                    }
-
-                    categoriaDb.Nombre = categoria.Nombre;
-                    categoriaDb.Estado = categoria.Estado;
-                    categoriaDb.EmpresaId = categoria.EmpresaId;
-                    await _context.SaveChangesAsync();
+                    ViewData["EmpresaId"] = new SelectList(
+                        _context.Empresas,
+                        "Id",
+                        "Nombre",
+                        categoria.EmpresaId);
                 }
-                catch (DbUpdateConcurrencyException)
+
+                return View(categoria);
+            }
+
+            // Verificar nombre duplicado
+            bool existeCategoria = await _context.Categorias.AnyAsync(c =>
+                c.Id != categoria.Id &&
+                c.EmpresaId == categoria.EmpresaId &&
+                c.Nombre.ToLower() == categoria.Nombre.ToLower());
+
+            if (existeCategoria)
+            {
+                ModelState.AddModelError("Nombre",
+                    "Ya existe una categoría con ese nombre para esta empresa.");
+
+                if (esSuperAdmin)
                 {
-                    if (!CategoriaExists(categoria.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    ViewData["EmpresaId"] = new SelectList(
+                        _context.Empresas,
+                        "Id",
+                        "Nombre",
+                        categoria.EmpresaId);
                 }
-                TempData["Success"] = "Categoria modificada correctamente.";
+
+                return View(categoria);
+            }
+
+            try
+            {
+                _context.Update(categoria);
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Categoría modificada correctamente.";
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
-            return View(categoria);
+            catch
+            {
+                ModelState.AddModelError("", "Ocurrió un error al modificar la categoría.");
+
+                if (esSuperAdmin)
+                {
+                    ViewData["EmpresaId"] = new SelectList(
+                        _context.Empresas,
+                        "Id",
+                        "Nombre",
+                        categoria.EmpresaId);
+                }
+
+                return View(categoria);
+            }
         }
 
         // GET: Categoria/Delete/5
@@ -172,9 +310,25 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            var categoria = await _context.Categorias
-                .Include(c => c.Empresa)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            IQueryable<Categoria> consulta = _context.Categorias
+                .Include(c => c.Empresa);
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var categoria = await consulta.FirstOrDefaultAsync(c => c.Id == id);
+
             if (categoria == null)
             {
                 return NotFound();
@@ -188,16 +342,36 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            IQueryable<Categoria> consulta = _context.Categorias;
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var categoria = await consulta.FirstOrDefaultAsync(c => c.Id == id);
+
+            if (categoria == null)
+            {
+                return NotFound();
+            }
+
             try
             {
-                var categoria = await _context.Categorias.FindAsync(id);
-                if (categoria != null)
-                {
-                    _context.Categorias.Remove(categoria);
-                }
+                _context.Categorias.Remove(categoria);
 
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Categoria eliminada correctamente.";
+
+                TempData["Success"] = "Categoría eliminada correctamente.";
             }
             catch
             {

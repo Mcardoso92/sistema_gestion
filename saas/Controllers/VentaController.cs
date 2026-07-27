@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
@@ -7,6 +8,7 @@ using System;
 
 namespace saas.Controllers
 {
+    [Authorize]
     public class VentaController : Controller
     {
         private readonly SaasDbContext _context;

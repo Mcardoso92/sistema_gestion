@@ -1,22 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace saas.Controllers
 {
+    [Authorize]
     public class ProductoController : Controller
     {
         private readonly SaasDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public ProductoController(SaasDbContext context)
+        public ProductoController(SaasDbContext context, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Producto
