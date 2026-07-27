@@ -54,13 +54,16 @@
                             <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
                             <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" />
                         </div>
-                        <div class="col-md-6">
-                            <label asp-for="EmpresaId" class="form-label">Empresa</label>
-                            <select asp-for="EmpresaId" class="form-select" asp-items="ViewBag.EmpresaId">
-                                <option disabled="" selected="">Seleccionar Empresa...</option>
-                            </select>
-                            <span asp-validation-for="EmpresaId" class="text-danger"></span>
-                        </div>
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                <select asp-for="EmpresaId" class="form-select" asp-items="ViewBag.EmpresaId">
+                                    <option disabled="" selected="">Seleccionar Empresa...</option>
+                                </select>
+                                <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                            </div>
+                        }
                         <div class="col-md-12">
                             <label asp-for="UrlImagen" class="form-label">Url Imagen</label>
                             <input asp-for="UrlImagen" class="form-control" type="text" />

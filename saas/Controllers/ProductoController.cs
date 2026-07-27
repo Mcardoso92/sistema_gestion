@@ -27,22 +27,51 @@ namespace saas.Controllers
         // GET: Producto
         public async Task<IActionResult> Index()
         {
-            var saasDbContext = _context.Productos.Include(p => p.Categoria).Include(p => p.Empresa);
-            return View(await saasDbContext.ToListAsync());
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            IQueryable<Producto> producto = _context.Productos
+                .Where(p => p.Estado)
+                .Include(p => p.Empresa);
+
+            // Si es SuperAdmin ve todas las categorías
+            if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            {
+                // Si no es SuperAdmin, solo ve las de su empresa
+                producto = producto.Where(p => p.Estado &&
+                p.EmpresaId == usuario.EmpresaId);
+            }
+
+            return View(await producto
+                .Include(c => c.Categoria)
+                .OrderBy(c => c.Nombre)
+                .ToListAsync());
         }
 
         // GET: Producto/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
             {
-                return NotFound();
+                return Challenge();
             }
 
-            var producto = await _context.Productos
-                .Include(p => p.Categoria)
+            IQueryable<Producto> consulta = _context.Productos
                 .Include(p => p.Empresa)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(p => p.Categoria);
+
+            if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            {
+                consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var producto = await consulta.FirstOrDefaultAsync(c => c.Id == id);
+
             if (producto == null)
             {
                 return NotFound();
@@ -52,18 +81,33 @@ namespace saas.Controllers
         }
 
         // GET: Producto/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["CategoriaId"] = new SelectList(
-                _context.Categorias.Where(c => c.Estado),
-                "Id",
-                "Nombre");
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre");
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            if (esSuperAdmin)
+            {
+                ViewData["EmpresaId"] = new SelectList(_context.Empresas.Where(e => e.Estado), "Id", "Nombre");
+                ViewData["CategoriaId"] = new SelectList(_context.Categorias.Where(c => c.Estado), "Id", "Nombre");
+            }
+            else
+            {
+                ViewData["CategoriaId"] = new SelectList(_context.Categorias.Where(c => c.Estado && c.EmpresaId == usuario.EmpresaId), "Id", "Nombre");
+            }
+
             var producto = new Producto
             {
                 Estado = true
             };
-            return View();
+
+            return View(producto);
         }
 
         // POST: Producto/Create
@@ -73,40 +117,77 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Producto producto)
         {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
             try
             {
-                if (ModelState.IsValid)
+                // Si no es SuperAdmin, la empresa siempre es la del usuario
+                if (!esSuperAdmin)
                 {
-                    bool existe = await _context.Productos.AnyAsync(p =>
-                        p.EmpresaId == producto.EmpresaId &&
-                        p.Nombre.ToLower() == producto.Nombre.ToLower());
-
-                    if (existe)
-                    {
-                        ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");
-
-                    }
-
-                    _context.Add(producto);
-                    producto.FechaAlta = DateTime.Now;
-                    producto.Estado = true;
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "Producto creado correctamente.";
-                    return RedirectToAction(nameof(Index));
+                    producto.EmpresaId = usuario.EmpresaId;
                 }
+
+                if (!ModelState.IsValid)
+                {
+                    CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                    return View(producto);
+                }
+
+                // Verificar que la categoría pertenezca a la empresa
+                bool categoriaValida = await _context.Categorias.AnyAsync(c =>
+                    c.Id == producto.CategoriaId &&
+                    c.EmpresaId == producto.EmpresaId &&
+                    c.Estado);
+
+                if (!categoriaValida)
+                {
+                    ModelState.AddModelError("CategoriaId", "La categoría seleccionada no es válida.");
+
+                    CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                    return View(producto);
+                }
+
+                // Verificar producto duplicado
+                bool existeProducto = await _context.Productos.AnyAsync(p =>
+                    p.EmpresaId == producto.EmpresaId &&
+                    p.Nombre.ToLower() == producto.Nombre.ToLower());
+
+                if (existeProducto)
+                {
+                    ModelState.AddModelError("Nombre",
+                        "Ya existe un producto con ese nombre para esta empresa.");
+
+                    CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                    return View(producto);
+                }
+
+                producto.FechaAlta = DateTime.Now;
+                producto.Estado = true;
+                _context.Add(producto);
+                
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Producto creado correctamente.";
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
 
-                ModelState.AddModelError("", "Ocurrió un error al Crear el Producto.");
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                ModelState.AddModelError("", "Ocurrió un error al crear el producto.");
 
                 return View(producto);
             }
-
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Nombre", producto.CategoriaId);
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", producto.EmpresaId);
-
-            return View(producto);
         }
 
         // GET: Producto/Edit/5
@@ -117,13 +198,32 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            var producto = await _context.Productos.FindAsync(id);
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            IQueryable<Producto> consulta = _context.Productos;
+                        
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+            }
+
+            var producto = await consulta.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+
             if (producto == null)
             {
                 return NotFound();
             }
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Nombre", producto.CategoriaId);
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", producto.EmpresaId);
+
+            CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
             return View(producto);
         }
 
@@ -134,59 +234,96 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Producto producto)
         {
-            var productoDb = await _context.Productos.FindAsync(id);
-
-            if (productoDb == null)
+            if (id != producto.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
             {
-                try
-                {
-                    bool existe = await _context.Productos.AnyAsync(p =>
-                        p.EmpresaId == producto.EmpresaId &&
-                        p.Nombre.ToLower() == producto.Nombre.ToLower() &&
-                        p.Id != producto.Id); // Excluir el producto actual de la verificación de existencia
+                return Challenge();
+            }
 
-                    if (existe)
-                    {
-                        ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
-                    }
-                    productoDb.Nombre = producto.Nombre;
-                    productoDb.CodigoBarra = producto.CodigoBarra;
-                    productoDb.Descripcion = producto.Descripcion;
-                    productoDb.CategoriaId = producto.CategoriaId;
-                    productoDb.PrecioCosto = producto.PrecioCosto;
-                    productoDb.PrecioVenta = producto.PrecioVenta;
-                    productoDb.Stock = producto.Stock;
-                    productoDb.PuntoReposicion = producto.PuntoReposicion;
-                    productoDb.Estado = producto.Estado;
-                    productoDb.UrlImagen = producto.UrlImagen;
+            // Si no es SuperAdmin, siempre pertenece a su empresa
+            if (!esSuperAdmin)
+            {
+                producto.EmpresaId = usuario.EmpresaId;
+            }
 
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductoExists(producto.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+            // Validación
+            if (!ModelState.IsValid)
+            {
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                return View(producto);
+            }
+
+            // Validar que la categoría pertenezca a la empresa
+            bool categoriaValida = await _context.Categorias.AnyAsync(c =>
+                c.Id == producto.CategoriaId &&
+                c.EmpresaId == producto.EmpresaId &&
+                c.Estado);
+
+            if (!categoriaValida)
+            {
+                ModelState.AddModelError("CategoriaId", "La categoría seleccionada no es válida.");
+
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                return View(producto);
+            }
+
+            // Verificar nombre duplicado
+            bool existeProducto = await _context.Productos.AnyAsync(c =>
+                c.Id != producto.Id &&
+                c.EmpresaId == producto.EmpresaId &&
+                c.Nombre.ToLower() == producto.Nombre.ToLower());
+
+            if (existeProducto)
+            {
+                ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");              
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+                return View(producto);
+            }
+
+            var productoDB = await _context.Productos.FindAsync(id);
+
+            if (productoDB == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                
+                productoDB.Nombre = producto.Nombre;
+                productoDB.CodigoBarra = producto.CodigoBarra;
+                productoDB.Descripcion = producto.Descripcion;
+                productoDB.CategoriaId = producto.CategoriaId;
+                productoDB.PrecioCosto = producto.PrecioCosto;
+                productoDB.PrecioVenta = producto.PrecioVenta;
+                productoDB.Stock = producto.Stock;
+                productoDB.PuntoReposicion = producto.PuntoReposicion;
+                productoDB.Estado = producto.Estado;
+                productoDB.UrlImagen = producto.UrlImagen;
+                productoDB.EmpresaId = producto.EmpresaId;
+
+                await _context.SaveChangesAsync();
                 TempData["Success"] = "Producto modificado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
+            catch 
+            {
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
 
-            ViewData["CategoriaId"] = new SelectList(_context.Categorias, "Id", "Nombre", producto.CategoriaId);
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", producto.EmpresaId);
+                ModelState.AddModelError("", "Ocurrió un error al modificar el producto.");
 
-            return View(producto);
+                return View(producto);
+            }
         }
 
         // GET: Producto/Delete/5
@@ -197,10 +334,26 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            var producto = await _context.Productos
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            IQueryable<Producto> consulta = _context.Productos
                 .Include(p => p.Categoria)
-                .Include(p => p.Empresa)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(p => p.Empresa);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+            }
+
+            var producto = await consulta.FirstOrDefaultAsync(p => p.Id == id);
+
             if (producto == null)
             {
                 return NotFound();
@@ -214,19 +367,75 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var producto = await _context.Productos.FindAsync(id);
-            if (producto != null)
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
             {
-                _context.Productos.Remove(producto);
+                return Challenge();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            IQueryable<Producto> consulta = _context.Productos;
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+            }
+
+            var producto = await consulta.FirstOrDefaultAsync(p => p.Id == id);
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                producto.Estado = false; // Desactivar el producto en lugar de eliminarlo
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Producto desactivado correctamente.";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                TempData["Error"] = "No fue posible eliminar el producto.";
+
+                return RedirectToAction(nameof(Delete), new { id });
+            }
         }
 
         private bool ProductoExists(int id)
         {
             return _context.Productos.Any(e => e.Id == id);
+        }
+
+        private void CargarCombos(int empresaId, int categoriaId, Usuario usuario, bool esSuperAdmin)
+        {
+            if (esSuperAdmin)
+            {
+                ViewData["EmpresaId"] = new SelectList(
+                    _context.Empresas.Where(e => e.Estado),
+                    "Id",
+                    "Nombre",
+                    empresaId);
+
+                ViewData["CategoriaId"] = new SelectList(
+                    _context.Categorias.Where(c => c.Estado),
+                    "Id",
+                    "Nombre",
+                    categoriaId);
+            }
+            else
+            {
+                ViewData["CategoriaId"] = new SelectList(
+                    _context.Categorias
+                        .Where(c => c.EmpresaId == usuario.EmpresaId && c.Estado),
+                    "Id",
+                    "Nombre",
+                    categoriaId);
+            }
         }
     }
 }
