@@ -22,6 +22,11 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 3;
 
+    //Bloquear usuarios después de varios intentos fallidos
+    options.Lockout.MaxFailedAccessAttempts = 3;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.AllowedForNewUsers = true;
+
     options.User.RequireUniqueEmail = true;
 }
 )

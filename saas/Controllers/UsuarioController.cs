@@ -32,10 +32,34 @@ namespace saas.Controllers
             {
                 return View(model);
             }
-            var resultado = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure:false);
+
+            var usuario = await _userManager.FindByEmailAsync(model.Email);
+
+            if (usuario == null)
+            {
+                ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
+                return View(model);
+            }
+
+            if (!usuario.Estado)
+            {
+                ModelState.AddModelError("", "El usuario se encuentra inactivo.");
+                return View(model);
+            }
+
+            var resultado = await _signInManager.PasswordSignInAsync(
+                usuario.UserName!,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: true);
 
             if (resultado.Succeeded)
             {
+                if (await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+                {
+                    return RedirectToAction("Index", "Empresa");
+                }
+
                 return RedirectToAction("Index", "Home");
             }
 
