@@ -1,24 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace saas.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin")]
     public class EmpresaController : Controller
     {
         private readonly SaasDbContext _context;
+        private readonly UserManager<Usuario> _userManager;
 
-        public EmpresaController(SaasDbContext context)
+        public EmpresaController(SaasDbContext context, UserManager<Usuario> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Empresa
@@ -36,7 +39,7 @@ namespace saas.Controllers
             }
 
             var empresa = await _context.Empresas
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(e => e.Id == id);
             if (empresa == null)
             {
                 return NotFound();
@@ -56,7 +59,7 @@ namespace saas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nombre,ImagenEmpresa,Estado,FechaAlta")] Empresa empresa)
+        public async Task<IActionResult> Create(Empresa empresa)
         {
             try
             {
@@ -170,12 +173,12 @@ namespace saas.Controllers
                 var empresa = await _context.Empresas.FindAsync(id);
                 if (empresa != null)
                 {
-                    _context.Empresas.Remove(empresa);
+                    empresa.Estado = false;
                 }
 
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Empresa eliminada correctamente.";
+                TempData["Success"] = "Empresa desactivada correctamente.";
             }
             catch
             {

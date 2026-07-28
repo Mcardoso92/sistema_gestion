@@ -9,23 +9,68 @@ using saas.ViewModel;
 
 namespace saas.Controllers
 {
+    [Authorize]
     public class UsuarioController : Controller
     {
         private readonly UserManager<Usuario> _userManager;
         private readonly SignInManager<Usuario> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, RoleManager<IdentityRole> roleManager)
+        private readonly SaasDbContext _context;
+        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, RoleManager<IdentityRole> roleManager, SaasDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _context = context;
         }
+        // GET: Producto
+        [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
+        public async Task<IActionResult> Index()
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            IQueryable<Usuario> usuarios = _context.Users
+                .Where(u => u.Estado)
+                .Include(u => u.Empresa);
+
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            // Si es SuperAdmin ve todos los usuarios, de lo contrario solo ve los de su empresa
+            if (!esSuperAdmin)
+            {
+                // Si no es SuperAdmin, solo ve los de su empresa
+                usuarios = usuarios.Where(u =>  u.EmpresaId == usuario.EmpresaId);
+            }
+
+            var listaUsuarios = await usuarios
+                .OrderBy(u => u.Nombre)
+                .ToListAsync();
+
+            ViewBag.Roles = new Dictionary<string, string>();
+
+            foreach (var usuarioItem in listaUsuarios)
+            {
+                var rol = await _userManager.GetRolesAsync(usuarioItem);
+                ViewBag.Roles[usuarioItem.Id] = rol.FirstOrDefault() ?? "";
+            }
+
+            return View(listaUsuarios);
+        }
+
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginVM model)
         {
             if (!ModelState.IsValid)
@@ -65,57 +110,7 @@ namespace saas.Controllers
 
             ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
             return View(model);
-        }
-        //public IActionResult Registro()
-        //{
-        //    var vm = new RegistroVM
-        //    {
-        //        Empresas = _context.Empresas
-        //            .Where(e => e.Estado)
-        //            .Select(e => new SelectListItem
-        //            {
-        //                Value = e.Id.ToString(),
-        //                Text = e.Nombre
-        //            })
-        //    };
-        //    return View(vm);
-        //}
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Registro(RegistroVM nuevoUsuario)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        //Logica para registrar al usuario
-        //        var usuario = new Usuario
-        //        {
-        //            UserName = nuevoUsuario.Email,
-        //            Email = nuevoUsuario.Email,
-        //            Nombre = nuevoUsuario.Nombre,
-        //            Apellido = nuevoUsuario.Apellido,
-        //            EmpresaId = nuevoUsuario.EmpresaId,
-        //            ImagenPerfil = "default-profile.png",
-        //        };
-        //        var resultado = await _userManager.CreateAsync(usuario, nuevoUsuario.Clave);
-        //        if (resultado.Succeeded)
-        //        {
-        //            //Asignar rol al usuario
-        //            await _userManager.AddToRoleAsync(usuario, "Usuario");
-        //            //Redirigir a la página de login o a otra página
-        //            return RedirectToAction("Login", "Usuario");
-        //        }
-        //        else
-        //        {
-        //            foreach (var error in resultado.Errors)
-        //            {
-        //                ModelState.AddModelError(string.Empty, error.Description);
-        //            }
-        //        }
-
-        //    }
-        //    return View();
-        //}
-        
+        }        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -123,9 +118,11 @@ namespace saas.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction(nameof(Login));
         }
-        //public IActionResult AccessDenied()
-        //{
-        //    return View();
-        //}
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
     }
 }
