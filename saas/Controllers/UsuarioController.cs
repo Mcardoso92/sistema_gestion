@@ -62,8 +62,37 @@ namespace saas.Controllers
 
             return View(listaUsuarios);
         }
+        // GET: Producto/Details/5
+        public async Task<IActionResult> Details(string? id)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+            if (usuario == null)
+            {
+                return Challenge();
+            }
 
-        [AllowAnonymous]
+            IQueryable<Usuario> consulta = _context.Users
+                .Include(p => p.Empresa);
+
+            if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            {
+                consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
+            }
+            var detalleUsuario = await consulta.FirstOrDefaultAsync(m => m.Id == id.ToString());
+
+            if (detalleUsuario == null)
+            {
+                return NotFound();
+            }
+
+            var rol = (await _userManager.GetRolesAsync(detalleUsuario)).FirstOrDefault();
+
+            ViewBag.Rol = rol;
+
+            return View(detalleUsuario);
+        }
+
+            [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
