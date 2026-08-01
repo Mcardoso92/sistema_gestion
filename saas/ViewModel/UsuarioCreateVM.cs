@@ -15,6 +15,7 @@ namespace saas.ViewModel
 
         [Required(ErrorMessage = "El email es obligatorio.")]
         [EmailAddress(ErrorMessage = "Ingrese un email válido.")]
+        [StringLength(100, ErrorMessage = "El email no puede superar los 100 caracteres.")]
         public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
@@ -27,7 +28,7 @@ namespace saas.ViewModel
         [Compare("Password", ErrorMessage = "Las contraseñas no coinciden.")]
         public string ConfirmarPassword { get; set; } = null!;
 
-        [Required(ErrorMessage = "Debe seleccionar una empresa.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una empresa.")]
         public int EmpresaId { get; set; }
 
         [Required(ErrorMessage = "Debe seleccionar un rol.")]

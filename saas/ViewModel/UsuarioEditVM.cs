@@ -5,23 +5,27 @@ namespace saas.ViewModel
 {
     public class UsuarioEditVM
     {
+        [Required]
         public string Id { get; set; } = null!;
 
-        [Required]
+        [Required(ErrorMessage = "El nombre es obligatorio.")]
+        [StringLength(50, ErrorMessage = "El nombre no puede superar los 50 caracteres.")]
         public string Nombre { get; set; } = null!;
 
-        [Required]
+        [Required(ErrorMessage = "El apellido es obligatorio.")]
+        [StringLength(50, ErrorMessage = "El apellido no puede superar los 50 caracteres.")]
         public string Apellido { get; set; } = null!;
 
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "El email es obligatorio.")]
+        [EmailAddress(ErrorMessage = "Ingrese un email válido.")]
+        [StringLength(100, ErrorMessage = "El email no puede superar los 100 caracteres.")]
         public string Email { get; set; } = null!;
 
         public bool Estado { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Debe seleccionar un rol.")] 
         public string Rol { get; set; } = null!;
-
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una empresa.")]
         public int EmpresaId { get; set; }
 
         public IEnumerable<SelectListItem> Roles { get; set; } = Enumerable.Empty<SelectListItem>();
