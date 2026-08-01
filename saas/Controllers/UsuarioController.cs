@@ -749,7 +749,7 @@ namespace saas.Controllers
                 roles = roles.Where(r => r.Name != "SuperAdmin");
             }
 
-            model.Roles = await _roleManager.Roles
+            model.Roles = await roles
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {
@@ -780,7 +780,7 @@ namespace saas.Controllers
                 roles = roles.Where(r => r.Name != "SuperAdmin");
             }
 
-            model.Roles = await _roleManager.Roles
+            model.Roles = await roles
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {
