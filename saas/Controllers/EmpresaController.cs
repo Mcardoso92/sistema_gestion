@@ -1,14 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace saas.Controllers
 {
@@ -16,12 +10,10 @@ namespace saas.Controllers
     public class EmpresaController : Controller
     {
         private readonly SaasDbContext _context;
-        private readonly UserManager<Usuario> _userManager;
 
-        public EmpresaController(SaasDbContext context, UserManager<Usuario> userManager)
+        public EmpresaController(SaasDbContext context)
         {
             _context = context;
-            _userManager = userManager;
         }
 
         // GET: Empresa
@@ -55,26 +47,25 @@ namespace saas.Controllers
         }
 
         // POST: Empresa/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Empresa empresa)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(empresa);
+            }
             try
             {
-                if (ModelState.IsValid)
-                {
-                    empresa.FechaAlta = DateTime.Now; // Carga por defecto la fecha de alta al momento de crear la empresa
-                    empresa.Estado = true; // Carga por defecto el estado como activo al momento de crear la empresa
+                empresa.FechaAlta = DateTime.Now;
+                empresa.Estado = true;
 
-                    _context.Add(empresa);
-                    await _context.SaveChangesAsync();
+                _context.Empresas.Add(empresa);
+                await _context.SaveChangesAsync();
 
-                    TempData["Success"] = "Empresa creada correctamente.";
+                TempData["Success"] = "Empresa creada correctamente.";
 
-                    return RedirectToAction(nameof(Index));
-                }
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
@@ -82,9 +73,6 @@ namespace saas.Controllers
 
                 return View(empresa);
             }
-
-            // Si el modelo no es válido, regresar la vista con el modelo para mostrar errores
-            return View(empresa);
         }
 
         // GET: Empresa/Edit/5
@@ -105,11 +93,9 @@ namespace saas.Controllers
         }
 
         // POST: Empresa/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,ImagenEmpresa,Estado,FechaAlta")] Empresa empresa)
+        public async Task<IActionResult> Edit(int id, Empresa empresa)
         {
             var empresaDb = await _context.Empresas.FindAsync(id);
             if (empresaDb == null)
@@ -117,32 +103,25 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    empresaDb.Nombre = empresa.Nombre;
-                    empresaDb.Estado = empresa.Estado;
+                return View(empresa);
+            }
+            try
+            {
+                empresaDb.Nombre = empresa.Nombre;
+                empresaDb.Estado = empresa.Estado;
 
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmpresaExists(empresa.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-
+                await _context.SaveChangesAsync();
                 TempData["Success"] = "Empresa modificada correctamente.";
 
                 return RedirectToAction(nameof(Index));
             }
-            return View(empresa);
+            catch
+            {
+                ModelState.AddModelError("", "Ocurrió un error al modificar la empresa.");
+                return View(empresa);
+            }
         }
 
         // GET: Empresa/Delete/5
@@ -186,11 +165,6 @@ namespace saas.Controllers
             }
 
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool EmpresaExists(int id)
-        {
-            return _context.Empresas.Any(e => e.Id == id);
         }
     }
 }

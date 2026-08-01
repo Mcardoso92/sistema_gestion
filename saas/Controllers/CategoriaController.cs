@@ -5,10 +5,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace saas.Controllers
 {
@@ -35,12 +31,11 @@ namespace saas.Controllers
             }
 
             IQueryable<Categoria> categorias = _context.Categorias
+                .Where(c => c.Estado)
                 .Include(c => c.Empresa);
 
-            // Si es SuperAdmin ve todas las categorías
             if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
             {
-                // Si no es SuperAdmin, solo ve las de su empresa
                 categorias = categorias.Where(c => c.EmpresaId == usuario.EmpresaId);
             }
 
@@ -95,8 +90,6 @@ namespace saas.Controllers
         }
 
         // POST: Categoria/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Categoria categoria)
@@ -123,7 +116,6 @@ namespace saas.Controllers
 
                 bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
-                // Si NO es SuperAdmin, la empresa siempre es la del usuario
                 if (!esSuperAdmin)
                 {
                     categoria.EmpresaId = usuario.EmpresaId;
@@ -144,10 +136,10 @@ namespace saas.Controllers
                     return View(categoria);
                 }
 
-                categoria.Estado = true; // Cargar el valor predeterminado de Estado como true al crear una nueva categoría
+                categoria.Estado = true;
                 _context.Categorias.Add(categoria);
                 await _context.SaveChangesAsync();
-                TempData["Success"] = "Categoria creada correctamente.";
+                TempData["Success"] = "Categoría creada correctamente.";
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -211,8 +203,6 @@ namespace saas.Controllers
         }
 
         // POST: Categoria/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Categoria categoria)
@@ -231,13 +221,11 @@ namespace saas.Controllers
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
-            // Si no es SuperAdmin, siempre pertenece a su empresa
             if (!esSuperAdmin)
             {
                 categoria.EmpresaId = usuario.EmpresaId;
             }
 
-            // Validación
             if (!ModelState.IsValid)
             {
                 if (esSuperAdmin)
@@ -252,7 +240,6 @@ namespace saas.Controllers
                 return View(categoria);
             }
 
-            // Verificar nombre duplicado
             bool existeCategoria = await _context.Categorias.AnyAsync(c =>
                 c.Id != categoria.Id &&
                 c.EmpresaId == categoria.EmpresaId &&
@@ -367,24 +354,19 @@ namespace saas.Controllers
 
             try
             {
-                _context.Categorias.Remove(categoria);
+                categoria.Estado = false;
 
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Categoría eliminada correctamente.";
+                TempData["Success"] = "Categoría desactivada correctamente.";
             }
             catch
             {
 
-                TempData["Error"] = "No es posible eliminar la categoria porque tiene información relacionada.";
+                TempData["Error"] = "No es posible desactivar la categoría porque tiene información relacionada.";
             }
-            
-            return RedirectToAction(nameof(Index));
-        }
 
-        private bool CategoriaExists(int id)
-        {
-            return _context.Categorias.Any(e => e.Id == id);
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -5,10 +5,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace saas.Controllers
 {
@@ -34,19 +30,17 @@ namespace saas.Controllers
                 return Challenge();
             }
 
-            IQueryable<Producto> producto = _context.Productos
+            IQueryable<Producto> productos = _context.Productos
                 .Where(p => p.Estado)
                 .Include(p => p.Empresa);
 
-            // Si es SuperAdmin ve todas las categorías
             if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
             {
-                // Si no es SuperAdmin, solo ve las de su empresa
-                producto = producto.Where(p => p.Estado &&
+                productos = productos.Where(p =>
                 p.EmpresaId == usuario.EmpresaId);
             }
 
-            return View(await producto
+            return View(await productos
                 .Include(c => c.Categoria)
                 .OrderBy(c => c.Nombre)
                 .ToListAsync());
@@ -111,8 +105,6 @@ namespace saas.Controllers
         }
 
         // POST: Producto/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Producto producto)
@@ -128,7 +120,6 @@ namespace saas.Controllers
 
             try
             {
-                // Si no es SuperAdmin, la empresa siempre es la del usuario
                 if (!esSuperAdmin)
                 {
                     producto.EmpresaId = usuario.EmpresaId;
@@ -156,7 +147,6 @@ namespace saas.Controllers
                     return View(producto);
                 }
 
-                // Verificar producto duplicado
                 bool existeProducto = await _context.Productos.AnyAsync(p =>
                     p.EmpresaId == producto.EmpresaId &&
                     p.Nombre.ToLower() == producto.Nombre.ToLower());
@@ -173,8 +163,8 @@ namespace saas.Controllers
 
                 producto.FechaAlta = DateTime.Now;
                 producto.Estado = true;
-                _context.Add(producto);
-                
+                _context.Productos.Add(producto);
+
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Producto creado correctamente.";
                 return RedirectToAction(nameof(Index));
@@ -208,7 +198,7 @@ namespace saas.Controllers
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
             IQueryable<Producto> consulta = _context.Productos;
-                        
+
 
             if (!esSuperAdmin)
             {
@@ -228,8 +218,6 @@ namespace saas.Controllers
         }
 
         // POST: Producto/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Producto producto)
@@ -248,13 +236,11 @@ namespace saas.Controllers
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
-            // Si no es SuperAdmin, siempre pertenece a su empresa
             if (!esSuperAdmin)
             {
                 producto.EmpresaId = usuario.EmpresaId;
             }
 
-            // Validación
             if (!ModelState.IsValid)
             {
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
@@ -262,7 +248,6 @@ namespace saas.Controllers
                 return View(producto);
             }
 
-            // Validar que la categoría pertenezca a la empresa
             bool categoriaValida = await _context.Categorias.AnyAsync(c =>
                 c.Id == producto.CategoriaId &&
                 c.EmpresaId == producto.EmpresaId &&
@@ -277,7 +262,6 @@ namespace saas.Controllers
                 return View(producto);
             }
 
-            // Verificar nombre duplicado
             bool existeProducto = await _context.Productos.AnyAsync(c =>
                 c.Id != producto.Id &&
                 c.EmpresaId == producto.EmpresaId &&
@@ -285,7 +269,7 @@ namespace saas.Controllers
 
             if (existeProducto)
             {
-                ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");              
+                ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
                 return View(producto);
             }
@@ -299,7 +283,7 @@ namespace saas.Controllers
 
             try
             {
-                
+
                 productoDB.Nombre = producto.Nombre;
                 productoDB.CodigoBarra = producto.CodigoBarra;
                 productoDB.Descripcion = producto.Descripcion;
@@ -316,7 +300,7 @@ namespace saas.Controllers
                 TempData["Success"] = "Producto modificado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
-            catch 
+            catch
             {
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
 
@@ -391,7 +375,7 @@ namespace saas.Controllers
 
             try
             {
-                producto.Estado = false; // Desactivar el producto en lugar de eliminarlo
+                producto.Estado = false;
                 await _context.SaveChangesAsync();
 
                 TempData["Success"] = "Producto desactivado correctamente.";
@@ -400,15 +384,10 @@ namespace saas.Controllers
             }
             catch
             {
-                TempData["Error"] = "No fue posible eliminar el producto.";
+                TempData["Error"] = "No fue posible desactivar el producto porque tiene información relacionada.";
 
                 return RedirectToAction(nameof(Delete), new { id });
             }
-        }
-
-        private bool ProductoExists(int id)
-        {
-            return _context.Productos.Any(e => e.Id == id);
         }
 
         private void CargarCombos(int empresaId, int categoriaId, Usuario usuario, bool esSuperAdmin)
