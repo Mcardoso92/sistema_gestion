@@ -89,6 +89,19 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuarioLogueado,
+                "SuperAdmin");
+
+            bool usuarioEsSuperAdmin = await _userManager.IsInRoleAsync(
+                usuario,
+                "SuperAdmin");
+
+            if (!esSuperAdmin && usuarioEsSuperAdmin)
+            {
+                return Forbid();
+            }
+
             var rol = (await _userManager.GetRolesAsync(usuario)).FirstOrDefault();
 
             ViewBag.Rol = rol;
