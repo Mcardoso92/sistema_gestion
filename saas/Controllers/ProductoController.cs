@@ -8,7 +8,7 @@ using saas.Models;
 
 namespace saas.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
     public class ProductoController : Controller
     {
         private readonly SaasDbContext _context;
@@ -274,9 +274,17 @@ namespace saas.Controllers
                 return View(producto);
             }
 
-            var productoDB = await _context.Productos.FindAsync(id);
+            IQueryable<Producto> consulta = _context.Productos;
 
-            if (productoDB == null)
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(p =>
+                    p.EmpresaId == usuario.EmpresaId);
+            }
+
+            var productoDb = await consulta.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (productoDb == null)
             {
                 return NotFound();
             }
@@ -284,17 +292,17 @@ namespace saas.Controllers
             try
             {
 
-                productoDB.Nombre = producto.Nombre;
-                productoDB.CodigoBarra = producto.CodigoBarra;
-                productoDB.Descripcion = producto.Descripcion;
-                productoDB.CategoriaId = producto.CategoriaId;
-                productoDB.PrecioCosto = producto.PrecioCosto;
-                productoDB.PrecioVenta = producto.PrecioVenta;
-                productoDB.Stock = producto.Stock;
-                productoDB.PuntoReposicion = producto.PuntoReposicion;
-                productoDB.Estado = producto.Estado;
-                productoDB.UrlImagen = producto.UrlImagen;
-                productoDB.EmpresaId = producto.EmpresaId;
+                productoDb.Nombre = producto.Nombre;
+                productoDb.CodigoBarra = producto.CodigoBarra;
+                productoDb.Descripcion = producto.Descripcion;
+                productoDb.CategoriaId = producto.CategoriaId;
+                productoDb.PrecioCosto = producto.PrecioCosto;
+                productoDb.PrecioVenta = producto.PrecioVenta;
+                productoDb.Stock = producto.Stock;
+                productoDb.PuntoReposicion = producto.PuntoReposicion;
+                productoDb.Estado = producto.Estado;
+                productoDb.UrlImagen = producto.UrlImagen;
+                productoDb.EmpresaId = producto.EmpresaId;
 
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Producto modificado correctamente.";

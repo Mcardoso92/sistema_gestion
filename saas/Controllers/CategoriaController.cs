@@ -83,7 +83,7 @@ namespace saas.Controllers
 
             if (await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
             {
-                ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre");
+                CargarEmpresas();
             }
 
             return View();
@@ -102,7 +102,7 @@ namespace saas.Controllers
 
                     if (usuarioModel != null && await _userManager.IsInRoleAsync(usuarioModel, "SuperAdmin"))
                     {
-                        ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+                        CargarEmpresas();
                     }
 
                     return View(categoria);
@@ -130,7 +130,7 @@ namespace saas.Controllers
                     ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
                     if (esSuperAdmin)
                     {
-                        ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+                        CargarEmpresas();
                     }
 
                     return View(categoria);
@@ -150,7 +150,7 @@ namespace saas.Controllers
                 if (usuario != null &&
                     await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
                 {
-                    ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", categoria.EmpresaId);
+                    CargarEmpresas();
                 }
 
                 ModelState.AddModelError("", "Ocurrió un error al crear la categoría.");
@@ -192,11 +192,7 @@ namespace saas.Controllers
 
             if (esSuperAdmin)
             {
-                ViewData["EmpresaId"] = new SelectList(
-                    _context.Empresas,
-                    "Id",
-                    "Nombre",
-                    categoria.EmpresaId);
+                CargarEmpresas(categoria.EmpresaId);
             }
 
             return View(categoria);
@@ -212,29 +208,25 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            var usuario = await _userManager.GetUserAsync(User);
+            var usuarioLogueado = await _userManager.GetUserAsync(User);
 
-            if (usuario == null)
+            if (usuarioLogueado == null)
             {
                 return Challenge();
             }
 
-            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuarioLogueado, "SuperAdmin");
 
             if (!esSuperAdmin)
             {
-                categoria.EmpresaId = usuario.EmpresaId;
+                categoria.EmpresaId = usuarioLogueado.EmpresaId;
             }
 
             if (!ModelState.IsValid)
             {
                 if (esSuperAdmin)
                 {
-                    ViewData["EmpresaId"] = new SelectList(
-                        _context.Empresas,
-                        "Id",
-                        "Nombre",
-                        categoria.EmpresaId);
+                    CargarEmpresas(categoria.EmpresaId);
                 }
 
                 return View(categoria);
@@ -247,24 +239,41 @@ namespace saas.Controllers
 
             if (existeCategoria)
             {
-                ModelState.AddModelError("Nombre",
-                    "Ya existe una categoría con ese nombre para esta empresa.");
+                ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
 
                 if (esSuperAdmin)
                 {
-                    ViewData["EmpresaId"] = new SelectList(
-                        _context.Empresas,
-                        "Id",
-                        "Nombre",
-                        categoria.EmpresaId);
+                    CargarEmpresas(categoria.EmpresaId);
                 }
 
                 return View(categoria);
             }
 
+            IQueryable<Categoria> consulta = _context.Categorias;
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(c =>
+                    c.EmpresaId == usuarioLogueado.EmpresaId);
+            }
+
+            var categoriaDb = await consulta
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (categoriaDb == null)
+            {
+                return NotFound();
+            }
+
             try
             {
-                _context.Update(categoria);
+                categoriaDb.Nombre = categoria.Nombre;
+                categoriaDb.Estado = categoria.Estado;
+
+                if (esSuperAdmin)
+                {
+                    categoriaDb.EmpresaId = categoria.EmpresaId;
+                }
 
                 await _context.SaveChangesAsync();
 
@@ -278,11 +287,7 @@ namespace saas.Controllers
 
                 if (esSuperAdmin)
                 {
-                    ViewData["EmpresaId"] = new SelectList(
-                        _context.Empresas,
-                        "Id",
-                        "Nombre",
-                        categoria.EmpresaId);
+                    CargarEmpresas(categoria.EmpresaId);
                 }
 
                 return View(categoria);
@@ -367,6 +372,17 @@ namespace saas.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private void CargarEmpresas(int? empresaId = null)
+        {
+            ViewData["EmpresaId"] = new SelectList(
+                _context.Empresas
+                    .Where(e => e.Estado)
+                    .OrderBy(e => e.Nombre),
+                "Id",
+                "Nombre",
+                empresaId);
         }
     }
 }
