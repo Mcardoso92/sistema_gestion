@@ -872,3 +872,81 @@ footer {
     background: #ffffff;
     border-top: 1px solid #dee2e6;
 }
+
+/*Estilo Create Usuario*/
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f7f9fb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.bg-primary-veltika {
+    background-color: #0f4c81 !important;
+}
+
+.btn-primary-veltika {
+    background-color: #0f4c81;
+    border-color: #0f4c81;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+    .btn-primary-veltika:hover {
+        background-color: #0a365c;
+        border-color: #0a365c;
+        color: #ffffff;
+    }
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.nav-link.active {
+    border-bottom: 2px solid #71f8e4;
+}
+
+.material-symbols-outlined {
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+.profile-img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.form-container {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.help-guide-item {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f2f4f6;
+    margin-bottom: 1.5rem;
+}
+
+    .help-guide-item:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+footer {
+    background: #ffffff;
+    border-top: 1px solid #dee2e6;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #45464d;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
