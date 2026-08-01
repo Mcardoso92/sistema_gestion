@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using saas.Data;
 
@@ -11,9 +12,11 @@ using saas.Data;
 namespace saas.Migrations
 {
     [DbContext(typeof(SaasDbContext))]
-    partial class SaasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260801042639_RefactorizacionModelos")]
+    partial class RefactorizacionModelos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,8 +179,7 @@ namespace saas.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EmpresaId", "Nombre")
-                        .IsUnique();
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("Categorias");
                 });
@@ -237,9 +239,6 @@ namespace saas.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Nombre")
-                        .IsUnique();
-
                     b.ToTable("Empresas");
                 });
 
@@ -298,12 +297,7 @@ namespace saas.Migrations
 
                     b.HasIndex("CategoriaId");
 
-                    b.HasIndex("EmpresaId", "CodigoBarra")
-                        .IsUnique()
-                        .HasFilter("[CodigoBarra] IS NOT NULL");
-
-                    b.HasIndex("EmpresaId", "Nombre")
-                        .IsUnique();
+                    b.HasIndex("EmpresaId");
 
                     b.ToTable("Productos");
                 });
@@ -537,7 +531,7 @@ namespace saas.Migrations
                     b.HasOne("saas.Models.Empresa", "Empresa")
                         .WithMany("Usuarios")
                         .HasForeignKey("EmpresaId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Empresa");
