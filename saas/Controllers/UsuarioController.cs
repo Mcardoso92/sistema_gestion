@@ -130,8 +130,16 @@ namespace saas.Controllers
                     })
                     .ToListAsync();
             }
-            model.Roles = await _roleManager.Roles
-                .Where(r => r.Name != "SuperAdmin")
+
+            IQueryable<IdentityRole> roles = _roleManager.Roles;
+
+            if (!esSuperAdmin)
+            {
+                roles = roles.Where(r => r.Name != "SuperAdmin");
+            }
+
+            model.Roles = await roles
+                .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {
                     Value = r.Name!,
@@ -175,6 +183,30 @@ namespace saas.Controllers
                     ModelState.AddModelError("Email", "Ya existe un usuario con ese correo electrónico.");
 
                     await CargarCombos(usuario, esSuperAdmin);
+                    return View(usuario);
+                }
+
+                if (!esSuperAdmin && usuario.Rol == "SuperAdmin")
+                {
+                    ModelState.AddModelError(
+                        "Rol",
+                        "No tiene permisos para asignar el rol SuperAdmin.");
+
+                    await CargarCombos(usuario, esSuperAdmin);
+
+                    return View(usuario);
+                }
+
+                bool existeRol = await _roleManager.RoleExistsAsync(usuario.Rol);
+
+                if (!existeRol)
+                {
+                    ModelState.AddModelError(
+                        "Rol",
+                        "El rol seleccionado no es válido.");
+
+                    await CargarCombos(usuario, esSuperAdmin);
+
                     return View(usuario);
                 }
 
@@ -697,8 +729,14 @@ namespace saas.Controllers
 
         private async Task CargarCombos(UsuarioCreateVM model, bool esSuperAdmin)
         {
+            IQueryable<IdentityRole> roles = _roleManager.Roles;
+
+            if (!esSuperAdmin)
+            {
+                roles = roles.Where(r => r.Name != "SuperAdmin");
+            }
+
             model.Roles = await _roleManager.Roles
-                .Where(r => r.Name != "SuperAdmin")
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {
@@ -722,8 +760,14 @@ namespace saas.Controllers
         }
         private async Task CargarCombos(UsuarioEditVM model, bool esSuperAdmin)
         {
+            IQueryable<IdentityRole> roles = _roleManager.Roles;
+
+            if (!esSuperAdmin)
+            {
+                roles = roles.Where(r => r.Name != "SuperAdmin");
+            }
+
             model.Roles = await _roleManager.Roles
-                .Where(r => r.Name != "SuperAdmin")
                 .OrderBy(r => r.Name)
                 .Select(r => new SelectListItem
                 {
