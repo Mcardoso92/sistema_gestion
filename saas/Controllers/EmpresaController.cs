@@ -17,9 +17,33 @@ namespace saas.Controllers
         }
 
         // GET: Empresa
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string estado = "activos")
         {
-            return View(await _context.Empresas.ToListAsync());
+            IQueryable<Empresa> empresas = _context.Empresas
+                .AsNoTracking();
+
+            switch (estado.ToLower())
+            {
+                case "inactivos":
+                    empresas = empresas.Where(e => !e.Estado);
+                    break;
+
+                case "todos":
+                    break;
+
+                default:
+                    empresas = empresas.Where(e => e.Estado);
+                    estado = "activos";
+                    break;
+            }
+
+            ViewBag.Estado = estado;
+
+            var listaEmpresas = await empresas
+                .OrderBy(e => e.Nombre)
+                .ToListAsync();
+
+            return View(listaEmpresas);
         }
 
         // GET: Empresa/Details/5
