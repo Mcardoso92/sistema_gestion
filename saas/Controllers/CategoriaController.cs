@@ -21,27 +21,50 @@ namespace saas.Controllers
         }
 
         // GET: Categoria
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string estado = "activos")
         {
-            var usuario = await _userManager.GetUserAsync(User);
+            var usuarioLogueado = await _userManager.GetUserAsync(User);
 
-            if (usuario == null)
+            if (usuarioLogueado == null)
             {
                 return Challenge();
             }
 
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuarioLogueado,
+                "SuperAdmin");
+
             IQueryable<Categoria> categorias = _context.Categorias
-                .Where(c => c.Estado)
+                .AsNoTracking()
                 .Include(c => c.Empresa);
 
-            if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            if (!esSuperAdmin)
             {
-                categorias = categorias.Where(c => c.EmpresaId == usuario.EmpresaId);
+                categorias = categorias.Where(c => c.EmpresaId == usuarioLogueado.EmpresaId);
             }
 
-            return View(await categorias
+            switch (estado.ToLower())
+            {
+                case "inactivos":
+                    categorias = categorias.Where(c => !c.Estado);
+                    break;
+
+                case "todos":
+                    break;
+
+                default:
+                    categorias = categorias.Where(c => c.Estado);
+                    estado = "activos";
+                    break;
+            }
+
+            ViewBag.Estado = estado;
+
+            var listaCategorias = await categorias
                 .OrderBy(c => c.Nombre)
-                .ToListAsync());
+                .ToListAsync();
+
+            return View(listaCategorias);
         }
 
         // GET: Categoria/Details/5
