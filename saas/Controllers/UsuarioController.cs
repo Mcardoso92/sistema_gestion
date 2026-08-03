@@ -339,16 +339,15 @@ namespace saas.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, UsuarioEditVM usuario)
+        public async Task<IActionResult> Edit(
+            string id,
+            UsuarioEditVM usuario)
         {
-            // Verificamos que el id de la URL coincida con el del ViewModel.
-            // Esto evita que alguien modifique el formulario manualmente.
             if (id != usuario.Id)
             {
                 return NotFound();
             }
 
-            // Obtenemos el usuario logueado.
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
             if (usuarioLogueado == null)
@@ -356,16 +355,10 @@ namespace saas.Controllers
                 return Challenge();
             }
 
-            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuarioLogueado, "SuperAdmin");
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuarioLogueado,
+                "SuperAdmin");
 
-            // Si el modelo tiene errores de validación,
-            // recargamos los combos y volvemos a mostrar la vista.
-            if (!ModelState.IsValid)
-            {
-                await CargarCombos(usuario, esSuperAdmin);
-                return View(usuario);
-            }
-            // Buscamos el usuario que queremos editar.
             var usuarioDb = await _userManager.FindByIdAsync(id);
 
             if (usuarioDb == null)
@@ -373,14 +366,12 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            // Un AdminEmpresa solo puede modificar usuarios de su empresa.
             if (!esSuperAdmin &&
                 usuarioDb.EmpresaId != usuarioLogueado.EmpresaId)
             {
                 return Forbid();
             }
 
-            // Un AdminEmpresa nunca puede modificar un SuperAdmin.
             bool usuarioEsSuperAdmin = await _userManager.IsInRoleAsync(
                 usuarioDb,
                 "SuperAdmin");
@@ -390,12 +381,35 @@ namespace saas.Controllers
                 return Forbid();
             }
 
-            // Un AdminEmpresa tampoco puede asignar el rol SuperAdmin.
+            var rolesActuales = await _userManager.GetRolesAsync(usuarioDb);
+            string? rolActual = rolesActuales.FirstOrDefault();
+
+            // Un AdminEmpresa no recibe EmpresaId desde la vista.
+            if (!esSuperAdmin)
+            {
+                usuario.EmpresaId = usuarioLogueado.EmpresaId;
+                ModelState.Remove(nameof(usuario.EmpresaId));
+            }
+
+            // Un usuario no puede cambiar su propio rol.
+            if (usuarioDb.Id == usuarioLogueado.Id)
+            {
+                usuario.Rol = rolActual!;
+                ModelState.Remove(nameof(usuario.Rol));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                await CargarCombos(usuario, esSuperAdmin);
+
+                return View(usuario);
+            }
+
             if (!esSuperAdmin &&
                 usuario.Rol == "SuperAdmin")
             {
                 ModelState.AddModelError(
-                    "Rol",
+                    nameof(usuario.Rol),
                     "No tiene permisos para asignar el rol SuperAdmin.");
 
                 await CargarCombos(usuario, esSuperAdmin);
@@ -403,12 +417,11 @@ namespace saas.Controllers
                 return View(usuario);
             }
 
-            // Ningún usuario puede desactivarse a sí mismo desde Edit.
             if (usuarioDb.Id == usuarioLogueado.Id &&
                 !usuario.Estado)
             {
                 ModelState.AddModelError(
-                    "Estado",
+                    nameof(usuario.Estado),
                     "No puede desactivar su propio usuario.");
 
                 await CargarCombos(usuario, esSuperAdmin);
@@ -423,7 +436,7 @@ namespace saas.Controllers
                 existeEmail.Id != usuario.Id)
             {
                 ModelState.AddModelError(
-                    "Email",
+                    nameof(usuario.Email),
                     "Ya existe un usuario con ese correo electrónico.");
 
                 await CargarCombos(usuario, esSuperAdmin);
@@ -436,7 +449,7 @@ namespace saas.Controllers
             if (!existeRol)
             {
                 ModelState.AddModelError(
-                    "Rol",
+                    nameof(usuario.Rol),
                     "El rol seleccionado no es válido.");
 
                 await CargarCombos(usuario, esSuperAdmin);
@@ -444,23 +457,19 @@ namespace saas.Controllers
                 return View(usuario);
             }
 
-
             try
             {
-                // Actualizamos únicamente los campos permitidos.
                 usuarioDb.Nombre = usuario.Nombre;
                 usuarioDb.Apellido = usuario.Apellido;
                 usuarioDb.Email = usuario.Email;
                 usuarioDb.UserName = usuario.Email;
                 usuarioDb.Estado = usuario.Estado;
 
-                // Solo el SuperAdmin puede cambiar la empresa.
                 if (esSuperAdmin)
                 {
                     usuarioDb.EmpresaId = usuario.EmpresaId;
                 }
 
-                // Guardamos los cambios básicos.
                 var resultado = await _userManager.UpdateAsync(usuarioDb);
 
                 if (!resultado.Succeeded)
@@ -474,14 +483,6 @@ namespace saas.Controllers
 
                     return View(usuario);
                 }
-
-                // ============================
-                // Actualización del Rol
-                // ============================
-
-                // Obtenemos el rol actual.
-                var rolesActuales = await _userManager.GetRolesAsync(usuarioDb);
-                var rolActual = rolesActuales.FirstOrDefault();
 
                 if (rolActual != usuario.Rol)
                 {
@@ -514,7 +515,6 @@ namespace saas.Controllers
 
                     if (!resultadoAgregarRol.Succeeded)
                     {
-                        // Si falla el nuevo rol, restauramos el anterior.
                         if (rolActual != null)
                         {
                             await _userManager.AddToRoleAsync(
@@ -535,13 +535,16 @@ namespace saas.Controllers
                     }
                 }
 
-                TempData["Success"] = "Usuario modificado correctamente.";
+                TempData["Success"] =
+                    "Usuario modificado correctamente.";
 
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
-                ModelState.AddModelError("", "Ocurrió un error al modificar el usuario.");
+                ModelState.AddModelError(
+                    "",
+                    "Ocurrió un error al modificar el usuario.");
 
                 await CargarCombos(usuario, esSuperAdmin);
 

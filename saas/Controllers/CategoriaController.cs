@@ -357,6 +357,18 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            bool tieneProductos = await _context.Productos.AnyAsync(p =>
+                p.CategoriaId == categoria.Id &&
+                p.Estado);
+
+            if (tieneProductos)
+            {
+                TempData["Error"] =
+                    "No es posible desactivar la categoría porque tiene productos activos asociados.";
+
+                return RedirectToAction(nameof(Delete), new { id });
+            }
+
             try
             {
                 categoria.Estado = false;

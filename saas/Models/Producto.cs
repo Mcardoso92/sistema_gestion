@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace saas.Models
 {
@@ -13,6 +14,7 @@ namespace saas.Models
         [StringLength(500)]
         public string? Descripcion { get; set; }
         public int CategoriaId { get; set; }
+        [ValidateNever]
         public Categoria Categoria { get; set; } = null!;
         [Range(0, 999999999.99, ErrorMessage = "El precio de costo debe ser mayor o igual a 0.")]
         public decimal PrecioCosto { get; set; }
@@ -29,7 +31,9 @@ namespace saas.Models
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
         public int EmpresaId { get; set; }
+        [ValidateNever]
         public Empresa Empresa { get; set; } = null!;
+        [ValidateNever]
         public ICollection<DetalleVenta>? DetallesVenta { get; set; } = new List<DetalleVenta>();
     }
 }
