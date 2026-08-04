@@ -21,7 +21,7 @@ namespace saas.Controllers
         }
 
         // GET: Producto
-        public async Task<IActionResult> Index(string estado = "activos", int? categoriaId = null, int? empresaId = null)
+        public async Task<IActionResult> Index(string estado = "activos", int? categoriaId = null, int? empresaId = null, string? busqueda = null)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -67,6 +67,15 @@ namespace saas.Controllers
                 productos = productos.Where(p => p.CategoriaId == categoriaId.Value);
             }
 
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                busqueda = busqueda.Trim();
+
+                productos = productos.Where(p =>
+                    p.Nombre.Contains(busqueda) ||
+                    (p.CodigoBarra != null && p.CodigoBarra.Contains(busqueda)));
+            }
+
             if (esSuperAdmin)
             {
                 ViewBag.Empresas = await _context.Empresas
@@ -92,6 +101,7 @@ namespace saas.Controllers
             ViewBag.Estado = estado;
             ViewBag.CategoriaId = categoriaId;
             ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
+            ViewBag.Busqueda = busqueda;
 
             var listaProductos = await productos
                 .OrderBy(p => p.Nombre)
