@@ -1,4 +1,22 @@
-﻿@model IEnumerable<Usuario>
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<Usuario>
+
+@{
+    ViewData["Title"] = "Usuarios";
+
+    string estadoSeleccionado = ViewBag.Estado?.ToString() ?? "activos";
+    string? rolSeleccionado = ViewBag.Rol?.ToString();
+    int? empresaSeleccionada = ViewBag.EmpresaId as int?;
+
+    IEnumerable<IdentityRole> rolesDisponibles = ViewBag.RolesDisponibles as IEnumerable<IdentityRole>
+        ?? Enumerable.Empty<IdentityRole>();
+
+    IEnumerable<Empresa> empresas = ViewBag.Empresas as IEnumerable<Empresa>
+        ?? Enumerable.Empty<Empresa>();
+
+    Dictionary<string, string> rolesUsuarios = ViewBag.Roles as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+}
 
 <main class="container-fluid px-4 mb-5">
     <!-- Header -->
@@ -9,7 +27,7 @@
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
             <a asp-action="Create" class="btn btn-primary-veltika px-4 py-2">
-                <span class="material-symbols-outlined me-1">person_add</span>                
+                <span class="material-symbols-outlined me-1">person_add</span>
                 <span class="fw-medium small">Nuevo Usuario</span>
             </a>
         </div>
@@ -17,35 +35,64 @@
     <!-- Filter Bar -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label small fw-bold text-muted text-uppercase">Búsqueda rápida</label>
-                    <div class="input-group">
-                        <input class="form-control" placeholder="Filtrar por nombre, email o empresa..." type="text" />
-                        <span class="input-group-text bg-white border-start-0">
-                            <span class="material-symbols-outlined text-muted">search</span>
-                        </span>
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="estado" class="form-label small fw-bold text-muted text-uppercase">Estado</label>
+
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="activos" selected="@(estadoSeleccionado == "activos")">Activos</option>
+                        <option value="inactivos" selected="@(estadoSeleccionado == "inactivos")">Inactivos</option>
+                        <option value="todos" selected="@(estadoSeleccionado == "todos")">Todos</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="rol" class="form-label small fw-bold text-muted text-uppercase">Rol</label>
+
+                    <select id="rol" name="rol" class="form-select">
+                        <option value="">Todos los roles</option>
+
+                        @foreach (var rol in rolesDisponibles)
+                        {
+                            <option value="@rol.Name" selected="@(rolSeleccionado == rol.Name)">
+                                @rol.Name
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <div class="col-md-3">
+                        <label for="empresaId" class="form-label small fw-bold text-muted text-uppercase">Empresa</label>
+
+                        <select id="empresaId" name="empresaId" class="form-select">
+                            <option value="">Todas las empresas</option>
+
+                            @foreach (var empresa in empresas)
+                            {
+                                <option value="@empresa.Id" selected="@(empresaSeleccionada == empresa.Id)">
+                                    @empresa.Nombre
+                                </option>
+                            }
+                        </select>
                     </div>
+                }
+
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined fs-5">filter_list</span>
+                        <span>Aplicar filtros</span>
+                    </button>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted text-uppercase">Estado</label>
-                    <select class="form-select">
-                        <option>Todos los estados</option>
-                        <option>Activo</option>
-                        <option>Pendiente</option>
-                        <option>Inactivo</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold text-muted text-uppercase">Empresa</label>
-                    <select class="form-select">
-                        <option>Todas las empresas</option>
-                        <option>VELTIKA Global</option>
-                        <option>Logística Austral</option>
-                        <option>Sistemas del Norte</option>
-                    </select>
-                </div>
-            </div>
+
+                @if (estadoSeleccionado != "activos" || !string.IsNullOrWhiteSpace(rolSeleccionado) || empresaSeleccionada.HasValue)
+                {
+                    <div class="col-md-auto">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar filtros</a>
+                    </div>
+                }
+            </form>
         </div>
     </div>
     <!-- Table Section -->
@@ -57,7 +104,10 @@
                         <th class="py-3 small fw-bold text-muted text-uppercase">Nombre</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase">Apellido</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase">Email</th>
-                        <th class="py-3 small fw-bold text-muted text-uppercase">Empresa</th>
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <th class="py-3 small fw-bold text-muted text-uppercase">Empresa</th>
+                        }
                         <th class="py-3 small fw-bold text-muted text-uppercase">Rol</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase">Estado</th>
                         <th class="py-3 small fw-bold text-muted text-uppercase">Fecha de Alta</th>
@@ -65,63 +115,77 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var usuario in Model)
+                    @if (!Model.Any())
                     {
                         <tr>
-                            <td class="fw-medium">@usuario.Nombre</td>
-                            <td>@usuario.Apellido</td>
-                            <td class="text-muted">@usuario.Email</td>
-                            <td>@usuario.Empresa.Nombre</td>
-                            <td>@ViewBag.Roles[usuario.Id]</td>
-                            <td>
-                                @if (usuario.Estado)
-                                {
-                                    <span class="badge badge-active rounded-pill px-3 py-2 text-uppercase fw-bold" style="font-size: 0.65rem;">
-                                        <span class="d-inline-block rounded-circle bg-success me-1" style="width: 6px; height: 6px;"></span> Activo
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge badge-inactive rounded-pill px-3 py-2 text-uppercase fw-bold" style="font-size: 0.65rem;">
-                                        <span class="d-inline-block rounded-circle bg-danger me-1" style="width: 6px; height: 6px;"></span> Inactivo
-                                    </span>
-                                }
-                            </td>
-                            <td class="text-muted">@usuario.FechaAlta.ToString("dd/MM/yyyy")</td>
-                            <td class="pe-4 text-end">                           
-                                <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">Ver</a>
-                                <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-warning">Editar</a>
-                                <a asp-action="Delete" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                            <td colspan="@(User.IsInRole("SuperAdmin") ? 8 : 7)" class="text-center text-muted py-5">
+                                No se encontraron usuarios para el filtro seleccionado.
                             </td>
                         </tr>
                     }
+                    else
+                    {
+                        @foreach (var usuario in Model)
+                        {
+                            <tr>
+                                <td class="fw-medium">@usuario.Nombre</td>
+                                <td>@usuario.Apellido</td>
+                                <td class="text-muted">@usuario.Email</td>
+                                @if (User.IsInRole("SuperAdmin"))
+                                {
+                                    <td>
+                                        @usuario.Empresa.Nombre
+                                    </td>
+                                }
+                            <td>
+                                @(rolesUsuarios.TryGetValue(usuario.Id, out var rolUsuario)
+                                                            ? rolUsuario
+                                                            : "")
+                        </td>
+                        <td>
+                            @if (usuario.Estado)
+                                    {
+                                        <span class="badge badge-active rounded-pill px-3 py-2 text-uppercase fw-bold" style="font-size: 0.65rem;">
+                                            <span class="d-inline-block rounded-circle bg-success me-1" style="width: 6px; height: 6px;"></span> Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-inactive rounded-pill px-3 py-2 text-uppercase fw-bold" style="font-size: 0.65rem;">
+                                            <span class="d-inline-block rounded-circle bg-danger me-1" style="width: 6px; height: 6px;"></span> Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                <td class="text-muted">@usuario.FechaAlta.ToString("dd/MM/yyyy")</td>
+                                <td class="pe-4 text-end">
+                                    <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">Ver</a>
+                                    <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                    @if (usuario.Estado)
+                                    {
+                                        <a asp-action="Delete"
+                                           asp-route-id="@usuario.Id"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Desactivar
+                                        </a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+
                 </tbody>
             </table>
         </div>
         <!-- Pagination -->
         <div class="card-footer bg-white border-top p-4">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div class="small text-muted">Mostrando 1-5 de 24 usuarios</div>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination pagination-sm mb-0">
-                        <li class="page-item disabled">
-                            <a aria-label="Previous" class="page-link" href="#">
-                                <span class="material-symbols-outlined fs-6">chevron_left</span>
-                            </a>
-                        </li>
-                        <li class="page-item active"><a class="page-link bg-primary-veltika border-primary-veltika" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a aria-label="Next" class="page-link" href="#">
-                                <span class="material-symbols-outlined fs-6">chevron_right</span>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+            <span class="small text-muted">
+
+                @Model.Count()
+                @(Model.Count() == 1
+                                ? "usuario encontrado"
+                                : "usuarios encontrados")
+
+            </span>
         </div>
     </div>
 </main>
-
-

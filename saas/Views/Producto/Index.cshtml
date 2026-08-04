@@ -2,6 +2,17 @@
 
 @{
     ViewData["Title"] = "Index";
+
+    string estadoSeleccionado =
+        ViewBag.Estado?.ToString() ?? "activos";
+    int? categoriaSeleccionada = ViewBag.CategoriaId as int?;
+    int? empresaSeleccionada = ViewBag.EmpresaId as int?;
+
+    IEnumerable<Categoria> categorias = ViewBag.Categorias as IEnumerable<Categoria>
+        ?? Enumerable.Empty<Categoria>();
+
+    IEnumerable<Empresa> empresas = ViewBag.Empresas as IEnumerable<Empresa>
+        ?? Enumerable.Empty<Empresa>();
 }
 
 <main class="flex-grow-1 py-5 container-fluid px-4">
@@ -23,26 +34,64 @@
         </div>
     </div>
     <!-- Filter Bar (Identical structure to SCREEN_11) -->
+    <!-- Filtros -->
     <div class="card mb-4">
         <div class="card-body p-3">
-            <div class="row g-3 align-items-center">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label for="estado" class="form-label fw-semibold"> Estado </label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="activos" selected="@(estadoSeleccionado == "activos")"> Activos </option>
+                        <option value="inactivos" selected="@(estadoSeleccionado == "inactivos")"> Inactivos </option>
+                        <option value="todos" selected="@(estadoSeleccionado == "todos")"> Todos </option>
+                    </select>
+                </div>
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <div class="col-md-3">
+                        <label for="empresaId" class="form-label fw-semibold">Empresa</label>
+                        <select id="empresaId" name="empresaId" class="form-select">
+                            <option value="">Todas las empresas</option>
+
+                            @foreach (var empresa in empresas)
+                            {
+                                <option value="@empresa.Id" selected="@(empresaSeleccionada == empresa.Id)">
+                                    @empresa.Nombre
+                                </option>
+                            }
+                        </select>
+                    </div>
+                }
+                <div class="col-md-3">
+                    <label for="categoriaId" class="form-label fw-semibold">Categoría</label>
+                    <select id="categoriaId" name="categoriaId" class="form-select">
+                        <option value="">Todas las categorías</option>
+
+                        @foreach (var categoria in categorias)
+                        {
+                            <option value="@categoria.Id" selected="@(categoriaSeleccionada == categoria.Id)">
+                                @categoria.Nombre
+                            </option>
+                        }
+                    </select>
+                </div>
                 <div class="col-md-8 d-flex gap-2">
                     <div class="search-input-wrapper flex-grow-1" style="max-width: 400px;">
                         <span class="material-symbols-outlined">search</span>
                         <input class="form-control form-control-md" id="tableSearch" placeholder="Buscar por ID, Producto o SKU..." type="text" />
                     </div>
-                    <button class="btn btn-outline-secondary d-flex align-items-center gap-1 px-3">
+                    <button type="submit" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
                         <span class="material-symbols-outlined fs-5">filter_list</span>
-                        <span class="small fw-medium">Filtros</span>
+                        <span class="small fw-medium"> Aplicar filtro </span>
                     </button>
+                    @if (estadoSeleccionado != "activos" || categoriaSeleccionada.HasValue || empresaSeleccionada.HasValue)
+                    {
+                        <div class="col-md-auto">
+                            <a asp-action="Index" class="btn btn-outline-secondary">Limpiar filtros</a>
+                        </div>
+                    }
                 </div>
-                <div class="col-md-4 d-flex justify-content-md-end">
-                    <button class="btn btn-outline-secondary d-flex align-items-center gap-1 px-3">
-                        <span class="material-symbols-outlined fs-5">file_download</span>
-                        <span class="small fw-medium">Exportar</span>
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
     <!-- Data Table Card -->
@@ -54,80 +103,107 @@
                         <th class="px-4 py-3 border-0">ID</th>
                         <th class="px-4 py-3 border-0">Producto</th>
                         <th class="px-4 py-3 border-0">Categoría</th>
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <th class="px-4 py-3 border-0">Empresa</th>
+                        }
                         <th class="px-4 py-3 border-0 text-end">Precio Venta</th>
                         <th class="px-4 py-3 border-0 text-center">Stock</th>
                         <th class="px-4 py-3 border-0 text-center">Reposición</th>
+                        <th class="px-4 py-3 border-0 text-center">Situación Stock</th>
                         <th class="px-4 py-3 border-0 text-center">Estado</th>
                         <th class="px-4 py-3 border-0 text-end">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="border-top-0">
-                    @foreach (var producto in Model)
+                    @if (!Model.Any())
                     {
                         <tr>
-                            <td class="px-4 py-3">@producto.Id</td>
-                            <td class="px-4 py-3">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="product-img-wrapper">
-                                        <img alt="Producto" src="@producto.UrlImagen" />
-                                    </div>
-                                    <div>
-                                        <a class="product-name d-block" href="#">@producto.Nombre</a>                                        
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-3">@producto.Categoria.Nombre</td>
-                            <td class="px-4 py-3 text-end fw-semibold">@producto.PrecioVenta</td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="badge bg-light text-dark border p-2 rounded-1">@producto.Stock</span>
-                            </td>
-                            <td class="px-4 py-3 text-center small text-secondary">@producto.PuntoReposicion</td>
-                            <td class="px-4 py-3 text-center">
-                                @if (producto.Stock < producto.PuntoReposicion)
-                                {
-                                    <span class="badge-status status-activo">
-
-                                        <span class="dot"></span>Bajo Stock
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge-status status-inactivo">
-
-                                        <span class="dot"></span>Normal
-                                    </span>
-                                }
-                            </td>
-                            <td class="px-4 py-3 text-end">
-                                <a asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-primary">Ver</a>
-                                <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-warning">Editar</a>
-                                <a asp-action="Delete" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-danger">Descativar</a>
+                            <td colspan="@(User.IsInRole("SuperAdmin") ? 10 : 9)" class="text-center text-secondary py-5">
+                                No se encontraron productos para el filtro seleccionado.
                             </td>
                         </tr>
-                    }                                        
+                    }
+                    else
+                    {
+                        @foreach (var producto in Model)
+                        {
+                            <tr>
+                                <td class="px-4 py-3">@producto.Id</td>
+                                <td class="px-4 py-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="product-img-wrapper">
+                                            <img alt="Producto" src="@producto.UrlImagen" />
+                                        </div>
+                                        <div>
+                                            <a class="product-name d-block" href="#">@producto.Nombre</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">@producto.Categoria.Nombre</td>
+                                @if (User.IsInRole("SuperAdmin"))
+                                {
+                                    <td class="px-4 py-3">@producto.Empresa.Nombre</td>
+                                }
+                                <td class="px-4 py-3 text-end fw-semibold">@producto.PrecioVenta</td>
+                                <td class="px-4 py-3 text-center">
+                                    <span class="badge bg-light text-dark border p-2 rounded-1">@producto.Stock</span>
+                                </td>
+                                <td class="px-4 py-3 text-center small text-secondary">@producto.PuntoReposicion</td>
+                                <td class="px-4 py-3 text-center">
+                                    @if (producto.Stock < producto.PuntoReposicion)
+                                    {
+                                        <span class="badge-status status-inactivo">
+
+                                            <span class="dot"></span>Bajo Stock
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-status status-activo">
+
+                                            <span class="dot"></span>Normal
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-center">
+                                    @if (producto.Estado)
+                                    {
+                                        <span class="badge-status status-activo">
+                                            <span class="dot"></span>
+                                            Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-status status-inactivo">
+                                            <span class="dot"></span>
+                                            Inactivo
+                                        </span>
+                                    }
+                                </td>
+                                <td class="px-4 py-3 text-end">
+                                    <a asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-primary">Ver</a>
+                                    <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                    @if (producto.Estado)
+                                    {
+                                        <a asp-action="Delete" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-danger">Desactivar</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>
         <!-- Pagination Footer (Identical to SCREEN_11) -->
         <div class="card-footer bg-light border-top-0 px-4 py-3">
-            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
-                <span class="small text-secondary">Mostrando 1 a 4 de 1,284 productos</span>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination pagination-sm mb-0 align-items-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#"><span class="material-symbols-outlined fs-5">chevron_left</span></a>
-                        </li>
-                        <li class="page-item active"><a class="page-link text-white" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><span class="px-2 text-secondary">...</span></li>
-                        <li class="page-item"><a class="page-link" href="#">321</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#"><span class="material-symbols-outlined fs-5">chevron_right</span></a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
+            <span class="small text-secondary">
+                @Model.Count()
+                @(Model.Count() == 1
+                                ? "producto encontrado"
+                                : "productos encontrados")
+            </span>
         </div>
     </div>
 </main>

@@ -23,43 +23,141 @@ namespace saas.Controllers
             _roleManager = roleManager;
             _context = context;
         }
-        // GET: Producto
-        public async Task<IActionResult> Index()
+        // GET: Usuario
+        public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null)
         {
-            var usuario = await _userManager.GetUserAsync(User);
+            var usuarioLogueado = await _userManager.GetUserAsync(User);
 
-            if (usuario == null)
+            if (usuarioLogueado == null)
             {
                 return Challenge();
             }
 
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuarioLogueado,
+                "SuperAdmin");
+
             IQueryable<Usuario> usuarios = _context.Users
-                .Where(u => u.Estado)
+                .AsNoTracking()
                 .Include(u => u.Empresa);
 
-
-            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
-
-            // Si es SuperAdmin ve todos los usuarios, de lo contrario solo ve los de su empresa
             if (!esSuperAdmin)
             {
-                // Si no es SuperAdmin, solo ve los de su empresa
-                usuarios = usuarios.Where(u =>  u.EmpresaId == usuario.EmpresaId);
+                empresaId = usuarioLogueado.EmpresaId;
+
+                usuarios = usuarios.Where(u => u.EmpresaId == usuarioLogueado.EmpresaId);
+
+                var rolSuperAdmin = await _roleManager.FindByNameAsync("SuperAdmin");
+
+                if (rolSuperAdmin != null)
+                {
+                    IQueryable<string> idsSuperAdmin = _context.UserRoles
+                        .Where(ur => ur.RoleId == rolSuperAdmin.Id)
+                        .Select(ur => ur.UserId);
+
+                    usuarios = usuarios.Where(u => !idsSuperAdmin.Contains(u.Id));
+                }
+            }
+            else if (empresaId.HasValue)
+            {
+                usuarios = usuarios.Where(u => u.EmpresaId == empresaId.Value);
+            }
+
+            switch (estado.ToLower())
+            {
+                case "inactivos":
+                    usuarios = usuarios.Where(u => !u.Estado);
+                    break;
+
+                case "todos":
+                    break;
+
+                default:
+                    usuarios = usuarios.Where(u => u.Estado);
+                    estado = "activos";
+                    break;
+            }
+
+            if (!string.IsNullOrWhiteSpace(rol))
+            {
+                var rolDb = await _roleManager.FindByNameAsync(rol);
+
+                if (rolDb != null)
+                {
+                    IQueryable<string> idsUsuariosRol = _context.UserRoles
+                        .Where(ur => ur.RoleId == rolDb.Id)
+                        .Select(ur => ur.UserId);
+
+                    usuarios = usuarios.Where(u => idsUsuariosRol.Contains(u.Id));
+                }
+                else
+                {
+                    usuarios = usuarios.Where(u => false);
+                }
             }
 
             var listaUsuarios = await usuarios
                 .OrderBy(u => u.Nombre)
+                .ThenBy(u => u.Apellido)
                 .ToListAsync();
 
-            ViewBag.Roles = new Dictionary<string, string>();
+            IQueryable<IdentityRole> rolesDisponibles = _roleManager.Roles
+                .AsNoTracking();
 
-            foreach (var usuarioItem in listaUsuarios)
+            if (!esSuperAdmin)
             {
-                var rol = await _userManager.GetRolesAsync(usuarioItem);
-                ViewBag.Roles[usuarioItem.Id] = rol.FirstOrDefault() ?? "";
+                rolesDisponibles = rolesDisponibles.Where(r => r.Name != "SuperAdmin");
             }
 
+            ViewBag.RolesDisponibles = await rolesDisponibles
+                .OrderBy(r => r.Name)
+                .ToListAsync();
+
+            if (esSuperAdmin)
+            {
+                ViewBag.Empresas = await _context.Empresas
+                    .AsNoTracking()
+                    .Where(e => e.Estado)
+                    .OrderBy(e => e.Nombre)
+                    .ToListAsync();
+            }
+
+            ViewBag.Estado = estado;
+            ViewBag.Rol = rol;
+            ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
+            ViewBag.Roles = await ObtenerRolesUsuarios(listaUsuarios);
+
             return View(listaUsuarios);
+        }
+
+        private async Task<Dictionary<string, string>> ObtenerRolesUsuarios(IEnumerable<Usuario> usuarios)
+        {
+            var idsUsuarios = usuarios
+                .Select(u => u.Id)
+                .ToList();
+
+            if (!idsUsuarios.Any())
+            {
+                return new Dictionary<string, string>();
+            }
+
+            var rolesUsuarios = await (
+                from usuarioRol in _context.UserRoles
+                join rol in _context.Roles on usuarioRol.RoleId equals rol.Id
+                where idsUsuarios.Contains(usuarioRol.UserId)
+                select new
+                {
+                    usuarioRol.UserId,
+                    Rol = rol.Name
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return rolesUsuarios
+                .GroupBy(r => r.UserId)
+                .ToDictionary(
+                    grupo => grupo.Key,
+                    grupo => grupo.First().Rol ?? "");
         }
         // GET: Producto/Details/5
         public async Task<IActionResult> Details(string? id)
