@@ -1,12 +1,12 @@
 ﻿@model IEnumerable<Producto>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Productos";
 
-    string estadoSeleccionado =
-        ViewBag.Estado?.ToString() ?? "activos";
+    string estadoSeleccionado = ViewBag.Estado?.ToString() ?? "activos";
     int? categoriaSeleccionada = ViewBag.CategoriaId as int?;
     int? empresaSeleccionada = ViewBag.EmpresaId as int?;
+    string? busqueda = ViewBag.Busqueda?.ToString();
 
     IEnumerable<Categoria> categorias = ViewBag.Categorias as IEnumerable<Categoria>
         ?? Enumerable.Empty<Categoria>();
@@ -33,23 +33,25 @@
             </a>
         </div>
     </div>
-    <!-- Filter Bar (Identical structure to SCREEN_11) -->
-    <!-- Filtros -->
+    <!-- Filter Bar -->
     <div class="card mb-4">
         <div class="card-body p-3">
             <form asp-action="Index" method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="estado" class="form-label fw-semibold"> Estado </label>
+                <div class="col-md-2">
+                    <label for="estado" class="form-label fw-semibold">Estado</label>
+
                     <select id="estado" name="estado" class="form-select">
-                        <option value="activos" selected="@(estadoSeleccionado == "activos")"> Activos </option>
-                        <option value="inactivos" selected="@(estadoSeleccionado == "inactivos")"> Inactivos </option>
-                        <option value="todos" selected="@(estadoSeleccionado == "todos")"> Todos </option>
+                        <option value="activos" selected="@(estadoSeleccionado == "activos")">Activos</option>
+                        <option value="inactivos" selected="@(estadoSeleccionado == "inactivos")">Inactivos</option>
+                        <option value="todos" selected="@(estadoSeleccionado == "todos")">Todos</option>
                     </select>
                 </div>
+
                 @if (User.IsInRole("SuperAdmin"))
                 {
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="empresaId" class="form-label fw-semibold">Empresa</label>
+
                         <select id="empresaId" name="empresaId" class="form-select">
                             <option value="">Todas las empresas</option>
 
@@ -62,8 +64,10 @@
                         </select>
                     </div>
                 }
-                <div class="col-md-3">
+
+                <div class="col-md-2">
                     <label for="categoriaId" class="form-label fw-semibold">Categoría</label>
+
                     <select id="categoriaId" name="categoriaId" class="form-select">
                         <option value="">Todas las categorías</option>
 
@@ -75,22 +79,38 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-8 d-flex gap-2">
-                    <div class="search-input-wrapper flex-grow-1" style="max-width: 400px;">
+
+                <div class="col-md-4">
+                    <label for="busqueda" class="form-label fw-semibold">Buscar producto</label>
+
+                    <div class="search-input-wrapper">
                         <span class="material-symbols-outlined">search</span>
-                        <input class="form-control form-control-md" id="tableSearch" placeholder="Buscar por ID, Producto o SKU..." type="text" />
+
+                        <input id="busqueda"
+                               name="busqueda"
+                               value="@busqueda"
+                               class="form-control form-control-md"
+                               placeholder="Buscar por nombre o código de barras..."
+                               type="text" />
                     </div>
-                    <button type="submit" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
-                        <span class="material-symbols-outlined fs-5">filter_list</span>
-                        <span class="small fw-medium"> Aplicar filtro </span>
-                    </button>
-                    @if (estadoSeleccionado != "activos" || categoriaSeleccionada.HasValue || empresaSeleccionada.HasValue)
-                    {
-                        <div class="col-md-auto">
-                            <a asp-action="Index" class="btn btn-outline-secondary">Limpiar filtros</a>
-                        </div>
-                    }
                 </div>
+
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
+                        <span class="material-symbols-outlined fs-5">search</span>
+                        <span class="small fw-medium">Buscar</span>
+                    </button>
+                </div>
+
+                @if (estadoSeleccionado != "activos" ||
+                                categoriaSeleccionada.HasValue ||
+                                empresaSeleccionada.HasValue ||
+                                !string.IsNullOrWhiteSpace(busqueda))
+                {
+                    <div class="col-md-auto">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                    </div>
+                }
             </form>
         </div>
     </div>
@@ -120,7 +140,7 @@
                     {
                         <tr>
                             <td colspan="@(User.IsInRole("SuperAdmin") ? 10 : 9)" class="text-center text-secondary py-5">
-                                No se encontraron productos para el filtro seleccionado.
+                                No se encontraron productos para los criterios seleccionados.
                             </td>
                         </tr>
                     }

@@ -7,6 +7,7 @@
     string estadoSeleccionado = ViewBag.Estado?.ToString() ?? "activos";
     string? rolSeleccionado = ViewBag.Rol?.ToString();
     int? empresaSeleccionada = ViewBag.EmpresaId as int?;
+    string? busqueda = ViewBag.Busqueda?.ToString();
 
     IEnumerable<IdentityRole> rolesDisponibles = ViewBag.RolesDisponibles as IEnumerable<IdentityRole>
         ?? Enumerable.Empty<IdentityRole>();
@@ -33,10 +34,11 @@
         </div>
     </div>
     <!-- Filter Bar -->
+    <!-- Filter Bar -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
             <form asp-action="Index" method="get" class="row g-3 align-items-end">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="estado" class="form-label small fw-bold text-muted text-uppercase">Estado</label>
 
                     <select id="estado" name="estado" class="form-select">
@@ -46,7 +48,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label for="rol" class="form-label small fw-bold text-muted text-uppercase">Rol</label>
 
                     <select id="rol" name="rol" class="form-select">
@@ -63,7 +65,7 @@
 
                 @if (User.IsInRole("SuperAdmin"))
                 {
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="empresaId" class="form-label small fw-bold text-muted text-uppercase">Empresa</label>
 
                         <select id="empresaId" name="empresaId" class="form-select">
@@ -79,17 +81,35 @@
                     </div>
                 }
 
+                <div class="col-md-4">
+                    <label for="busqueda" class="form-label small fw-bold text-muted text-uppercase">Buscar usuario</label>
+
+                    <div class="search-input-wrapper">
+                        <span class="material-symbols-outlined">search</span>
+
+                        <input id="busqueda"
+                               name="busqueda"
+                               value="@busqueda"
+                               class="form-control"
+                               placeholder="Buscar por nombre, apellido o email..."
+                               type="text" />
+                    </div>
+                </div>
+
                 <div class="col-md-auto">
                     <button type="submit" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                        <span class="material-symbols-outlined fs-5">filter_list</span>
-                        <span>Aplicar filtros</span>
+                        <span class="material-symbols-outlined fs-5">search</span>
+                        <span>Buscar</span>
                     </button>
                 </div>
 
-                @if (estadoSeleccionado != "activos" || !string.IsNullOrWhiteSpace(rolSeleccionado) || empresaSeleccionada.HasValue)
+                @if (estadoSeleccionado != "activos" ||
+                                !string.IsNullOrWhiteSpace(rolSeleccionado) ||
+                                empresaSeleccionada.HasValue ||
+                                !string.IsNullOrWhiteSpace(busqueda))
                 {
                     <div class="col-md-auto">
-                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar filtros</a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
                     </div>
                 }
             </form>
@@ -119,7 +139,7 @@
                     {
                         <tr>
                             <td colspan="@(User.IsInRole("SuperAdmin") ? 8 : 7)" class="text-center text-muted py-5">
-                                No se encontraron usuarios para el filtro seleccionado.
+                                No se encontraron usuarios para los criterios seleccionados.
                             </td>
                         </tr>
                     }

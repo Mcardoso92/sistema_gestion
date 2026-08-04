@@ -24,7 +24,7 @@ namespace saas.Controllers
             _context = context;
         }
         // GET: Usuario
-        public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null)
+        public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -33,9 +33,7 @@ namespace saas.Controllers
                 return Challenge();
             }
 
-            bool esSuperAdmin = await _userManager.IsInRoleAsync(
-                usuarioLogueado,
-                "SuperAdmin");
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuarioLogueado, "SuperAdmin");
 
             IQueryable<Usuario> usuarios = _context.Users
                 .AsNoTracking()
@@ -96,6 +94,16 @@ namespace saas.Controllers
                 }
             }
 
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                busqueda = busqueda.Trim();
+
+                usuarios = usuarios.Where(u =>
+                    u.Nombre.Contains(busqueda) ||
+                    u.Apellido.Contains(busqueda) ||
+                    (u.Email != null && u.Email.Contains(busqueda)));
+            }
+
             var listaUsuarios = await usuarios
                 .OrderBy(u => u.Nombre)
                 .ThenBy(u => u.Apellido)
@@ -125,6 +133,7 @@ namespace saas.Controllers
             ViewBag.Estado = estado;
             ViewBag.Rol = rol;
             ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
+            ViewBag.Busqueda = busqueda;
             ViewBag.Roles = await ObtenerRolesUsuarios(listaUsuarios);
 
             return View(listaUsuarios);
