@@ -1,9 +1,10 @@
 ﻿@model IEnumerable<Empresa>
 
 @{
-    ViewData["Title"] = "Index";
-    string estadoSeleccionado =
-        ViewBag.Estado?.ToString() ?? "activos";
+    ViewData["Title"] = "Empresas";
+
+    string estadoSeleccionado = ViewBag.Estado?.ToString() ?? "activos";
+    string? busqueda = ViewBag.Busqueda?.ToString();
 }
 
 <main class="flex-grow-1 py-5 container-fluid px-4">
@@ -51,40 +52,37 @@
                         </option>
 
                     </select>
-                </div>                               
-                <div class="col-md-8 d-flex gap-2">
-                    <div class="search-input-wrapper flex-grow-1" style="max-width: 400px;">
+                </div>
+                <div class="col-md-5">
+                    <label for="busqueda" class="form-label fw-semibold">Buscar empresa</label>
+
+                    <div class="search-input-wrapper">
                         <span class="material-symbols-outlined">search</span>
-                        <input class="form-control form-control-md" id="tableSearch" placeholder="Buscar por ID o Nombre..." type="text" />
+
+                        <input id="busqueda"
+                               name="busqueda"
+                               value="@busqueda"
+                               class="form-control form-control-md"
+                               placeholder="Buscar por nombre..."
+                               type="text" />
                     </div>
-                    <button type="submit"
-                            class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
+                </div>
 
-                        <span class="material-symbols-outlined fs-5">
-                            filter_list
-                        </span>
-
-                        <span class="small fw-medium">
-                            Aplicar filtro
-                        </span>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
+                        <span class="material-symbols-outlined fs-5">search</span>
+                        <span class="small fw-medium">Buscar</span>
                     </button>
-                    @if (estadoSeleccionado != "activos")
-                    {
-                        <div class="col-md-auto">
-                            <a asp-action="Index"
-                               class="btn btn-outline-secondary">
-                                X
-                            </a>
-                        </div>
-                    }
-                </div>                
-@*                 <div class="col-md-4 d-flex justify-content-md-end">
-                    <button class="btn btn-outline-secondary d-flex align-items-center gap-1 px-3">
-                        <span class="material-symbols-outlined fs-5">file_download</span>
-                        <span class="small fw-medium">Exportar</span>
-                    </button>
-                </div> *@
+                </div>
 
+                @if (estadoSeleccionado != "activos" || !string.IsNullOrWhiteSpace(busqueda))
+                {
+                    <div class="col-md-auto">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            Limpiar
+                        </a>
+                    </div>
+                }
             </form>
         </div>
     </div>
@@ -109,7 +107,7 @@
                             <td colspan="5"
                                 class="text-center text-secondary py-5">
 
-                                No se encontraron empresas para el filtro seleccionado.
+                                No se encontraron empresas para los criterios seleccionados.
 
                             </td>
                         </tr>
@@ -150,7 +148,7 @@
                                 </td>
                             </tr>
                         }
-                    }                    
+                    }
                 </tbody>
             </table>
         </div>

@@ -17,7 +17,7 @@ namespace saas.Controllers
         }
 
         // GET: Empresa
-        public async Task<IActionResult> Index(string estado = "activos")
+        public async Task<IActionResult> Index(string estado = "activos", string? busqueda = null)
         {
             IQueryable<Empresa> empresas = _context.Empresas
                 .AsNoTracking();
@@ -37,7 +37,15 @@ namespace saas.Controllers
                     break;
             }
 
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                busqueda = busqueda.Trim();
+
+                empresas = empresas.Where(e => e.Nombre.Contains(busqueda));
+            }
+
             ViewBag.Estado = estado;
+            ViewBag.Busqueda = busqueda;
 
             var listaEmpresas = await empresas
                 .OrderBy(e => e.Nombre)

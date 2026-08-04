@@ -21,7 +21,7 @@ namespace saas.Controllers
         }
 
         // GET: Categoria
-        public async Task<IActionResult> Index(string estado = "activos")
+        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -40,8 +40,15 @@ namespace saas.Controllers
 
             if (!esSuperAdmin)
             {
+                empresaId = usuarioLogueado.EmpresaId;
+
                 categorias = categorias.Where(c => c.EmpresaId == usuarioLogueado.EmpresaId);
             }
+            else if (empresaId.HasValue)
+            {
+                categorias = categorias.Where(c => c.EmpresaId == empresaId.Value);
+            }
+
 
             switch (estado.ToLower())
             {
@@ -58,7 +65,25 @@ namespace saas.Controllers
                     break;
             }
 
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                busqueda = busqueda.Trim();
+
+                categorias = categorias.Where(c => c.Nombre.Contains(busqueda));
+            }
+
+            if (esSuperAdmin)
+            {
+                ViewBag.Empresas = await _context.Empresas
+                    .AsNoTracking()
+                    .Where(e => e.Estado)
+                    .OrderBy(e => e.Nombre)
+                    .ToListAsync();
+            }
+
             ViewBag.Estado = estado;
+            ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
+            ViewBag.Busqueda = busqueda;
 
             var listaCategorias = await categorias
                 .OrderBy(c => c.Nombre)

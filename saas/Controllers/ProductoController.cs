@@ -21,29 +21,83 @@ namespace saas.Controllers
         }
 
         // GET: Producto
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string estado = "activos", int? categoriaId = null, int? empresaId = null)
         {
-            var usuario = await _userManager.GetUserAsync(User);
+            var usuarioLogueado = await _userManager.GetUserAsync(User);
 
-            if (usuario == null)
+            if (usuarioLogueado == null)
             {
                 return Challenge();
             }
 
-            IQueryable<Producto> productos = _context.Productos
-                .Where(p => p.Estado)
-                .Include(p => p.Empresa);
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuarioLogueado, "SuperAdmin");
 
-            if (!await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            IQueryable<Producto> productos = _context.Productos
+                .AsNoTracking()
+                .Include(p => p.Empresa)
+                .Include(p => p.Categoria);
+
+            if (!esSuperAdmin)
             {
-                productos = productos.Where(p =>
-                p.EmpresaId == usuario.EmpresaId);
+                empresaId = usuarioLogueado.EmpresaId;
+                productos = productos.Where(p => p.EmpresaId == usuarioLogueado.EmpresaId);
+            }
+            else if (empresaId.HasValue)
+            {
+                productos = productos.Where(p => p.EmpresaId == empresaId.Value);
             }
 
-            return View(await productos
-                .Include(c => c.Categoria)
+            switch (estado.ToLower())
+            {
+                case "inactivos":
+                    productos = productos.Where(p => !p.Estado);
+                    break;
+
+                case "todos":
+                    break;
+
+                default:
+                    productos = productos.Where(p => p.Estado);
+                    estado = "activos";
+                    break;
+            }
+
+            if (categoriaId.HasValue)
+            {
+                productos = productos.Where(p => p.CategoriaId == categoriaId.Value);
+            }
+
+            if (esSuperAdmin)
+            {
+                ViewBag.Empresas = await _context.Empresas
+                    .AsNoTracking()
+                    .Where(e => e.Estado)
+                    .OrderBy(e => e.Nombre)
+                    .ToListAsync();
+            }
+
+            IQueryable<Categoria> categorias = _context.Categorias
+                .AsNoTracking()
+                .Where(c => c.Estado);
+
+            if (empresaId.HasValue)
+            {
+                categorias = categorias.Where(c => c.EmpresaId == empresaId.Value);
+            }
+
+            ViewBag.Categorias = await categorias
                 .OrderBy(c => c.Nombre)
-                .ToListAsync());
+                .ToListAsync();
+
+            ViewBag.Estado = estado;
+            ViewBag.CategoriaId = categoriaId;
+            ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
+
+            var listaProductos = await productos
+                .OrderBy(p => p.Nombre)
+                .ToListAsync();
+
+            return View(listaProductos);
         }
 
         // GET: Producto/Details/5

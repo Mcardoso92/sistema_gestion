@@ -1,9 +1,14 @@
 ﻿@model IEnumerable<Categoria>
 
 @{
-    ViewData["Title"] = "Index";
-    string estadoSeleccionado =
-        ViewBag.Estado?.ToString() ?? "activos";
+    ViewData["Title"] = "Categorías";
+
+    string estadoSeleccionado = ViewBag.Estado?.ToString() ?? "activos";
+    int? empresaSeleccionada = ViewBag.EmpresaId as int?;
+    string? busqueda = ViewBag.Busqueda?.ToString();
+
+    IEnumerable<Empresa> empresas = ViewBag.Empresas as IEnumerable<Empresa>
+        ?? Enumerable.Empty<Empresa>();
 }
 
 
@@ -53,41 +58,59 @@
 
                     </select>
                 </div>
-                <div class="col-md-8 d-flex gap-2">
-                    <div class="search-input-wrapper flex-grow-1" style="max-width: 400px;">
-                        <span class="material-symbols-outlined">search</span>
-                        <input class="form-control form-control-md" id="tableSearch" placeholder="Filtrar por nombre..." type="text" />
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <div class="col-md-3">
+                        <label for="empresaId" class="form-label fw-semibold">
+                            Empresa
+                        </label>
+
+                        <select id="empresaId"
+                                name="empresaId"
+                                class="form-select">
+
+                            <option value="">
+                                Todas las empresas
+                            </option>
+
+                            @foreach (var empresa in empresas)
+                            {
+                                <option value="@empresa.Id"
+                                        selected="@(empresaSeleccionada == empresa.Id)">
+                                    @empresa.Nombre
+                                </option>
+                            }
+
+                        </select>
                     </div>
-                    <button type="submit"
-                            class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
+                }
+                <div class="col-md-4">
+                    <label for="busqueda" class="form-label fw-semibold">Buscar categoría</label>
 
-                        <span class="material-symbols-outlined fs-5">
-                            filter_list
-                        </span>
+                    <div class="search-input-wrapper">
+                        <span class="material-symbols-outlined">search</span>
 
-                        <span class="small fw-medium">
-                            Aplicar filtro
-                        </span>
-                    </button>
-                    @if (estadoSeleccionado != "activos")
-                    {
-                        <div class="col-md-auto">
-                            <a asp-action="Index"
-                               class="btn btn-outline-secondary">
-                                X
-                            </a>
-                        </div>
-                    }
+                        <input id="busqueda"
+                               name="busqueda"
+                               value="@busqueda"
+                               class="form-control form-control-md"
+                               placeholder="Buscar por nombre..."
+                               type="text" />
+                    </div>
                 </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
+                        <span class="material-symbols-outlined fs-5">search</span>
+                        <span class="small fw-medium">Buscar</span>
+                    </button>
+                </div>
+                @if (estadoSeleccionado != "activos" || empresaSeleccionada.HasValue || !string.IsNullOrWhiteSpace(busqueda))
+                {
+                    <div class="col-md-auto">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
+                    </div>
+                }
             </form>
-            @*                     <div class="col-md-4 d-flex justify-content-md-end">
-                        <button class="btn btn-outline-secondary d-flex align-items-center gap-1 px-3">
-                            <span class="material-symbols-outlined fs-5">file_download</span>
-                            <span class="small fw-medium">Exportar</span>
-                        </button>
-                    </div> *@
-
-
         </div>
     </div>
     <!-- Data Table Card -->
@@ -112,7 +135,7 @@
                         <tr>
                             <td colspan="@(User.IsInRole("SuperAdmin") ? 5 : 4)"
                                 class="text-center text-secondary py-5">
-                                No se encontraron categorías para el filtro seleccionado.
+                                No se encontraron categorías para los criterios seleccionados.
                             </td>
                         </tr>
                     }
