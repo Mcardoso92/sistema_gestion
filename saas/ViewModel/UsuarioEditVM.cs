@@ -27,6 +27,7 @@ namespace saas.ViewModel
         public string Rol { get; set; } = null!;
         [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una empresa.")]
         public int EmpresaId { get; set; }
+        public bool EsUsuarioLogueado { get; set; }
 
         public IEnumerable<SelectListItem> Roles { get; set; } = Enumerable.Empty<SelectListItem>();
 
