@@ -8,11 +8,11 @@
                 <ol class="breadcrumb small">
                     <li class="breadcrumb-item"><a class="text-decoration-none text-muted" href="#">Dashboard</a></li>
                     <li class="breadcrumb-item"><a class="text-decoration-none text-muted" href="#">Usuarios</a></li>
-                    <li aria-current="page" class="breadcrumb-item active fw-semibold">Alta de Nuevo Usuario</li>
+                    <li aria-current="page" class="breadcrumb-item active fw-semibold">Modificar Información del Usuario</li>
                 </ol>
             </nav>
-            <h1 class="display-6 fw-bold text-dark mb-1">Alta de Nuevo Usuario</h1>
-            <p class="text-muted mb-0">Complete el siguiente formulario para integrar un nuevo miembro al sistema VELTIKA.</p>
+            <h1 class="display-6 fw-bold text-dark mb-1">Modificar Información del Usuario</h1>
+            <p class="text-muted mb-0">Complete el siguiente formulario para modificar la información del usuario.</p>
         </div>
     </div>
     <!-- Two-Column Layout -->
@@ -24,11 +24,11 @@
                 @if (User.IsInRole("SuperAdmin"))
                 {
                     <div class="alert alert-warning mb-4">
-                        Está creando un usuario como SuperAdministrador.
+                        Está modificando un usuario como SuperAdministrador.
                         Recuerde asignarlo a la empresa correcta y seleccionar el rol adecuado.
                     </div>
                 }
-                <form asp-action="Edit" method="post" id="newUserForm" novalidate>
+                <form asp-action="Edit" method="post" id="newUserForm">
                     <input asp-for="Id" type="hidden" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="row g-4">
@@ -48,9 +48,9 @@
                                 <span class="input-group-text bg-light border-end-0">
                                     <span class="material-symbols-outlined text-muted">mail</span>
                                 </span>
-                                <input asp-for="Email" class="form-control border-start-0" placeholder="" type="email">
-                                <span asp-validation-for="Email" class="text-danger"></span>
+                                <input asp-for="Email" class="form-control border-start-0" placeholder="" type="email">                                
                             </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Rol" class="form-label">Rol de Usuario</label>
@@ -71,15 +71,30 @@
                         }
                         <div class="col-12 mt-4">
                             <div class="form-check form-switch d-flex align-items-center gap-3 ps-0">
-                                <label asp-for="Estado" class="form-label mb-0" for="userStatus">Estado del Usuario</label>
-                                <input asp-for="Estado" checked="" class="form-check-input ms-0 mt-0" id="userStatus" role="switch" style="width: 2.8em; height: 1.4em; cursor: pointer;" type="checkbox">
-                                <span class="badge rounded-pill bg-success px-3 py-2 text-uppercase fw-bold" id="statusBadge" style="font-size: 0.65rem;">ACTIVO</span>
+                                <label asp-for="Estado" class="form-label mb-0">Estado del Usuario</label>
+                                <input asp-for="Estado" class="form-check-input ms-0 mt-0" id="userStatus" role="switch" style="width: 2.8em; height: 1.4em; cursor: pointer;" type="checkbox">                                
+                                @if (Model.Estado)
+                                {
+                                    <span class="badge rounded-pill bg-success px-3 py-2 text-uppercase fw-bold"
+                                        id="statusBadge"
+                                        style="font-size: 0.65rem;">
+                                        ACTIVO
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-danger px-3 py-2 text-uppercase fw-bold"
+                                        id="statusBadge"
+                                        style="font-size: 0.65rem;">
+                                        INACTIVO
+                                    </span>
+                                }                                
                             </div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-3 pt-4 mt-4 border-top">
                         <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
-                        <button type="submit" class="btn btn-v-primary">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-v-primary">Guardar</button>
                     </div>
                 </form>
             </div>

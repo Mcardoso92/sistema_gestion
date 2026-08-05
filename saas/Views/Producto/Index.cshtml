@@ -23,10 +23,10 @@
             <p class="text-secondary mb-0">Administra tu inventario, precios y niveles de stock en tiempo real.</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
+            <!-- <button class="btn btn-outline-secondary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
                 <span class="material-symbols-outlined fs-5">inventory_2</span>
                 <span class="fw-medium small">Ajuste de Stock</span>
-            </button>
+            </button> -->
             <a asp-action="Create" class="btn btn-primary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
                 <span class="material-symbols-outlined fs-5">add_circle</span>
                 <span class="fw-medium small">Nuevo Producto</span>
@@ -51,10 +51,8 @@
                 {
                     <div class="col-md-2">
                         <label for="empresaId" class="form-label fw-semibold">Empresa</label>
-
                         <select id="empresaId" name="empresaId" class="form-select">
                             <option value="">Todas las empresas</option>
-
                             @foreach (var empresa in empresas)
                             {
                                 <option value="@empresa.Id" selected="@(empresaSeleccionada == empresa.Id)">
@@ -67,10 +65,8 @@
 
                 <div class="col-md-2">
                     <label for="categoriaId" class="form-label fw-semibold">Categoría</label>
-
                     <select id="categoriaId" name="categoriaId" class="form-select">
                         <option value="">Todas las categorías</option>
-
                         @foreach (var categoria in categorias)
                         {
                             <option value="@categoria.Id" selected="@(categoriaSeleccionada == categoria.Id)">
@@ -82,16 +78,9 @@
 
                 <div class="col-md-4">
                     <label for="busqueda" class="form-label fw-semibold">Buscar producto</label>
-
                     <div class="search-input-wrapper">
                         <span class="material-symbols-outlined">search</span>
-
-                        <input id="busqueda"
-                               name="busqueda"
-                               value="@busqueda"
-                               class="form-control form-control-md"
-                               placeholder="Buscar por nombre o código de barras..."
-                               type="text" />
+                        <input id="busqueda" name="busqueda" value="@busqueda" class="form-control form-control-md" placeholder="Buscar por nombre o código de barras..." type="text" />
                     </div>
                 </div>
 
@@ -102,10 +91,7 @@
                     </button>
                 </div>
 
-                @if (estadoSeleccionado != "activos" ||
-                                categoriaSeleccionada.HasValue ||
-                                empresaSeleccionada.HasValue ||
-                                !string.IsNullOrWhiteSpace(busqueda))
+                @if (estadoSeleccionado != "activos" || categoriaSeleccionada.HasValue || empresaSeleccionada.HasValue || !string.IsNullOrWhiteSpace(busqueda))
                 {
                     <div class="col-md-auto">
                         <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
@@ -152,11 +138,14 @@
                                 <td class="px-4 py-3">@producto.Id</td>
                                 <td class="px-4 py-3">
                                     <div class="d-flex align-items-center gap-3">
-                                        <div class="product-img-wrapper">
-                                            <img alt="Producto" src="@producto.UrlImagen" />
-                                        </div>
+                                        @if (!string.IsNullOrWhiteSpace(producto.UrlImagen))
+                                        {
+                                            <div class="product-img-wrapper">
+                                                <img alt="@producto.Nombre" src="@producto.UrlImagen" />
+                                            </div>
+                                        }
                                         <div>
-                                            <a class="product-name d-block" href="#">@producto.Nombre</a>
+                                            <a asp-action="Details" asp-route-id="@producto.Id" class="product-name d-block text-decoration-none">@producto.Nombre</a>
                                         </div>
                                     </div>
                                 </td>
@@ -165,23 +154,21 @@
                                 {
                                     <td class="px-4 py-3">@producto.Empresa.Nombre</td>
                                 }
-                                <td class="px-4 py-3 text-end fw-semibold">@producto.PrecioVenta</td>
+                                <td class="px-4 py-3 text-end fw-semibold">@producto.PrecioVenta.ToString("C")</td>
                                 <td class="px-4 py-3 text-center">
                                     <span class="badge bg-light text-dark border p-2 rounded-1">@producto.Stock</span>
                                 </td>
                                 <td class="px-4 py-3 text-center small text-secondary">@producto.PuntoReposicion</td>
                                 <td class="px-4 py-3 text-center">
-                                    @if (producto.Stock < producto.PuntoReposicion)
+                                    @if (producto.Stock <= producto.PuntoReposicion)
                                     {
                                         <span class="badge-status status-inactivo">
-
                                             <span class="dot"></span>Bajo Stock
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="badge-status status-activo">
-
                                             <span class="dot"></span>Normal
                                         </span>
                                     }
@@ -220,9 +207,7 @@
         <div class="card-footer bg-light border-top-0 px-4 py-3">
             <span class="small text-secondary">
                 @Model.Count()
-                @(Model.Count() == 1
-                                ? "producto encontrado"
-                                : "productos encontrados")
+                @(Model.Count() == 1 ? "producto encontrado" : "productos encontrados")
             </span>
         </div>
     </div>

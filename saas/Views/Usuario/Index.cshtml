@@ -34,13 +34,11 @@
         </div>
     </div>
     <!-- Filter Bar -->
-    <!-- Filter Bar -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
             <form asp-action="Index" method="get" class="row g-3 align-items-end">
                 <div class="col-md-2">
                     <label for="estado" class="form-label small fw-bold text-muted text-uppercase">Estado</label>
-
                     <select id="estado" name="estado" class="form-select">
                         <option value="activos" selected="@(estadoSeleccionado == "activos")">Activos</option>
                         <option value="inactivos" selected="@(estadoSeleccionado == "inactivos")">Inactivos</option>
@@ -50,15 +48,11 @@
 
                 <div class="col-md-2">
                     <label for="rol" class="form-label small fw-bold text-muted text-uppercase">Rol</label>
-
                     <select id="rol" name="rol" class="form-select">
                         <option value="">Todos los roles</option>
-
                         @foreach (var rol in rolesDisponibles)
                         {
-                            <option value="@rol.Name" selected="@(rolSeleccionado == rol.Name)">
-                                @rol.Name
-                            </option>
+                            <option value="@rol.Name" selected="@(rolSeleccionado == rol.Name)"> @rol.Name </option>
                         }
                     </select>
                 </div>
@@ -67,15 +61,11 @@
                 {
                     <div class="col-md-2">
                         <label for="empresaId" class="form-label small fw-bold text-muted text-uppercase">Empresa</label>
-
                         <select id="empresaId" name="empresaId" class="form-select">
                             <option value="">Todas las empresas</option>
-
                             @foreach (var empresa in empresas)
                             {
-                                <option value="@empresa.Id" selected="@(empresaSeleccionada == empresa.Id)">
-                                    @empresa.Nombre
-                                </option>
+                                <option value="@empresa.Id" selected="@(empresaSeleccionada == empresa.Id)"> @empresa.Nombre </option>
                             }
                         </select>
                     </div>
@@ -83,16 +73,9 @@
 
                 <div class="col-md-4">
                     <label for="busqueda" class="form-label small fw-bold text-muted text-uppercase">Buscar usuario</label>
-
                     <div class="search-input-wrapper">
                         <span class="material-symbols-outlined">search</span>
-
-                        <input id="busqueda"
-                               name="busqueda"
-                               value="@busqueda"
-                               class="form-control"
-                               placeholder="Buscar por nombre, apellido o email..."
-                               type="text" />
+                        <input id="busqueda" name="busqueda" value="@busqueda" class="form-control" placeholder="Buscar por nombre, apellido o email..." type="text" />
                     </div>
                 </div>
 
@@ -103,10 +86,7 @@
                     </button>
                 </div>
 
-                @if (estadoSeleccionado != "activos" ||
-                                !string.IsNullOrWhiteSpace(rolSeleccionado) ||
-                                empresaSeleccionada.HasValue ||
-                                !string.IsNullOrWhiteSpace(busqueda))
+                @if (estadoSeleccionado != "activos" || !string.IsNullOrWhiteSpace(rolSeleccionado) || empresaSeleccionada.HasValue || !string.IsNullOrWhiteSpace(busqueda))
                 {
                     <div class="col-md-auto">
                         <a asp-action="Index" class="btn btn-outline-secondary">Limpiar</a>
@@ -115,6 +95,7 @@
             </form>
         </div>
     </div>
+
     <!-- Table Section -->
     <div class="table-container border">
         <div class="table-responsive">
@@ -154,16 +135,14 @@
                                 @if (User.IsInRole("SuperAdmin"))
                                 {
                                     <td>
-                                        @usuario.Empresa.Nombre
+                                        @(usuario.Empresa?.Nombre ?? "Sin empresa")
                                     </td>
                                 }
-                            <td>
-                                @(rolesUsuarios.TryGetValue(usuario.Id, out var rolUsuario)
-                                                            ? rolUsuario
-                                                            : "")
-                        </td>
-                        <td>
-                            @if (usuario.Estado)
+                                <td>
+                                    @(rolesUsuarios.TryGetValue(usuario.Id, out var rolUsuario) ? rolUsuario : "")
+                                </td>
+                                <td>
+                                    @if (usuario.Estado)
                                     {
                                         <span class="badge badge-active rounded-pill px-3 py-2 text-uppercase fw-bold" style="font-size: 0.65rem;">
                                             <span class="d-inline-block rounded-circle bg-success me-1" style="width: 6px; height: 6px;"></span> Activo
@@ -182,11 +161,7 @@
                                     <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-warning">Editar</a>
                                     @if (usuario.Estado)
                                     {
-                                        <a asp-action="Delete"
-                                           asp-route-id="@usuario.Id"
-                                           class="btn btn-sm btn-outline-danger">
-                                            Desactivar
-                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-danger"> Desactivar </a>
                                     }
                                 </td>
                             </tr>
@@ -199,12 +174,8 @@
         <!-- Pagination -->
         <div class="card-footer bg-white border-top p-4">
             <span class="small text-muted">
-
                 @Model.Count()
-                @(Model.Count() == 1
-                                ? "usuario encontrado"
-                                : "usuarios encontrados")
-
+                @(Model.Count() == 1 ? "usuario encontrado" : "usuarios encontrados")
             </span>
         </div>
     </div>

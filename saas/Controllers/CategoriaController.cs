@@ -411,9 +411,7 @@ namespace saas.Controllers
 
             if (tieneProductos)
             {
-                TempData["Error"] =
-                    "No es posible desactivar la categoría porque tiene productos activos asociados.";
-
+                TempData["Error"] = "No es posible desactivar la categoría porque tiene productos activos asociados.";
                 return RedirectToAction(nameof(Delete), new { id });
             }
 
@@ -427,7 +425,6 @@ namespace saas.Controllers
             }
             catch
             {
-
                 TempData["Error"] = "No es posible desactivar la categoría porque tiene información relacionada.";
             }
 

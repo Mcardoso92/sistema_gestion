@@ -8,11 +8,11 @@
                 <ol class="breadcrumb small">
                     <li class="breadcrumb-item"><a class="text-decoration-none text-muted" href="#">Dashboard</a></li>
                     <li class="breadcrumb-item"><a class="text-decoration-none text-muted" href="#">Usuarios</a></li>
-                    <li aria-current="page" class="breadcrumb-item active fw-semibold">Eliminar Usuario</li>
+                    <li aria-current="page" class="breadcrumb-item active fw-semibold">Desactivar Usuario</li>
                 </ol>
             </nav>
-            <h1 class="display-6 fw-bold text-dark mb-1">Detalle del Usuario</h1>
-            <p class="text-muted mb-0">Visualice la información detallada y el historial del miembro seleccionado.</p>
+            <h1 class="display-6 fw-bold text-dark mb-1">Desactivar Usuario</h1>
+            <p class="text-muted mb-0">Revise la información antes de desactivar el usuario.</p>
         </div>
     </div>
     <!-- Two-Column Layout -->
@@ -26,7 +26,7 @@
                         <a asp-action="Index" class="btn btn-v-outline">Volver</a>
                         <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
                             <input asp-for="Id" type="hidden" />
-                            <button type="submit" class="btn btn-v-primary">Eliminar </button>
+                            <button type="submit" class="btn btn-danger">Desactivar</button>
                         </form>
                     </div>
                 </div>
@@ -56,15 +56,6 @@
                                 <span class="badge badge-inactive">Inactivo</span>
                             }
                         </div>
-                    </div>
-                </div>
-                <div class="mt-4 pt-4 border-top">
-                    <h6 class="fw-bold mb-3 text-uppercase small" style="letter-spacing: 0.05em; color: #45464d;">Permisos Asignados</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">Gestión de Inventarios</span>
-                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">Reportes Avanzados</span>
-                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">Auditoría de Ventas</span>
-                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-medium">Configuración de Sucursales</span>
                     </div>
                 </div>
                 <div class="card mt-4 border-0 bg-info bg-opacity-10 shadow-none">

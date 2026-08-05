@@ -22,49 +22,20 @@
     <!-- Filter Bar -->
     <div class="card mb-4">
         <div class="card-body p-3">
-            <form asp-action="Index"
-                  method="get"
-                  class="row g-3 align-items-end">
-
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label for="estado"
-                           class="form-label fw-semibold">
-                        Estado
-                    </label>
-
-                    <select id="estado"
-                            name="estado"
-                            class="form-select">
-
-                        <option value="activos"
-                                selected="@(estadoSeleccionado == "activos")">
-                            Activos
-                        </option>
-
-                        <option value="inactivos"
-                                selected="@(estadoSeleccionado == "inactivos")">
-                            Inactivos
-                        </option>
-
-                        <option value="todos"
-                                selected="@(estadoSeleccionado == "todos")">
-                            Todos
-                        </option>
-
+                    <label for="estado" class="form-label fw-semibold">Estado</label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="activos" selected="@(estadoSeleccionado == "activos")"> Activos </option>
+                        <option value="inactivos" selected="@(estadoSeleccionado == "inactivos")"> Inactivos </option>
+                        <option value="todos" selected="@(estadoSeleccionado == "todos")"> Todos </option>
                     </select>
                 </div>
                 <div class="col-md-5">
                     <label for="busqueda" class="form-label fw-semibold">Buscar empresa</label>
-
                     <div class="search-input-wrapper">
                         <span class="material-symbols-outlined">search</span>
-
-                        <input id="busqueda"
-                               name="busqueda"
-                               value="@busqueda"
-                               class="form-control form-control-md"
-                               placeholder="Buscar por nombre..."
-                               type="text" />
+                        <input id="busqueda" name="busqueda" value="@busqueda" class="form-control form-control-md" placeholder="Buscar por nombre..." type="text" />
                     </div>
                 </div>
 
@@ -78,9 +49,7 @@
                 @if (estadoSeleccionado != "activos" || !string.IsNullOrWhiteSpace(busqueda))
                 {
                     <div class="col-md-auto">
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            Limpiar
-                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary"> X </a>
                     </div>
                 }
             </form>
@@ -104,11 +73,8 @@
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="5"
-                                class="text-center text-secondary py-5">
-
+                            <td colspan="5" class="text-center text-secondary py-5">
                                 No se encontraron empresas para los criterios seleccionados.
-
                             </td>
                         </tr>
                     }
@@ -123,14 +89,12 @@
                                     @if (empresa.Estado)
                                     {
                                         <span class="badge-status status-activo">
-
                                             <span class="dot"></span>Activo
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="badge-status status-inactivo">
-
                                             <span class="dot"></span>Inactivo
                                         </span>
                                     }
