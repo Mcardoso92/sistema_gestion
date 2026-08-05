@@ -1,7 +1,7 @@
 ﻿@model saas.Models.Producto
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del Producto";
 }
 
 <main class="container-fluid px-4">
@@ -13,16 +13,14 @@
                     Información del Producto
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Create" class="row g-4" id="productForm">
+                    <div class="row g-4">
                         <div class="col-md-8">
                             <label asp-for="Nombre" class="form-label">Nombre del Producto</label>
                             <input asp-for="Nombre" class="form-control" type="text" readonly />
-                            <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
                         <div class="col-md-4">
                             <label asp-for="CodigoBarra" class="form-label">Codigo de Barras</label>
                             <input asp-for="CodigoBarra" class="form-control" type="text" readonly />
-                            <span asp-validation-for="CodigoBarra" class="text-danger"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="CategoriaId" class="form-label">Categoría</label>
@@ -50,32 +48,32 @@
                             <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
                             <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" readonly />
                         </div>
-                        <div class="col-md-6">
-                            <label asp-for="EmpresaId" class="form-label">Empresa</label>
-                            <input class="form-control" value="@Model.Empresa?.Nombre" readonly />
-                        </div>
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                <input class="form-control" value="@Model.Empresa?.Nombre" readonly />
+                            </div>
+                        }
                         <div class="col-md-12">
                             <label asp-for="UrlImagen" class="form-label">Url Imagen</label>
                             <input asp-for="UrlImagen" class="form-control" type="text" readonly />
-                            <span asp-validation-for="UrlImagen" class="text-danger"></span>
                         </div>
                         <div class="col-12">
                             <label asp-for="Descripcion" class="form-label">Descripción</label>
                             <textarea asp-for="Descripcion" class="form-control" id="description" placeholder="Escriba las especificaciones técnicas o detalles del producto..." rows="4" readonly></textarea>
-                            <span asp-validation-for="Descripcion" class="text-danger" ></span>
                         </div>
                         <div class="col-12">
                             <div class="form-check form-switch mt-2">
                                 <input asp-for="Estado" class="form-check-input" role="switch" disabled />
-                                <label asp-for="Estado" class="form-check-label fw-semibold" for="statusSwitch">Estado del Producto (Activo/Inactivo)</label>
+                                <label asp-for="Estado" class="form-check-label fw-semibold">Estado del Producto (Activo/Inactivo)</label>
                             </div>
-                            <span asp-validation-for="Estado" class="text-danger"></span>
                         </div>
                         <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
-                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-outline">Editar</a>
-                            <a asp-action="Index" class="btn btn-v-primary">Volver</a>
+                            <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary"> Editar </a>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

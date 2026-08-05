@@ -139,35 +139,7 @@ namespace saas.Controllers
             return View(listaUsuarios);
         }
 
-        private async Task<Dictionary<string, string>> ObtenerRolesUsuarios(IEnumerable<Usuario> usuarios)
-        {
-            var idsUsuarios = usuarios
-                .Select(u => u.Id)
-                .ToList();
 
-            if (!idsUsuarios.Any())
-            {
-                return new Dictionary<string, string>();
-            }
-
-            var rolesUsuarios = await (
-                from usuarioRol in _context.UserRoles
-                join rol in _context.Roles on usuarioRol.RoleId equals rol.Id
-                where idsUsuarios.Contains(usuarioRol.UserId)
-                select new
-                {
-                    usuarioRol.UserId,
-                    Rol = rol.Name
-                })
-                .AsNoTracking()
-                .ToListAsync();
-
-            return rolesUsuarios
-                .GroupBy(r => r.UserId)
-                .ToDictionary(
-                    grupo => grupo.Key,
-                    grupo => grupo.First().Rol ?? "");
-        }
         // GET: Producto/Details/5
         public async Task<IActionResult> Details(string? id)
         {
@@ -642,8 +614,7 @@ namespace saas.Controllers
                     }
                 }
 
-                TempData["Success"] =
-                    "Usuario modificado correctamente.";
+                TempData["Success"] = "Usuario modificado correctamente.";
 
                 return RedirectToAction(nameof(Index));
             }
@@ -911,6 +882,36 @@ namespace saas.Controllers
                     })
                     .ToListAsync();
             }
+        }
+
+        private async Task<Dictionary<string, string>> ObtenerRolesUsuarios(IEnumerable<Usuario> usuarios)
+        {
+            var idsUsuarios = usuarios
+                .Select(u => u.Id)
+                .ToList();
+
+            if (!idsUsuarios.Any())
+            {
+                return new Dictionary<string, string>();
+            }
+
+            var rolesUsuarios = await (
+                from usuarioRol in _context.UserRoles
+                join rol in _context.Roles on usuarioRol.RoleId equals rol.Id
+                where idsUsuarios.Contains(usuarioRol.UserId)
+                select new
+                {
+                    usuarioRol.UserId,
+                    Rol = rol.Name
+                })
+                .AsNoTracking()
+                .ToListAsync();
+
+            return rolesUsuarios
+                .GroupBy(r => r.UserId)
+                .ToDictionary(
+                    grupo => grupo.Key,
+                    grupo => grupo.First().Rol ?? "");
         }
     }
 }

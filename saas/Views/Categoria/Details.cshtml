@@ -1,13 +1,20 @@
 ﻿@model saas.Models.Categoria
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles de la Categoría";
 }
 
-<h1>Details</h1>
+<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <h2 class="h5 fw-bold mb-0">Información de la Categoría</h2>
+
+    <div class="d-flex gap-2">
+        <a asp-action="Index" class="btn btn-v-outline"> Volver </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary"> Editar </a>
+    </div>
+</div>
 
 <div>
-    <h4>Categoria</h4>
+    <h4>Categoría</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
@@ -28,6 +35,3 @@
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>

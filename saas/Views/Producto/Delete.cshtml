@@ -1,10 +1,10 @@
 ﻿@model saas.Models.Producto
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Desactivar Producto";
 }
 
-<h1>Delete</h1>
+<h1>Desactivar Producto</h1>
 
 <h3>¿Está seguro que desea desactivar este producto?</h3>
 <div>
@@ -27,7 +27,7 @@
             @Html.DisplayNameFor(model => model.Categoria)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Categoria.Id)
+            @Html.DisplayFor(model => model.Categoria.Nombre)
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.PrecioCosto)
@@ -53,17 +53,22 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.PuntoReposicion)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
+        <dt class="col-sm-2">
+            Estado
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UrlImagen)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UrlImagen)
+        <dd class="col-sm-10">
+            @if (Model.Estado)
+            {
+                <span class="badge-status status-activo">
+                    <span class="dot"></span>Activo
+                </span>
+            }
+            else
+            {
+                <span class="badge-status status-inactivo">
+                    <span class="dot"></span>Inactivo
+                </span>
+            }
         </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.FechaAlta)
@@ -71,17 +76,22 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.FechaAlta)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Empresa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Empresa.Nombre)
-        </dd>
+        @if (User.IsInRole("SuperAdmin"))
+        {
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Empresa)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Empresa.Nombre)
+            </dd>
+        }
     </dl>
     
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Desactivar" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
-    </form>
+    <div class="d-flex justify-content-end gap-2 mt-4">
+        <a asp-action="Index" class="btn btn-v-outline"> Volver </a>
+        <form asp-action="Delete" method="post" class="d-inline">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-v-primary"> Desactivar </button>
+        </form>
+    </div>
 </div>
