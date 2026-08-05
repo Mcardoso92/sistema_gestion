@@ -1,39 +1,175 @@
-﻿@model saas.Models.Empresa
+﻿@model Empresa
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Desactivar Empresa";
 }
 
-<h1>Desactivar Empresa</h1>
+<main class="container-fluid px-4">
+    <div class="row">
+        <!-- Form Column -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    Desactivar Empresa
+                </div>
 
-<h3>¿Está seguro que quiere desactivar esta empresa?</h3>
-<div>
-    <h4>Empresa</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaAlta)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaAlta)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Desactivar" class="btn btn-danger" /> |
-        <a asp-action="Index">Volver a la lista</a>
-    </form>
-</div>
+                <div class="card-body p-4">
+
+                    <div class="alert alert-warning d-flex align-items-center mb-4">
+                        <span class="material-symbols-outlined me-2">
+                            warning
+                        </span>
+
+                        <span>
+                            La empresa será desactivada y dejará de estar disponible para operar en el sistema.
+                        </span>
+                    </div>
+
+                    <form asp-action="Delete"
+                          method="post">
+
+                        <input asp-for="Id" type="hidden" />
+
+                        <div class="row g-4">
+
+                            <div class="col-md-8">
+                                <label class="form-label">
+                                    Nombre de la Empresa
+                                </label>
+
+                                <input asp-for="Nombre"
+                                       class="form-control"
+                                       readonly />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">
+                                    Fecha de Alta
+                                </label>
+
+                                <input value="@Model.FechaAlta.ToString("dd/MM/yyyy")"
+                                       class="form-control"
+                                       readonly />
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+
+                                    <input asp-for="Estado"
+                                           class="form-check-input"
+                                           disabled />
+
+                                    <label class="form-check-label fw-semibold">
+                                        Estado de la Empresa
+                                    </label>
+
+                                </div>
+                            </div>
+
+                            <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
+
+                                <a asp-action="Index"
+                                   class="btn btn-v-outline">
+                                    Cancelar
+                                </a>
+
+                                <button type="submit"
+                                        class="btn btn-danger">
+                                    Desactivar
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Column -->
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2 text-primary">
+                        info
+                    </span>
+
+                    Guía de Ayuda
+                </div>
+
+                <div class="card-body p-4">
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size:14px; color: var(--v-primary-container);">
+                            Desactivación
+                        </h6>
+
+                        <p class="text-muted"
+                           style="font-size:13px;">
+                            La empresa permanecerá registrada en el sistema, pero dejará de estar disponible para operar.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size:14px; color: var(--v-primary-container);">
+                            Usuarios
+                        </h6>
+
+                        <p class="text-muted"
+                           style="font-size:13px;">
+                            Los usuarios asociados a esta empresa no podrán iniciar sesión mientras permanezca inactiva.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size:14px; color: var(--v-primary-container);">
+                            Información
+                        </h6>
+
+                        <p class="text-muted"
+                           style="font-size:13px;">
+                            La información de la empresa no será eliminada y podrá recuperarse al reactivarla.
+                        </p>
+                    </div>
+
+                    <div class="tip-box">
+
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="material-symbols-outlined text-secondary me-2">
+                                lightbulb
+                            </span>
+
+                            <span class="fw-bold"
+                                  style="font-size:14px;">
+                                Recomendación
+                            </span>
+                        </div>
+
+                        <p class="mb-0 text-muted"
+                           style="font-size:13px;">
+                            Antes de desactivar una empresa, verifique que no existan tareas pendientes para sus usuarios.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
