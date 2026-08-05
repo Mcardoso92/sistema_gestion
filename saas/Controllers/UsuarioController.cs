@@ -470,18 +470,13 @@ namespace saas.Controllers
             }
 
             // Un usuario no puede cambiar su propio rol.
-            if (usuarioDb.Id == usuarioLogueado.Id &&
-                usuario.Rol != rolActual)
+            if (usuarioDb.Id == usuarioLogueado.Id)
             {
-                ModelState.AddModelError(
-                    nameof(usuario.Rol),
-                    "No puede modificar su propio rol.");
-
                 usuario.Rol = rolActual!;
+                usuario.EmpresaId = usuarioDb.EmpresaId;
 
-                await CargarCombos(usuario, esSuperAdmin);
-
-                return View(usuario);
+                ModelState.Remove(nameof(usuario.Rol));
+                ModelState.Remove(nameof(usuario.EmpresaId));
             }
 
             if (!ModelState.IsValid)

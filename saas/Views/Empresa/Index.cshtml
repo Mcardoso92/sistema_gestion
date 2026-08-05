@@ -49,7 +49,10 @@
                 @if (estadoSeleccionado != "activos" || !string.IsNullOrWhiteSpace(busqueda))
                 {
                     <div class="col-md-auto">
-                        <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3"> X </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
+                            <span class="material-symbols-outlined fs-5">close</span>
+                            <span class="small fw-medium">Limpiar</span>
+                        </a>
                     </div>
                 }
             </form>
