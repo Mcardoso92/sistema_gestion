@@ -254,10 +254,10 @@ namespace saas.Controllers
 
             try
             {
-                // Si no es SuperAdmin, la empresa siempre es la del usuario
                 if (!esSuperAdmin)
                 {
                     usuario.EmpresaId = usuarioLogueado.EmpresaId;
+                    ModelState.Remove(nameof(usuario.EmpresaId));
                 }
 
                 if (!ModelState.IsValid)
@@ -402,7 +402,8 @@ namespace saas.Controllers
                 Apellido = usuarioDb.Apellido,
                 Email = usuarioDb.Email!,
                 Estado = usuarioDb.Estado,
-                EmpresaId = usuarioDb.EmpresaId
+                EmpresaId = usuarioDb.EmpresaId,
+                EsUsuarioLogueado = usuarioDb.Id == usuarioLogueado.Id
             };
 
             // Obtengo el rol actual del usuario a editar
@@ -469,10 +470,18 @@ namespace saas.Controllers
             }
 
             // Un usuario no puede cambiar su propio rol.
-            if (usuarioDb.Id == usuarioLogueado.Id)
+            if (usuarioDb.Id == usuarioLogueado.Id &&
+                usuario.Rol != rolActual)
             {
+                ModelState.AddModelError(
+                    nameof(usuario.Rol),
+                    "No puede modificar su propio rol.");
+
                 usuario.Rol = rolActual!;
-                ModelState.Remove(nameof(usuario.Rol));
+
+                await CargarCombos(usuario, esSuperAdmin);
+
+                return View(usuario);
             }
 
             if (!ModelState.IsValid)
