@@ -425,7 +425,7 @@ namespace saas.Controllers
             }
             catch
             {
-                TempData["Error"] = "No es posible desactivar la categoría porque tiene información relacionada.";
+                TempData["Error"] = "Ocurrió un error al desactivar la categoría.";
             }
 
             return RedirectToAction(nameof(Index));
