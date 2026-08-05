@@ -15,6 +15,7 @@ namespace saas.Models
         public ICollection<Producto> Productos { get; set; } = new List<Producto>();
         public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
         public ICollection<Categoria> Categorias { get; set; } = new List<Categoria>();
+        public ICollection<Cliente> Clientes { get; set; } = new List<Cliente>();
 
     }
 }
