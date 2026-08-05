@@ -14,6 +14,7 @@ namespace saas.Data
         public DbSet<Venta> Ventas { get; set; } = null!;
         public DbSet<DetalleVenta> DetallesVenta { get; set; } = null!;
         public DbSet<Categoria> Categorias { get; set; } = null!;
+        public DbSet<Cliente> Clientes { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,6 +37,12 @@ namespace saas.Data
             modelBuilder.Entity<Categoria>()
                 .HasOne(c => c.Empresa)
                 .WithMany(e => e.Categorias)
+                .HasForeignKey(c => c.EmpresaId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Cliente>()
+                .HasOne(c => c.Empresa)
+                .WithMany(e => e.Clientes)
                 .HasForeignKey(c => c.EmpresaId)
                 .OnDelete(DeleteBehavior.NoAction);
 
@@ -67,7 +74,7 @@ namespace saas.Data
                 .HasOne(d => d.Venta)
                 .WithMany(v => v.Detalles)
                 .HasForeignKey(d => d.VentaId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.NoAction);           
         }
 
         private static void ConfigurarIndices(
@@ -84,6 +91,14 @@ namespace saas.Data
                     c.Nombre
                 })
                 .IsUnique();
+            modelBuilder.Entity<Cliente>()
+                .HasIndex(c => new
+                {
+                    c.EmpresaId,
+                    c.Documento
+                })
+                .IsUnique()
+                .HasFilter("[Documento] IS NOT NULL");
 
             modelBuilder.Entity<Producto>()
                 .HasIndex(p => new
