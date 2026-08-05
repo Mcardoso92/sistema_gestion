@@ -87,6 +87,19 @@ namespace saas.Controllers
             {
                 return View(empresa);
             }
+
+            bool existeEmpresa = await _context.Empresas.AnyAsync(e =>
+                e.Nombre.ToLower() == empresa.Nombre.ToLower());
+
+            if (existeEmpresa)
+            {
+                ModelState.AddModelError(
+                    nameof(empresa.Nombre),
+                    "Ya existe una empresa con ese nombre.");
+
+                return View(empresa);
+            }
+
             try
             {
                 empresa.FechaAlta = DateTime.Now;
@@ -129,6 +142,11 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Empresa empresa)
         {
+            if (id != empresa.Id)
+            {
+                return NotFound();
+            }
+
             var empresaDb = await _context.Empresas.FindAsync(id);
             if (empresaDb == null)
             {
@@ -139,6 +157,20 @@ namespace saas.Controllers
             {
                 return View(empresa);
             }
+
+            bool existeEmpresa = await _context.Empresas.AnyAsync(e =>
+                e.Id != empresa.Id &&
+                e.Nombre.ToLower() == empresa.Nombre.ToLower());
+
+            if (existeEmpresa)
+            {
+                ModelState.AddModelError(
+                    nameof(empresa.Nombre),
+                    "Ya existe una empresa con ese nombre.");
+
+                return View(empresa);
+            }
+
             try
             {
                 empresaDb.Nombre = empresa.Nombre;

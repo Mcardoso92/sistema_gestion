@@ -11,10 +11,10 @@ namespace saas.Models
         public bool Estado { get; set; }
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
-        public ICollection<Usuario>? Usuarios { get; set; } = new List<Usuario>();
-        public ICollection<Producto>? Productos { get; set; } = new List<Producto>();
-        public ICollection<Venta>? Ventas { get; set; } = new List<Venta>();
-        public ICollection<Categoria>? Categorias { get; set; } = new List<Categoria>();
+        public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
+        public ICollection<Producto> Productos { get; set; } = new List<Producto>();
+        public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
+        public ICollection<Categoria> Categorias { get; set; } = new List<Categoria>();
 
     }
 }
