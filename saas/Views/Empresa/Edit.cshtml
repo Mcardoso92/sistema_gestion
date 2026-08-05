@@ -1,7 +1,7 @@
 ﻿@model saas.Models.Empresa
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Empresa";
 
 }
 
@@ -11,13 +11,14 @@
         <div class="col-md-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header">
-                    Información del Producto
+                    Información de la Empresa
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Edit" method="post" class="row g-4" id="productForm">
+                    <form asp-action="Edit" method="post" class="row g-4" id="empresaForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <input type="hidden" asp-for="Id" />
                         <div class="col-md-8">
-                            <label asp-for="Nombre" class="form-label">Nombre del Producto</label>
+                            <label asp-for="Nombre" class="form-label">Nombre de la Empresa</label>
                             <input asp-for="Nombre" class="form-control" type="text" />
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>                        
@@ -76,44 +77,6 @@
         </div>
     </div>
 </main>
-
-
-
-
-
-
-
-
-
-<h1>Editar Empresa</h1>
-
-<h4>Empresa</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Estado" /> @Html.DisplayNameFor(model => model.Estado)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Guardar" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
-<div>
-    <a asp-action="Index">Volver a la lista</a>
-</div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

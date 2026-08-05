@@ -13,7 +13,7 @@
                     Nueva Empresa
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Create" method="post" class="row g-4" id="productForm">
+                    <form asp-action="Create" method="post" class="row g-4" id="empresaForm">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="col-md-8">
                             <label asp-for="Nombre" class="form-label">Nombre de la Empresa</label>
@@ -29,31 +29,61 @@
             </div>
         </div>
         <!-- Help Column -->
-        <div class="mb-4">
-            <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">
-                Código de barras
-            </h6>
-            <p class="text-muted" style="font-size: 13px;">
-                Ingrese el código de barras del producto cuando corresponda. Puede utilizarse para localizarlo rápidamente.
-            </p>
-        </div>
+        <!-- Help Guide Column -->
+        <div class="col-lg-4">
+            <div class="form-container border p-4 p-md-5 h-100 d-flex flex-column">
+                <h2 class="h5 fw-bold mb-4 border-bottom pb-3">
+                    Guía de Ayuda
+                </h2>
 
-        <div class="mb-4">
-            <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">
-                Gestión de stock
-            </h6>
-            <p class="text-muted" style="font-size: 13px;">
-                Indique el stock inicial y el punto de reposición para identificar productos con pocas unidades disponibles.
-            </p>
-        </div>
+                <div class="help-guide-item d-flex align-items-start gap-3">
+                    <span class="material-symbols-outlined text-primary-veltika fs-4 mt-1">
+                        corporate_fare
+                    </span>
 
-        <div class="mb-4">
-            <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">
-                Categoría
-            </h6>
-            <p class="text-muted" style="font-size: 13px;">
-                Seleccione una categoría perteneciente a la misma empresa del producto.
-            </p>
+                    <div>
+                        <h3 class="h6 fw-bold mb-1">
+                            Nombre de la empresa
+                        </h3>
+
+                        <p class="small text-muted mb-0">
+                            Ingrese un nombre que permita identificar claramente a la organización dentro del sistema.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item d-flex align-items-start gap-3">
+                    <span class="material-symbols-outlined text-primary-veltika fs-4 mt-1">
+                        verified
+                    </span>
+
+                    <div>
+                        <h3 class="h6 fw-bold mb-1">
+                            Estado inicial
+                        </h3>
+
+                        <p class="small text-muted mb-0">
+                            Las empresas nuevas se registran activas y quedan disponibles para asociar usuarios, categorías y productos.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item d-flex align-items-start gap-3">
+                    <span class="material-symbols-outlined text-primary-veltika fs-4 mt-1">
+                        security
+                    </span>
+
+                    <div>
+                        <h3 class="h6 fw-bold mb-1">
+                            Aislamiento de datos
+                        </h3>
+
+                        <p class="small text-muted mb-0">
+                            La información registrada para cada empresa se administra de forma independiente.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
