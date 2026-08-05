@@ -456,7 +456,7 @@ namespace saas.Controllers
             }
             catch
             {
-                TempData["Error"] = "No fue posible desactivar el producto porque tiene información relacionada.";
+                TempData["Error"] = "Ocurrió un error al desactivar el producto.";
 
                 return RedirectToAction(nameof(Delete), new { id });
             }

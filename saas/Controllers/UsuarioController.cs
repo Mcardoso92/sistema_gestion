@@ -138,8 +138,6 @@ namespace saas.Controllers
 
             return View(listaUsuarios);
         }
-
-
         // GET: Producto/Details/5
         public async Task<IActionResult> Details(string? id)
         {
@@ -708,7 +706,7 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            // Si no es SuperAdmin, sólo puede eliminar usuarios de su empresa.
+            // Si no es SuperAdmin, solo puede desactivar usuarios de su empresa.
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuarioLogueado, "SuperAdmin");
 
             if (!esSuperAdmin && usuarioDb.EmpresaId != usuarioLogueado.EmpresaId)
@@ -726,7 +724,7 @@ namespace saas.Controllers
                 return Forbid();
             }
 
-            // No permitir que un usuario se elimine a sí mismo.
+            // No permitir que un usuario se desactive a sí mismo.
             if (usuarioDb.Id == usuarioLogueado.Id)
             {
                 TempData["Error"] = "No puede desactivar su propio usuario.";
@@ -742,7 +740,7 @@ namespace saas.Controllers
 
                 if (!resultado.Succeeded)
                 {
-                    TempData["Error"] = "No fue posible desactivar el usuario.";
+                    TempData["Error"] = "Ocurrió un error al desactivar el usuario.";
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -786,6 +784,22 @@ namespace saas.Controllers
             {
                 ModelState.AddModelError("", "El usuario se encuentra inactivo.");
                 return View(model);
+            }
+
+            // Verificamos que la empresa del usuario se encuentre activa.
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            if (!esSuperAdmin)
+            {
+                bool empresaActiva = await _context.Empresas.AnyAsync(e =>
+                    e.Id == usuario.EmpresaId &&
+                    e.Estado);
+
+                if (!empresaActiva)
+                {
+                    ModelState.AddModelError("", "La empresa se encuentra inactiva.");
+                    return View(model);
+                }
             }
 
             var resultado = await _signInManager.PasswordSignInAsync(

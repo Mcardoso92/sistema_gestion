@@ -101,7 +101,7 @@ namespace saas.Controllers
             }
             catch
             {
-                ModelState.AddModelError("", "Ocurrió un error al guardar la empresa.");
+                ModelState.AddModelError("", "Ocurrió un error al crear la empresa.");
 
                 return View(empresa);
             }
@@ -182,10 +182,13 @@ namespace saas.Controllers
             try
             {
                 var empresa = await _context.Empresas.FindAsync(id);
-                if (empresa != null)
+
+                if (empresa == null)
                 {
-                    empresa.Estado = false;
+                    return NotFound();
                 }
+
+                empresa.Estado = false;
 
                 await _context.SaveChangesAsync();
 
@@ -193,7 +196,7 @@ namespace saas.Controllers
             }
             catch
             {
-                TempData["Error"] = "No es posible eliminar la empresa porque tiene información relacionada.";
+                TempData["Error"] = "Ocurrió un error al desactivar la empresa.";
             }
 
             return RedirectToAction(nameof(Index));
