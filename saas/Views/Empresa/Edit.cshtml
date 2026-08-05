@@ -6,6 +6,39 @@
 }
 
 <main class="container-fluid px-4">
+    <div class="row align-items-end mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home"
+                           asp-action="Index"
+                           class="text-decoration-none text-muted">
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a asp-action="Index"
+                           class="text-decoration-none text-muted">
+                            Empresas
+                        </a>
+                    </li>
+                    <li aria-current="page"
+                        class="breadcrumb-item active fw-semibold">
+                        Editar Empresa
+                    </li>
+                </ol>
+            </nav>
+
+            <h1 class="display-6 fw-bold text-dark mb-1">
+                Editar Empresa
+            </h1>
+
+            <p class="text-muted mb-0">
+                Modifique la información general y el estado operativo de la empresa.
+            </p>
+        </div>
+    </div>
     <div class="row">
         <!-- Form Column -->
         <div class="col-md-8">
@@ -41,36 +74,65 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm">
                 <div class="card-header d-flex align-items-center">
-                    <span class="material-symbols-outlined me-2 text-primary">info</span>
+                    <span class="material-symbols-outlined me-2 text-primary">
+                        info
+                    </span>
                     Guía de Ayuda
                 </div>
+
                 <div class="card-body p-4">
                     <div class="mb-4">
-                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">SKU &amp; Formato</h6>
-                        <p class="text-muted" style="font-size: 13px;">El SKU debe ser único. Recomendamos usar un prefijo de categoría seguido de un identificador numérico (ej. ELEC-001).</p>
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Nombre de la empresa
+                        </h6>
+
+                        <p class="text-muted"
+                           style="font-size: 13px;">
+                            Utilice un nombre claro y representativo. No puede existir otra empresa registrada con el mismo nombre.
+                        </p>
                     </div>
+
                     <div class="mb-4">
-                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Gestión de Stock</h6>
-                        <p class="text-muted" style="font-size: 13px;">El stock inicial será cargado en el almacén principal por defecto. Puede ajustarlo más tarde desde el módulo de Inventarios.</p>
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Estado operativo
+                        </h6>
+
+                        <p class="text-muted"
+                           style="font-size: 13px;">
+                            Una empresa activa puede operar normalmente y sus usuarios pueden acceder al sistema.
+                        </p>
                     </div>
+
                     <div class="mb-4">
-                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Categorías</h6>
-                        <p class="text-muted" style="font-size: 13px;">Asignar una categoría correcta es vital para los reportes de ventas automáticos de final de mes.</p>
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Desactivación
+                        </h6>
+
+                        <p class="text-muted"
+                           style="font-size: 13px;">
+                            Al desactivar la empresa, se conserva toda su información, pero sus usuarios dejan de poder iniciar sesión.
+                        </p>
                     </div>
+
                     <div class="tip-box">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="material-symbols-outlined text-secondary me-2">lightbulb</span>
-                            <span class="fw-bold" style="font-size: 14px;">Tip de Organización</span>
+                            <span class="material-symbols-outlined text-secondary me-2">
+                                lightbulb
+                            </span>
+
+                            <span class="fw-bold"
+                                  style="font-size: 14px;">
+                                Reactivación
+                            </span>
                         </div>
-                        <p class="mb-0 text-muted" style="font-size: 13px;">Mantenga descripciones cortas y use palabras clave. Esto facilita la búsqueda global dentro de la suite VELTIKA.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card border-0 shadow-sm mt-4">
-                <div style="height: 180px; position: relative;">
-                    <div class="w-100 h-100 rounded-top" data-alt="A clean, high-angle shot of a minimalist warehouse with neatly organized white shelves and boxes. The lighting is bright and industrial, emphasizing efficiency and order. Soft blue and teal accents reflect a corporate SaaS tech environment. Shot with a sharp focus and professional look." style="background-size: cover; background-position: center;"></div>
-                    <div class="position-absolute bottom-0 start-0 p-3 w-100" style="background: linear-gradient(transparent, rgba(0,0,0,0.7));">
-                        <span class="badge bg-success">Actualización en tiempo real</span>
+
+                        <p class="mb-0 text-muted"
+                           style="font-size: 13px;">
+                            Puede reactivar la empresa en cualquier momento habilitando nuevamente su estado.
+                        </p>
                     </div>
                 </div>
             </div>
