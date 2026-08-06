@@ -1,74 +1,187 @@
-﻿@model saas.Models.Cliente
+﻿@model ClienteEditVM
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Editar Cliente";
 }
 
-<h1>Edit</h1>
+<main class="container-fluid px-4">
+    <div class="row">
+        <!-- Form Column -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    Editar Cliente
+                </div>
 
-<h4>Cliente</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
+                <div class="card-body p-4">
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <div class="alert alert-warning mb-4">
+                            Está modificando un cliente como SuperAdministrador.
+                            Verifique la empresa seleccionada antes de guardar los cambios.
+                        </div>
+                    }
+
+                    <form asp-action="Edit" asp-route-id="@Model.Id" method="post" class="row g-4">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <input asp-for="Id" type="hidden" />
+
+                        <div class="col-md-6">
+                            <label asp-for="Nombre" class="form-label">Nombre</label>
+                            <input asp-for="Nombre"
+                                   class="form-control"
+                                   type="text"
+                                   autocomplete="off" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Apellido" class="form-label">Apellido</label>
+                            <input asp-for="Apellido"
+                                   class="form-control"
+                                   type="text"
+                                   autocomplete="off" />
+                            <span asp-validation-for="Apellido" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Documento" class="form-label">Documento</label>
+                            <input asp-for="Documento"
+                                   class="form-control"
+                                   type="text"
+                                   autocomplete="off" />
+                            <span asp-validation-for="Documento" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Telefono" class="form-label">Teléfono</label>
+                            <input asp-for="Telefono"
+                                   class="form-control"
+                                   type="tel"
+                                   autocomplete="off" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   type="email"
+                                   autocomplete="off" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                <select asp-for="EmpresaId"
+                                        asp-items="Model.Empresas"
+                                        class="form-select">
+                                    <option value="">-- Seleccione una empresa --</option>
+                                </select>
+                                <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <input asp-for="EmpresaId" type="hidden" />
+                        }
+
+                        <div class="col-md-12">
+                            <label asp-for="Direccion" class="form-label">Dirección</label>
+                            <input asp-for="Direccion"
+                                   class="form-control"
+                                   type="text"
+                                   autocomplete="off" />
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="Estado"
+                                       class="form-check-input"
+                                       role="switch" />
+                                <label asp-for="Estado" class="form-check-label fw-semibold">
+                                    Estado del Cliente (Activo/Inactivo)
+                                </label>
+                            </div>
+
+                            @if (!Model.Estado)
+                            {
+                                <div class="form-text">
+                                    Active este campo para reactivar al cliente.
+                                </div>
+                            }
+                        </div>
+
+                        <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
+                            <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                            <button type="submit" class="btn btn-v-primary">Guardar cambios</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Apellido" class="control-label"></label>
-                <input asp-for="Apellido" class="form-control" />
-                <span asp-validation-for="Apellido" class="text-danger"></span>
+        </div>
+
+        <!-- Help Column -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2 text-primary">info</span>
+                    Guía de Edición
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Documento
+                        </h6>
+                        <p class="text-muted" style="font-size: 13px;">
+                            El documento puede modificarse, pero no debe coincidir con otro cliente de la misma empresa.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Cambio de empresa
+                        </h6>
+                        <p class="text-muted" style="font-size: 13px;">
+                            Solamente el SuperAdministrador puede cambiar la empresa asociada al cliente.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Reactivación
+                        </h6>
+                        <p class="text-muted" style="font-size: 13px;">
+                            Un cliente desactivado puede volver a utilizarse activando su estado y guardando los cambios.
+                        </p>
+                    </div>
+
+                    <div class="tip-box">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="material-symbols-outlined text-secondary me-2">lightbulb</span>
+                            <span class="fw-bold" style="font-size: 14px;">Historial protegido</span>
+                        </div>
+
+                        <p class="mb-0 text-muted" style="font-size: 13px;">
+                            La edición no modifica la fecha de alta ni elimina la información histórica del cliente.
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label asp-for="Documento" class="control-label"></label>
-                <input asp-for="Documento" class="form-control" />
-                <span asp-validation-for="Documento" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Telefono" class="control-label"></label>
-                <input asp-for="Telefono" class="form-control" />
-                <span asp-validation-for="Telefono" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Direccion" class="control-label"></label>
-                <input asp-for="Direccion" class="form-control" />
-                <span asp-validation-for="Direccion" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Estado" /> @Html.DisplayNameFor(model => model.Estado)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="FechaAlta" class="control-label"></label>
-                <input asp-for="FechaAlta" class="form-control" />
-                <span asp-validation-for="FechaAlta" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="EmpresaId" class="control-label"></label>
-                <select asp-for="EmpresaId" class="form-control" asp-items="ViewBag.EmpresaId"></select>
-                <span asp-validation-for="EmpresaId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+</main>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

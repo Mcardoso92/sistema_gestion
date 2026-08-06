@@ -1,72 +1,175 @@
 ﻿@model saas.Models.Cliente
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Detalles del Cliente";
+
+    string nombreCompleto = string.IsNullOrWhiteSpace(Model.Apellido)
+        ? Model.Nombre
+        : $"{Model.Nombre} {Model.Apellido}";
 }
 
-<h1>Details</h1>
+<main class="container-fluid px-4">
+    <div class="row">
+        <!-- Details Column -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    Información del Cliente
+                </div>
 
-<div>
-    <h4>Cliente</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Apellido)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Apellido)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Documento)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Documento)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Telefono)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Telefono)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Direccion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Direccion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Estado)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Estado)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaAlta)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaAlta)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Empresa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Empresa.Nombre)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label asp-for="Nombre" class="form-label">Nombre</label>
+                            <input asp-for="Nombre" class="form-control" type="text" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Apellido" class="form-label">Apellido</label>
+                            <input asp-for="Apellido"
+                                   class="form-control"
+                                   type="text"
+                                   value="@(Model.Apellido ?? "Sin apellido")"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Documento" class="form-label">Documento</label>
+                            <input asp-for="Documento"
+                                   class="form-control"
+                                   type="text"
+                                   value="@(Model.Documento ?? "Sin documento")"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Telefono" class="form-label">Teléfono</label>
+                            <input asp-for="Telefono"
+                                   class="form-control"
+                                   type="text"
+                                   value="@(Model.Telefono ?? "Sin teléfono")"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   type="email"
+                                   value="@(Model.Email ?? "Sin email")"
+                                   readonly />
+                        </div>
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                <input class="form-control"
+                                       value="@Model.Empresa.Nombre"
+                                       readonly />
+                            </div>
+                        }
+
+                        <div class="col-md-12">
+                            <label asp-for="Direccion" class="form-label">Dirección</label>
+                            <input asp-for="Direccion"
+                                   class="form-control"
+                                   type="text"
+                                   value="@(Model.Direccion ?? "Sin dirección")"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FechaAlta" class="form-label">Fecha de alta</label>
+                            <input class="form-control"
+                                   value="@Model.FechaAlta.ToString("dd/MM/yyyy")"
+                                   readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Nombre completo</label>
+                            <input class="form-control"
+                                   value="@nombreCompleto"
+                                   readonly />
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="Estado"
+                                       class="form-check-input"
+                                       role="switch"
+                                       disabled />
+                                <label asp-for="Estado" class="form-check-label fw-semibold">
+                                    Estado del Cliente (Activo/Inactivo)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
+                            <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+
+                            <a asp-action="Edit"
+                               asp-route-id="@Model.Id"
+                               class="btn btn-v-primary">
+                                Editar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Column -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2 text-primary">info</span>
+                    Información del Cliente
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Datos personales
+                        </h6>
+                        <p class="text-muted" style="font-size: 13px;">
+                            El nombre permite identificar al cliente dentro de ventas, búsquedas y reportes.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Documento
+                        </h6>
+                        <p class="text-muted" style="font-size: 13px;">
+                            El documento debe ser único dentro de la empresa cuando se encuentre informado.
+                        </p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2"
+                            style="font-size: 14px; color: var(--v-primary-container);">
+                            Datos de contacto
+                        </h6>
+                        <p class="text-muted" style="font-size: 13px;">
+                            El email y el teléfono son opcionales y pueden utilizarse para comunicaciones futuras.
+                        </p>
+                    </div>
+
+                    <div class="tip-box">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="material-symbols-outlined text-secondary me-2">lightbulb</span>
+                            <span class="fw-bold" style="font-size: 14px;">Estado del cliente</span>
+                        </div>
+
+                        <p class="mb-0 text-muted" style="font-size: 13px;">
+                            Los clientes inactivos conservan su información histórica y pueden reactivarse desde Editar.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
