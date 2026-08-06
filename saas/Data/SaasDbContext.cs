@@ -64,6 +64,18 @@ namespace saas.Data
                 .HasForeignKey(v => v.EmpresaId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.Usuario)
+                .WithMany(u => u.Ventas)
+                .HasForeignKey(v => v.UsuarioId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Venta>()
+                .HasOne(v => v.Cliente)
+                .WithMany(c => c.Ventas)
+                .HasForeignKey(v => v.ClienteId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<DetalleVenta>()
                 .HasOne(d => d.Producto)
                 .WithMany(p => p.DetallesVenta)
@@ -74,7 +86,7 @@ namespace saas.Data
                 .HasOne(d => d.Venta)
                 .WithMany(v => v.Detalles)
                 .HasForeignKey(d => d.VentaId)
-                .OnDelete(DeleteBehavior.NoAction);           
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         private static void ConfigurarIndices(
@@ -116,6 +128,19 @@ namespace saas.Data
                 })
                 .IsUnique()
                 .HasFilter("[CodigoBarra] IS NOT NULL");
+
+            modelBuilder.Entity<Venta>()
+                .HasIndex(v => new
+                {
+                    v.EmpresaId,
+                    v.Fecha
+                });
+
+            modelBuilder.Entity<Venta>()
+                .HasIndex(v => v.ClienteId);
+
+            modelBuilder.Entity<Venta>()
+                .HasIndex(v => v.UsuarioId);
         }
 
         private static void ConfigurarDecimales(
