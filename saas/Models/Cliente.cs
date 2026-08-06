@@ -24,8 +24,12 @@ namespace saas.Models
         public bool Estado { get; set; }
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una empresa.")]
+
         public int EmpresaId { get; set; }
         [ValidateNever]
         public Empresa Empresa { get; set; } = null!;
+        [ValidateNever]
+        public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
     }
 }

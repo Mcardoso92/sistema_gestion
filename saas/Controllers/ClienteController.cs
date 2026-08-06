@@ -175,6 +175,7 @@ namespace saas.Controllers
             if (!esSuperAdmin)
             {
                 clienteVM.EmpresaId = usuario.EmpresaId;
+                ModelState.Remove(nameof(clienteVM.EmpresaId));
             }
 
             if (!ModelState.IsValid)
@@ -351,6 +352,7 @@ namespace saas.Controllers
             if (!esSuperAdmin)
             {
                 clienteVM.EmpresaId = usuario.EmpresaId;
+                ModelState.Remove(nameof(clienteVM.EmpresaId));
             }
 
             if (!ModelState.IsValid)

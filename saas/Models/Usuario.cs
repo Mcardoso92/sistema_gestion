@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace saas.Models
@@ -18,6 +19,8 @@ namespace saas.Models
         public bool Estado { get; set; }
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
+        [ValidateNever]
+        public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
 
     }
 }

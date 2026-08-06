@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace saas.Models
 {
@@ -10,10 +11,16 @@ namespace saas.Models
         public decimal Total { get; set; }
         public bool Estado { get; set; }
         public int EmpresaId { get; set; }
-        public Empresa? Empresa { get; set; }
-        public string? UsuarioId { get; set; }
-        public Usuario? Usuario { get; set; }
-        public ICollection<DetalleVenta>? Detalles { get; set; }
+        [ValidateNever]
+        public Empresa Empresa { get; set; } = null!;
+        public string UsuarioId { get; set; } = null!;
+        [ValidateNever]
+        public Usuario Usuario { get; set; } = null!;
+        public int? ClienteId { get; set; }
+        [ValidateNever]
+        public Cliente? Cliente { get; set; }
+        [ValidateNever]
+        public ICollection<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
 
     }
 }
