@@ -17,56 +17,38 @@ namespace saas.Controllers
         {
             _context = context;
         }
+
+        // GET: Venta
         public IActionResult Index()
         {
             return View();
         }
+
+        // GET: Venta/Create
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Productos = _context.Productos
-                .Where(p => p.Estado)
-                .ToList();
-            return View();
+            var vm = new VentaCreateVM();
+
+            return View(vm);
         }
+
+        // POST: Venta/Create
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(VentaCreateVM model)
         {
-            var producto = await _context.Productos
-                .FirstOrDefaultAsync(p => p.Id == model.ProductoId);
-
-            if (producto == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound();
-            }
-
-            if (producto.Stock < model.Cantidad)
-            {
-                ModelState.AddModelError("", "Stock insuficiente");
-
-                ViewBag.Productos = _context.Productos
-                    .Where(p => p.Estado)
-                    .ToList();
-
                 return View(model);
             }
 
-            // ACA SE CREA LA VENTA
-            var venta = new Venta
-            {
-                Fecha = DateTime.Now,
-                Total = producto.PrecioVenta * model.Cantidad,
-                Estado = true,
-                EmpresaId = producto.EmpresaId
-            };
-
-            _context.Ventas.Add(venta);
-
-            await _context.SaveChangesAsync();
+            // Implementaremos la lógica de la venta más adelante.
 
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: Venta/Details/5
         public IActionResult Details(int id)
         {
             return View();
