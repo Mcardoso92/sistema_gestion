@@ -58,7 +58,6 @@ body {
 }
 
 .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     vertical-align: middle;
 }
 
@@ -224,7 +223,6 @@ body {
 }
 
 .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     vertical-align: middle;
 }
 
@@ -381,7 +379,6 @@ body {
 }
 
 .material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     vertical-align: middle;
 }
 
@@ -950,3 +947,152 @@ footer {
     text-transform: uppercase;
     letter-spacing: 0.025em;
 }
+
+/*Estilos de venta-pos*/
+body {
+    font-family: 'Hanken Grotesk', sans-serif;
+    background-color: #f7f9fb;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.bg-primary-veltika {
+    background-color: #0f4c81 !important;
+}
+
+.text-primary-veltika {
+    color: #0f4c81 !important;
+}
+
+.btn-primary-veltika {
+    background-color: #0f4c81;
+    border-color: #0f4c81;
+    color: #ffffff;
+}
+
+    .btn-primary-veltika:hover {
+        background-color: #0a365c;
+        border-color: #0a365c;
+        color: #ffffff;
+    }
+
+.btn-outline-veltika {
+    color: #0f4c81;
+    border-color: #0f4c81;
+}
+
+    .btn-outline-veltika:hover {
+        background-color: #0f4c81;
+        color: #ffffff;
+    }
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.nav-link.active {
+    border-bottom: 2px solid #71f8e4;
+}
+
+.material-symbols-outlined {
+    vertical-align: middle;
+    font-size: 20px;
+}
+
+.profile-img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-custom {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #dee2e6;
+}
+
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border: 1px solid #dee2e6;
+}
+
+.badge-info-custom {
+    background-color: #f2f4f6;
+    color: #42474f;
+    border: 1px solid #dee2e6;
+}
+
+.summary-panel {
+    background-color: #0f4c81;
+    color: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #0f4c81;
+    overflow: hidden;
+}
+
+.summary-total {
+    background-color: rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem;
+}
+
+.row-error {
+    background-color: rgba(255, 218, 214, 0.2) !important;
+    border-left: 4px solid #ba1a1a !important;
+}
+
+    .row-error:hover {
+        background-color: rgba(255, 218, 214, 0.3) !important;
+    }
+
+.text-error {
+    color: #ba1a1a !important;
+}
+
+.btn-quantity {
+    padding: 0.1rem 0.5rem;
+    line-height: 1;
+}
+
+.input-quantity {
+    width: 40px;
+    text-align: center;
+    border: none;
+    background: transparent;
+}
+
+    .input-quantity:focus {
+        outline: none;
+    }
+
+.qty-group {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+}
+
+    .qty-group.error {
+        border-color: rgba(186, 26, 26, 0.5);
+    }
