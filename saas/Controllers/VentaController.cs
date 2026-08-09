@@ -27,6 +27,7 @@ namespace saas.Controllers
             return View();
         }
 
+
         // GET: Venta/Create
         [HttpGet]
         public async Task<IActionResult> Create(int? empresaId = null)
@@ -339,9 +340,76 @@ namespace saas.Controllers
         }
 
         // GET: Venta/Details/5
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int? id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuario,
+                "SuperAdmin");
+
+            IQueryable<Venta> consulta = _context.Ventas
+                .AsNoTracking()
+                .Include(v => v.Empresa)
+                .Include(v => v.Usuario)
+                .Include(v => v.Cliente)
+                .Include(v => v.Detalles)
+                    .ThenInclude(d => d.Producto);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(v =>
+                    v.EmpresaId == usuario.EmpresaId);
+            }
+
+            var venta = await consulta
+                .FirstOrDefaultAsync(v => v.Id == id);
+
+            if (venta == null)
+            {
+                return NotFound();
+            }
+
+            var ventaVM = new VentaDetailsVM
+            {
+                Id = venta.Id,
+                Fecha = venta.Fecha,
+                Total = venta.Total,
+                Estado = venta.Estado,
+                EmpresaId = venta.EmpresaId,
+                EmpresaNombre = venta.Empresa.Nombre,
+                UsuarioNombre = $"{venta.Usuario.Nombre} {venta.Usuario.Apellido}",
+                ClienteNombre = venta.Cliente == null
+                    ? "Cliente ocasional"
+                    : string.IsNullOrWhiteSpace(venta.Cliente.Apellido)
+                        ? venta.Cliente.Nombre
+                        : $"{venta.Cliente.Nombre} {venta.Cliente.Apellido}",
+                ClienteDocumento = venta.Cliente?.Documento,
+                ClienteEmail = venta.Cliente?.Email,
+                Detalles = venta.Detalles
+                    .Select(d => new VentaDetalleDetailsVM
+                    {
+                        ProductoId = d.ProductoId,
+                        ProductoNombre = d.Producto.Nombre,
+                        CodigoBarra = d.Producto.CodigoBarra,
+                        PrecioUnitario = d.PrecioUnitario,
+                        Cantidad = d.Cantidad,
+                        Subtotal = d.Subtotal
+                    })
+                    .ToList()
+            };
+
+            return View(ventaVM);
         }
 
         // GET: Venta/BuscarProductos

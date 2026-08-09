@@ -1,7 +1,395 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model VentaDetailsVM
+
 @{
+    ViewData["Title"] = "Detalle de Venta";
 }
 
-<h1>Detalle de Venta</h1>
+<main class="container-fluid px-4 pb-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Home" asp-action="Index">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item">
+                        <a asp-controller="Venta" asp-action="Index">
+                            Ventas
+                        </a>
+                    </li>
+
+                    <li class="breadcrumb-item active"
+                        aria-current="page">
+                        Detalle
+                    </li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-end gap-3">
+                <h1 class="h3 fw-bold text-dark mb-0">
+                    Detalle de Venta
+                </h1>
+
+                <span class="h5 text-muted mb-0 pb-1">
+                    #@Model.Id
+                </span>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <a asp-action="Index"
+               class="btn btn-outline-secondary py-2 fw-medium d-flex align-items-center gap-2 small">
+
+                <span class="material-symbols-outlined"
+                      style="font-size: 18px;">
+                    arrow_back
+                </span>
+
+                Volver al Listado
+            </a>
+
+            <a asp-action="Create"
+               asp-route-empresaId="@Model.EmpresaId"
+               class="btn btn-v-primary py-2 fw-medium d-flex align-items-center gap-2 small">
+
+                <span class="material-symbols-outlined"
+                      style="font-size: 18px;">
+                    add_shopping_cart
+                </span>
+
+                Nueva Venta
+            </a>
+        </div>
+    </div>
+
+    <!-- Layout -->
+    <div class="row g-4">
+
+        <!-- Artículos -->
+        <div class="col-lg-8 d-flex flex-column gap-4">
+
+            <div class="table-container d-flex flex-column mb-0">
+
+                <div class="px-4 py-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+                    <h2 class="h5 fw-bold text-dark mb-0">
+                        Artículos de la Venta
+                    </h2>
+
+                    <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+                        @Model.TotalLineas @(Model.TotalLineas == 1 ? "producto" : "productos")
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">
+                                    Producto
+                                </th>
+
+                                <th class="py-3 small fw-bold text-muted text-uppercase">
+                                    Código
+                                </th>
+
+                                <th class="py-3 small fw-bold text-muted text-uppercase text-end">
+                                    Precio Unit.
+                                </th>
+
+                                <th class="py-3 small fw-bold text-muted text-uppercase text-center">
+                                    Cant.
+                                </th>
+
+                                <th class="pe-4 py-3 small fw-bold text-muted text-uppercase text-end">
+                                    Subtotal
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var detalle in Model.Detalles)
+                            {
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center gap-3">
+
+                                            <div class="bg-secondary bg-opacity-10 rounded d-flex align-items-center justify-content-center border"
+                                                 style="width: 40px; height: 40px;">
+
+                                                <span class="material-symbols-outlined text-muted">
+                                                    inventory_2
+                                                </span>
+                                            </div>
+
+                                            <div>
+                                                <div class="fw-medium text-dark">
+                                                    @detalle.ProductoNombre
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td class="py-3 text-muted small">
+                                        @(string.IsNullOrWhiteSpace(detalle.CodigoBarra)
+                                            ? "Sin código"
+                                            : detalle.CodigoBarra)
+                                    </td>
+
+                                    <td class="py-3 text-end fw-medium small">
+                                        @detalle.PrecioUnitario.ToString("C")
+                                    </td>
+
+                                    <td class="py-3 text-center">
+                                        @detalle.Cantidad
+                                    </td>
+
+                                    <td class="pe-4 py-3 text-end fw-semibold">
+                                        @detalle.Subtotal.ToString("C")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+
+                <div class="px-4 py-3 border-top bg-light d-flex justify-content-end">
+                    <div class="small text-muted">
+                        Total de unidades:
+                        <strong class="text-dark">
+                            @Model.TotalUnidades
+                        </strong>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="col-lg-4 d-flex flex-column gap-4">
+
+            <!-- Total -->
+            <div class="summary-panel p-4">
+
+                <h3 class="small fw-bold text-white-50 text-uppercase mb-4">
+                    Resumen de Venta
+                </h3>
+
+                <div class="text-white-50 small mb-4">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Productos diferentes</span>
+
+                        <span class="fw-medium text-white">
+                            @Model.TotalLineas
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <span>Total de unidades</span>
+
+                        <span class="fw-medium text-white">
+                            @Model.TotalUnidades
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="summary-total p-3 text-center">
+                    <div class="small text-white-50 text-uppercase fw-semibold mb-1"
+                         style="letter-spacing: 0.1em;">
+                        Total
+                    </div>
+
+                    <div class="display-5 fw-bold text-white mb-0"
+                         style="letter-spacing: -0.02em;">
+                        @Model.Total.ToString("C")
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Cliente -->
+            <div class="card-custom p-4">
+
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <span class="material-symbols-outlined text-primary-veltika">
+                        person
+                    </span>
+
+                    <h3 class="h6 fw-bold text-dark mb-0">
+                        Cliente
+                    </h3>
+                </div>
+
+                <div class="d-flex align-items-start gap-3">
+
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary-veltika d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width: 48px; height: 48px;">
+
+                        <span class="material-symbols-outlined">
+                            person
+                        </span>
+
+                    </div>
+
+                    <div>
+                        <div class="fw-medium text-dark mb-1">
+                            @Model.ClienteNombre
+                        </div>
+
+                        @if (Model.ClienteDocumento != null)
+                        {
+                            <div class="small text-muted d-flex align-items-center gap-1 mb-1">
+                                <span class="material-symbols-outlined"
+                                      style="font-size: 16px;">
+                                    badge
+                                </span>
+
+                                @Model.ClienteDocumento
+                            </div>
+                        }
+
+                        @if (Model.ClienteEmail != null)
+                        {
+                            <div class="small text-muted d-flex align-items-center gap-1">
+                                <span class="material-symbols-outlined"
+                                      style="font-size: 16px;">
+                                    mail
+                                </span>
+
+                                @Model.ClienteEmail
+                            </div>
+                        }
+
+                        @if (Model.ClienteDocumento == null &&
+                             Model.ClienteEmail == null)
+                        {
+                            <div class="small text-muted">
+                                Venta sin cliente registrado
+                            </div>
+                        }
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Información -->
+            <div class="card-custom p-4">
+
+                <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <span class="material-symbols-outlined text-primary-veltika">
+                        info
+                    </span>
+
+                    <h3 class="h6 fw-bold text-dark mb-0">
+                        Información
+                    </h3>
+                </div>
+
+                <div class="d-flex flex-column gap-2">
+
+                    <div class="d-flex justify-content-between align-items-start">
+
+                        <div class="small fw-medium text-muted d-flex align-items-center gap-1">
+                            <span class="material-symbols-outlined"
+                                  style="font-size: 16px;">
+                                calendar_today
+                            </span>
+
+                            Fecha y Hora
+                        </div>
+
+                        <div class="small text-dark text-end">
+                            @Model.Fecha.ToString("dd/MM/yyyy")
+                            <br />
+
+                            <span class="text-muted">
+                                @Model.Fecha.ToString("HH:mm:ss")
+                            </span>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-start pt-2 border-top">
+
+                        <div class="small fw-medium text-muted d-flex align-items-center gap-1">
+                            <span class="material-symbols-outlined"
+                                  style="font-size: 16px;">
+                                person
+                            </span>
+
+                            Usuario
+                        </div>
+
+                        <div class="small text-dark fw-medium text-end">
+                            @Model.UsuarioNombre
+                        </div>
+
+                    </div>
+
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <div class="d-flex justify-content-between align-items-start pt-2 border-top">
+
+                            <div class="small fw-medium text-muted d-flex align-items-center gap-1">
+                                <span class="material-symbols-outlined"
+                                      style="font-size: 16px;">
+                                    business
+                                </span>
+
+                                Empresa
+                            </div>
+
+                            <div class="small text-dark fw-medium text-end">
+                                @Model.EmpresaNombre
+                            </div>
+
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-start pt-2 border-top">
+
+                        <div class="small fw-medium text-muted d-flex align-items-center gap-1">
+                            <span class="material-symbols-outlined"
+                                  style="font-size: 16px;">
+                                check_circle
+                            </span>
+
+                            Estado
+                        </div>
+
+                        <div class="small text-end">
+                            @if (Model.Estado)
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success fw-medium">
+                                    Completada
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger fw-medium">
+                                    Anulada
+                                </span>
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
