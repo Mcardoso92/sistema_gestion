@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
@@ -22,9 +23,161 @@ namespace saas.Controllers
         }
 
         // GET: Venta
-        public IActionResult Index()
+        public async Task<IActionResult> Index(VentaIndexVM ventaVM)
         {
-            return View();
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuario,
+                "SuperAdmin");
+
+            IQueryable<Venta> consulta = _context.Ventas
+                .AsNoTracking()
+                .Include(v => v.Empresa)
+                .Include(v => v.Usuario)
+                .Include(v => v.Cliente)
+                .Include(v => v.Detalles);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(v =>
+                    v.EmpresaId == usuario.EmpresaId);
+            }
+            else if (ventaVM.EmpresaId.HasValue)
+            {
+                consulta = consulta.Where(v =>
+                    v.EmpresaId == ventaVM.EmpresaId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(ventaVM.Buscar))
+            {
+                string buscar = ventaVM.Buscar.Trim();
+
+                if (int.TryParse(buscar, out int ventaId))
+                {
+                    consulta = consulta.Where(v =>
+                        v.Id == ventaId ||
+                        (
+                            v.Cliente != null &&
+                            (
+                                v.Cliente.Nombre.Contains(buscar) ||
+                                (v.Cliente.Apellido != null &&
+                                 v.Cliente.Apellido.Contains(buscar)) ||
+                                (v.Cliente.Documento != null &&
+                                 v.Cliente.Documento.Contains(buscar))
+                            )
+                        ));
+                }
+                else
+                {
+                    consulta = consulta.Where(v =>
+                        v.Cliente != null &&
+                        (
+                            v.Cliente.Nombre.Contains(buscar) ||
+                            (v.Cliente.Apellido != null &&
+                             v.Cliente.Apellido.Contains(buscar)) ||
+                            (v.Cliente.Documento != null &&
+                             v.Cliente.Documento.Contains(buscar))
+                        ));
+                }
+            }
+
+            if (ventaVM.FechaDesde.HasValue)
+            {
+                DateTime fechaDesde = ventaVM.FechaDesde.Value.Date;
+
+                consulta = consulta.Where(v =>
+                    v.Fecha >= fechaDesde);
+            }
+
+            if (ventaVM.FechaHasta.HasValue)
+            {
+                DateTime fechaHasta =
+                    ventaVM.FechaHasta.Value.Date.AddDays(1);
+
+                consulta = consulta.Where(v =>
+                    v.Fecha < fechaHasta);
+            }
+
+            if (!string.IsNullOrWhiteSpace(ventaVM.UsuarioId))
+            {
+                consulta = consulta.Where(v =>
+                    v.UsuarioId == ventaVM.UsuarioId);
+            }
+
+            if (ventaVM.Estado.HasValue)
+            {
+                consulta = consulta.Where(v =>
+                    v.Estado == ventaVM.Estado.Value);
+            }
+
+            ventaVM.Ventas = await consulta
+                .OrderByDescending(v => v.Fecha)
+                .ThenByDescending(v => v.Id)
+                .Select(v => new VentaIndexItemVM
+                {
+                    Id = v.Id,
+                    Fecha = v.Fecha,
+                    ClienteNombre = v.Cliente == null
+                        ? "Cliente ocasional"
+                        : v.Cliente.Apellido == null
+                            ? v.Cliente.Nombre
+                            : v.Cliente.Nombre + " " + v.Cliente.Apellido,
+                    UsuarioNombre =
+                        v.Usuario.Nombre + " " + v.Usuario.Apellido,
+                    EmpresaNombre = v.Empresa.Nombre,
+                    Total = v.Total,
+                    Estado = v.Estado,
+                    TotalUnidades = v.Detalles.Sum(d => d.Cantidad)
+                })
+                .ToListAsync();
+
+            if (esSuperAdmin)
+            {
+                ventaVM.Empresas = await _context.Empresas
+                    .AsNoTracking()
+                    .Where(e => e.Estado)
+                    .OrderBy(e => e.Nombre)
+                    .Select(e => new SelectListItem
+                    {
+                        Value = e.Id.ToString(),
+                        Text = e.Nombre
+                    })
+                    .ToListAsync();
+            }
+
+            IQueryable<Usuario> usuariosConsulta =
+                _userManager.Users
+                    .AsNoTracking()
+                    .Where(u => u.Estado);
+
+            if (!esSuperAdmin)
+            {
+                usuariosConsulta = usuariosConsulta.Where(u =>
+                    u.EmpresaId == usuario.EmpresaId);
+            }
+            else if (ventaVM.EmpresaId.HasValue)
+            {
+                usuariosConsulta = usuariosConsulta.Where(u =>
+                    u.EmpresaId == ventaVM.EmpresaId.Value);
+            }
+
+            ventaVM.Usuarios = await usuariosConsulta
+                .OrderBy(u => u.Nombre)
+                .ThenBy(u => u.Apellido)
+                .Select(u => new SelectListItem
+                {
+                    Value = u.Id,
+                    Text = u.Nombre + " " + u.Apellido
+                })
+                .ToListAsync();
+
+            return View(ventaVM);
         }
 
 

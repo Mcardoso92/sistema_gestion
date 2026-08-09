@@ -1,7 +1,428 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model VentaIndexVM
+
 @{
+    ViewData["Title"] = "Gestión de Ventas";
 }
 
-<h1>Listado de Ventas</h1>
+<main class="container-fluid py-4 px-4">
+
+    <!-- Encabezado -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+
+        <div>
+            <h1 class="h2 fw-bold mb-1">
+                Gestión de Ventas
+            </h1>
+
+            <p class="text-muted mb-0">
+                Administre y supervise las ventas realizadas en el sistema.
+            </p>
+        </div>
+
+        @if (User.IsInRole("SuperAdmin"))
+        {
+            @if (Model.EmpresaId.HasValue)
+            {
+                <a asp-action="Create"
+                   asp-route-empresaId="@Model.EmpresaId"
+                   class="btn btn-v-primary d-flex align-items-center gap-2 px-3 py-2">
+
+                    <span class="material-symbols-outlined"
+                          style="font-size: 18px;">
+                        add
+                    </span>
+
+                    Nueva Venta
+                </a>
+            }
+        }
+        else
+        {
+            <a asp-action="Create"
+               class="btn btn-v-primary d-flex align-items-center gap-2 px-3 py-2">
+
+                <span class="material-symbols-outlined"
+                      style="font-size: 18px;">
+                    add
+                </span>
+
+                Nueva Venta
+            </a>
+        }
+
+    </div>
+
+    <!-- Filtros -->
+    <div class="card-custom p-3 mb-4">
+
+        <form asp-action="Index"
+              method="get">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- Buscar -->
+                <div class="col-lg-4 col-md-6">
+
+                    <label asp-for="Buscar"
+                           class="form-label small fw-semibold text-muted">
+                        Buscar
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text bg-light">
+                            <span class="material-symbols-outlined text-muted"
+                                  style="font-size: 18px;">
+                                search
+                            </span>
+                        </span>
+
+                        <input asp-for="Buscar"
+                               class="form-control bg-light"
+                               placeholder="ID, cliente o documento..." />
+
+                    </div>
+
+                </div>
+
+                <!-- Fecha desde -->
+                <div class="col-lg-2 col-md-3">
+
+                    <label asp-for="FechaDesde"
+                           class="form-label small fw-semibold text-muted">
+                        Desde
+                    </label>
+
+                    <input asp-for="FechaDesde"
+                           type="date"
+                           class="form-control bg-light" />
+
+                </div>
+
+                <!-- Fecha hasta -->
+                <div class="col-lg-2 col-md-3">
+
+                    <label asp-for="FechaHasta"
+                           class="form-label small fw-semibold text-muted">
+                        Hasta
+                    </label>
+
+                    <input asp-for="FechaHasta"
+                           type="date"
+                           class="form-control bg-light" />
+
+                </div>
+
+                <!-- Estado -->
+                <div class="col-lg-2 col-md-4">
+
+                    <label asp-for="Estado"
+                           class="form-label small fw-semibold text-muted">
+                        Estado
+                    </label>
+
+                    <select asp-for="Estado"
+                            class="form-select bg-light">
+
+                        <option value="">Todos</option>
+                        <option value="true">Completadas</option>
+                        <option value="false">Anuladas</option>
+
+                    </select>
+
+                </div>
+
+                <!-- Botón -->
+                <div class="col-lg-2 col-md-4">
+
+                    <button type="submit"
+                            class="btn btn-v-primary w-100 d-flex align-items-center justify-content-center gap-2">
+
+                        <span class="material-symbols-outlined"
+                              style="font-size: 18px;">
+                            filter_list
+                        </span>
+
+                        Filtrar
+
+                    </button>
+
+                </div>
+
+                <!-- Usuario -->
+                <div class="col-lg-4 col-md-6">
+
+                    <label asp-for="UsuarioId"
+                           class="form-label small fw-semibold text-muted">
+                        Usuario
+                    </label>
+
+                    <select asp-for="UsuarioId"
+                            asp-items="Model.Usuarios"
+                            class="form-select bg-light">
+
+                        <option value="">
+                            Todos los usuarios
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Empresa: solamente SuperAdmin -->
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <div class="col-lg-4 col-md-6">
+
+                        <label asp-for="EmpresaId"
+                               class="form-label small fw-semibold text-muted">
+                            Empresa
+                        </label>
+
+                        <select asp-for="EmpresaId"
+                                asp-items="Model.Empresas"
+                                class="form-select bg-light">
+
+                            <option value="">
+                                Todas las empresas
+                            </option>
+
+                        </select>
+
+                    </div>
+                }
+
+                <!-- Limpiar filtros -->
+                <div class="col-lg-2 col-md-4">
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+
+                        <span class="material-symbols-outlined"
+                              style="font-size: 18px;">
+                            restart_alt
+                        </span>
+
+                        Limpiar
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-container">
+
+        <div class="px-4 py-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+
+            <h2 class="h5 fw-bold text-dark mb-0">
+                Ventas
+            </h2>
+
+            <span class="badge bg-secondary bg-opacity-10 text-secondary border">
+                @Model.Ventas.Count @(Model.Ventas.Count == 1 ? "registro" : "registros")
+            </span>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table venta-index-table table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">
+                            Venta
+                        </th>
+
+                        <th class="py-3 small fw-bold text-muted text-uppercase">
+                            Fecha
+                        </th>
+
+                        <th class="py-3 small fw-bold text-muted text-uppercase">
+                            Cliente
+                        </th>
+
+                        <th class="py-3 small fw-bold text-muted text-uppercase">
+                            Usuario
+                        </th>
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <th class="py-3 small fw-bold text-muted text-uppercase">
+                                Empresa
+                            </th>
+                        }
+
+                        <th class="py-3 small fw-bold text-muted text-uppercase text-center">
+                            Unidades
+                        </th>
+
+                        <th class="py-3 small fw-bold text-muted text-uppercase text-end">
+                            Total
+                        </th>
+
+                        <th class="py-3 small fw-bold text-muted text-uppercase text-center">
+                            Estado
+                        </th>
+
+                        <th class="pe-4 py-3 small fw-bold text-muted text-uppercase text-center">
+                            Acción
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Ventas.Any())
+                    {
+                        <tr>
+
+                            <td colspan="@(User.IsInRole("SuperAdmin") ? 9 : 8)"
+                                class="text-center py-5">
+
+                                <span class="material-symbols-outlined text-muted mb-2"
+                                      style="font-size: 42px;">
+                                    receipt_long
+                                </span>
+
+                                <div class="fw-medium text-dark">
+                                    No se encontraron ventas
+                                </div>
+
+                                <div class="small text-muted">
+                                    No existen ventas que coincidan con los filtros seleccionados.
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var venta in Model.Ventas)
+                        {
+                            <tr>
+
+                                <!-- ID -->
+                                <td class="ps-4 fw-semibold">
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@venta.Id"
+                                       class="text-primary-veltika text-decoration-none">
+
+                                        #@venta.Id
+
+                                    </a>
+
+                                </td>
+
+                                <!-- Fecha -->
+                                <td>
+
+                                    <div class="small fw-medium text-dark">
+                                        @venta.Fecha.ToString("dd/MM/yyyy")
+                                    </div>
+
+                                    <div class="text-muted"
+                                         style="font-size: 0.75rem;">
+                                        @venta.Fecha.ToString("HH:mm:ss")
+                                    </div>
+
+                                </td>
+
+                                <!-- Cliente -->
+                                <td>
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <div class="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                             style="width: 32px; height: 32px;">
+
+                                            <span class="material-symbols-outlined text-muted"
+                                                  style="font-size: 18px;">
+                                                person
+                                            </span>
+
+                                        </div>
+
+                                        <span class="small fw-medium">
+                                            @venta.ClienteNombre
+                                        </span>
+
+                                    </div>
+
+                                </td>
+
+                                <!-- Usuario -->
+                                <td class="small text-muted">
+                                    @venta.UsuarioNombre
+                                </td>
+
+                                <!-- Empresa -->
+                                @if (User.IsInRole("SuperAdmin"))
+                                {
+                                    <td class="small text-muted">
+                                        @venta.EmpresaNombre
+                                    </td>
+                                }
+
+                                <!-- Unidades -->
+                                <td class="text-center small">
+                                    @venta.TotalUnidades
+                                </td>
+
+                                <!-- Total -->
+                                <td class="text-end fw-semibold">
+                                    @venta.Total.ToString("C")
+                                </td>
+
+                                <!-- Estado -->
+                                <td class="text-center">
+
+                                    @if (venta.Estado)
+                                    {
+                                        <span class="venta-badge-completada">
+                                            Completada
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="venta-badge-anulada">
+                                            Anulada
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <!-- Acción -->
+                                <td class="pe-4 text-center">
+
+                                    <a asp-action="Details"
+                                       asp-route-id="@venta.Id"
+                                       class="venta-action"
+                                       title="Ver detalle">
+
+                                        <span class="material-symbols-outlined">
+                                            visibility
+                                        </span>
+
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
