@@ -1,12 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace saas.ViewModel
 {
     public class StockAjusteVM
     {
         public int ProductoId { get; set; }
+
+        [ValidateNever]
         public string ProductoNombre { get; set; } = null!;
+
+        [ValidateNever]
         public string? CodigoBarra { get; set; }
+
+        [ValidateNever]
         public int StockActual { get; set; }
 
         [Required(ErrorMessage = "Debe seleccionar un tipo de ajuste.")]

@@ -279,6 +279,144 @@ namespace saas.Controllers
                 return View(ajusteVM);
             }
         }
+        public async Task<IActionResult> Historial(StockHistorialVM historialVM)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            if (historialVM.ProductoId.HasValue)
+            {
+                IQueryable<Producto> productoConsulta = _context.Productos
+                    .AsNoTracking()
+                    .Include(p => p.Categoria)
+                    .Include(p => p.Empresa);
+
+                if (!esSuperAdmin)
+                {
+                    productoConsulta = productoConsulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+                }
+                else if (historialVM.EmpresaId.HasValue)
+                {
+                    productoConsulta = productoConsulta.Where(p => p.EmpresaId == historialVM.EmpresaId.Value);
+                }
+
+                var producto = await productoConsulta
+                    .FirstOrDefaultAsync(p => p.Id == historialVM.ProductoId.Value);
+
+                if (producto == null)
+                {
+                    return NotFound();
+                }
+
+                historialVM.ProductoNombre = producto.Nombre;
+                historialVM.CodigoBarra = producto.CodigoBarra;
+                historialVM.CategoriaNombre = producto.Categoria.Nombre;
+                historialVM.EmpresaNombre = producto.Empresa.Nombre;
+                historialVM.StockActual = producto.Stock;
+                historialVM.PuntoReposicion = producto.PuntoReposicion;
+                historialVM.ProductoActivo = producto.Estado;
+            }
+
+            IQueryable<MovimientoStock> consulta = _context.MovimientosStock
+                .AsNoTracking()
+                .Include(m => m.Producto)
+                .Include(m => m.Empresa)
+                .Include(m => m.Usuario);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(m => m.EmpresaId == usuario.EmpresaId);
+            }
+            else if (historialVM.EmpresaId.HasValue)
+            {
+                consulta = consulta.Where(m => m.EmpresaId == historialVM.EmpresaId.Value);
+            }
+
+            if (historialVM.ProductoId.HasValue)
+            {
+                consulta = consulta.Where(m => m.ProductoId == historialVM.ProductoId.Value);
+            }
+
+            if (historialVM.Tipo.HasValue)
+            {
+                consulta = consulta.Where(m => m.Tipo == historialVM.Tipo.Value);
+            }
+
+            if (historialVM.FechaDesde.HasValue)
+            {
+                DateTime fechaDesde = historialVM.FechaDesde.Value.Date;
+                consulta = consulta.Where(m => m.Fecha >= fechaDesde);
+            }
+
+            if (historialVM.FechaHasta.HasValue)
+            {
+                DateTime fechaHasta = historialVM.FechaHasta.Value.Date.AddDays(1);
+                consulta = consulta.Where(m => m.Fecha < fechaHasta);
+            }
+
+            historialVM.Movimientos = await consulta
+                .OrderByDescending(m => m.Fecha)
+                .ThenByDescending(m => m.Id)
+                .Select(m => new StockHistorialItemVM
+                {
+                    Id = m.Id,
+                    Fecha = m.Fecha,
+                    ProductoNombre = m.Producto.Nombre,
+                    CodigoBarra = m.Producto.CodigoBarra,
+                    EmpresaNombre = m.Empresa.Nombre,
+                    UsuarioNombre = m.Usuario.Nombre + " " + m.Usuario.Apellido,
+                    Tipo = m.Tipo,
+                    Cantidad = m.Cantidad,
+                    StockAnterior = m.StockAnterior,
+                    StockPosterior = m.StockPosterior,
+                    Motivo = m.Motivo,
+                    VentaId = m.VentaId
+                })
+                .ToListAsync();
+
+            IQueryable<Producto> productosConsulta = _context.Productos
+                .AsNoTracking();
+
+            if (!esSuperAdmin)
+            {
+                productosConsulta = productosConsulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+            }
+            else if (historialVM.EmpresaId.HasValue)
+            {
+                productosConsulta = productosConsulta.Where(p => p.EmpresaId == historialVM.EmpresaId.Value);
+            }
+
+            historialVM.Productos = await productosConsulta
+                .OrderBy(p => p.Nombre)
+                .Select(p => new SelectListItem
+                {
+                    Value = p.Id.ToString(),
+                    Text = p.Nombre
+                })
+                .ToListAsync();
+
+            if (esSuperAdmin)
+            {
+                historialVM.Empresas = await _context.Empresas
+                    .AsNoTracking()
+                    .Where(e => e.Estado)
+                    .OrderBy(e => e.Nombre)
+                    .Select(e => new SelectListItem
+                    {
+                        Value = e.Id.ToString(),
+                        Text = e.Nombre
+                    })
+                    .ToListAsync();
+            }
+
+            return View(historialVM);
+        }
 
         // GET: MovimientoStock/Details/5
         public async Task<IActionResult> Details(int? id)
