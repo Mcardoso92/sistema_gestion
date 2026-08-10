@@ -179,8 +179,6 @@ namespace saas.Controllers
 
             return View(ventaVM);
         }
-
-
         // GET: Venta/Create
         [HttpGet]
         public async Task<IActionResult> Create(int? empresaId = null)
@@ -235,13 +233,10 @@ namespace saas.Controllers
 
             return View(ventaVM);
         }
-
         // POST: Venta/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            VentaCreateVM ventaVM,
-            int? empresaId = null)
+        public async Task<IActionResult> Create(VentaCreateVM ventaVM,int? empresaId = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -491,7 +486,6 @@ namespace saas.Controllers
                 return View(ventaVM);
             }
         }
-
         // GET: Venta/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -564,12 +558,81 @@ namespace saas.Controllers
 
             return View(ventaVM);
         }
+        // POST: Venta/Anular/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Anular(int id)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
 
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
+            try
+            {
+                IQueryable<Venta> consulta = _context.Ventas
+                    .Include(v => v.Detalles)
+                        .ThenInclude(d => d.Producto);
+
+                if (!esSuperAdmin)
+                {
+                    consulta = consulta.Where(v => v.EmpresaId == usuario.EmpresaId);
+                }
+
+                var venta = await consulta.FirstOrDefaultAsync(v => v.Id == id);
+
+                if (venta == null)
+                {
+                    await transaccion.RollbackAsync();
+                    return NotFound();
+                }
+
+                if (!venta.Estado)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] = "La venta ya se encuentra anulada.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                foreach (var detalle in venta.Detalles)
+                {
+                    detalle.Producto.Stock += detalle.Cantidad;
+                }
+
+                venta.Estado = false;
+
+                await _context.SaveChangesAsync();
+                await transaccion.CommitAsync();
+
+                TempData["Success"] = "Venta anulada correctamente. El stock fue restaurado.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (DbUpdateException)
+            {
+                await transaccion.RollbackAsync();
+
+                TempData["Error"] = "No fue posible anular la venta debido a un error en la base de datos.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception)
+            {
+                await transaccion.RollbackAsync();
+
+                TempData["Error"] = "Ocurrió un error inesperado al anular la venta.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
         // GET: Venta/BuscarProductos
         [HttpGet]
-        public async Task<IActionResult> BuscarProductos(
-            string? termino,
-            int? empresaId = null)
+        public async Task<IActionResult> BuscarProductos(string? termino, int? empresaId = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -646,12 +709,9 @@ namespace saas.Controllers
 
             return Json(productos);
         }
-
         // GET: Venta/BuscarClientes
         [HttpGet]
-        public async Task<IActionResult> BuscarClientes(
-            string? termino,
-            int? empresaId = null)
+        public async Task<IActionResult> BuscarClientes(string? termino, int? empresaId = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -735,9 +795,7 @@ namespace saas.Controllers
 
             return Json(clientes);
         }
-        private async Task PrepararVentaParaVista(
-    VentaCreateVM ventaVM,
-    int empresaId)
+        private async Task PrepararVentaParaVista(VentaCreateVM ventaVM, int empresaId)
         {
             var empresa = await _context.Empresas
                 .AsNoTracking()
