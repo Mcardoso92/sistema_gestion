@@ -1,0 +1,317 @@
+﻿@model StockIndexVM
+
+@{
+    ViewData["Title"] = "Stock";
+}
+
+<main class="flex-grow-1 py-5 container-fluid px-4">
+
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-semibold mb-1">Control de Stock</h1>
+            <p class="text-secondary mb-0">
+                Supervise y gestione el inventario de productos en tiempo real.
+            </p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body p-3">
+
+            <form asp-action="Index"
+                  method="get"
+                  class="row g-3 align-items-end">
+
+                <div class="col-md-5">
+                    <label asp-for="Busqueda"
+                           class="form-label fw-semibold">
+                        Buscar producto
+                    </label>
+
+                    <div class="search-input-wrapper">
+                        <span class="material-symbols-outlined">search</span>
+
+                        <input asp-for="Busqueda"
+                               class="form-control"
+                               placeholder="Nombre o código de barras..." />
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <label asp-for="EstadoStock"
+                           class="form-label fw-semibold">
+                        Estado de stock
+                    </label>
+
+                    <select asp-for="EstadoStock"
+                            class="form-select">
+                        <option value="todos">Todos</option>
+                        <option value="constock">Con stock</option>
+                        <option value="bajo">Stock bajo</option>
+                        <option value="sinstock">Sin stock</option>
+                    </select>
+                </div>
+
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <div class="col-md-3">
+                        <label asp-for="EmpresaId"
+                               class="form-label fw-semibold">
+                            Empresa
+                        </label>
+
+                        <select asp-for="EmpresaId"
+                                asp-items="Model.Empresas"
+                                class="form-select">
+
+                            <option value="">Todas las empresas</option>
+                        </select>
+                    </div>
+                }
+
+                <div class="col-md-auto">
+                    <button type="submit"
+                            class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
+
+                        <span class="material-symbols-outlined fs-5">
+                            search
+                        </span>
+
+                        <span class="small fw-medium">
+                            Buscar
+                        </span>
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Busqueda)
+                                || Model.EstadoStock != "todos"
+                                || Model.EmpresaId.HasValue)
+                {
+                    <div class="col-md-auto">
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Limpiar
+                        </a>
+                    </div>
+                }
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card shadow-sm overflow-hidden">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover mb-0 align-middle stock-table">
+
+                <thead>
+                    <tr>
+                        <th class="px-4 py-3 border-0">
+                            Producto
+                        </th>
+
+                        <th class="px-4 py-3 border-0">
+                            Categoría
+                        </th>
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <th class="px-4 py-3 border-0">
+                                Empresa
+                            </th>
+                        }
+
+                        <th class="px-4 py-3 border-0 text-center">
+                            Stock actual
+                        </th>
+
+                        <th class="px-4 py-3 border-0 text-center">
+                            Punto reposición
+                        </th>
+
+                        <th class="px-4 py-3 border-0 text-center">
+                            Estado stock
+                        </th>
+
+                        <th class="px-4 py-3 border-0 text-center">
+                            Producto
+                        </th>
+
+                        <th class="px-4 py-3 border-0 text-end">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="border-top-0">
+
+                    @if (!Model.Productos.Any())
+                    {
+                        <tr>
+                            <td colspan="@(User.IsInRole("SuperAdmin") ? 8 : 7)"
+                                class="text-center text-secondary py-5">
+
+                                No se encontraron productos para los criterios seleccionados.
+
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var producto in Model.Productos)
+                        {
+                            <tr class="@(!producto.ProductoActivo ? "stock-producto-inactivo" : "")">
+
+                                <td class="px-4 py-3">
+
+                                    <div class="stock-product-name">
+                                        @producto.Nombre
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(producto.CodigoBarra))
+                                    {
+                                        <div class="stock-product-code">
+                                            @producto.CodigoBarra
+                                        </div>
+                                    }
+
+                                </td>
+
+                                <td class="px-4 py-3">
+                                    @producto.CategoriaNombre
+                                </td>
+
+                                @if (User.IsInRole("SuperAdmin"))
+                                {
+                                    <td class="px-4 py-3">
+                                        @producto.EmpresaNombre
+                                    </td>
+                                }
+
+                                <td class="px-4 py-3 text-center">
+
+                                    <span class="stock-quantity">
+                                        @producto.Stock
+                                    </span>
+
+                                </td>
+
+                                <td class="px-4 py-3 text-center text-secondary">
+                                    @producto.PuntoReposicion
+                                </td>
+
+                                <td class="px-4 py-3 text-center">
+
+                                    @switch (producto.EstadoStock)
+                                    {
+                                        case EstadoStockVM.SinStock:
+
+                                            <span class="badge-status stock-status-sin">
+                                                <span class="dot"></span>
+                                                Sin stock
+                                            </span>
+
+                                            break;
+
+                                        case EstadoStockVM.StockBajo:
+
+                                            <span class="badge-status stock-status-bajo">
+                                                <span class="dot"></span>
+                                                Stock bajo
+                                            </span>
+
+                                            break;
+
+                                        default:
+
+                                            <span class="badge-status stock-status-normal">
+                                                <span class="dot"></span>
+                                                Con stock
+                                            </span>
+
+                                            break;
+                                    }
+
+                                </td>
+
+                                <td class="px-4 py-3 text-center">
+
+                                    @if (producto.ProductoActivo)
+                                    {
+                                        <span class="badge-status status-activo">
+                                            <span class="dot"></span>
+                                            Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-status status-inactivo">
+                                            <span class="dot"></span>
+                                            Inactivo
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td class="px-4 py-3 text-end">
+
+                                    <div class="d-inline-flex align-items-center gap-1">
+
+                                        <a asp-action="Historial"
+                                           asp-route-productoId="@producto.ProductoId"
+                                           class="stock-action-btn"
+                                           title="Ver historial">
+
+                                            <span class="material-symbols-outlined">
+                                                history
+                                            </span>
+
+                                        </a>
+
+                                        @if (producto.ProductoActivo
+                                                                        && User.IsInRole("AdminEmpresa"))
+                                        {
+                                            <a asp-action="Ajustar"
+                                               asp-route-productoId="@producto.ProductoId"
+                                               class="stock-action-btn"
+                                               title="Ajustar stock">
+
+                                                <span class="material-symbols-outlined">
+                                                    tune
+                                                </span>
+
+                                            </a>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+
+        <div class="card-footer bg-light border-top-0 px-4 py-3">
+            <span class="small text-secondary">
+
+                @Model.Productos.Count
+                @(Model.Productos.Count == 1
+                                ? "producto encontrado"
+                                : "productos encontrados")
+
+            </span>
+        </div>
+
+    </div>
+
+</main>

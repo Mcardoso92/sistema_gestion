@@ -225,12 +225,41 @@ namespace saas.Controllers
                     return View(producto);
                 }
 
-                producto.FechaAlta = DateTime.Now;
+                DateTime fecha = DateTime.Now;
+
+                producto.FechaAlta = fecha;
                 producto.Estado = true;
+
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+
                 _context.Productos.Add(producto);
 
                 await _context.SaveChangesAsync();
+
+                if (producto.Stock > 0)
+                {
+                    var movimientoStock = new MovimientoStock
+                    {
+                        ProductoId = producto.Id,
+                        EmpresaId = producto.EmpresaId,
+                        Tipo = TipoMovimientoStock.StockInicial,
+                        Cantidad = producto.Stock,
+                        StockAnterior = 0,
+                        StockPosterior = producto.Stock,
+                        Motivo = "Stock inicial",
+                        Fecha = fecha,
+                        UsuarioId = usuario.Id
+                    };
+
+                    _context.MovimientosStock.Add(movimientoStock);
+
+                    await _context.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+
                 TempData["Success"] = "Producto creado correctamente.";
+
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -362,7 +391,6 @@ namespace saas.Controllers
                 productoDb.CategoriaId = producto.CategoriaId;
                 productoDb.PrecioCosto = producto.PrecioCosto;
                 productoDb.PrecioVenta = producto.PrecioVenta;
-                productoDb.Stock = producto.Stock;
                 productoDb.PuntoReposicion = producto.PuntoReposicion;
                 productoDb.Estado = producto.Estado;
                 productoDb.UrlImagen = producto.UrlImagen;

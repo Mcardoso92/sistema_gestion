@@ -1210,3 +1210,80 @@ main {
         color: var(--bs-primary);
         background-color: #eceef0;
     }
+
+/* Stock - Index */
+
+.stock-product-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--bs-primary);
+}
+
+.stock-product-code {
+    margin-top: 0.15rem;
+    font-size: 13px;
+    color: #727780;
+}
+
+.stock-quantity {
+    display: inline-block;
+    min-width: 42px;
+    padding: 0.35rem 0.6rem;
+    background-color: var(--vt-surface-container-low);
+    border: 1px solid var(--vt-outline-variant);
+    border-radius: 0.25rem;
+    font-weight: 600;
+    color: var(--vt-on-surface);
+}
+
+.stock-status-normal {
+    background-color: var(--vt-secondary-fixed);
+    color: var(--vt-on-secondary-fixed-variant);
+}
+
+    .stock-status-normal .dot {
+        background-color: var(--bs-secondary);
+    }
+
+.stock-status-bajo {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+    .stock-status-bajo .dot {
+        background-color: #d39e00;
+    }
+
+.stock-status-sin {
+    background-color: var(--vt-error-container);
+    color: var(--vt-on-error-container);
+}
+
+    .stock-status-sin .dot {
+        background-color: #ba1a1a;
+    }
+
+.stock-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: #727780;
+    text-decoration: none;
+    border-radius: 0.25rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+    .stock-action-btn:hover {
+        color: var(--bs-primary);
+        background-color: var(--vt-surface-container-low);
+    }
+
+    .stock-action-btn .material-symbols-outlined {
+        font-size: 20px;
+    }
+
+.stock-producto-inactivo {
+    opacity: 0.65;
+}
