@@ -1371,3 +1371,52 @@ main {
 .required-asterisk {
     color: var(--bs-danger);
 }
+
+/* Stock - Historial */
+
+.historial-breadcrumb {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.historial-label {
+    color: var(--vt-on-surface-variant);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.historial-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 50rem;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+    .historial-badge .material-symbols-outlined {
+        font-size: 14px;
+    }
+
+.historial-badge-entrada {
+    background-color: rgba(0, 107, 95, 0.1);
+    color: #006b5f;
+    border: 1px solid rgba(0, 107, 95, 0.2);
+}
+
+.historial-badge-salida {
+    background-color: rgba(186, 26, 26, 0.1);
+    color: #ba1a1a;
+    border: 1px solid rgba(186, 26, 26, 0.2);
+}
+
+.historial-motivo {
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
