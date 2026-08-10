@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace saas.Models
 {
@@ -16,6 +17,8 @@ namespace saas.Models
         public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
         public ICollection<Categoria> Categorias { get; set; } = new List<Categoria>();
         public ICollection<Cliente> Clientes { get; set; } = new List<Cliente>();
+        [ValidateNever]
+        public ICollection<MovimientoStock> MovimientosStock { get; set; }  = new List<MovimientoStock>();
 
     }
 }
