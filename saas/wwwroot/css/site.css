@@ -1287,3 +1287,87 @@ main {
 .stock-producto-inactivo {
     opacity: 0.65;
 }
+
+/* Stock - Ajustar */
+
+.text-corporate {
+    color: var(--bs-primary);
+}
+
+.btn-corporate {
+    background-color: var(--bs-primary);
+    color: #fff;
+    font-weight: 500;
+    border: none;
+}
+
+    .btn-corporate:hover {
+        background-color: var(--bs-primary-hover);
+        color: #fff;
+    }
+
+.card-header-corporate {
+    background-color: var(--bs-primary);
+    color: #fff;
+    border-bottom: none;
+    padding: 1rem 1.5rem;
+}
+
+.ajuste-breadcrumb {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ajuste-info-box {
+    background-color: var(--vt-surface-container-low);
+    border: 1px solid var(--vt-outline-variant);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+}
+
+.ajuste-section-title {
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.ajuste-info-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.ajuste-stock-box {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.75rem;
+    background-color: rgba(15, 76, 129, 0.05);
+    border: 1px solid rgba(15, 76, 129, 0.2);
+    border-radius: 0.5rem;
+}
+
+.ajuste-resultado-box {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    padding: 0.375rem 0.75rem;
+    background-color: var(--vt-surface-container-low);
+    border: 1px solid var(--vt-outline-variant);
+    border-radius: 0.375rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.ajuste-resultado-negativo {
+    color: var(--bs-danger);
+    border-color: var(--bs-danger);
+    background-color: var(--vt-error-container);
+}
+
+.ajuste-motivo {
+    resize: none;
+}
+
+.required-asterisk {
+    color: var(--bs-danger);
+}

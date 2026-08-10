@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Models.Enums;
 using saas.ViewModel;
+using saas.ViewModel.Enums;
 
 namespace saas.Controllers
 {
@@ -123,6 +125,159 @@ namespace saas.Controllers
             }
 
             return View(stockVM);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "AdminEmpresa")]
+        public async Task<IActionResult> Ajustar(int productoId)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            var producto = await _context.Productos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p =>
+                    p.Id == productoId &&
+                    p.EmpresaId == usuario.EmpresaId);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            if (!producto.Estado)
+            {
+                TempData["Error"] = "No se puede ajustar el stock de un producto inactivo.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var ajusteVM = new StockAjusteVM
+            {
+                ProductoId = producto.Id,
+                ProductoNombre = producto.Nombre,
+                CodigoBarra = producto.CodigoBarra,
+                StockActual = producto.Stock
+            };
+
+            return View(ajusteVM);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "AdminEmpresa")]
+        public async Task<IActionResult> Ajustar(StockAjusteVM ajusteVM)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            var producto = await _context.Productos
+                .FirstOrDefaultAsync(p =>
+                    p.Id == ajusteVM.ProductoId &&
+                    p.EmpresaId == usuario.EmpresaId);
+
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            ajusteVM.ProductoNombre = producto.Nombre;
+            ajusteVM.CodigoBarra = producto.CodigoBarra;
+            ajusteVM.StockActual = producto.Stock;
+
+            if (!producto.Estado)
+            {
+                ModelState.AddModelError("", "No se puede ajustar el stock de un producto inactivo.");
+                return View(ajusteVM);
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(ajusteVM);
+            }
+
+            int stockAnterior = producto.Stock;
+            int stockPosterior;
+            TipoMovimientoStock tipoMovimiento;
+
+            switch (ajusteVM.Tipo)
+            {
+                case TipoAjusteStockVM.Entrada:
+                    stockPosterior = stockAnterior + ajusteVM.Cantidad;
+                    tipoMovimiento = TipoMovimientoStock.AjusteEntrada;
+                    break;
+
+                case TipoAjusteStockVM.Salida:
+                    if (ajusteVM.Cantidad > stockAnterior)
+                    {
+                        ModelState.AddModelError(
+                            "Cantidad",
+                            "La cantidad a retirar no puede superar el stock disponible.");
+
+                        return View(ajusteVM);
+                    }
+
+                    stockPosterior = stockAnterior - ajusteVM.Cantidad;
+                    tipoMovimiento = TipoMovimientoStock.AjusteSalida;
+                    break;
+
+                default:
+                    ModelState.AddModelError(
+                        "Tipo",
+                        "El tipo de ajuste seleccionado no es válido.");
+
+                    return View(ajusteVM);
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                DateTime fecha = DateTime.Now;
+
+                producto.Stock = stockPosterior;
+
+                var movimiento = new MovimientoStock
+                {
+                    ProductoId = producto.Id,
+                    EmpresaId = producto.EmpresaId,
+                    Tipo = tipoMovimiento,
+                    Cantidad = ajusteVM.Cantidad,
+                    StockAnterior = stockAnterior,
+                    StockPosterior = stockPosterior,
+                    Motivo = ajusteVM.Motivo.Trim(),
+                    Fecha = fecha,
+                    UsuarioId = usuario.Id
+                };
+
+                _context.MovimientosStock.Add(movimiento);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["Success"] = "Stock ajustado correctamente.";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                producto.Stock = stockAnterior;
+                ajusteVM.StockActual = stockAnterior;
+
+                ModelState.AddModelError(
+                    "",
+                    "Ocurrió un error al realizar el ajuste de stock.");
+
+                return View(ajusteVM);
+            }
         }
 
         // GET: MovimientoStock/Details/5
