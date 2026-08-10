@@ -49,9 +49,11 @@
                             <span asp-validation-for="PrecioVenta" class="text-danger"></span>
                         </div>
                         <div class="col-md-3">
-                            <label asp-for="Stock" class="form-label">Stock Inicial</label>
-                            <input asp-for="Stock" class="form-control" placeholder="0" type="number" step="1" min="0"/>
-                            <span asp-validation-for="Stock" class="text-danger"></span>
+                            <label class="form-label">Stock Actual</label>
+                            <input value="@Model.Stock" class="form-control" disabled/>
+                            <div class="form-text">
+                                El stock se modifica desde el módulo Stock.
+                            </div>
                         </div>
                         <div class="col-md-3">
                             <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
