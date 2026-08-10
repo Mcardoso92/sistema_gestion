@@ -15,7 +15,7 @@ namespace saas.Data
         public DbSet<DetalleVenta> DetallesVenta { get; set; } = null!;
         public DbSet<Categoria> Categorias { get; set; } = null!;
         public DbSet<Cliente> Clientes { get; set; } = null!;
-        public DbSet<MovimientoStock> MovimientosStock { get; set; }
+        public DbSet<MovimientoStock> MovimientosStock { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -23,7 +23,7 @@ namespace saas.Data
 
             ConfigurarRelaciones(modelBuilder);
             ConfigurarIndices(modelBuilder);
-            ConfigurarDecimales(modelBuilder);
+            ConfigurarPropiedades(modelBuilder);
         }
 
         private static void ConfigurarRelaciones(
@@ -166,11 +166,24 @@ namespace saas.Data
 
             modelBuilder.Entity<Venta>()
                 .HasIndex(v => v.UsuarioId);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasIndex(m => m.ProductoId);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasIndex(m => m.EmpresaId);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasIndex(m => m.Fecha);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasIndex(m => m.VentaId);
         }
 
-        private static void ConfigurarDecimales(
+        private static void ConfigurarPropiedades(
             ModelBuilder modelBuilder)
         {
+            //DECIMALES
             modelBuilder.Entity<Producto>()
                 .Property(p => p.PrecioCosto)
                 .HasPrecision(18, 2);
@@ -190,6 +203,11 @@ namespace saas.Data
             modelBuilder.Entity<DetalleVenta>()
                 .Property(d => d.Subtotal)
                 .HasPrecision(18, 2);
+
+            //MovmientoStock
+            modelBuilder.Entity<MovimientoStock>()
+                .Property(m => m.Motivo)
+                .HasMaxLength(250);
         }
     }
 }
