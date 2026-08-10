@@ -21,6 +21,8 @@ namespace saas.Models
         public DateTime FechaAlta { get; set; }
         [ValidateNever]
         public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
+        [ValidateNever]
+        public ICollection<MovimientoStock> MovimientosStock { get; set; } = new List<MovimientoStock>();
 
     }
 }

@@ -15,6 +15,7 @@ namespace saas.Data
         public DbSet<DetalleVenta> DetallesVenta { get; set; } = null!;
         public DbSet<Categoria> Categorias { get; set; } = null!;
         public DbSet<Cliente> Clientes { get; set; } = null!;
+        public DbSet<MovimientoStock> MovimientosStock { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -87,6 +88,30 @@ namespace saas.Data
                 .WithMany(v => v.Detalles)
                 .HasForeignKey(d => d.VentaId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.Producto)
+                .WithMany(p => p.MovimientosStock)
+                .HasForeignKey(m => m.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.Empresa)
+                .WithMany(e => e.MovimientosStock)
+                .HasForeignKey(m => m.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.Usuario)
+                .WithMany(u => u.MovimientosStock)
+                .HasForeignKey(m => m.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.Venta)
+                .WithMany(v => v.MovimientosStock)
+                .HasForeignKey(m => m.VentaId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         private static void ConfigurarIndices(

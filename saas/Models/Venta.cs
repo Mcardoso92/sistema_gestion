@@ -21,6 +21,8 @@ namespace saas.Models
         public Cliente? Cliente { get; set; }
         [ValidateNever]
         public ICollection<DetalleVenta> Detalles { get; set; } = new List<DetalleVenta>();
+        [ValidateNever]
+        public ICollection<MovimientoStock> MovimientosStock { get; set; } = new List<MovimientoStock>();
 
     }
 }
