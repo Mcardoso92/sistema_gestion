@@ -4,6 +4,8 @@
 
     const buscarProductosUrl = puntoVenta.dataset.buscarProductosUrl;
     const buscarClientesUrl = puntoVenta.dataset.buscarClientesUrl;
+    const ventasIndexUrl = puntoVenta.dataset.ventasIndexUrl;
+    const btnVolverVentas = document.getElementById("btnVolverVentas");
 
     const formVenta = document.getElementById("formVenta");
 
@@ -966,6 +968,23 @@
         renderizarCarrito();
         inputBuscarProducto.value = "";
         inputBuscarProducto.focus();
+    });
+
+    btnVolverVentas.addEventListener("click", evento => {
+        evento.preventDefault();
+
+        if (carrito.length === 0) {
+            window.location.href = ventasIndexUrl;
+            return;
+        }
+
+        const confirmar = window.confirm(
+            "Hay una venta en curso. ¿Está seguro de que desea volver al listado? Se perderán los productos cargados."
+        );
+
+        if (!confirmar) return;
+
+        window.location.href = ventasIndexUrl;
     });
 
     formVenta.addEventListener("submit", evento => {

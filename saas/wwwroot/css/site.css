@@ -947,6 +947,13 @@ footer {
 }
 
 /*Estilos de venta-pos*/
+
+.venta-total-details {
+    font-size: clamp(1.75rem, 3vw, 3rem);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    line-height: 1.1;
+}
 body {
     font-family: 'Hanken Grotesk', sans-serif;
     background-color: #f7f9fb;

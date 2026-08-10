@@ -27,7 +27,10 @@
                 <a class="h4 mb-0 text-white fw-bold text-uppercase me-4"" asp-area="" asp-controller="Home" asp-action="Index">Veltika</a>
                 <nav class="d-none d-md-flex align-items-center gap-4">
                     <a class="text-white-50 text-decoration-none hover-white" asp-controller="Home" asp-action="Index">Inicio</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Empresa" asp-action="Index">Empresas</a>
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <a class="text-white-50 text-decoration-none hover-white" asp-controller="Empresa" asp-action="Index">Empresas</a>
+                    }
                     <a class="text-white-50 text-decoration-none hover-white" asp-controller="Categoria" asp-action="Index">Categorías</a>
                     <a class="text-white-50 text-decoration-none hover-white" asp-controller="Producto" asp-action="Index">Productos</a>
                     <a class="text-white-50 text-decoration-none hover-white" asp-controller="Usuario" asp-action="Index">Usuarios</a>

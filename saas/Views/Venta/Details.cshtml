@@ -64,6 +64,18 @@
 
                 Nueva Venta
             </a>
+            @if (Model.Estado)
+            {
+                <form asp-action="Anular" asp-route-id="@Model.Id" method="post" class="d-inline"
+                      onsubmit="return confirm('¿Está seguro de que desea anular esta venta? El stock de los productos será restaurado.');">
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="btn btn-outline-danger py-2 fw-medium d-flex align-items-center gap-2 small">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">cancel</span>
+                        Anular Venta
+                    </button>
+                </form>
+            }
         </div>
     </div>
 
@@ -208,8 +220,7 @@
                         Total
                     </div>
 
-                    <div class="display-5 fw-bold text-white mb-0"
-                         style="letter-spacing: -0.02em;">
+                    <div class="venta-total-details fw-bold text-white mb-0">
                         @Model.Total.ToString("C")
                     </div>
                 </div>
