@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using saas.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace saas.Models

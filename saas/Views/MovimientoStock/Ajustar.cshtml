@@ -1,0 +1,153 @@
+﻿@model StockAjusteVM
+@using saas.ViewModel.Enums
+
+@{
+    ViewData["Title"] = "Ajustar Stock";
+}
+
+<main class="container-fluid flex-grow-1 px-3 px-md-5 py-4 py-md-5" style="max-width: 1440px;">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 ajuste-breadcrumb">
+                <li class="breadcrumb-item">
+                    <a asp-action="Index" class="text-decoration-none text-secondary d-flex align-items-center">
+                        <span class="material-symbols-outlined fs-6 me-1">inventory_2</span>Stock
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-corporate" aria-current="page">Ajustar</li>
+            </ol>
+        </nav>
+        <h1 class="display-6 fw-bold text-corporate mb-1">Ajustar Stock</h1>
+        <p class="text-muted mb-0">Actualice el inventario manualmente registrando el motivo del cambio.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 bg-white shadow-sm h-100">
+                <div class="card-header card-header-corporate d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                    <h2 class="h5 mb-0">Detalles del Ajuste</h2>
+                </div>
+
+                <div class="card-body p-4 p-md-5">
+                    <div class="ajuste-info-box mb-4">
+                        <h3 class="text-muted text-uppercase mb-3 ajuste-section-title">Información del Producto</h3>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <span class="d-block text-muted mb-1 ajuste-info-label">Producto</span>
+                                <span class="d-block fw-semibold text-dark">@Model.ProductoNombre</span>
+                            </div>
+                            <div class="col-md-4">
+                                <span class="d-block text-muted mb-1 ajuste-info-label">Código de Barras</span>
+                                <span class="d-block fw-semibold text-dark">
+                                    @(string.IsNullOrWhiteSpace(Model.CodigoBarra) ? "Sin código" : Model.CodigoBarra)
+                                </span>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="ajuste-stock-box">
+                                    <span class="d-block text-corporate mb-1 ajuste-info-label">Stock Actual</span>
+                                    <div class="d-flex align-items-baseline">
+                                        <span class="fs-3 fw-bold text-corporate lh-1">@Model.StockActual</span>
+                                        <span class="text-muted ms-1 small">uds.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="stockActual"
+                         data-stock="@Model.StockActual"
+                         data-tipo-entrada="@((int)TipoAjusteStockVM.Entrada)"
+                         data-tipo-salida="@((int)TipoAjusteStockVM.Salida)">
+                    </div>
+                    <form asp-action="Ajustar" method="post">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="ProductoId" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <label asp-for="Tipo" class="form-label">Tipo de Ajuste <span class="required-asterisk">*</span></label>
+                                <select asp-for="Tipo" class="form-select" id="tipoAjuste">
+                                    <option value="">Seleccione el tipo...</option>
+                                    <option value="@((int)TipoAjusteStockVM.Entrada)">Entrada</option>
+                                    <option value="@((int)TipoAjusteStockVM.Salida)">Salida</option>
+                                </select>
+                                <span asp-validation-for="Tipo" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Cantidad" class="form-label">Cantidad <span class="required-asterisk">*</span></label>
+                                <input asp-for="Cantidad" class="form-control" min="1" id="cantidadAjuste" placeholder="0" />
+                                <span asp-validation-for="Cantidad" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Stock Resultante</label>
+                                <div class="ajuste-resultado-box" id="stockResultante">@Model.StockActual</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Motivo" class="form-label">Motivo del Ajuste <span class="required-asterisk">*</span></label>
+                            <textarea asp-for="Motivo" class="form-control ajuste-motivo" id="motivo" maxlength="250" rows="4" placeholder="Especifique la razón del cambio de stock..."></textarea>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span asp-validation-for="Motivo" class="text-danger small"></span>
+                                <small class="text-muted"><span id="motivoContador">0</span> / 250</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4 text-muted" />
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 fw-medium">CANCELAR</a>
+                            <button class="btn btn-corporate px-4 d-flex align-items-center gap-2" type="submit">
+                                <span class="material-symbols-outlined fs-5">save</span>GUARDAR AJUSTE
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 bg-white shadow-sm">
+                <div class="card-header bg-light border-bottom d-flex align-items-center gap-2 p-3">
+                    <span class="material-symbols-outlined text-corporate fs-4">help</span>
+                    <h3 class="h5 mb-0 text-dark">Guía de Ayuda</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex gap-3 mb-4 align-items-start">
+                        <span class="material-symbols-outlined text-corporate mt-1">swap_vert</span>
+                        <div>
+                            <h4 class="h6 mb-1 fw-bold">Entrada o Salida</h4>
+                            <p class="text-muted small mb-0">Use Entrada para incrementar existencias y Salida para descontarlas manualmente.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 mb-4 align-items-start">
+                        <span class="material-symbols-outlined text-corporate mt-1">inventory</span>
+                        <div>
+                            <h4 class="h6 mb-1 fw-bold">Stock Disponible</h4>
+                            <p class="text-muted small mb-0">Una salida nunca puede superar el stock disponible del producto.</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-start">
+                        <span class="material-symbols-outlined text-corporate mt-1">history</span>
+                        <div>
+                            <h4 class="h6 mb-1 fw-bold">Trazabilidad</h4>
+                            <p class="text-muted small mb-0">Cada ajuste registra el usuario, la fecha, la cantidad y el motivo. Una vez confirmado, no puede editarse ni eliminarse.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/stock-ajustar.js" asp-append-version="true"></script>
+}
+
+}

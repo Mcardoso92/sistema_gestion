@@ -1,4 +1,6 @@
-﻿namespace saas.ViewModel
+﻿using saas.ViewModel.Enums;
+
+namespace saas.ViewModel
 {
     public class StockIndexItemVM
     {

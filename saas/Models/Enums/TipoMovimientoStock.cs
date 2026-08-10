@@ -1,4 +1,4 @@
-﻿namespace saas.Models
+﻿namespace saas.Models.Enums
 {
     public enum TipoMovimientoStock
     {

@@ -1,4 +1,4 @@
-﻿namespace saas.ViewModel
+﻿namespace saas.ViewModel.Enums
 {
     public enum EstadoStockVM
     {
