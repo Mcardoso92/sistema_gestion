@@ -15,14 +15,13 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
 
-
         public MovimientoStockController(SaasDbContext context, UserManager<Usuario> userManager)
         {
             _context = context;
             _userManager = userManager;
         }
 
-        // GET: MovimientoStocks
+        // GET: MovimientoStock
         public async Task<IActionResult> Index(StockIndexVM stockVM)
         {
             var usuario = await _userManager.GetUserAsync(User);
@@ -126,7 +125,7 @@ namespace saas.Controllers
             return View(stockVM);
         }
 
-        // GET: MovimientoStocks/Details/5
+        // GET: MovimientoStock/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -148,7 +147,7 @@ namespace saas.Controllers
             return View(movimientoStock);
         }
 
-        // GET: MovimientoStocks/Create
+        // GET: MovimientoStock/Create
         public IActionResult Create()
         {
             ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre");
@@ -158,7 +157,7 @@ namespace saas.Controllers
             return View();
         }
 
-        // POST: MovimientoStocks/Create
+        // POST: MovimientoStock/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -178,7 +177,7 @@ namespace saas.Controllers
             return View(movimientoStock);
         }
 
-        // GET: MovimientoStocks/Edit/5
+        // GET: MovimientoStock/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -198,7 +197,7 @@ namespace saas.Controllers
             return View(movimientoStock);
         }
 
-        // POST: MovimientoStocks/Edit/5
+        // POST: MovimientoStock/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -237,7 +236,7 @@ namespace saas.Controllers
             return View(movimientoStock);
         }
 
-        // GET: MovimientoStocks/Delete/5
+        // GET: MovimientoStock/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -259,7 +258,7 @@ namespace saas.Controllers
             return View(movimientoStock);
         }
 
-        // POST: MovimientoStocks/Delete/5
+        // POST: MovimientoStock/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
