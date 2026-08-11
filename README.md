@@ -3,7 +3,7 @@
 > Sistema SaaS de gestión empresarial desarrollado con ASP.NET Core MVC.
 
 ![Estado](https://img.shields.io/badge/Estado-En%20Desarrollo-blue)
-![.NET](https://img.shields.io/badge/.NET-8-purple)
+![.NET](https://img.shields.io/badge/.NET-9-purple)
 ![ASP.NET Core MVC](https://img.shields.io/badge/ASP.NET%20Core-MVC-blueviolet)
 ![Entity Framework Core](https://img.shields.io/badge/Entity%20Framework-Core-success)
 ![SQL Server](https://img.shields.io/badge/SQL%20Server-Database-red)
