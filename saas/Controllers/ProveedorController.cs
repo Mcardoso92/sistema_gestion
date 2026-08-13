@@ -71,7 +71,9 @@ namespace saas.Controllers
                     p.RazonSocial.Contains(busqueda) ||
                     (p.NombreFantasia != null && p.NombreFantasia.Contains(busqueda)) ||
                     (p.Email != null && p.Email.Contains(busqueda)) ||
-                    (p.CUIT != null && p.CUIT.Contains(cuitBusqueda)));
+                    (!string.IsNullOrEmpty(cuitBusqueda) &&
+                     p.CUIT != null &&
+                     p.CUIT.Contains(cuitBusqueda)));
             }
 
             proveedorVM.Proveedores = await consulta
