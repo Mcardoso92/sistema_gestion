@@ -1,0 +1,44 @@
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
+
+namespace saas.ViewModel
+{
+    public class ProveedorCreateVM
+    {
+        [Required(ErrorMessage = "La razón social es obligatoria.")]
+        [StringLength(150, ErrorMessage = "La razón social no puede superar los 150 caracteres.")]
+        public string RazonSocial { get; set; } = null!;
+
+        [StringLength(150, ErrorMessage = "El nombre de fantasía no puede superar los 150 caracteres.")]
+        public string? NombreFantasia { get; set; }
+
+        [StringLength(14, ErrorMessage = "El CUIT no tiene un formato válido.")]
+        public string? CUIT { get; set; }
+
+        [EmailAddress(ErrorMessage = "El email ingresado no tiene un formato válido.")]
+        [StringLength(150, ErrorMessage = "El email no puede superar los 150 caracteres.")]
+        public string? Email { get; set; }
+
+        [StringLength(50, ErrorMessage = "El teléfono no puede superar los 50 caracteres.")]
+        public string? Telefono { get; set; }
+
+        [StringLength(200, ErrorMessage = "La dirección no puede superar los 200 caracteres.")]
+        public string? Direccion { get; set; }
+
+        [StringLength(100, ErrorMessage = "La localidad no puede superar los 100 caracteres.")]
+        public string? Localidad { get; set; }
+
+        [StringLength(100, ErrorMessage = "La provincia no puede superar los 100 caracteres.")]
+        public string? Provincia { get; set; }
+
+        [StringLength(20, ErrorMessage = "El código postal no puede superar los 20 caracteres.")]
+        public string? CodigoPostal { get; set; }
+
+        [StringLength(500, ErrorMessage = "Las observaciones no pueden superar los 500 caracteres.")]
+        public string? Observaciones { get; set; }
+
+        public int? EmpresaId { get; set; }
+
+        public List<SelectListItem> Empresas { get; set; } = new();
+    }
+}

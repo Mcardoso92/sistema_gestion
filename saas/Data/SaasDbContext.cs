@@ -16,6 +16,7 @@ namespace saas.Data
         public DbSet<Categoria> Categorias { get; set; } = null!;
         public DbSet<Cliente> Clientes { get; set; } = null!;
         public DbSet<MovimientoStock> MovimientosStock { get; set; } = null!;
+        public DbSet<Proveedor> Proveedores { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -112,6 +113,12 @@ namespace saas.Data
                 .WithMany(v => v.MovimientosStock)
                 .HasForeignKey(m => m.VentaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Proveedor>()
+                .HasOne(p => p.Empresa)
+                .WithMany(e => e.Proveedores)
+                .HasForeignKey(p => p.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         private static void ConfigurarIndices(
@@ -178,6 +185,12 @@ namespace saas.Data
 
             modelBuilder.Entity<MovimientoStock>()
                 .HasIndex(m => m.VentaId);
+
+            modelBuilder.Entity<Proveedor>()
+                .HasIndex(p => p.EmpresaId);
+
+            modelBuilder.Entity<Proveedor>()
+                .HasIndex(p => new { p.EmpresaId, p.CUIT });
         }
 
         private static void ConfigurarPropiedades(

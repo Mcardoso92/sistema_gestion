@@ -1,0 +1,115 @@
+﻿@model ProveedorDetailsVM
+
+@{
+    ViewData["Title"] = "Desactivar Proveedor";
+}
+
+<main class="container-fluid px-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">Proveedores</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Desactivar</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-1 fw-bold">Desactivar Proveedor</h1>
+        <p class="text-muted mb-0">Confirme la desactivación del proveedor seleccionado.</p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="alert alert-warning d-flex align-items-start gap-3 mb-4">
+                        <span class="material-symbols-outlined">warning</span>
+                        <div>
+                            <div class="fw-semibold mb-1">El proveedor dejará de estar disponible para nuevas operaciones.</div>
+                            <div class="small">La información no será eliminada de la base de datos y podrá reactivarse posteriormente desde Editar.</div>
+                        </div>
+                    </div>
+
+                    <h2 class="proveedor-section-title">
+                        <span class="material-symbols-outlined fs-5">domain</span>
+                        Proveedor a desactivar
+                    </h2>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Razón Social</div>
+                            <div class="proveedor-detail-value">@Model.RazonSocial</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Nombre de Fantasía</div>
+                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.NombreFantasia) ? "—" : Model.NombreFantasia)</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">CUIT</div>
+                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.CUIT) ? "—" : Model.CUIT)</div>
+                        </div>
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <div class="proveedor-detail-label">Empresa</div>
+                                <div class="proveedor-detail-value">@Model.EmpresaNombre</div>
+                            </div>
+                        }
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Email</div>
+                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email)</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Teléfono</div>
+                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.Telefono) ? "—" : Model.Telefono)</div>
+                        </div>
+                    </div>
+
+                    <form asp-action="Delete" method="post">
+                        <input asp-for="Id" type="hidden" />
+
+                        <div class="d-flex justify-content-end gap-3 mt-5 pt-4 border-top">
+                            <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                            <button type="submit" class="btn btn-danger d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined fs-6">block</span>
+                                Desactivar Proveedor
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2 text-primary">info</span>
+                    Guía de Ayuda
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Soft Delete</h6>
+                        <p class="text-muted mb-0" style="font-size: 13px;">La desactivación no elimina físicamente el proveedor. Sus datos y su historial se conservan.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Nuevas compras</h6>
+                        <p class="text-muted mb-0" style="font-size: 13px;">Un proveedor inactivo no podrá seleccionarse para nuevas compras.</p>
+                    </div>
+
+                    <div class="tip-box">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="material-symbols-outlined text-secondary me-2">restart_alt</span>
+                            <span class="fw-bold" style="font-size: 14px;">Reactivación</span>
+                        </div>
+                        <p class="mb-0 text-muted" style="font-size: 13px;">Si vuelve a necesitar el proveedor, podrá reactivarlo posteriormente desde la pantalla Editar.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

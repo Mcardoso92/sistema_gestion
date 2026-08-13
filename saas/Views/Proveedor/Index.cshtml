@@ -1,0 +1,302 @@
+﻿@model saas.ViewModel.ProveedorIndexVM
+
+@{
+    ViewData["Title"] = "Proveedores";
+    bool esSuperAdmin = User.IsInRole("SuperAdmin");
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb text-sm mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="text-decoration-none text-muted-custom">
+                        Dashboard
+                    </a>
+                </li>
+                <li class="breadcrumb-item active text-dark fw-medium"
+                    aria-current="page">
+                    Proveedores
+                </li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+            <div>
+                <h1 class="h2 mb-1">Proveedores</h1>
+                <p class="text-muted-custom mb-0">
+                    Administrá los proveedores y sus datos de contacto.
+                </p>
+            </div>
+
+            <a asp-action="Create"
+               class="btn btn-primary d-flex align-items-center gap-2 fw-medium text-sm">
+                <span class="material-symbols-outlined icon-sm">add</span>
+                Nuevo proveedor
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Cerrar">
+            </button>
+        </div>
+    }
+
+    <div class="card bg-white mb-4">
+        <div class="card-body p-3">
+            <form asp-action="Index"
+                  method="get"
+                  class="row g-3 align-items-end">
+
+                <div class="col-12 col-lg">
+                    <label asp-for="Busqueda"
+                           class="form-label text-sm fw-medium">
+                        Buscar
+                    </label>
+
+                    <div class="position-relative">
+                        <span class="material-symbols-outlined proveedor-search-icon">
+                            search
+                        </span>
+
+                        <input asp-for="Busqueda"
+                               class="form-control ps-5"
+                               placeholder="Razón social, nombre, CUIT o email" />
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4 col-lg-2">
+                    <label asp-for="Estado"
+                           class="form-label text-sm fw-medium">
+                        Estado
+                    </label>
+
+                    <select asp-for="Estado" class="form-select">
+                        <option value="activos">Activos</option>
+                        <option value="inactivos">Inactivos</option>
+                        <option value="todos">Todos</option>
+                    </select>
+                </div>
+
+                @if (esSuperAdmin)
+                {
+                    <div class="col-12 col-md-4 col-lg-3">
+                        <label asp-for="EmpresaId"
+                               class="form-label text-sm fw-medium">
+                            Empresa
+                        </label>
+
+                        <select asp-for="EmpresaId"
+                                asp-items="Model.Empresas"
+                                class="form-select">
+                            <option value="">Todas las empresas</option>
+                        </select>
+                    </div>
+                }
+
+                <div class="col-12 col-md-auto">
+                    <div class="d-flex gap-2">
+                        <button type="submit"
+                                class="btn btn-primary d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined icon-sm">
+                                search
+                            </span>
+                            Buscar
+                        </button>
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined icon-sm">
+                                restart_alt
+                            </span>
+                            Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card bg-white">
+        <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center">
+            <h2 class="h6 mb-0">Listado de proveedores</h2>
+
+            <span class="text-sm text-muted-custom">
+                @Model.Proveedores.Count
+                @(Model.Proveedores.Count == 1 ? "proveedor" : "proveedores")
+            </span>
+        </div>
+
+        @if (Model.Proveedores.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Razón social</th>
+                            <th>Nombre de fantasía</th>
+                            <th>CUIT</th>
+                            <th>Contacto</th>
+
+                            @if (esSuperAdmin)
+                            {
+                                <th>Empresa</th>
+                            }
+
+                            <th class="text-center">Estado</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var proveedor in Model.Proveedores)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <a asp-action="Details"
+                                       asp-route-id="@proveedor.Id"
+                                       class="fw-semibold text-decoration-none">
+                                        @proveedor.RazonSocial
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(proveedor.NombreFantasia))
+                                    {
+                                        @proveedor.NombreFantasia
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted-custom">—</span>
+                                    }
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @if (!string.IsNullOrWhiteSpace(proveedor.CUIT))
+                                    {
+                                        @proveedor.CUIT
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted-custom">—</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        @if (!string.IsNullOrWhiteSpace(proveedor.Email))
+                                        {
+                                            <span>@proveedor.Email</span>
+                                        }
+
+                                        @if (!string.IsNullOrWhiteSpace(proveedor.Telefono))
+                                        {
+                                            <span class="text-sm text-muted-custom">
+                                                @proveedor.Telefono
+                                            </span>
+                                        }
+
+                                        @if (string.IsNullOrWhiteSpace(proveedor.Email) &&
+                                                                        string.IsNullOrWhiteSpace(proveedor.Telefono))
+                                        {
+                                            <span class="text-muted-custom">—</span>
+                                        }
+                                    </div>
+                                </td>
+
+                                @if (esSuperAdmin)
+                                {
+                                    <td>@proveedor.EmpresaNombre</td>
+                                }
+
+                                <td class="text-center">
+                                    @if (proveedor.Estado)
+                                    {
+                                        <span class="badge rounded-pill badge-success-light text-xs px-2 py-1">
+                                            Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill badge-danger-light text-xs px-2 py-1">
+                                            Inactivo
+                                        </span>
+                                    }
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        <a asp-action="Details"
+                                           asp-route-id="@proveedor.Id"
+                                           class="btn btn-sm btn-light proveedor-action-btn"
+                                           title="Ver detalle">
+                                            <span class="material-symbols-outlined icon-sm">
+                                                visibility
+                                            </span>
+                                        </a>
+
+                                        <a asp-action="Edit"
+                                           asp-route-id="@proveedor.Id"
+                                           class="btn btn-sm btn-light proveedor-action-btn"
+                                           title="Editar">
+                                            <span class="material-symbols-outlined icon-sm">
+                                                edit
+                                            </span>
+                                        </a>
+
+                                        @if (proveedor.Estado)
+                                        {
+                                            <a asp-action="Delete"
+                                               asp-route-id="@proveedor.Id"
+                                               class="btn btn-sm btn-light proveedor-action-btn proveedor-action-danger"
+                                               title="Desactivar">
+                                                <span class="material-symbols-outlined icon-sm">
+                                                    block
+                                                </span>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 px-3">
+                <span class="material-symbols-outlined proveedor-empty-icon mb-2">
+                    local_shipping
+                </span>
+
+                <h3 class="h6 mb-1">No se encontraron proveedores</h3>
+
+                <p class="text-muted-custom text-sm mb-0">
+                    Probá modificando los filtros o registrá un nuevo proveedor.
+                </p>
+            </div>
+        }
+    </div>
+</main>

@@ -1420,3 +1420,65 @@ main {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* Stilos para el componente Proveedor index */
+
+.proveedor-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    color: var(--bs-secondary-color);
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.proveedor-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.proveedor-action-danger:hover {
+    color: var(--bs-danger);
+    background-color: var(--bs-danger-bg-subtle);
+}
+
+.proveedor-empty-icon {
+    font-size: 42px;
+    color: var(--bs-secondary-color);
+}
+
+/* Proveedor - Create / Edit */
+
+.proveedor-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--v-border);
+    color: var(--v-primary-container);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+/* Proveedor - Details */
+
+.proveedor-detail-label {
+    margin-bottom: 0.25rem;
+    color: var(--v-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.proveedor-detail-value {
+    color: var(--v-text-main);
+    font-size: 15px;
+    font-weight: 500;
+}
