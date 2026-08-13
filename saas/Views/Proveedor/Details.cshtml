@@ -1,0 +1,214 @@
+﻿@model ProveedorDetailsVM
+
+@{
+    ViewData["Title"] = "Detalle del Proveedor";
+}
+
+<main class="container-fluid px-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">Proveedores</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Detalle</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1 class="h3 mb-1 fw-bold">Detalle del Proveedor</h1>
+                <p class="text-muted mb-0">Información registrada del proveedor seleccionado.</p>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar Proveedor</a>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Estado)
+    {
+        <div class="alert alert-warning mb-4">
+            Este proveedor se encuentra actualmente inactivo.
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="proveedor-section-title">
+                        <span class="material-symbols-outlined fs-5">domain</span>
+                        Información General
+                    </h2>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Razón Social</div>
+                            <div class="proveedor-detail-value">@Model.RazonSocial</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Nombre de Fantasía</div>
+                            <div class="proveedor-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.NombreFantasia) ? "—" : Model.NombreFantasia)
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">CUIT</div>
+                            <div class="proveedor-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.CUIT) ? "—" : Model.CUIT)
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Estado</div>
+
+                            @if (Model.Estado)
+                            {
+                                <span class="badge-status status-activo">
+                                    <span class="dot"></span>
+                                    Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge-status status-inactivo">
+                                    <span class="dot"></span>
+                                    Inactivo
+                                </span>
+                            }
+                        </div>
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <div class="proveedor-detail-label">Empresa</div>
+                                <div class="proveedor-detail-value">@Model.EmpresaNombre</div>
+                            </div>
+                        }
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Fecha de Alta</div>
+                            <div class="proveedor-detail-value">@Model.FechaAlta.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="proveedor-section-title">
+                        <span class="material-symbols-outlined fs-5">contact_mail</span>
+                        Datos de Contacto
+                    </h2>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Email</div>
+                            <div class="proveedor-detail-value">
+                                @if (!string.IsNullOrWhiteSpace(Model.Email))
+                                {
+                                    <a href="mailto:@Model.Email" class="text-decoration-none">@Model.Email</a>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="proveedor-detail-label">Teléfono</div>
+                            <div class="proveedor-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.Telefono) ? "—" : Model.Telefono)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h2 class="proveedor-section-title">
+                        <span class="material-symbols-outlined fs-5">location_on</span>
+                        Ubicación
+                    </h2>
+
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <div class="proveedor-detail-label">Dirección</div>
+                            <div class="proveedor-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.Direccion) ? "—" : Model.Direccion)
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="proveedor-detail-label">Localidad</div>
+                            <div class="proveedor-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.Localidad) ? "—" : Model.Localidad)
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="proveedor-detail-label">Provincia</div>
+                            <div class="proveedor-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.Provincia) ? "—" : Model.Provincia)
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="proveedor-detail-label">Código Postal</div>
+                            <div class="proveedor-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.CodigoPostal) ? "—" : Model.CodigoPostal)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="proveedor-section-title">
+                        <span class="material-symbols-outlined fs-5">notes</span>
+                        Observaciones
+                    </h2>
+
+                    <div class="proveedor-detail-value mb-0">
+                        @(string.IsNullOrWhiteSpace(Model.Observaciones) ? "Sin observaciones." : Model.Observaciones)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex align-items-center">
+                    <span class="material-symbols-outlined me-2 text-primary">info</span>
+                    Guía de Ayuda
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Información del proveedor</h6>
+                        <p class="text-muted mb-0" style="font-size: 13px;">Esta pantalla permite consultar los datos registrados sin modificar información.</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-2" style="font-size: 14px; color: var(--v-primary-container);">Editar datos</h6>
+                        <p class="text-muted mb-0" style="font-size: 13px;">Utilice Editar Proveedor para modificar los datos administrativos o reactivar un proveedor inactivo.</p>
+                    </div>
+
+                    <div class="tip-box">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="material-symbols-outlined text-secondary me-2">shopping_cart</span>
+                            <span class="fw-bold" style="font-size: 14px;">Compras</span>
+                        </div>
+                        <p class="mb-0 text-muted" style="font-size: 13px;">El historial comercial del proveedor podrá incorporarse aquí cuando implementemos el módulo de Compras.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

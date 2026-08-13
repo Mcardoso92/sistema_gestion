@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Models.Enums;
 using saas.ViewModel;
 using System.Data;
 
@@ -406,8 +407,7 @@ namespace saas.Controllers
 
                 foreach (var detalleVM in ventaVM.Detalles)
                 {
-                    var producto = productosPorId[
-                        detalleVM.ProductoId];
+                    var producto = productosPorId[detalleVM.ProductoId];
 
                     if (producto.Stock < detalleVM.Cantidad)
                     {
@@ -416,19 +416,13 @@ namespace saas.Controllers
                             $"Stock insuficiente para \"{producto.Nombre}\". Disponible: {producto.Stock}. Solicitado: {detalleVM.Cantidad}.");
 
                         await transaccion.RollbackAsync();
-
-                        await PrepararVentaParaVista(
-                            ventaVM,
-                            empresaVentaId);
+                        await PrepararVentaParaVista(ventaVM, empresaVentaId);
 
                         return View(ventaVM);
                     }
 
-                    decimal precioUnitario =
-                        producto.PrecioVenta;
-
-                    decimal subtotal =
-                        precioUnitario * detalleVM.Cantidad;
+                    decimal precioUnitario = producto.PrecioVenta;
+                    decimal subtotal = precioUnitario * detalleVM.Cantidad;
 
                     venta.Detalles.Add(new DetalleVenta
                     {
@@ -438,7 +432,22 @@ namespace saas.Controllers
                         Subtotal = subtotal
                     });
 
-                    producto.Stock -= detalleVM.Cantidad;
+                    int stockAnterior = producto.Stock;
+                    int stockPosterior = stockAnterior - detalleVM.Cantidad;
+
+                    producto.Stock = stockPosterior;
+
+                    venta.MovimientosStock.Add(new MovimientoStock
+                    {
+                        ProductoId = producto.Id,
+                        EmpresaId = empresaVentaId,
+                        Tipo = TipoMovimientoStock.Venta,
+                        Cantidad = detalleVM.Cantidad,
+                        StockAnterior = stockAnterior,
+                        StockPosterior = stockPosterior,
+                        Fecha = venta.Fecha,
+                        UsuarioId = usuario.Id
+                    });
 
                     totalVenta += subtotal;
                 }
@@ -601,9 +610,26 @@ namespace saas.Controllers
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
+                DateTime fechaAnulacion = DateTime.Now;
+
                 foreach (var detalle in venta.Detalles)
                 {
-                    detalle.Producto.Stock += detalle.Cantidad;
+                    int stockAnterior = detalle.Producto.Stock;
+                    int stockPosterior = stockAnterior + detalle.Cantidad;
+
+                    detalle.Producto.Stock = stockPosterior;
+
+                    venta.MovimientosStock.Add(new MovimientoStock
+                    {
+                        ProductoId = detalle.ProductoId,
+                        EmpresaId = venta.EmpresaId,
+                        Tipo = TipoMovimientoStock.AnulacionVenta,
+                        Cantidad = detalle.Cantidad,
+                        StockAnterior = stockAnterior,
+                        StockPosterior = stockPosterior,
+                        Fecha = fechaAnulacion,
+                        UsuarioId = usuario.Id
+                    });
                 }
 
                 venta.Estado = false;
