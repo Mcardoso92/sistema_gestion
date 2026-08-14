@@ -23,6 +23,10 @@ namespace saas.Models
         public ICollection<Venta> Ventas { get; set; } = new List<Venta>();
         [ValidateNever]
         public ICollection<MovimientoStock> MovimientosStock { get; set; } = new List<MovimientoStock>();
+        [ValidateNever]
+        public ICollection<Compra> Compras { get; set; } = new List<Compra>();
+        [ValidateNever]
+        public ICollection<Compra> ComprasAnuladas { get; set; } = new List<Compra>();
 
     }
 }

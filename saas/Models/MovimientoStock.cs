@@ -30,5 +30,8 @@ namespace saas.Models
         public int? VentaId { get; set; }
         [ValidateNever]
         public Venta? Venta { get; set; }
+        public int? CompraId { get; set; }
+        [ValidateNever]
+        public Compra? Compra { get; set; }
     }
 }
