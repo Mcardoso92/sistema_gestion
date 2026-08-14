@@ -1,0 +1,228 @@
+﻿@model saas.ViewModel.CompraCreateVM
+
+@{
+    ViewData["Title"] = "Nueva Compra";
+    bool esSuperAdmin = User.IsInRole("SuperAdmin");
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb text-sm mb-0">
+                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted-custom">Compras</a></li>
+                <li class="breadcrumb-item active text-dark fw-medium" aria-current="page">Nueva compra</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+            <div>
+                <h1 class="h2 mb-1">Nueva Compra</h1>
+                <p class="text-muted-custom mb-0">Registrá una compra a proveedor y actualizá stock, costo y precios asociados.</p>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" id="compraForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="card bg-white mb-4">
+            <div class="card-body p-4">
+                <h2 class="compra-section-title">
+                    <span class="material-symbols-outlined icon-sm">receipt_long</span>
+                    Información general
+                </h2>
+
+                <div class="row g-3">
+                    @if (esSuperAdmin)
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="EmpresaId" class="form-label fw-medium">Empresa <span class="text-danger">*</span></label>
+                            <select asp-for="EmpresaId" asp-items="Model.Empresas" class="form-select" id="empresaSelect">
+                                <option value="">-- Seleccione una empresa --</option>
+                            </select>
+                            <span asp-validation-for="EmpresaId" class="text-danger text-sm"></span>
+                        </div>
+                    }
+
+                    <div class="col-md-6">
+                        <label asp-for="ProveedorId" class="form-label fw-medium">Proveedor <span class="text-danger">*</span></label>
+                        <select asp-for="ProveedorId" asp-items="Model.Proveedores" class="form-select">
+                            <option value="">-- Seleccione un proveedor --</option>
+                        </select>
+                        <span asp-validation-for="ProveedorId" class="text-danger text-sm"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="TipoComprobante" class="form-label fw-medium">Tipo de comprobante</label>
+                        <input asp-for="TipoComprobante" class="form-control" placeholder="Ej.: Factura A, Remito" />
+                        <span asp-validation-for="TipoComprobante" class="text-danger text-sm"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="NumeroComprobante" class="form-label fw-medium">Número de comprobante</label>
+                        <input asp-for="NumeroComprobante" class="form-control" placeholder="Ej.: 0001-00001234" />
+                        <span asp-validation-for="NumeroComprobante" class="text-danger text-sm"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Observaciones" class="form-label fw-medium">Observaciones</label>
+                        <textarea asp-for="Observaciones" class="form-control" rows="3" placeholder="Información adicional sobre la compra..."></textarea>
+                        <span asp-validation-for="Observaciones" class="text-danger text-sm"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-white mb-4">
+            <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h6 mb-1">Productos de la compra</h2>
+                    <p class="text-sm text-muted-custom mb-0">Ingresá cantidad, costo y, si corresponde, un nuevo precio de venta.</p>
+                </div>
+
+                <button type="button" id="agregarProductoBtn" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined icon-sm">add</span>
+                    Agregar producto
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle compra-detalle-table">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Producto</th>
+                            <th class="text-end">Cantidad</th>
+                            <th class="text-end">Costo unitario</th>
+                            <th class="text-end">Precio venta actual</th>
+                            <th class="text-end">Nuevo precio venta</th>
+                            <th class="text-end">Subtotal</th>
+                            <th class="text-center pe-4">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detalleCompraBody">
+                        @for (int i = 0; i < Model.Detalles.Count; i++)
+                        {
+                            var detalle = Model.Detalles[i];
+
+                            <tr class="compra-detalle-row">
+                                <td class="ps-4">
+                                    <select name="Detalles[@i].ProductoId" class="form-select form-select-sm producto-select" data-field="ProductoId">
+                                        <option value="">Seleccione...</option>
+                                        @foreach (var producto in Model.Productos)
+                                        {
+                                            if (producto.Value == detalle.ProductoId.ToString())
+                                            {
+                                                <option value="@producto.Value" selected>@producto.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@producto.Value">@producto.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+
+                                <td>
+                                    <input name="Detalles[@i].Cantidad" class="form-control form-control-sm text-end cantidad-input" data-field="Cantidad" type="number" min="1" value="@detalle.Cantidad" />
+                                </td>
+
+                                <td>
+                                    <input name="Detalles[@i].PrecioUnitario" class="form-control form-control-sm text-end costo-input" data-field="PrecioUnitario" type="number" min="0" step="0.01" value="@detalle.PrecioUnitario.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                                </td>
+
+                                <td>
+                                    <input name="Detalles[@i].PrecioVentaActual" class="form-control form-control-sm text-end precio-actual-input" data-field="PrecioVentaActual" type="number" readonly value="@detalle.PrecioVentaActual.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                                </td>
+
+                                <td>
+                                    <input name="Detalles[@i].NuevoPrecioVenta" class="form-control form-control-sm text-end nuevo-precio-input" data-field="NuevoPrecioVenta" type="number" min="0" step="0.01" value="@(detalle.NuevoPrecioVenta?.ToString(System.Globalization.CultureInfo.InvariantCulture))" placeholder="Sin cambio" />
+                                    <div class="venta-warning text-warning text-sm mt-1 d-none"></div>
+                                </td>
+
+                                <td class="text-end fw-semibold subtotal-cell">
+                                    $ 0,00
+                                </td>
+
+                                <td class="text-center pe-4">
+                                    <button type="button" class="btn btn-sm btn-light compra-action-btn eliminar-linea-btn" title="Eliminar línea">
+                                        <span class="material-symbols-outlined icon-sm">delete</span>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="compraEmptyState" class="text-center py-5 px-3">
+                <span class="material-symbols-outlined compra-empty-icon mb-2">inventory_2</span>
+                <h3 class="h6 mb-1">Todavía no agregaste productos</h3>
+                <p class="text-muted-custom text-sm mb-0">Agregá al menos un producto para registrar la compra.</p>
+            </div>
+
+            <div class="card-footer bg-white border-top py-3 px-4">
+                <div class="d-flex justify-content-end">
+                    <div class="compra-total-box">
+                        <span class="text-sm text-muted-custom">Total de la compra</span>
+                        <strong id="totalCompra" class="fs-4">$ 0,00</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined icon-sm">save</span>
+                Guardar compra
+            </button>
+        </div>
+    </form>
+</main>
+
+<template id="detalleCompraTemplate">
+    <tr class="compra-detalle-row">
+        <td class="ps-4">
+            <select class="form-select form-select-sm producto-select" data-field="ProductoId">
+                <option value="">Seleccione...</option>
+                @foreach (var producto in Model.Productos)
+                {
+                    <option value="@producto.Value">@producto.Text</option>
+                }
+            </select>
+            <div class="precio-warning text-warning text-sm mt-1 d-none"></div>
+        </td>
+
+        <td>
+            <input class="form-control form-control-sm text-end cantidad-input" data-field="Cantidad" type="number" min="1" value="1" />
+        </td>
+
+        <td>
+            <input class="form-control form-control-sm text-end costo-input" data-field="PrecioUnitario" type="number" min="0" step="0.01" />
+        </td>
+
+        <td>
+            <input class="form-control form-control-sm text-end precio-actual-input" data-field="PrecioVentaActual" type="number" readonly />
+        </td>
+
+        <td>
+            <input class="form-control form-control-sm text-end nuevo-precio-input" data-field="NuevoPrecioVenta" type="number" min="0" step="0.01" placeholder="Sin cambio" />
+            <div class="venta-warning text-warning text-sm mt-1 d-none"></div>
+        </td>
+
+        <td class="text-end fw-semibold subtotal-cell">$ 0,00</td>
+
+        <td class="text-center pe-4">
+            <button type="button" class="btn btn-sm btn-light compra-action-btn eliminar-linea-btn" title="Eliminar línea">
+                <span class="material-symbols-outlined icon-sm">delete</span>
+            </button>
+        </td>
+    </tr>
+</template>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/compra-create.js" asp-append-version="true"></script>
+}
