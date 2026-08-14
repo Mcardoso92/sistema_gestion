@@ -47,5 +47,7 @@ namespace saas.Models
 
         [ValidateNever]
         public Empresa Empresa { get; set; } = null!;
+        [ValidateNever]
+        public ICollection<Compra> Compras { get; set; } = new List<Compra>();
     }
 }

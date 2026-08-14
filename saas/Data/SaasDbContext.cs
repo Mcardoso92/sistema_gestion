@@ -17,6 +17,8 @@ namespace saas.Data
         public DbSet<Cliente> Clientes { get; set; } = null!;
         public DbSet<MovimientoStock> MovimientosStock { get; set; } = null!;
         public DbSet<Proveedor> Proveedores { get; set; } = null!;
+        public DbSet<Compra> Compras { get; set; } = null!;
+        public DbSet<DetalleCompra> DetallesCompra { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -114,11 +116,55 @@ namespace saas.Data
                 .HasForeignKey(m => m.VentaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.Compra)
+                .WithMany(c => c.MovimientosStock)
+                .HasForeignKey(m => m.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Proveedor>()
                 .HasOne(p => p.Empresa)
                 .WithMany(e => e.Proveedores)
                 .HasForeignKey(p => p.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Compra>()
+                .HasOne(c => c.Empresa)
+                .WithMany(e => e.Compras)
+                .HasForeignKey(c => c.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Compra>()
+                .HasOne(c => c.Proveedor)
+                .WithMany(p => p.Compras)
+                .HasForeignKey(c => c.ProveedorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Compra>()
+                .HasOne(c => c.Usuario)
+                .WithMany(u => u.Compras)
+                .HasForeignKey(c => c.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Compra>()
+                .HasOne(c => c.UsuarioAnulacion)
+                .WithMany(u => u.ComprasAnuladas)
+                .HasForeignKey(c => c.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .HasOne(d => d.Compra)
+                .WithMany(c => c.Detalles)
+                .HasForeignKey(d => d.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .HasOne(d => d.Producto)
+                .WithMany(p => p.DetallesCompra)
+                .HasForeignKey(d => d.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
         }
 
         private static void ConfigurarIndices(
@@ -191,6 +237,48 @@ namespace saas.Data
 
             modelBuilder.Entity<Proveedor>()
                 .HasIndex(p => new { p.EmpresaId, p.CUIT });
+
+            modelBuilder.Entity<Compra>()
+                .HasIndex(c => new
+                {
+                    c.EmpresaId,
+                    c.Fecha
+                });
+
+            modelBuilder.Entity<Compra>()
+                .HasIndex(c => c.ProveedorId);
+
+            modelBuilder.Entity<Compra>()
+                .HasIndex(c => c.UsuarioId);
+
+            modelBuilder.Entity<Compra>()
+                .HasIndex(c => c.UsuarioAnulacionId);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .HasIndex(d => d.CompraId);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .HasIndex(d => d.ProductoId);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .HasIndex(d => new
+                {
+                    d.CompraId,
+                    d.ProductoId
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasIndex(m => m.CompraId);
+
+            modelBuilder.Entity<Compra>()
+                .HasIndex(c => new
+                {
+                    c.EmpresaId,
+                    c.ProveedorId,
+                    c.TipoComprobante,
+                    c.NumeroComprobante
+                });
         }
 
         private static void ConfigurarPropiedades(
@@ -215,6 +303,30 @@ namespace saas.Data
 
             modelBuilder.Entity<DetalleVenta>()
                 .Property(d => d.Subtotal)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Compra>()
+                .Property(c => c.Total)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .Property(d => d.PrecioUnitario)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .Property(d => d.Subtotal)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .Property(d => d.PrecioCostoAnterior)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .Property(d => d.PrecioVentaAnterior)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleCompra>()
+                .Property(d => d.PrecioVentaNuevo)
                 .HasPrecision(18, 2);
 
             //MovmientoStock

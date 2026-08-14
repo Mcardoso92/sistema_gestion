@@ -18,6 +18,7 @@ namespace saas.Models
         public decimal PrecioUnitario { get; set; }
 
         public decimal Subtotal { get; set; }
+        public decimal PrecioCostoAnterior { get; set; }
 
         public decimal? PrecioVentaAnterior { get; set; }
 

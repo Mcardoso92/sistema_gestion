@@ -37,5 +37,7 @@ namespace saas.Models
         public ICollection<DetalleVenta>? DetallesVenta { get; set; } = new List<DetalleVenta>();
         [ValidateNever]
         public ICollection<MovimientoStock> MovimientosStock { get; set; } = new List<MovimientoStock>();
+        [ValidateNever]
+        public ICollection<DetalleCompra> DetallesCompra { get; set; } = new List<DetalleCompra>();
     }
 }
