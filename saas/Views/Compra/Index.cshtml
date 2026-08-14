@@ -1,0 +1,209 @@
+﻿@model saas.ViewModel.CompraIndexVM
+
+@{
+    ViewData["Title"] = "Compras";
+    bool esSuperAdmin = User.IsInRole("SuperAdmin");
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb text-sm mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted-custom">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active text-dark fw-medium" aria-current="page">Compras</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+            <div>
+                <h1 class="h2 mb-1">Compras</h1>
+                <p class="text-muted-custom mb-0">Administrá las compras realizadas a proveedores y su impacto en stock.</p>
+            </div>
+
+            <a asp-action="Create" class="btn btn-primary d-flex align-items-center gap-2 fw-medium text-sm">
+                <span class="material-symbols-outlined icon-sm">add</span>
+                Nueva compra
+            </a>
+        </div>
+    </div>
+
+    <div class="card bg-white mb-4">
+        <div class="card-body p-3">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                <div class="col-12 col-lg">
+                    <label asp-for="Busqueda" class="form-label text-sm fw-medium">Buscar</label>
+                    <div class="position-relative">
+                        <span class="material-symbols-outlined compra-search-icon">search</span>
+                        <input asp-for="Busqueda" class="form-control ps-5" placeholder="ID, número o tipo de comprobante" />
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4 col-lg-2">
+                    <label asp-for="Estado" class="form-label text-sm fw-medium">Estado</label>
+                    <select asp-for="Estado" class="form-select">
+                        <option value="activas">Activas</option>
+                        <option value="anuladas">Anuladas</option>
+                        <option value="todas">Todas</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-4 col-lg-2">
+                    <label asp-for="ProveedorId" class="form-label text-sm fw-medium">Proveedor</label>
+                    <select asp-for="ProveedorId" asp-items="Model.Proveedores" class="form-select">
+                        <option value="">Todos los proveedores</option>
+                    </select>
+                </div>
+
+                @if (esSuperAdmin)
+                {
+                    <div class="col-12 col-md-4 col-lg-2">
+                        <label asp-for="EmpresaId" class="form-label text-sm fw-medium">Empresa</label>
+                        <select asp-for="EmpresaId" asp-items="Model.Empresas" class="form-select">
+                            <option value="">Todas las empresas</option>
+                        </select>
+                    </div>
+                }
+
+                <div class="col-12 col-md-4 col-lg-2">
+                    <label asp-for="FechaDesde" class="form-label text-sm fw-medium">Desde</label>
+                    <input asp-for="FechaDesde" class="form-control" type="date" />
+                </div>
+
+                <div class="col-12 col-md-4 col-lg-2">
+                    <label asp-for="FechaHasta" class="form-label text-sm fw-medium">Hasta</label>
+                    <input asp-for="FechaHasta" class="form-control" type="date" />
+                </div>
+
+                <div class="col-12 col-md-auto">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined icon-sm">search</span>
+                            Buscar
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined icon-sm">restart_alt</span>
+                            Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card bg-white">
+        <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center">
+            <h2 class="h6 mb-0">Listado de compras</h2>
+
+            <span class="text-sm text-muted-custom">
+                @Model.Compras.Count
+                @(Model.Compras.Count == 1 ? "compra" : "compras")
+            </span>
+        </div>
+
+        @if (Model.Compras.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>Fecha</th>
+                            <th>Proveedor</th>
+                            <th>Comprobante</th>
+
+                            @if (esSuperAdmin)
+                            {
+                                <th>Empresa</th>
+                            }
+
+                            <th class="text-end">Total</th>
+                            <th class="text-center">Estado</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var compra in Model.Compras)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <a asp-action="Details" asp-route-id="@compra.Id" class="fw-semibold text-decoration-none">
+                                        #@compra.Id
+                                    </a>
+                                </td>
+
+                                <td class="text-nowrap">
+                                    @compra.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold">@compra.ProveedorNombre</span>
+                                </td>
+
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(compra.TipoComprobante) || !string.IsNullOrWhiteSpace(compra.NumeroComprobante))
+                                    {
+                                        <div class="d-flex flex-column">
+                                            @if (!string.IsNullOrWhiteSpace(compra.TipoComprobante))
+                                            {
+                                                <span>@compra.TipoComprobante</span>
+                                            }
+
+                                            @if (!string.IsNullOrWhiteSpace(compra.NumeroComprobante))
+                                            {
+                                                <span class="text-sm text-muted-custom">@compra.NumeroComprobante</span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted-custom">—</span>
+                                    }
+                                </td>
+
+                                @if (esSuperAdmin)
+                                {
+                                    <td>@compra.EmpresaNombre</td>
+                                }
+
+                                <td class="text-end fw-semibold">
+                                    @compra.Total.ToString("C")
+                                </td>
+
+                                <td class="text-center">
+                                    @if (compra.Estado)
+                                    {
+                                        <span class="badge rounded-pill badge-success-light text-xs px-2 py-1">Activa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill badge-danger-light text-xs px-2 py-1">Anulada</span>
+                                    }
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <div class="d-inline-flex align-items-center gap-1">
+                                        <a asp-action="Details" asp-route-id="@compra.Id" class="btn btn-sm btn-light compra-action-btn" title="Ver detalle">
+                                            <span class="material-symbols-outlined icon-sm">visibility</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 px-3">
+                <span class="material-symbols-outlined compra-empty-icon mb-2">shopping_cart</span>
+                <h3 class="h6 mb-1">No se encontraron compras</h3>
+                <p class="text-muted-custom text-sm mb-0">Probá modificando los filtros o registrá una nueva compra.</p>
+            </div>
+        }
+    </div>
+</main>

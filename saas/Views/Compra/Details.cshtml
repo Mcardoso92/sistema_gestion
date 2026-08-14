@@ -1,0 +1,295 @@
+﻿@model saas.ViewModel.CompraDetailsVM
+
+@{
+    ViewData["Title"] = "Detalle de Compra";
+    bool esSuperAdmin = User.IsInRole("SuperAdmin");
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb" class="mb-2">
+            <ol class="breadcrumb text-sm mb-0">
+                <li class="breadcrumb-item">
+                    <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted-custom">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a asp-action="Index" class="text-decoration-none text-muted-custom">Compras</a>
+                </li>
+                <li class="breadcrumb-item active text-dark fw-medium" aria-current="page">Detalle</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
+            <div>
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                    <h1 class="h2 mb-0">Compra #@Model.Id</h1>
+
+                    @if (Model.Estado)
+                    {
+                        <span class="badge rounded-pill badge-success-light text-xs px-2 py-1">Activa</span>
+                    }
+                    else
+                    {
+                        <span class="badge rounded-pill badge-danger-light text-xs px-2 py-1">Anulada</span>
+                    }
+                </div>
+
+                <p class="text-muted-custom mb-0">Consultá la información general, productos e historial de la compra.</p>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                    <span class="material-symbols-outlined icon-sm">arrow_back</span>
+                    Volver
+                </a>
+
+                @if (Model.Estado)
+                {
+                    <button type="button"
+                            class="btn btn-danger d-flex align-items-center gap-2"
+                            data-bs-toggle="modal"
+                            data-bs-target="#anularCompraModal">
+                        <span class="material-symbols-outlined icon-sm">cancel</span>
+                        Anular compra
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card bg-white mb-4">
+                <div class="card-header card-header-bg py-3">
+                    <h2 class="h6 mb-0">Información general</h2>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <span class="compra-detail-label">Proveedor</span>
+                            <p class="compra-detail-value">@Model.ProveedorNombre</p>
+                        </div>
+
+                        @if (esSuperAdmin)
+                        {
+                            <div class="col-md-6">
+                                <span class="compra-detail-label">Empresa</span>
+                                <p class="compra-detail-value">@Model.EmpresaNombre</p>
+                            </div>
+                        }
+
+                        <div class="col-md-4">
+                            <span class="compra-detail-label">Fecha</span>
+                            <p class="compra-detail-value">@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <span class="compra-detail-label">Tipo de comprobante</span>
+                            <p class="compra-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.TipoComprobante) ? "—" : Model.TipoComprobante)
+                            </p>
+                        </div>
+
+                        <div class="col-md-4">
+                            <span class="compra-detail-label">Nº de comprobante</span>
+                            <p class="compra-detail-value">
+                                @(string.IsNullOrWhiteSpace(Model.NumeroComprobante) ? "—" : Model.NumeroComprobante)
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <span class="compra-detail-label">Registrada por</span>
+                            <p class="compra-detail-value">@Model.UsuarioEmail</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <span class="compra-detail-label">Estado</span>
+                            <p class="compra-detail-value">@(Model.Estado ? "Activa" : "Anulada")</p>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Observaciones))
+                        {
+                            <div class="col-12">
+                                <span class="compra-detail-label">Observaciones</span>
+                                <p class="compra-detail-value mb-0">@Model.Observaciones</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-white">
+                <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center">
+                    <h2 class="h6 mb-0">Productos</h2>
+
+                    <span class="text-sm text-muted-custom">
+                        @Model.Detalles.Count
+                        @(Model.Detalles.Count == 1 ? "producto" : "productos")
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle compra-details-table">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Producto</th>
+                                <th class="text-end">Cantidad</th>
+                                <th class="text-end">Costo unitario</th>
+                                <th class="text-end">Subtotal</th>
+                                <th class="text-end">Precio venta</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var detalle in Model.Detalles)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-semibold">@detalle.ProductoNombre</td>
+
+                                    <td class="text-end">@detalle.Cantidad</td>
+
+                                    <td class="text-end">
+                                        @detalle.PrecioUnitario.ToString("C")
+                                    </td>
+
+                                    <td class="text-end fw-semibold">
+                                        @detalle.Subtotal.ToString("C")
+                                    </td>
+
+                                    <td class="text-end">
+                                        @if (detalle.PrecioVentaNuevo.HasValue)
+                                        {
+                                            <div class="d-flex flex-column align-items-end">
+                                                <span class="fw-semibold">@detalle.PrecioVentaNuevo.Value.ToString("C")</span>
+
+                                                @if (detalle.PrecioVentaAnterior.HasValue)
+                                                {
+                                                    <span class="text-xs text-muted-custom">
+                                                        Anterior: @detalle.PrecioVentaAnterior.Value.ToString("C")
+                                                    </span>
+                                                }
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted-custom">Sin cambios</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer bg-white border-top p-4">
+                    <div class="d-flex justify-content-end">
+                        <div class="compra-total-box">
+                            <span class="text-sm text-muted-custom">Total de la compra</span>
+                            <strong class="fs-4">@Model.Total.ToString("C")</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            @if (!Model.Estado)
+            {
+                <div class="card bg-white mb-4">
+                    <div class="card-header card-header-bg py-3">
+                        <h2 class="h6 mb-0">Información de anulación</h2>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <span class="compra-detail-label">Fecha de anulación</span>
+                            <p class="compra-detail-value">
+                                @(Model.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                            </p>
+                        </div>
+
+                        <div>
+                            <span class="compra-detail-label">Anulada por</span>
+                            <p class="compra-detail-value mb-0">
+                                @(string.IsNullOrWhiteSpace(Model.UsuarioAnulacionEmail) ? "—" : Model.UsuarioAnulacionEmail)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="card bg-white">
+                <div class="card-header card-header-bg py-3">
+                    <h2 class="h6 mb-0">Impacto de la compra</h2>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="compra-info-item">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                        <div>
+                            <h3 class="h6 mb-1">Stock</h3>
+                            <p class="text-sm text-muted-custom mb-0">
+                                Al registrar la compra, las cantidades fueron incorporadas automáticamente al stock.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="compra-info-item">
+                        <span class="material-symbols-outlined">payments</span>
+                        <div>
+                            <h3 class="h6 mb-1">Costo</h3>
+                            <p class="text-sm text-muted-custom mb-0">
+                                El precio de costo de cada producto se actualizó con el último costo registrado.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="compra-info-item mb-0">
+                        <span class="material-symbols-outlined">history</span>
+                        <div>
+                            <h3 class="h6 mb-1">Trazabilidad</h3>
+                            <p class="text-sm text-muted-custom mb-0">
+                                La compra y sus movimientos permanecen registrados incluso si posteriormente se anula.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@if (Model.Estado)
+{
+    <div class="modal fade" id="anularCompraModal" tabindex="-1" aria-labelledby="anularCompraModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="anularCompraModalLabel">Anular compra</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-2">¿Confirmás la anulación de la compra <strong>#@Model.Id</strong>?</p>
+                    <p class="text-muted-custom text-sm mb-0">
+                        La operación intentará revertir el stock y los precios correspondientes. Si no existe stock suficiente, la anulación será rechazada.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+
+                    <form asp-action="Anular" asp-route-id="@Model.Id" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit" class="btn btn-danger d-flex align-items-center gap-2">
+                            <span class="material-symbols-outlined icon-sm">cancel</span>
+                            Confirmar anulación
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}

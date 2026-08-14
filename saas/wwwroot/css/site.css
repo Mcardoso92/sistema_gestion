@@ -1482,3 +1482,120 @@ main {
     font-size: 15px;
     font-weight: 500;
 }
+
+/* Compra - Index */
+
+.compra-search-icon {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    color: var(--bs-secondary-color);
+    font-size: 20px;
+    pointer-events: none;
+}
+
+.compra-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.compra-empty-icon {
+    font-size: 42px;
+    color: var(--bs-secondary-color);
+}
+
+/* Compra - Create */
+
+.compra-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--v-border);
+    color: var(--v-primary-container);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.compra-detalle-table {
+    min-width: 1050px;
+}
+
+    .compra-detalle-table th {
+        white-space: nowrap;
+    }
+
+.compra-total-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 220px;
+}
+
+.compra-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.precio-actual-input {
+    background-color: var(--vt-surface-container-low);
+}
+
+.compra-empty-icon {
+    font-size: 42px;
+    color: var(--bs-secondary-color);
+}
+
+.precio-warning,
+.venta-warning {
+    line-height: 1.25;
+}
+
+/* Compra - Details */
+
+.compra-detail-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.compra-detail-value {
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.compra-details-table {
+    min-width: 800px;
+}
+
+.compra-info-item {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+    .compra-info-item > .material-symbols-outlined {
+        flex-shrink: 0;
+        color: var(--v-primary-container);
+    }
+
+.compra-total-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 220px;
+}

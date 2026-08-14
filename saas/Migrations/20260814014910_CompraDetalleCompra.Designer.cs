@@ -12,7 +12,7 @@ using saas.Data;
 namespace saas.Migrations
 {
     [DbContext(typeof(SaasDbContext))]
-    [Migration("20260814002837_CompraDetalleCompra")]
+    [Migration("20260814014910_CompraDetalleCompra")]
     partial class CompraDetalleCompra
     {
         /// <inheritdoc />
@@ -236,6 +236,116 @@ namespace saas.Migrations
                     b.ToTable("Clientes");
                 });
 
+            modelBuilder.Entity("saas.Models.Compra", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EmpresaId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("Estado")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaAnulacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NumeroComprobante")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("ProveedorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TipoComprobante")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UsuarioAnulacionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProveedorId");
+
+                    b.HasIndex("UsuarioAnulacionId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("EmpresaId", "Fecha");
+
+                    b.HasIndex("EmpresaId", "ProveedorId", "TipoComprobante", "NumeroComprobante");
+
+                    b.ToTable("Compras");
+                });
+
+            modelBuilder.Entity("saas.Models.DetalleCompra", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CompraId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioCostoAnterior")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("PrecioVentaAnterior")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("PrecioVentaNuevo")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompraId");
+
+                    b.HasIndex("ProductoId");
+
+                    b.HasIndex("CompraId", "ProductoId")
+                        .IsUnique();
+
+                    b.ToTable("DetallesCompra");
+                });
+
             modelBuilder.Entity("saas.Models.DetalleVenta", b =>
                 {
                     b.Property<int>("Id")
@@ -308,6 +418,9 @@ namespace saas.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CompraId")
+                        .HasColumnType("int");
+
                     b.Property<int>("EmpresaId")
                         .HasColumnType("int");
 
@@ -338,6 +451,8 @@ namespace saas.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompraId");
 
                     b.HasIndex("EmpresaId");
 
@@ -686,6 +801,59 @@ namespace saas.Migrations
                     b.Navigation("Empresa");
                 });
 
+            modelBuilder.Entity("saas.Models.Compra", b =>
+                {
+                    b.HasOne("saas.Models.Empresa", "Empresa")
+                        .WithMany("Compras")
+                        .HasForeignKey("EmpresaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("saas.Models.Proveedor", "Proveedor")
+                        .WithMany("Compras")
+                        .HasForeignKey("ProveedorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("saas.Models.Usuario", "UsuarioAnulacion")
+                        .WithMany("ComprasAnuladas")
+                        .HasForeignKey("UsuarioAnulacionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("saas.Models.Usuario", "Usuario")
+                        .WithMany("Compras")
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Empresa");
+
+                    b.Navigation("Proveedor");
+
+                    b.Navigation("Usuario");
+
+                    b.Navigation("UsuarioAnulacion");
+                });
+
+            modelBuilder.Entity("saas.Models.DetalleCompra", b =>
+                {
+                    b.HasOne("saas.Models.Compra", "Compra")
+                        .WithMany("Detalles")
+                        .HasForeignKey("CompraId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("saas.Models.Producto", "Producto")
+                        .WithMany("DetallesCompra")
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Compra");
+
+                    b.Navigation("Producto");
+                });
+
             modelBuilder.Entity("saas.Models.DetalleVenta", b =>
                 {
                     b.HasOne("saas.Models.Producto", "Producto")
@@ -707,6 +875,11 @@ namespace saas.Migrations
 
             modelBuilder.Entity("saas.Models.MovimientoStock", b =>
                 {
+                    b.HasOne("saas.Models.Compra", "Compra")
+                        .WithMany("MovimientosStock")
+                        .HasForeignKey("CompraId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("saas.Models.Empresa", "Empresa")
                         .WithMany("MovimientosStock")
                         .HasForeignKey("EmpresaId")
@@ -729,6 +902,8 @@ namespace saas.Migrations
                         .WithMany("MovimientosStock")
                         .HasForeignKey("VentaId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Compra");
 
                     b.Navigation("Empresa");
 
@@ -816,11 +991,20 @@ namespace saas.Migrations
                     b.Navigation("Ventas");
                 });
 
+            modelBuilder.Entity("saas.Models.Compra", b =>
+                {
+                    b.Navigation("Detalles");
+
+                    b.Navigation("MovimientosStock");
+                });
+
             modelBuilder.Entity("saas.Models.Empresa", b =>
                 {
                     b.Navigation("Categorias");
 
                     b.Navigation("Clientes");
+
+                    b.Navigation("Compras");
 
                     b.Navigation("MovimientosStock");
 
@@ -835,13 +1019,24 @@ namespace saas.Migrations
 
             modelBuilder.Entity("saas.Models.Producto", b =>
                 {
+                    b.Navigation("DetallesCompra");
+
                     b.Navigation("DetallesVenta");
 
                     b.Navigation("MovimientosStock");
                 });
 
+            modelBuilder.Entity("saas.Models.Proveedor", b =>
+                {
+                    b.Navigation("Compras");
+                });
+
             modelBuilder.Entity("saas.Models.Usuario", b =>
                 {
+                    b.Navigation("Compras");
+
+                    b.Navigation("ComprasAnuladas");
+
                     b.Navigation("MovimientosStock");
 
                     b.Navigation("Ventas");
