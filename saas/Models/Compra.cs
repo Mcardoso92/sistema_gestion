@@ -50,5 +50,10 @@ namespace saas.Models
 
         [ValidateNever]
         public ICollection<MovimientoStock> MovimientosStock { get; set; } = new List<MovimientoStock>();
+        [ValidateNever]
+        public ICollection<PagoProveedor> PagosProveedor { get; set; } = new List<PagoProveedor>();
+
+        [ValidateNever]
+        public ICollection<ReintegroProveedor> ReintegrosProveedor { get; set; } = new List<ReintegroProveedor>();
     }
 }

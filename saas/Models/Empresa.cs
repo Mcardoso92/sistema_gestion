@@ -23,6 +23,34 @@ namespace saas.Models
         public ICollection<Proveedor> Proveedores { get; set; } = new List<Proveedor>();
         [ValidateNever]
         public ICollection<Compra> Compras { get; set; } = new List<Compra>();
+        [ValidateNever]
+        public ICollection<Caja> Cajas { get; set; } = new List<Caja>();
 
+        [ValidateNever]
+        public ICollection<MedioPago> MediosPago { get; set; } = new List<MedioPago>();
+
+        [ValidateNever]
+        public ICollection<CategoriaGasto> CategoriasGasto { get; set; } = new List<CategoriaGasto>();
+
+        [ValidateNever]
+        public ICollection<TurnoCaja> TurnosCaja { get; set; } = new List<TurnoCaja>();
+
+        [ValidateNever]
+        public ICollection<CobroVenta> CobrosVenta { get; set; } = new List<CobroVenta>();
+
+        [ValidateNever]
+        public ICollection<PagoProveedor> PagosProveedor { get; set; } = new List<PagoProveedor>();
+
+        [ValidateNever]
+        public ICollection<ReintegroVenta> ReintegrosVenta { get; set; } = new List<ReintegroVenta>();
+
+        [ValidateNever]
+        public ICollection<ReintegroProveedor> ReintegrosProveedor { get; set; } = new List<ReintegroProveedor>();
+
+        [ValidateNever]
+        public ICollection<TransferenciaCaja> TransferenciasCaja { get; set; } = new List<TransferenciaCaja>();
+
+        [ValidateNever]
+        public ICollection<MovimientoCaja> MovimientosCaja { get; set; } = new List<MovimientoCaja>();
     }
 }
