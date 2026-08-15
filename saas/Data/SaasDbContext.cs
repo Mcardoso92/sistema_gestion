@@ -19,6 +19,17 @@ namespace saas.Data
         public DbSet<Proveedor> Proveedores { get; set; } = null!;
         public DbSet<Compra> Compras { get; set; } = null!;
         public DbSet<DetalleCompra> DetallesCompra { get; set; } = null!;
+        public DbSet<Caja> Cajas { get; set; } = null!;
+        public DbSet<MedioPago> MediosPago { get; set; } = null!;
+        public DbSet<CajaMedioPago> CajaMediosPago { get; set; } = null!;
+        public DbSet<CategoriaGasto> CategoriasGasto { get; set; } = null!;
+        public DbSet<TurnoCaja> TurnosCaja { get; set; } = null!;
+        public DbSet<CobroVenta> CobrosVenta { get; set; } = null!;
+        public DbSet<PagoProveedor> PagosProveedor { get; set; } = null!;
+        public DbSet<ReintegroVenta> ReintegrosVenta { get; set; } = null!;
+        public DbSet<ReintegroProveedor> ReintegrosProveedor { get; set; } = null!;
+        public DbSet<TransferenciaCaja> TransferenciasCaja { get; set; } = null!;
+        public DbSet<MovimientoCaja> MovimientosCaja { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -164,7 +175,335 @@ namespace saas.Data
                 .HasForeignKey(d => d.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Caja>()
+                .HasOne(c => c.Empresa)
+                .WithMany(e => e.Cajas)
+                .HasForeignKey(c => c.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<MedioPago>()
+                .HasOne(m => m.Empresa)
+                .WithMany(e => e.MediosPago)
+                .HasForeignKey(m => m.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CategoriaGasto>()
+                .HasOne(c => c.Empresa)
+                .WithMany(e => e.CategoriasGasto)
+                .HasForeignKey(c => c.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CajaMedioPago>()
+                .HasOne(cm => cm.Caja)
+                .WithMany(c => c.CajaMediosPago)
+                .HasForeignKey(cm => cm.CajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CajaMedioPago>()
+                .HasOne(cm => cm.MedioPago)
+                .WithMany(m => m.CajaMediosPago)
+                .HasForeignKey(cm => cm.MedioPagoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasOne(t => t.Empresa)
+                .WithMany(e => e.TurnosCaja)
+                .HasForeignKey(t => t.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasOne(t => t.Caja)
+                .WithMany(c => c.TurnosCaja)
+                .HasForeignKey(t => t.CajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasOne(t => t.UsuarioApertura)
+                .WithMany(u => u.TurnosCajaApertura)
+                .HasForeignKey(t => t.UsuarioAperturaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasOne(t => t.UsuarioCierre)
+                .WithMany(u => u.TurnosCajaCierre)
+                .HasForeignKey(t => t.UsuarioCierreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasOne(c => c.Venta)
+                .WithMany(v => v.CobrosVenta)
+                .HasForeignKey(c => c.VentaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasOne(c => c.Empresa)
+                .WithMany(e => e.CobrosVenta)
+                .HasForeignKey(c => c.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasOne(c => c.Caja)
+                .WithMany()
+                .HasForeignKey(c => c.CajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasOne(c => c.MedioPago)
+                .WithMany(m => m.CobrosVenta)
+                .HasForeignKey(c => c.MedioPagoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasOne(c => c.TurnoCaja)
+                .WithMany()
+                .HasForeignKey(c => c.TurnoCajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasOne(c => c.Usuario)
+                .WithMany(u => u.CobrosVenta)
+                .HasForeignKey(c => c.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasOne(c => c.UsuarioAnulacion)
+                .WithMany(u => u.CobrosVentaAnulados)
+                .HasForeignKey(c => c.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasOne(p => p.Compra)
+                .WithMany(c => c.PagosProveedor)
+                .HasForeignKey(p => p.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasOne(p => p.Empresa)
+                .WithMany(e => e.PagosProveedor)
+                .HasForeignKey(p => p.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasOne(p => p.Caja)
+                .WithMany()
+                .HasForeignKey(p => p.CajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasOne(p => p.MedioPago)
+                .WithMany(m => m.PagosProveedor)
+                .HasForeignKey(p => p.MedioPagoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasOne(p => p.TurnoCaja)
+                .WithMany()
+                .HasForeignKey(p => p.TurnoCajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasOne(p => p.Usuario)
+                .WithMany(u => u.PagosProveedor)
+                .HasForeignKey(p => p.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasOne(p => p.UsuarioAnulacion)
+                .WithMany(u => u.PagosProveedorAnulados)
+                .HasForeignKey(p => p.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasOne(r => r.Venta)
+                .WithMany(v => v.ReintegrosVenta)
+                .HasForeignKey(r => r.VentaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasOne(r => r.Empresa)
+                .WithMany(e => e.ReintegrosVenta)
+                .HasForeignKey(r => r.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasOne(r => r.Caja)
+                .WithMany()
+                .HasForeignKey(r => r.CajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasOne(r => r.MedioPago)
+                .WithMany(m => m.ReintegrosVenta)
+                .HasForeignKey(r => r.MedioPagoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasOne(r => r.TurnoCaja)
+                .WithMany()
+                .HasForeignKey(r => r.TurnoCajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasOne(r => r.Usuario)
+                .WithMany(u => u.ReintegrosVenta)
+                .HasForeignKey(r => r.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasOne(r => r.UsuarioAnulacion)
+                .WithMany(u => u.ReintegrosVentaAnulados)
+                .HasForeignKey(r => r.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasOne(r => r.Compra)
+                .WithMany(c => c.ReintegrosProveedor)
+                .HasForeignKey(r => r.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasOne(r => r.Empresa)
+                .WithMany(e => e.ReintegrosProveedor)
+                .HasForeignKey(r => r.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasOne(r => r.Caja)
+                .WithMany()
+                .HasForeignKey(r => r.CajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasOne(r => r.MedioPago)
+                .WithMany(m => m.ReintegrosProveedor)
+                .HasForeignKey(r => r.MedioPagoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasOne(r => r.TurnoCaja)
+                .WithMany()
+                .HasForeignKey(r => r.TurnoCajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasOne(r => r.Usuario)
+                .WithMany(u => u.ReintegrosProveedor)
+                .HasForeignKey(r => r.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasOne(r => r.UsuarioAnulacion)
+                .WithMany(u => u.ReintegrosProveedorAnulados)
+                .HasForeignKey(r => r.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasOne(t => t.Empresa)
+                .WithMany(e => e.TransferenciasCaja)
+                .HasForeignKey(t => t.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasOne(t => t.CajaOrigen)
+                .WithMany(c => c.TransferenciasOrigen)
+                .HasForeignKey(t => t.CajaOrigenId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasOne(t => t.CajaDestino)
+                .WithMany(c => c.TransferenciasDestino)
+                .HasForeignKey(t => t.CajaDestinoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasOne(t => t.Usuario)
+                .WithMany(u => u.TransferenciasCaja)
+                .HasForeignKey(t => t.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasOne(t => t.TurnoCaja)
+                .WithMany()
+                .HasForeignKey(t => t.TurnoCajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasOne(t => t.UsuarioAnulacion)
+                .WithMany(u => u.TransferenciasCajaAnuladas)
+                .HasForeignKey(t => t.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.Empresa)
+                .WithMany(e => e.MovimientosCaja)
+                .HasForeignKey(m => m.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.Caja)
+                .WithMany(c => c.MovimientosCaja)
+                .HasForeignKey(m => m.CajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.Usuario)
+                .WithMany(u => u.MovimientosCaja)
+                .HasForeignKey(m => m.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.MedioPago)
+                .WithMany(mp => mp.MovimientosCaja)
+                .HasForeignKey(m => m.MedioPagoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.TurnoCaja)
+                .WithMany(t => t.MovimientosCaja)
+                .HasForeignKey(m => m.TurnoCajaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.CategoriaGasto)
+                .WithMany(c => c.MovimientosCaja)
+                .HasForeignKey(m => m.CategoriaGastoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.MovimientoOrigen)
+                .WithMany(m => m.Reversiones)
+                .HasForeignKey(m => m.MovimientoOrigenId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.CobroVenta)
+                .WithOne(c => c.MovimientoCaja)
+                .HasForeignKey<MovimientoCaja>(m => m.CobroVentaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.PagoProveedor)
+                .WithOne(p => p.MovimientoCaja)
+                .HasForeignKey<MovimientoCaja>(m => m.PagoProveedorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.ReintegroVenta)
+                .WithOne(r => r.MovimientoCaja)
+                .HasForeignKey<MovimientoCaja>(m => m.ReintegroVentaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.ReintegroProveedor)
+                .WithOne(r => r.MovimientoCaja)
+                .HasForeignKey<MovimientoCaja>(m => m.ReintegroProveedorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasOne(m => m.TransferenciaCaja)
+                .WithMany(t => t.MovimientosCaja)
+                .HasForeignKey(m => m.TransferenciaCajaId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
         private static void ConfigurarIndices(
@@ -279,6 +618,206 @@ namespace saas.Data
                     c.TipoComprobante,
                     c.NumeroComprobante
                 });
+
+            // Caja
+            modelBuilder.Entity<Caja>()
+                .HasIndex(c => c.EmpresaId);
+
+            modelBuilder.Entity<Caja>()
+                .HasIndex(c => new
+                {
+                    c.EmpresaId,
+                    c.Nombre
+                });
+
+            // MedioPago
+            modelBuilder.Entity<MedioPago>()
+                .HasIndex(m => m.EmpresaId);
+
+            modelBuilder.Entity<MedioPago>()
+                .HasIndex(m => new
+                {
+                    m.EmpresaId,
+                    m.Nombre
+                });
+
+            // CategoriaGasto
+            modelBuilder.Entity<CategoriaGasto>()
+                .HasIndex(c => c.EmpresaId);
+
+            modelBuilder.Entity<CategoriaGasto>()
+                .HasIndex(c => new
+                {
+                    c.EmpresaId,
+                    c.Nombre
+                });
+
+            // CajaMedioPago
+            modelBuilder.Entity<CajaMedioPago>()
+                .HasIndex(cm => new
+                {
+                    cm.CajaId,
+                    cm.MedioPagoId
+                })
+                .IsUnique();
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasIndex(t => new
+                {
+                    t.EmpresaId,
+                    t.FechaApertura
+                });
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasIndex(t => t.CajaId);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasIndex(t => t.UsuarioAperturaId);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasIndex(t => t.Estado);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasIndex(c => c.VentaId);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasIndex(c => c.EmpresaId);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasIndex(c => c.CajaId);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasIndex(c => c.MedioPagoId);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasIndex(c => c.TurnoCajaId);
+
+            modelBuilder.Entity<CobroVenta>()
+                .HasIndex(c => c.Fecha);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasIndex(p => p.CompraId);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasIndex(p => p.EmpresaId);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasIndex(p => p.CajaId);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasIndex(p => p.MedioPagoId);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasIndex(p => p.TurnoCajaId);
+
+            modelBuilder.Entity<PagoProveedor>()
+                .HasIndex(p => p.Fecha);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasIndex(r => r.VentaId);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasIndex(r => r.EmpresaId);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasIndex(r => r.CajaId);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasIndex(r => r.MedioPagoId);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasIndex(r => r.TurnoCajaId);
+
+            modelBuilder.Entity<ReintegroVenta>()
+                .HasIndex(r => r.Fecha);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasIndex(r => r.CompraId);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasIndex(r => r.EmpresaId);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasIndex(r => r.CajaId);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasIndex(r => r.MedioPagoId);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasIndex(r => r.TurnoCajaId);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .HasIndex(r => r.Fecha);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasIndex(t => t.EmpresaId);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasIndex(t => t.CajaOrigenId);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasIndex(t => t.CajaDestinoId);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasIndex(t => t.TurnoCajaId);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .HasIndex(t => t.Fecha);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => new
+                {
+                    m.EmpresaId,
+                    m.Fecha
+                });
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => new
+                {
+                    m.CajaId,
+                    m.Fecha
+                });
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.UsuarioId);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.TurnoCajaId);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.MedioPagoId);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.CategoriaGastoId);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.Tipo);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.MovimientoOrigenId);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.CobroVentaId)
+                .IsUnique()
+                .HasFilter("[CobroVentaId] IS NOT NULL");
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.PagoProveedorId)
+                .IsUnique()
+                .HasFilter("[PagoProveedorId] IS NOT NULL");
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.ReintegroVentaId)
+                .IsUnique()
+                .HasFilter("[ReintegroVentaId] IS NOT NULL");
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.ReintegroProveedorId)
+                .IsUnique()
+                .HasFilter("[ReintegroProveedorId] IS NOT NULL");
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .HasIndex(m => m.TransferenciaCajaId);
         }
 
         private static void ConfigurarPropiedades(
@@ -333,6 +872,77 @@ namespace saas.Data
             modelBuilder.Entity<MovimientoStock>()
                 .Property(m => m.Motivo)
                 .HasMaxLength(250);
+
+            // Caja
+            modelBuilder.Entity<Caja>()
+                .Property(c => c.FondoFijo)
+                .HasPrecision(18, 2);
+
+            // TurnoCaja
+            modelBuilder.Entity<TurnoCaja>()
+                .Property(t => t.FondoFijoAplicado)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .Property(t => t.EfectivoEsperado)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .Property(t => t.EfectivoContado)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .Property(t => t.Diferencia)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .Property(t => t.ImporteRendido)
+                .HasPrecision(18, 2);
+
+            // CobroVenta
+            modelBuilder.Entity<CobroVenta>()
+                .Property(c => c.Importe)
+                .HasPrecision(18, 2);
+
+            // PagoProveedor
+            modelBuilder.Entity<PagoProveedor>()
+                .Property(p => p.Importe)
+                .HasPrecision(18, 2);
+
+            // Reintegros
+            modelBuilder.Entity<ReintegroVenta>()
+                .Property(r => r.Importe)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<ReintegroProveedor>()
+                .Property(r => r.Importe)
+                .HasPrecision(18, 2);
+
+            // TransferenciaCaja
+            modelBuilder.Entity<TransferenciaCaja>()
+                .Property(t => t.Importe)
+                .HasPrecision(18, 2);
+
+            // MovimientoCaja
+            modelBuilder.Entity<MovimientoCaja>()
+                .Property(m => m.Importe)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .Property(m => m.Concepto)
+                .HasMaxLength(250);
+
+            modelBuilder.Entity<MovimientoCaja>()
+                .Property(m => m.Observaciones)
+                .HasMaxLength(500);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .Property(t => t.Motivo)
+                .HasMaxLength(250);
+
+            modelBuilder.Entity<TransferenciaCaja>()
+                .Property(t => t.MotivoAnulacion)
+                .HasMaxLength(500);
         }
     }
 }

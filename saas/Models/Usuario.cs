@@ -27,6 +27,43 @@ namespace saas.Models
         public ICollection<Compra> Compras { get; set; } = new List<Compra>();
         [ValidateNever]
         public ICollection<Compra> ComprasAnuladas { get; set; } = new List<Compra>();
+        [ValidateNever]
+        public ICollection<TurnoCaja> TurnosCajaApertura { get; set; } = new List<TurnoCaja>();
 
+        [ValidateNever]
+        public ICollection<TurnoCaja> TurnosCajaCierre { get; set; } = new List<TurnoCaja>();
+
+        [ValidateNever]
+        public ICollection<CobroVenta> CobrosVenta { get; set; } = new List<CobroVenta>();
+
+        [ValidateNever]
+        public ICollection<CobroVenta> CobrosVentaAnulados { get; set; } = new List<CobroVenta>();
+
+        [ValidateNever]
+        public ICollection<PagoProveedor> PagosProveedor { get; set; } = new List<PagoProveedor>();
+
+        [ValidateNever]
+        public ICollection<PagoProveedor> PagosProveedorAnulados { get; set; } = new List<PagoProveedor>();
+
+        [ValidateNever]
+        public ICollection<ReintegroVenta> ReintegrosVenta { get; set; } = new List<ReintegroVenta>();
+
+        [ValidateNever]
+        public ICollection<ReintegroVenta> ReintegrosVentaAnulados { get; set; } = new List<ReintegroVenta>();
+
+        [ValidateNever]
+        public ICollection<ReintegroProveedor> ReintegrosProveedor { get; set; } = new List<ReintegroProveedor>();
+
+        [ValidateNever]
+        public ICollection<ReintegroProveedor> ReintegrosProveedorAnulados { get; set; } = new List<ReintegroProveedor>();
+
+        [ValidateNever]
+        public ICollection<TransferenciaCaja> TransferenciasCaja { get; set; } = new List<TransferenciaCaja>();
+
+        [ValidateNever]
+        public ICollection<TransferenciaCaja> TransferenciasCajaAnuladas { get; set; } = new List<TransferenciaCaja>();
+
+        [ValidateNever]
+        public ICollection<MovimientoCaja> MovimientosCaja { get; set; } = new List<MovimientoCaja>();
     }
 }
