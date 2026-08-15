@@ -1,0 +1,166 @@
+﻿@model saas.ViewModel.CajaDetailsVM
+
+@{
+    ViewData["Title"] = "Detalle de Caja";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h1 class="h3 fw-bold mb-0">@Model.Nombre</h1>
+
+                @if (Model.Estado)
+                {
+                    <span class="badge bg-success">Activa</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Inactiva</span>
+                }
+
+                @if (Model.TieneTurnoAbierto)
+                {
+                    <span class="badge bg-primary">
+                        Turno abierto
+                    </span>
+                }
+            </div>
+
+            <p class="text-muted mb-0">
+                Información y configuración de la caja.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Volver
+            </a>
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-primary">
+                Editar
+            </a>
+
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">
+                                Nombre
+                            </div>
+                            <div class="fw-semibold">
+                                @Model.Nombre
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">
+                                Tipo
+                            </div>
+                            <div class="fw-semibold">
+                                @Model.Tipo
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">
+                                Empresa
+                            </div>
+                            <div class="fw-semibold">
+                                @Model.EmpresaNombre
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">
+                                Fecha de alta
+                            </div>
+                            <div>
+                                @Model.FechaAlta.ToString("dd/MM/yyyy")
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="text-muted small">
+                                Fondo fijo
+                            </div>
+                            <div class="fw-semibold">
+                                @Model.FondoFijo.ToString("C")
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="text-muted small">
+                                Saldo actual
+                            </div>
+                            <div class="fw-bold fs-5">
+                                @Model.SaldoActual.ToString("C")
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="text-muted small">
+                                Permite turnos
+                            </div>
+
+                            <div class="fw-semibold">
+                                @(Model.PermiteTurnos ? "Sí" : "No")
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-3">
+                        Medios de pago habilitados
+                    </h5>
+
+                    @if (Model.MediosPago.Any())
+                    {
+                        <ul class="mb-0">
+                            @foreach (var medio in Model.MediosPago)
+                            {
+                                <li>@medio</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">
+                            No hay medios de pago habilitados.
+                        </p>
+                    }
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
 using saas.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
@@ -17,11 +18,13 @@ namespace saas.ViewModel
         public decimal FondoFijo { get; set; }
 
         public int? EmpresaId { get; set; }
-
+        public List<SelectListItem> Empresas { get; set; }
+            = new List<SelectListItem>();
         public List<int> MediosPagoSeleccionadosIds { get; set; }
             = new List<int>();
 
         public List<MedioPagoOpcionVM> MediosPagoDisponibles { get; set; }
             = new List<MedioPagoOpcionVM>();
+        
     }
 }

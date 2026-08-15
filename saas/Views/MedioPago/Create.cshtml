@@ -1,0 +1,127 @@
+﻿@model saas.ViewModel.MedioPagoCreateVM
+
+@{
+    ViewData["Title"] = "Nuevo Medio de Pago";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Nuevo Medio de Pago</h1>
+            <p class="text-muted mb-0">
+                Creá un medio de pago disponible para la empresa.
+            </p>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+
+                <div class="row g-3">
+
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <div class="col-md-6">
+                            <label asp-for="EmpresaId"
+                                   class="form-label fw-semibold">
+                                Empresa
+                            </label>
+
+                            <select asp-for="EmpresaId"
+                                    asp-items="ViewBag.EmpresaId"
+                                    class="form-select">
+                                <option value="">
+                                    Seleccionar empresa
+                                </option>
+                            </select>
+
+                            <span asp-validation-for="EmpresaId"
+                                  class="text-danger"></span>
+                        </div>
+                    }
+
+                    <div class="col-md-6">
+                        <label asp-for="Nombre"
+                               class="form-label fw-semibold">
+                            Nombre
+                        </label>
+
+                        <input asp-for="Nombre"
+                               class="form-control"
+                               placeholder="Ej: Mercado Pago QR" />
+
+                        <span asp-validation-for="Nombre"
+                              class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Tipo"
+                               class="form-label fw-semibold">
+                            Tipo
+                        </label>
+
+                        <select asp-for="Tipo"
+                                asp-items="Html.GetEnumSelectList<saas.Models.Enums.TipoMedioPago>()"
+                                class="form-select">
+                        </select>
+
+                        <span asp-validation-for="Tipo"
+                              class="text-danger"></span>
+
+                        <div class="form-text">
+                            Define cómo se comportará este medio de pago dentro del sistema.
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Descripcion"
+                               class="form-label fw-semibold">
+                            Descripción
+                        </label>
+
+                        <textarea asp-for="Descripcion"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Descripción opcional del medio de pago"></textarea>
+
+                        <span asp-validation-for="Descripcion"
+                              class="text-danger"></span>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Crear Medio de Pago
+            </button>
+
+        </div>
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

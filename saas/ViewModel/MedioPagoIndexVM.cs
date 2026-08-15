@@ -1,3 +1,5 @@
+using saas.Models.Enums;
+
 namespace saas.ViewModel
 {
     public class MedioPagoIndexVM
@@ -7,6 +9,7 @@ namespace saas.ViewModel
         public string Nombre { get; set; } = null!;
 
         public string? Descripcion { get; set; }
+        public TipoMedioPago Tipo { get; set; }
 
         public bool Estado { get; set; }
 

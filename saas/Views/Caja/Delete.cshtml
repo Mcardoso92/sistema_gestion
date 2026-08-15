@@ -1,0 +1,85 @@
+﻿@model saas.ViewModel.CajaDetailsVM
+
+@{
+    ViewData["Title"] = "Desactivar Caja";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <h1 class="h4 fw-bold mb-3">
+                Desactivar Caja
+            </h1>
+
+            @if (Model.TieneTurnoAbierto)
+            {
+                <div class="alert alert-danger">
+                    Esta caja tiene un turno abierto y no puede desactivarse.
+                </div>
+            }
+            else if (Model.SaldoActual != 0)
+            {
+                <div class="alert alert-danger">
+                    Esta caja tiene un saldo de
+                    <strong>@Model.SaldoActual.ToString("C")</strong>.
+                    Debe dejar el saldo en cero antes de desactivarla.
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    La caja dejará de estar disponible para nuevas operaciones.
+                    Su historial financiero se conservará.
+                </div>
+            }
+
+            <dl class="row mb-4">
+
+                <dt class="col-sm-3">Caja</dt>
+                <dd class="col-sm-9">@Model.Nombre</dd>
+
+                <dt class="col-sm-3">Tipo</dt>
+                <dd class="col-sm-9">@Model.Tipo</dd>
+
+                <dt class="col-sm-3">Empresa</dt>
+                <dd class="col-sm-9">@Model.EmpresaNombre</dd>
+
+                <dt class="col-sm-3">Saldo actual</dt>
+                <dd class="col-sm-9">
+                    @Model.SaldoActual.ToString("C")
+                </dd>
+
+            </dl>
+
+            <form asp-action="Delete"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+
+                    @if (!Model.TieneTurnoAbierto &&
+                                        Model.SaldoActual == 0)
+                    {
+                        <button type="submit"
+                                class="btn btn-danger">
+                            Desactivar
+                        </button>
+                    }
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

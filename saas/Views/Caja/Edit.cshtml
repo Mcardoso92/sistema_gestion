@@ -1,0 +1,297 @@
+﻿@model saas.ViewModel.CajaEditVM
+
+@{
+    ViewData["Title"] = "Editar Caja";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Editar Caja
+            </h1>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <form asp-action="Edit"
+          asp-route-id="@Model.Id"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="EmpresaId" type="hidden" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label asp-for="Nombre"
+                                       class="form-label fw-semibold">
+                                    Nombre
+                                </label>
+
+                                <input asp-for="Nombre"
+                                       class="form-control" />
+
+                                <span asp-validation-for="Nombre"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Tipo"
+                                       class="form-label fw-semibold">
+                                    Tipo
+                                </label>
+
+                                <select asp-for="Tipo"
+                                        asp-items="Html.GetEnumSelectList<saas.Models.Enums.TipoCaja>()"
+                                        class="form-select"
+                                        id="tipoCajaSelect">
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="FondoFijo"
+                                       class="form-label fw-semibold">
+                                    Fondo fijo
+                                </label>
+
+                                <input asp-for="FondoFijo"
+                                       type="number"
+                                       min="0"
+                                       step="0.01"
+                                       class="form-control" />
+
+                                <span asp-validation-for="FondoFijo"
+                                      class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+
+                                <div class="form-check form-switch mb-3">
+
+                                    <input asp-for="PermiteTurnos"
+                                           class="form-check-input" />
+
+                                    <label asp-for="PermiteTurnos"
+                                           class="form-check-label fw-semibold">
+                                        Permite turnos
+                                    </label>
+
+                                </div>
+
+                                <span asp-validation-for="PermiteTurnos"
+                                      class="text-danger"></span>
+
+                                <div class="form-check form-switch">
+
+                                    <input asp-for="Estado"
+                                           class="form-check-input" />
+
+                                    <label asp-for="Estado"
+                                           class="form-check-label fw-semibold">
+                                        Caja activa
+                                    </label>
+
+                                </div>
+
+                                <span asp-validation-for="Estado"
+                                      class="text-danger"></span>
+
+                                @if (!Model.Estado)
+                                {
+                                    <div class="form-text">
+                                        Activá esta opción para reactivar la caja.
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-3">
+                            Medios de pago
+                        </h5>
+
+                        @foreach (var medio in Model.MediosPagoDisponibles)
+                        {
+                            <div class="form-check mb-2">
+
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="MediosPagoSeleccionadosIds"
+                                       value="@medio.Id"
+                                       id="medio-@medio.Id"
+                                       @(medio.Seleccionado ? "checked" : null) />
+
+                                <label class="form-check-label"
+                                       for="medio-@medio.Id">
+                                    @medio.Nombre
+                                </label>
+
+                            </div>
+                        }
+
+                        <span asp-validation-for="MediosPagoSeleccionadosIds"
+                              class="text-danger"></span>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+@{
+    var mediosSeleccionadosIds =
+        Model.MediosPagoSeleccionadosIds ?? new List<int>();
+}
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const tipoCajaSelect =
+                document.getElementById("tipoCajaSelect");
+
+            const container =
+                document.getElementById("mediosPagoContainer");
+
+            const empresaId =
+                '@Model.EmpresaId';
+
+            const mediosSeleccionadosIniciales =
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(mediosSeleccionadosIds));
+
+            async function cargarMediosPago() {
+
+                const tipoCaja =
+                    tipoCajaSelect.value;
+
+                container.innerHTML = "";
+
+                if (!empresaId || !tipoCaja) {
+                    return;
+                }
+
+                try {
+
+                    const url =
+                        '@Url.Action("GetMediosPagoPorEmpresa", "Caja")'
+                        + '?empresaId=' + empresaId
+                        + '&tipoCaja=' + tipoCaja;
+
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        throw new Error();
+                    }
+
+                    const medios = await response.json();
+
+                    if (medios.length === 0) {
+
+                        container.innerHTML =
+                            '<div class="text-muted small">'
+                            + 'No hay medios de pago compatibles con este tipo de caja.'
+                            + '</div>';
+
+                        return;
+                    }
+
+                    medios.forEach(medio => {
+
+                        const div =
+                            document.createElement("div");
+
+                        div.className =
+                            "form-check mb-2";
+
+                        const seleccionado =
+                            mediosSeleccionadosIniciales
+                                .includes(medio.id);
+
+                        div.innerHTML = `
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="MediosPagoSeleccionadosIds"
+                                value="${medio.id}"
+                                id="medio-${medio.id}"
+                                ${seleccionado ? 'checked' : ''} />
+
+                            <label
+                                class="form-check-label"
+                                for="medio-${medio.id}">
+                                ${medio.nombre}
+                            </label>
+                        `;
+
+                        container.appendChild(div);
+                    });
+
+                }
+                catch {
+
+                    container.innerHTML =
+                        '<div class="text-danger small">'
+                        + 'No se pudieron cargar los medios de pago.'
+                        + '</div>';
+                }
+            }
+
+            tipoCajaSelect.addEventListener(
+                "change",
+                cargarMediosPago);
+        });
+    </script>
+}

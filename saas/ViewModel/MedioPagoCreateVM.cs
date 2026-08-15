@@ -1,3 +1,4 @@
+using saas.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace saas.ViewModel
@@ -10,6 +11,7 @@ namespace saas.ViewModel
 
         [StringLength(250, ErrorMessage = "La descripción no puede superar los 250 caracteres.")]
         public string? Descripcion { get; set; }
+        public TipoMedioPago Tipo { get; set; }
 
         public int? EmpresaId { get; set; }
     }
