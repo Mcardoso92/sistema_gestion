@@ -1,0 +1,109 @@
+﻿@model saas.ViewModel.MedioPagoDetailsVM
+
+@{
+    ViewData["Title"] = "Detalle del Medio de Pago";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">@Model.Nombre</h1>
+
+            @if (Model.Estado)
+            {
+                <span class="badge bg-success">Activo</span>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Inactivo</span>
+            }
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Volver
+            </a>
+
+            <a asp-action="Edit"
+               asp-route-id="@Model.Id"
+               class="btn btn-primary">
+                Editar
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">Nombre</div>
+                            <div class="fw-semibold">@Model.Nombre</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Tipo</div>
+                            <div class="fw-semibold">@Model.Tipo</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-muted small">Empresa</div>
+                            <div class="fw-semibold">@Model.EmpresaNombre</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="text-muted small">Fecha de alta</div>
+                            <div>@Model.FechaAlta.ToString("dd/MM/yyyy")</div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="text-muted small">Descripción</div>
+
+                            <div>
+                                @(string.IsNullOrWhiteSpace(Model.Descripcion)
+                                                                ? "Sin descripción"
+                                                                : Model.Descripcion)
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-3">
+                        Cajas asociadas
+                    </h5>
+
+                    @if (Model.CajasAsociadas.Any())
+                    {
+                        <ul class="mb-0">
+                            @foreach (var caja in Model.CajasAsociadas)
+                            {
+                                <li>@caja</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted mb-0">
+                            Este medio de pago todavía no está asociado a ninguna caja.
+                        </p>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

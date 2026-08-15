@@ -1,0 +1,73 @@
+﻿@model saas.ViewModel.MedioPagoDetailsVM
+
+@{
+    ViewData["Title"] = "Desactivar Medio de Pago";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            <h1 class="h4 fw-bold mb-3">
+                Desactivar medio de pago
+            </h1>
+
+            <div class="alert alert-warning">
+                El medio de pago dejará de estar disponible para nuevas operaciones.
+                Los movimientos históricos no se modificarán.
+            </div>
+
+            <dl class="row mb-4">
+
+                <dt class="col-sm-3">Nombre</dt>
+                <dd class="col-sm-9">@Model.Nombre</dd>
+
+                <dt class="col-sm-3">Tipo</dt>
+                <dd class="col-sm-9">@Model.Tipo</dd>
+
+                <dt class="col-sm-3">Empresa</dt>
+                <dd class="col-sm-9">@Model.EmpresaNombre</dd>
+
+                <dt class="col-sm-3">Cajas asociadas</dt>
+                <dd class="col-sm-9">
+
+                    @if (Model.CajasAsociadas.Any())
+                    {
+                        @string.Join(", ", Model.CajasAsociadas)
+                    }
+                    else
+                    {
+                        <span>Ninguna</span>
+                    }
+
+                </dd>
+
+            </dl>
+
+            <form asp-action="Delete"
+                  asp-route-id="@Model.Id"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="d-flex justify-content-end gap-2">
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-danger">
+                        Desactivar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

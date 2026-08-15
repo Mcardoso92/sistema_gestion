@@ -1,25 +1,22 @@
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using saas.Models.Enums;
 
 namespace saas.ViewModel
 {
     public class CajaIndexVM
     {
-        public int Id { get; set; }
+        public string? Busqueda { get; set; }
 
-        public string Nombre { get; set; } = null!;
+        public string? Estado { get; set; }
 
-        public TipoCaja Tipo { get; set; }
+        public TipoCaja? Tipo { get; set; }
 
-        public bool PermiteTurnos { get; set; }
+        public int? EmpresaId { get; set; }
 
-        public decimal FondoFijo { get; set; }
+        public List<SelectListItem> Empresas { get; set; }
+            = new List<SelectListItem>();
 
-        public bool Estado { get; set; }
-
-        public DateTime FechaAlta { get; set; }
-
-        public string EmpresaNombre { get; set; } = null!;
-
-        public decimal SaldoActual { get; set; }
+        public List<CajaIndexItemVM> Cajas { get; set; }
+            = new List<CajaIndexItemVM>();
     }
 }

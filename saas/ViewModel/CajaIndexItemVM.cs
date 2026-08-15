@@ -2,14 +2,17 @@ using saas.Models.Enums;
 
 namespace saas.ViewModel
 {
-    public class MedioPagoDetailsVM
+    public class CajaIndexItemVM
     {
         public int Id { get; set; }
 
         public string Nombre { get; set; } = null!;
 
-        public string? Descripcion { get; set; }
-        public TipoMedioPago Tipo { get; set; }
+        public TipoCaja Tipo { get; set; }
+
+        public bool PermiteTurnos { get; set; }
+
+        public decimal FondoFijo { get; set; }
 
         public bool Estado { get; set; }
 
@@ -17,7 +20,6 @@ namespace saas.ViewModel
 
         public string EmpresaNombre { get; set; } = null!;
 
-        public List<string> CajasAsociadas { get; set; }
-            = new List<string>();
+        public decimal SaldoActual { get; set; }
     }
 }
