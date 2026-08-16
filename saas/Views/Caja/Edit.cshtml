@@ -141,24 +141,28 @@
                             Medios de pago
                         </h5>
 
-                        @foreach (var medio in Model.MediosPagoDisponibles)
-                        {
-                            <div class="form-check mb-2">
+                        <div id="mediosPagoContainer">
 
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="MediosPagoSeleccionadosIds"
-                                       value="@medio.Id"
-                                       id="medio-@medio.Id"
-                                       @(medio.Seleccionado ? "checked" : null) />
+                            @foreach (var medio in Model.MediosPagoDisponibles)
+                            {
+                                <div class="form-check mb-2">
 
-                                <label class="form-check-label"
-                                       for="medio-@medio.Id">
-                                    @medio.Nombre
-                                </label>
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="MediosPagoSeleccionadosIds"
+                                           value="@medio.Id"
+                                           id="medio-@medio.Id"
+                                           @(medio.Seleccionado ? "checked" : null) />
 
-                            </div>
-                        }
+                                    <label class="form-check-label"
+                                           for="medio-@medio.Id">
+                                        @medio.Nombre
+                                    </label>
+
+                                </div>
+                            }
+
+                        </div>
 
                         <span asp-validation-for="MediosPagoSeleccionadosIds"
                               class="text-danger"></span>
@@ -188,13 +192,7 @@
 
 </div>
 
-@{
-    var mediosSeleccionadosIds =
-        Model.MediosPagoSeleccionadosIds ?? new List<int>();
-}
-
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
 
     <script>
@@ -206,13 +204,18 @@
             const container =
                 document.getElementById("mediosPagoContainer");
 
-            const empresaId =
-                '@Model.EmpresaId';
+            const empresaId = "@Model.EmpresaId";
 
-            const mediosSeleccionadosIniciales =
-                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(mediosSeleccionadosIds));
+            if (!tipoCajaSelect || !container) {
+                return;
+            }
 
-            async function cargarMediosPago() {
+            const seleccionadosIniciales = [
+                @string.Join(",", Model.MediosPagoSeleccionadosIds)
+            ];
+
+            async function cargarMediosPago(
+                conservarSeleccionInicial = false) {
 
                 const tipoCaja =
                     tipoCajaSelect.value;
@@ -224,22 +227,25 @@
                 }
 
                 try {
-
                     const url =
                         '@Url.Action("GetMediosPagoPorEmpresa", "Caja")'
-                        + '?empresaId=' + empresaId
-                        + '&tipoCaja=' + tipoCaja;
+                        + '?empresaId='
+                        + encodeURIComponent(empresaId)
+                        + '&tipoCaja='
+                        + encodeURIComponent(tipoCaja);
 
-                    const response = await fetch(url);
+                    const response =
+                        await fetch(url);
 
                     if (!response.ok) {
-                        throw new Error();
+                        throw new Error(
+                            "Error al cargar medios de pago.");
                     }
 
-                    const medios = await response.json();
+                    const medios =
+                        await response.json();
 
                     if (medios.length === 0) {
-
                         container.innerHTML =
                             '<div class="text-muted small">'
                             + 'No hay medios de pago compatibles con este tipo de caja.'
@@ -250,38 +256,55 @@
 
                     medios.forEach(medio => {
 
+                        const seleccionado =
+                            conservarSeleccionInicial &&
+                            seleccionadosIniciales.includes(
+                                medio.id);
+
                         const div =
                             document.createElement("div");
 
                         div.className =
                             "form-check mb-2";
 
-                        const seleccionado =
-                            mediosSeleccionadosIniciales
-                                .includes(medio.id);
+                        const input =
+                            document.createElement("input");
 
-                        div.innerHTML = `
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                name="MediosPagoSeleccionadosIds"
-                                value="${medio.id}"
-                                id="medio-${medio.id}"
-                                ${seleccionado ? 'checked' : ''} />
+                        input.className =
+                            "form-check-input";
 
-                            <label
-                                class="form-check-label"
-                                for="medio-${medio.id}">
-                                ${medio.nombre}
-                            </label>
-                        `;
+                        input.type = "checkbox";
+
+                        input.name =
+                            "MediosPagoSeleccionadosIds";
+
+                        input.value = medio.id;
+
+                        input.id =
+                            `medio-${medio.id}`;
+
+                        input.checked =
+                            seleccionado;
+
+                        const label =
+                            document.createElement("label");
+
+                        label.className =
+                            "form-check-label";
+
+                        label.htmlFor =
+                            input.id;
+
+                        label.textContent =
+                            medio.nombre;
+
+                        div.appendChild(input);
+                        div.appendChild(label);
 
                         container.appendChild(div);
                     });
-
                 }
                 catch {
-
                     container.innerHTML =
                         '<div class="text-danger small">'
                         + 'No se pudieron cargar los medios de pago.'
@@ -289,9 +312,18 @@
                 }
             }
 
+            // Cambio manual de tipo:
+            // recarga opciones y no conserva asociaciones
+            // incompatibles del tipo anterior.
             tipoCajaSelect.addEventListener(
                 "change",
-                cargarMediosPago);
+                function () {
+                    cargarMediosPago(false);
+                });
+
+            // Estado inicial de Edit:
+            // conserva marcados los medios ya asociados.
+            cargarMediosPago(true);
         });
     </script>
 }

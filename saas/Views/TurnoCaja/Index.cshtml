@@ -1,0 +1,257 @@
+﻿@model IEnumerable<saas.ViewModel.TurnoCajaIndexVM>
+
+@{
+    ViewData["Title"] = "Turnos de Caja";
+
+    string estadoActual =
+        ViewBag.Estado as string ?? "abiertos";
+
+    string? busquedaActual =
+        ViewBag.Busqueda as string;
+
+    int? empresaIdActual =
+        ViewBag.EmpresaId as int?;
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Turnos de Caja
+            </h1>
+
+            <p class="text-muted mb-0">
+                Aperturas, cierres y control de turnos de efectivo.
+            </p>
+        </div>
+
+        @if (!User.IsInRole("SuperAdmin"))
+        {
+            <a asp-action="Abrir"
+               class="btn btn-primary">
+                Abrir turno
+            </a>
+        }
+
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <form method="get"
+                  asp-action="Index">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-lg-4 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Buscar
+                        </label>
+
+                        <input type="text"
+                               name="busqueda"
+                               value="@busquedaActual"
+                               class="form-control"
+                               placeholder="Caja o usuario..." />
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Estado
+                        </label>
+
+                        <select name="estado"
+                                class="form-select">
+
+                            <option value="abiertos"
+                                    selected="@(estadoActual == "abiertos")">
+                                Abiertos
+                            </option>
+
+                            <option value="cerrados"
+                                    selected="@(estadoActual == "cerrados")">
+                                Cerrados
+                            </option>
+
+                            <option value="todos"
+                                    selected="@(estadoActual == "todos")">
+                                Todos
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <div class="col-lg-4 col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Empresa
+                            </label>
+
+                            <select name="empresaId"
+                                    class="form-select">
+
+                                <option value="">
+                                    Todas
+                                </option>
+
+                                @if (ViewBag.Empresas != null)
+                                {
+                                    foreach (var empresa in ViewBag.Empresas)
+                                    {
+                                        <option value="@empresa.Id"
+                                                selected="@(empresaIdActual == empresa.Id)">
+                                            @empresa.Nombre
+                                        </option>
+                                    }
+                                }
+
+                            </select>
+
+                        </div>
+                    }
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <button type="submit"
+                                class="btn btn-outline-primary w-100">
+                            Filtrar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-0">
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Caja</th>
+                                <th>Usuario</th>
+
+                                @if (User.IsInRole("SuperAdmin"))
+                                {
+                                    <th>Empresa</th>
+                                }
+
+                                <th>Apertura</th>
+                                <th>Fondo fijo</th>
+                                <th>Estado</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var turno in Model)
+                            {
+                                <tr>
+
+                                    <td class="ps-4 fw-semibold">
+                                        @turno.CajaNombre
+                                    </td>
+
+                                    <td>
+                                        @turno.UsuarioAperturaNombre
+                                    </td>
+
+                                    @if (User.IsInRole("SuperAdmin"))
+                                    {
+                                        <td>
+                                            @turno.EmpresaNombre
+                                        </td>
+                                    }
+
+                                    <td>
+                                        @turno.FechaApertura.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @turno.FondoFijoAplicado.ToString("C")
+                                    </td>
+
+                                    <td>
+                                        @if (turno.Estado == saas.Models.Enums.EstadoTurnoCaja.Abierto)
+                                        {
+                                            <span class="badge bg-success">
+                                                Abierto
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                Cerrado
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end pe-4">
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@turno.Id"
+                                           class="btn btn-sm btn-outline-secondary">
+                                            Detalles
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5">
+
+                    <h5 class="fw-bold mb-2">
+                        No hay turnos para mostrar
+                    </h5>
+
+                    <p class="text-muted mb-3">
+                        No se encontraron turnos con los filtros seleccionados.
+                    </p>
+
+                    @if (!User.IsInRole("SuperAdmin") &&
+                                    estadoActual == "abiertos")
+                    {
+                        <a asp-action="Abrir"
+                           class="btn btn-primary">
+                            Abrir turno
+                        </a>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

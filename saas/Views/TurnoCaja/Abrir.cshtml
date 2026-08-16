@@ -1,0 +1,172 @@
+﻿@model saas.ViewModel.AperturaTurnoVM
+
+@{
+    ViewData["Title"] = "Abrir Turno";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Abrir Turno
+            </h1>
+
+            <p class="text-muted mb-0">
+                Seleccioná la caja de efectivo con la que vas a operar.
+            </p>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <form asp-action="Abrir"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                @if (Model.CajasDisponibles.Any())
+                {
+                    <div class="mb-3">
+
+                        <label asp-for="CajaId"
+                               class="form-label fw-semibold">
+                            Caja
+                        </label>
+
+                        <select asp-for="CajaId"
+                                class="form-select"
+                                id="cajaSelect">
+
+                            <option value="">
+                                Seleccionar caja
+                            </option>
+
+                            @foreach (var caja in Model.CajasDisponibles)
+                            {
+                                <option value="@caja.Id"
+                                        data-fondo="@caja.FondoFijo.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                    @caja.Nombre
+                                </option>
+                            }
+
+                        </select>
+
+                        <span asp-validation-for="CajaId"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="border rounded p-3 bg-light">
+
+                        <div class="text-muted small">
+                            Fondo fijo configurado
+                        </div>
+
+                        <div class="fs-4 fw-bold"
+                             id="fondoFijoVisual">
+                            -
+                        </div>
+
+                        <div class="form-text">
+                            El fondo fijo se toma automáticamente de la configuración de la caja.
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-0">
+                        No hay cajas de efectivo disponibles para abrir un turno.
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+        @if (Model.CajasDisponibles.Any())
+        {
+            <div class="d-flex justify-content-end gap-2 mt-4">
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Abrir turno
+                </button>
+
+            </div>
+        }
+
+    </form>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const cajaSelect =
+                document.getElementById("cajaSelect");
+
+            const fondoVisual =
+                document.getElementById("fondoFijoVisual");
+
+            if (!cajaSelect || !fondoVisual) {
+                return;
+            }
+
+            function actualizarFondo() {
+
+                const opcion =
+                    cajaSelect.options[
+                        cajaSelect.selectedIndex
+                    ];
+
+                const fondo =
+                    opcion?.dataset?.fondo;
+
+                if (!fondo) {
+                    fondoVisual.textContent = "-";
+                    return;
+                }
+
+                const importe =
+                    Number.parseFloat(fondo);
+
+                fondoVisual.textContent =
+                    importe.toLocaleString(
+                        "es-AR",
+                        {
+                            style: "currency",
+                            currency: "ARS"
+                        });
+            }
+
+            cajaSelect.addEventListener(
+                "change",
+                actualizarFondo);
+
+            actualizarFondo();
+        });
+    </script>
+}

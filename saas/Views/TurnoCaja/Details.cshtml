@@ -1,0 +1,427 @@
+﻿@model saas.ViewModel.TurnoCajaDetailsVM
+
+@{
+    ViewData["Title"] = "Detalle del Turno";
+
+    bool estaAbierto =
+        Model.Estado == saas.Models.Enums.EstadoTurnoCaja.Abierto;
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+
+                <h1 class="h3 fw-bold mb-0">
+                    @Model.CajaNombre
+                </h1>
+
+                @if (estaAbierto)
+                {
+                    <span class="badge bg-success">
+                        Abierto
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">
+                        Cerrado
+                    </span>
+                }
+
+                @if (Model.CierreForzado)
+                {
+                    <span class="badge bg-warning text-dark">
+                        Cierre forzado
+                    </span>
+                }
+
+            </div>
+
+            <p class="text-muted mb-0">
+                Turno #@Model.Id
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Volver
+            </a>
+
+            @if (estaAbierto)
+            {
+                <a asp-action="Cerrar"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-primary">
+                    Cerrar turno
+                </a>
+            }
+
+        </div>
+
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        Información del turno
+                    </h5>
+
+                    <div class="row g-4">
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-md-6">
+                                <div class="text-muted small">
+                                    Empresa
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @Model.EmpresaNombre
+                                </div>
+                            </div>
+                        }
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted small">
+                                Caja
+                            </div>
+
+                            <div class="fw-semibold">
+                                @Model.CajaNombre
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted small">
+                                Usuario de apertura
+                            </div>
+
+                            <div class="fw-semibold">
+                                @Model.UsuarioAperturaNombre
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted small">
+                                Fecha de apertura
+                            </div>
+
+                            <div>
+                                @Model.FechaApertura.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="text-muted small">
+                                Fondo fijo aplicado
+                            </div>
+
+                            <div class="fw-semibold">
+                                @Model.FondoFijoAplicado.ToString("C")
+                            </div>
+
+                        </div>
+
+                        @if (!estaAbierto)
+                        {
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Fecha de cierre
+                                </div>
+
+                                <div>
+                                    @(Model.FechaCierre.HasValue
+                                                                    ? Model.FechaCierre.Value.ToString("dd/MM/yyyy HH:mm")
+                                                                    : "-")
+                                                                      </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Usuario de cierre
+                                </div>
+
+                                <div>
+                                    @(string.IsNullOrWhiteSpace(Model.UsuarioCierreNombre)
+                                                                    ? "-"
+                                                                    : Model.UsuarioCierreNombre)
+                            </div>
+
+                            </div>
+                                                }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+                    <h5 class="fw-bold mb-4">
+                        Arqueo
+                    </h5>
+
+                    @if (estaAbierto)
+                    {
+                        <p class="text-muted mb-0">
+                            El arqueo estará disponible cuando se cierre el turno.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+
+                            <div class="text-muted small">
+                                Efectivo esperado
+                            </div>
+
+                            <div class="fw-semibold">
+                                @(Model.EfectivoEsperado?.ToString("C") ?? "-")
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="text-muted small">
+                                Efectivo contado
+                            </div>
+
+                            <div class="fw-semibold">
+                                @(Model.EfectivoContado?.ToString("C") ?? "-")
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="text-muted small">
+                                Diferencia
+                            </div>
+
+                            @if (Model.Diferencia.HasValue)
+                            {
+                                if (Model.Diferencia.Value == 0)
+                                {
+                                    <div class="fw-bold text-success">
+                                        @Model.Diferencia.Value.ToString("C")
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="fw-bold text-danger">
+                                        @Model.Diferencia.Value.ToString("C")
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div>-</div>
+                            }
+
+                        </div>
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Importe rendido
+                            </div>
+
+                            <div class="fw-semibold">
+                                @(Model.ImporteRendido?.ToString("C") ?? "-")
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    @if (Model.CierreForzado)
+    {
+        <div class="alert alert-warning">
+
+            <div class="fw-semibold mb-1">
+                Cierre forzado
+            </div>
+
+            <div>
+                @(string.IsNullOrWhiteSpace(Model.MotivoCierreForzado)
+                            ? "Sin motivo informado."
+                            : Model.MotivoCierreForzado)
+        </div>
+
+        </div>
+        }
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-0">
+
+            <div class="p-4 pb-3">
+
+                <h5 class="fw-bold mb-1">
+                    Movimientos del turno
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Operaciones financieras asociadas a este turno.
+                </p>
+
+            </div>
+
+            @if (Model.Movimientos.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="ps-4">Fecha</th>
+                                <th>Tipo</th>
+                                <th>Dirección</th>
+                                <th>Medio de pago</th>
+                                <th>Concepto</th>
+                                <th class="text-end pe-4">Importe</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var movimiento in Model.Movimientos)
+                            {
+                                <tr>
+
+                                    <td class="ps-4">
+                                        @movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @movimiento.Tipo
+                                    </td>
+
+                                    <td>
+
+                                        @if (movimiento.Direccion ==
+                                                                        saas.Models.Enums.DireccionMovimientoCaja.Ingreso)
+                                        {
+                                            <span class="badge bg-success">
+                                                Ingreso
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                Egreso
+                                            </span>
+                                        }
+
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(movimiento.MedioPagoNombre)
+                                                                    ? "-"
+                                                                    : movimiento.MedioPagoNombre)
+                                                                                             </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(movimiento.Concepto)
+                                                                    ? "-"
+                                                                    : movimiento.Concepto)
+                            </td>
+
+                                    <td class="text-end pe-4 fw-semibold">
+                                        @movimiento.Importe.ToString("C")
+                                    </td>
+
+                                </tr>
+                                                }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5 pt-3">
+
+                    <p class="text-muted mb-0">
+                        Este turno todavía no tiene movimientos asociados.
+                    </p>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    @if (!estaAbierto &&
+        Model.Diferencia.HasValue &&
+        Model.Diferencia.Value != 0)
+    {
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold mb-3">
+                    Regularización
+                </h5>
+
+                @if (Model.Regularizacion.Regularizado)
+                {
+                    <div class="alert alert-success mb-0">
+                        La diferencia de este turno ya fue regularizada.
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-warning mb-0">
+                        Este turno tiene una diferencia pendiente de regularización.
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>
