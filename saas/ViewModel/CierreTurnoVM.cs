@@ -30,5 +30,8 @@ namespace saas.ViewModel
 
         [StringLength(500, ErrorMessage = "El motivo del cierre forzado no puede superar los 500 caracteres.")]
         public string? MotivoCierreForzado { get; set; }
+        public int? CajaDestinoId { get; set; }
+        public List<CajaTurnoOpcionVM> CajasDestinoDisponibles { get; set; }
+            = new List<CajaTurnoOpcionVM>();
     }
 }

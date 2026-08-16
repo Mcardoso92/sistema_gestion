@@ -1,0 +1,482 @@
+﻿@model saas.ViewModel.CierreTurnoVM
+
+@{
+    ViewData["Title"] = "Cerrar Turno";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Cerrar Turno
+            </h1>
+
+            <p class="text-muted mb-0">
+                Realizá el arqueo y registrá la rendición de efectivo.
+            </p>
+        </div>
+
+        <a asp-action="Details"
+           asp-route-id="@Model.TurnoCajaId"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    @if (Model.CierreForzado)
+    {
+        <div class="alert alert-warning">
+
+            <div class="fw-semibold mb-1">
+                Cierre forzado
+            </div>
+
+            <div>
+                Está cerrando un turno abierto por otro usuario.
+                Deberá indicar el motivo del cierre.
+            </div>
+
+        </div>
+    }
+
+    <form asp-action="Cerrar"
+          asp-route-id="@Model.TurnoCajaId"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="TurnoCajaId"
+               type="hidden" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
+
+        <div class="row g-4">
+
+            <!-- INFORMACIÓN DEL TURNO -->
+
+            <div class="col-lg-5">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-4">
+                            Información del turno
+                        </h5>
+
+                        <div class="mb-3">
+
+                            <div class="text-muted small">
+                                Caja
+                            </div>
+
+                            <div class="fw-semibold">
+                                @Model.CajaNombre
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="text-muted small">
+                                Usuario de apertura
+                            </div>
+
+                            <div class="fw-semibold">
+                                @Model.UsuarioAperturaNombre
+                            </div>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <div class="text-muted small">
+                                Fecha de apertura
+                            </div>
+
+                            <div>
+                                @Model.FechaApertura.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+
+                        </div>
+
+                        <div>
+
+                            <div class="text-muted small">
+                                Fondo fijo aplicado
+                            </div>
+
+                            <div class="fs-5 fw-bold">
+                                @Model.FondoFijoAplicado.ToString("C")
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ARQUEO -->
+
+            <div class="col-lg-7">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-4">
+                            Arqueo
+                        </h5>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Efectivo esperado
+                                </label>
+
+                                <div class="form-control bg-light">
+                                    @Model.EfectivoEsperado.ToString("C")
+                                </div>
+
+                                <div class="form-text">
+                                    Calculado automáticamente según el fondo fijo y los movimientos del turno.
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label asp-for="EfectivoContado"
+                                       class="form-label fw-semibold">
+                                    Efectivo contado
+                                </label>
+
+                                <input asp-for="EfectivoContado"
+                                       class="form-control"
+                                       type="number"
+                                       min="0"
+                                       step="0.01"
+                                       id="efectivoContado" />
+
+                                <span asp-validation-for="EfectivoContado"
+                                      class="text-danger"></span>
+
+                                <div class="form-text">
+                                    Ingresá el efectivo físico contado en la caja.
+                                </div>
+
+                            </div>
+
+                            <div class="col-12">
+
+                                <div class="border rounded p-3">
+
+                                    <div class="text-muted small">
+                                        Diferencia de caja
+                                    </div>
+
+                                    <div class="fs-4 fw-bold"
+                                         id="diferenciaVisual">
+                                        @Model.Diferencia.ToString("C")
+                                    </div>
+
+                                    <div class="small mt-1"
+                                         id="diferenciaDescripcion">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- RENDICIÓN -->
+
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-1">
+                            Rendición
+                        </h5>
+
+                        <p class="text-muted mb-4">
+                            Indicá cuánto efectivo se retira de esta caja y dónde será depositado.
+                        </p>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label class="form-label fw-semibold">
+                                    Importe sugerido a rendir
+                                </label>
+
+                                <div class="form-control bg-light"
+                                     id="importeSugeridoVisual">
+                                    @Model.ImporteRendirSugerido.ToString("C")
+                                </div>
+
+                                <div class="form-text">
+                                    Se sugiere conservar el fondo fijo y rendir el excedente.
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label asp-for="ImporteRendido"
+                                       class="form-label fw-semibold">
+                                    Importe a rendir
+                                </label>
+
+                                <input asp-for="ImporteRendido"
+                                       class="form-control"
+                                       type="number"
+                                       min="0"
+                                       step="0.01"
+                                       id="importeRendido" />
+
+                                <span asp-validation-for="ImporteRendido"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <div class="col-12"
+                                 id="cajaDestinoContainer">
+
+                                <label asp-for="CajaDestinoId"
+                                       class="form-label fw-semibold">
+                                    Caja destino
+                                </label>
+
+                                <select asp-for="CajaDestinoId"
+                                        class="form-select">
+
+                                    <option value="">
+                                        Seleccionar caja destino
+                                    </option>
+
+                                    @foreach (var caja in Model.CajasDestinoDisponibles)
+                                    {
+                                        <option value="@caja.Id">
+                                            @caja.Nombre
+                                        </option>
+                                    }
+
+                                </select>
+
+                                <span asp-validation-for="CajaDestinoId"
+                                      class="text-danger"></span>
+
+                                <div class="form-text">
+                                    La rendición generará una transferencia desde la caja del turno hacia esta caja.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            @if (Model.CierreForzado)
+            {
+                <div class="col-12">
+
+                    <div class="card border-warning shadow-sm">
+
+                        <div class="card-body p-4">
+
+                            <label asp-for="MotivoCierreForzado"
+                                   class="form-label fw-semibold">
+                                Motivo del cierre forzado
+                            </label>
+
+                            <textarea asp-for="MotivoCierreForzado"
+                                      class="form-control"
+                                      rows="3"
+                                      maxlength="500"
+                                      placeholder="Indicá por qué se está cerrando el turno de otro usuario"></textarea>
+
+                            <span asp-validation-for="MotivoCierreForzado"
+                                  class="text-danger"></span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-action="Details"
+               asp-route-id="@Model.TurnoCajaId"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Confirmar cierre
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+        const efectivoEsperado =
+            @Model.EfectivoEsperado.ToString(
+                System.Globalization.CultureInfo.InvariantCulture);
+
+        const fondoFijo =
+            @Model.FondoFijoAplicado.ToString(
+                                System.Globalization.CultureInfo.InvariantCulture);
+
+        const efectivoContado =
+            document.getElementById("efectivoContado");
+
+        const importeRendido =
+            document.getElementById("importeRendido");
+
+        const diferenciaVisual =
+            document.getElementById("diferenciaVisual");
+
+        const diferenciaDescripcion =
+            document.getElementById("diferenciaDescripcion");
+
+        const importeSugeridoVisual =
+            document.getElementById("importeSugeridoVisual");
+
+        const cajaDestinoContainer =
+            document.getElementById("cajaDestinoContainer");
+
+        const formatoMoneda =
+            new Intl.NumberFormat(
+                "es-AR",
+                {
+                    style: "currency",
+                    currency: "ARS"
+                });
+
+        function obtenerNumero(elemento) {
+
+            const valor =
+                Number.parseFloat(elemento.value);
+
+            return Number.isFinite(valor)
+                ? valor
+                : 0;
+        }
+
+        function actualizarArqueo() {
+
+            const contado =
+                obtenerNumero(efectivoContado);
+
+            const diferencia =
+                contado - efectivoEsperado;
+
+            diferenciaVisual.textContent =
+                formatoMoneda.format(diferencia);
+
+            diferenciaVisual.classList.remove(
+                "text-success",
+                "text-danger");
+
+            if (diferencia === 0) {
+
+                diferenciaVisual.classList.add(
+                    "text-success");
+
+                diferenciaDescripcion.textContent =
+                    "La caja coincide con el efectivo esperado.";
+            }
+            else if (diferencia > 0) {
+
+                diferenciaVisual.classList.add(
+                    "text-danger");
+
+                diferenciaDescripcion.textContent =
+                    "Se detectó un sobrante de efectivo.";
+            }
+            else {
+
+                diferenciaVisual.classList.add(
+                    "text-danger");
+
+                diferenciaDescripcion.textContent =
+                    "Se detectó un faltante de efectivo.";
+            }
+
+            const sugerido =
+                Math.max(
+                    0,
+                    contado - fondoFijo);
+
+            importeSugeridoVisual.textContent =
+                formatoMoneda.format(sugerido);
+        }
+
+        function actualizarCajaDestino() {
+
+            const importe =
+                obtenerNumero(importeRendido);
+
+            if (importe > 0) {
+
+                cajaDestinoContainer.style.display =
+                    "";
+
+            }
+            else {
+
+                cajaDestinoContainer.style.display =
+                    "none";
+            }
+        }
+
+        efectivoContado.addEventListener(
+            "input",
+            actualizarArqueo);
+
+        importeRendido.addEventListener(
+            "input",
+            actualizarCajaDestino);
+
+        actualizarArqueo();
+        actualizarCajaDestino();
+    });
+</script>
+}

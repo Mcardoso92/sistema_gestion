@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Models.Enums;
+using saas.Helpers;
 
 namespace saas.Controllers
 {
@@ -102,19 +104,49 @@ namespace saas.Controllers
 
             try
             {
-                empresa.FechaAlta = DateTime.Now;
-                empresa.Estado = true;
+                await using var transaction =
+                    await _context.Database.BeginTransactionAsync();
 
-                _context.Empresas.Add(empresa);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    var fechaAlta = DateTime.Now;
 
-                TempData["Success"] = "Empresa creada correctamente.";
+                    empresa.FechaAlta = fechaAlta;
+                    empresa.Estado = true;
 
-                return RedirectToAction(nameof(Index));
+                    _context.Empresas.Add(empresa);
+
+                    await _context.SaveChangesAsync();
+
+                    var mediosPagoPredeterminados =
+                        ConfiguracionInicialEmpresa
+                            .CrearMediosPagoPredeterminados(
+                                empresa.Id,
+                                fechaAlta);
+
+                    _context.MediosPago.AddRange(
+                        mediosPagoPredeterminados);
+
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    TempData["Success"] =
+                        "Empresa creada correctamente.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
             }
             catch
             {
-                ModelState.AddModelError("", "Ocurrió un error al crear la empresa.");
+                ModelState.AddModelError(
+                    "",
+                    "Ocurrió un error al crear la empresa.");
 
                 return View(empresa);
             }
