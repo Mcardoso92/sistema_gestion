@@ -17,7 +17,11 @@ namespace saas.ViewModel
         [StringLength(500, ErrorMessage = "Las observaciones no pueden superar los 500 caracteres.")]
         public string? Observaciones { get; set; }
 
-        public List<CajaOpcionSimpleVM> CajasDisponibles { get; set; }
-            = new List<CajaOpcionSimpleVM>();
+        public List<CajaOpcionSimpleVM> CajasDisponibles { get; set; } = new List<CajaOpcionSimpleVM>();
+
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un medio de pago.")]
+        public int MedioPagoId { get; set; }
+
+        public List<MedioPagoOpcionSimpleVM> MediosPagoDisponibles { get; set; } = new List<MedioPagoOpcionSimpleVM>();
     }
 }

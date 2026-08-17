@@ -1,0 +1,254 @@
+﻿@model saas.ViewModel.IngresoManualVM
+
+@{
+    ViewData["Title"] = "Ingreso Manual";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Ingreso Manual
+            </h1>
+
+            <p class="text-muted mb-0">
+                Registrá un ingreso de dinero a una caja.
+            </p>
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <form asp-action="IngresoManual"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label asp-for="CajaId"
+                               class="form-label fw-semibold">
+                            Caja
+                        </label>
+
+                        <select asp-for="CajaId"
+                                class="form-select"
+                                id="cajaSelect">
+
+                            <option value="">
+                                Seleccionar caja
+                            </option>
+
+                            @foreach (var caja in Model.CajasDisponibles)
+                            {
+                                <option value="@caja.Id">
+                                    @caja.Nombre
+                                </option>
+                            }
+
+                        </select>
+
+                        <span asp-validation-for="CajaId"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="MedioPagoId"
+                               class="form-label fw-semibold">
+                            Medio de pago
+                        </label>
+
+                        <select asp-for="MedioPagoId"
+                                class="form-select"
+                                id="medioPagoSelect">
+
+                            <option value="">
+                                Primero seleccioná una caja
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="MedioPagoId"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label asp-for="Importe"
+                               class="form-label fw-semibold">
+                            Importe
+                        </label>
+
+                        <input asp-for="Importe"
+                               class="form-control"
+                               type="number"
+                               min="0.01"
+                               step="0.01" />
+
+                        <span asp-validation-for="Importe"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <label asp-for="Concepto"
+                               class="form-label fw-semibold">
+                            Concepto
+                        </label>
+
+                        <input asp-for="Concepto"
+                               class="form-control"
+                               maxlength="250"
+                               placeholder="Ej: Aporte de efectivo" />
+
+                        <span asp-validation-for="Concepto"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <label asp-for="Observaciones"
+                               class="form-label fw-semibold">
+                            Observaciones
+                        </label>
+
+                        <textarea asp-for="Observaciones"
+                                  class="form-control"
+                                  rows="3"
+                                  maxlength="500"></textarea>
+
+                        <span asp-validation-for="Observaciones"
+                              class="text-danger"></span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-success">
+                Registrar ingreso
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const cajaSelect =
+                document.getElementById("cajaSelect");
+
+            const medioPagoSelect =
+                document.getElementById("medioPagoSelect");
+
+            const medioSeleccionado =
+                "@Model.MedioPagoId";
+
+            async function cargarMediosPago() {
+
+                const cajaId =
+                    cajaSelect.value;
+
+                medioPagoSelect.innerHTML = "";
+
+                if (!cajaId) {
+
+                    medioPagoSelect.innerHTML =
+                        '<option value="">Primero seleccioná una caja</option>';
+
+                    return;
+                }
+
+                try {
+
+                    const url =
+                        '@Url.Action("GetMediosPagoPorCaja", "MovimientoCaja")'
+                        + '?cajaId='
+                        + encodeURIComponent(cajaId);
+
+                    const response =
+                        await fetch(url);
+
+                    if (!response.ok) {
+                        throw new Error();
+                    }
+
+                    const medios =
+                        await response.json();
+
+                    medioPagoSelect.innerHTML =
+                        '<option value="">Seleccionar medio de pago</option>';
+
+                    medios.forEach(medio => {
+
+                        const option =
+                            document.createElement("option");
+
+                        option.value =
+                            medio.id;
+
+                        option.textContent =
+                            medio.nombre;
+
+                        if (String(medio.id) ===
+                            medioSeleccionado) {
+
+                            option.selected = true;
+                        }
+
+                        medioPagoSelect.appendChild(option);
+                    });
+                }
+                catch {
+
+                    medioPagoSelect.innerHTML =
+                        '<option value="">No se pudieron cargar los medios</option>';
+                }
+            }
+
+            cajaSelect.addEventListener(
+                "change",
+                cargarMediosPago);
+
+            cargarMediosPago();
+        });
+    </script>
+}
