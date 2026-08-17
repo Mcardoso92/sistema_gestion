@@ -27,5 +27,11 @@ namespace saas.ViewModel
 
         public List<CategoriaGastoOpcionVM> CategoriasDisponibles { get; set; }
             = new List<CategoriaGastoOpcionVM>();
+
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un medio de pago.")]
+        public int MedioPagoId { get; set; }
+
+        public List<MedioPagoOpcionSimpleVM> MediosPagoDisponibles { get; set; }
+            = new List<MedioPagoOpcionSimpleVM>();
     }
 }
