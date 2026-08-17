@@ -42,6 +42,17 @@
            class="btn btn-outline-secondary">
             Volver
         </a>
+        @if (!Model.EsReversion &&
+                !Model.FueRevertido &&
+                (Model.Tipo == saas.Models.Enums.TipoMovimientoCaja.IngresoManual ||
+                Model.Tipo == saas.Models.Enums.TipoMovimientoCaja.EgresoManual))
+        {
+            <a asp-action="Revertir"
+               asp-route-id="@Model.Id"
+               class="btn btn-warning">
+                Revertir
+            </a>
+        }
 
     </div>
 

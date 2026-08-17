@@ -1,0 +1,149 @@
+﻿@using saas.Models.Enums
+@{
+    ViewData["Title"] = "Revertir Movimiento";
+
+    var movimiento =
+        ViewBag.Movimiento as saas.Models.MovimientoCaja;
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Revertir Movimiento
+            </h1>
+
+            <p class="text-muted mb-0">
+                Se generará un movimiento compensatorio.
+            </p>
+        </div>
+
+        <a asp-action="Details"
+           asp-route-id="@movimiento?.Id"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+
+    @if (movimiento != null)
+    {
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold mb-4">
+                    Movimiento original
+                </h5>
+
+                <div class="row g-4">
+
+                    <div class="col-md-4">
+                        <div class="text-muted small">
+                            Caja
+                        </div>
+
+                        <div class="fw-semibold">
+                            @movimiento.Caja.Nombre
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="text-muted small">
+                            Tipo
+                        </div>
+
+                        <div>
+                            @movimiento.Tipo
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="text-muted small">
+                            Importe
+                        </div>
+
+                        <div class="fw-bold">
+                            @movimiento.Importe.ToString("C")
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="text-muted small">
+                            Concepto
+                        </div>
+
+                        <div>
+                            @(movimiento.Concepto ?? "-")
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="alert alert-warning">
+            Esta acción no elimina ni modifica el movimiento original.
+            Se creará un nuevo movimiento por el mismo importe y con dirección contraria.
+        </div>
+
+        <form asp-action="Revertir"
+              asp-route-id="@movimiento.Id"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <label for="motivo"
+                           class="form-label fw-semibold">
+                        Motivo de la reversión
+                    </label>
+
+                    <textarea name="motivo"
+                          id="motivo"
+                          class="form-control"
+                          rows="3"
+                          maxlength="500"
+                          required></textarea>
+
+                    <div class="form-text">
+                        Indicá por qué se está corrigiendo este movimiento.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+
+                <a asp-action="Details"
+                   asp-route-id="@movimiento.Id"
+                   class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+
+                <button type="submit"
+                        class="btn btn-warning">
+                    Confirmar reversión
+                </button>
+
+            </div>
+
+        </form>
+    }
+
+</div>
