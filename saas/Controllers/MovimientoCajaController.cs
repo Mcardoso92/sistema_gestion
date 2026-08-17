@@ -159,6 +159,33 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
+            var idsMovimientos =
+                movimientos
+                    .Select(m => m.Id)
+                    .ToList();
+
+            var idsRevertidos =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .Where(m =>
+                        m.MovimientoOrigenId.HasValue &&
+                        idsMovimientos.Contains(
+                            m.MovimientoOrigenId.Value))
+                    .Select(m =>
+                        m.MovimientoOrigenId!.Value)
+                    .Distinct()
+                    .ToListAsync();
+
+            var idsRevertidosSet =
+                idsRevertidos.ToHashSet();
+
+            var movimientosVigentes =
+                movimientos
+                    .Where(m =>
+                        !m.EsReversion &&
+                        !idsRevertidosSet.Contains(m.Id))
+                    .ToList();
+
             var vm = new MovimientoCajaIndexVM
             {
                 Movimientos = movimientos,
@@ -176,14 +203,14 @@ namespace saas.Controllers
                     esSuperAdmin ? empresaId : null,
 
                 TotalIngresos =
-                    movimientos
+                    movimientosVigentes
                         .Where(m =>
                             m.Direccion ==
                             DireccionMovimientoCaja.Ingreso)
                         .Sum(m => m.Importe),
 
                 TotalEgresos =
-                    movimientos
+                    movimientosVigentes
                         .Where(m =>
                             m.Direccion ==
                             DireccionMovimientoCaja.Egreso)
@@ -862,6 +889,269 @@ namespace saas.Controllers
             {
                 saldo
             });
+        }
+        // GET: MovimientoCaja/Revertir/5
+        [HttpGet]
+        public async Task<IActionResult> Revertir(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<MovimientoCaja> consulta =
+                _context.MovimientosCaja
+                    .AsNoTracking()
+                    .Include(m => m.Caja)
+                    .Include(m => m.MedioPago)
+                    .Include(m => m.CategoriaGasto);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(m =>
+                    m.EmpresaId == usuario.EmpresaId);
+            }
+
+            var movimiento = await consulta
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (movimiento == null)
+            {
+                return NotFound();
+            }
+
+            if (movimiento.MovimientoOrigenId.HasValue)
+            {
+                TempData["Error"] =
+                    "Una reversión no puede volver a revertirse desde este flujo.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = movimiento.Id });
+            }
+
+            bool tipoReversible =
+                movimiento.Tipo == TipoMovimientoCaja.IngresoManual ||
+                movimiento.Tipo == TipoMovimientoCaja.EgresoManual;
+
+            if (!tipoReversible)
+            {
+                TempData["Error"] =
+                    "Este movimiento debe anularse desde su operación de origen.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = movimiento.Id });
+            }
+
+            bool yaRevertido =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.MovimientoOrigenId == movimiento.Id);
+
+            if (yaRevertido)
+            {
+                TempData["Error"] =
+                    "El movimiento ya fue revertido.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = movimiento.Id });
+            }
+
+            ViewBag.Movimiento = movimiento;
+
+            return View();
+        }
+        // POST: MovimientoCaja/Revertir/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Revertir(
+            int id,
+            string motivo)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<MovimientoCaja> consulta =
+                _context.MovimientosCaja
+                    .Include(m => m.Caja);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(m =>
+                    m.EmpresaId == usuario.EmpresaId);
+            }
+
+            var movimiento = await consulta
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (movimiento == null)
+            {
+                return NotFound();
+            }
+
+            if (movimiento.MovimientoOrigenId.HasValue)
+            {
+                TempData["Error"] =
+                    "Una reversión no puede volver a revertirse desde este flujo.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = movimiento.Id });
+            }
+
+            bool tipoReversible =
+                movimiento.Tipo == TipoMovimientoCaja.IngresoManual ||
+                movimiento.Tipo == TipoMovimientoCaja.EgresoManual;
+
+            if (!tipoReversible)
+            {
+                TempData["Error"] =
+                    "Este movimiento debe anularse desde su operación de origen.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = movimiento.Id });
+            }
+
+            bool yaRevertido =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.MovimientoOrigenId == movimiento.Id);
+
+            if (yaRevertido)
+            {
+                TempData["Error"] =
+                    "El movimiento ya fue revertido.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = movimiento.Id });
+            }
+
+            if (string.IsNullOrWhiteSpace(motivo))
+            {
+                ViewBag.Movimiento = movimiento;
+                ViewBag.Error = "Debe indicar el motivo de la reversión.";
+
+                return View();
+            }
+
+            motivo = motivo.Trim();
+
+            if (motivo.Length > 500)
+            {
+                ViewBag.Movimiento = movimiento;
+                ViewBag.Error =
+                    "El motivo no puede superar los 500 caracteres.";
+
+                return View();
+            }
+
+            TurnoCaja? turno = null;
+
+            if (movimiento.TurnoCajaId.HasValue)
+            {
+                turno = await _context.TurnosCaja
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t =>
+                        t.Id == movimiento.TurnoCajaId.Value);
+            }
+
+            if (movimiento.Caja.PermiteTurnos)
+            {
+                if (turno == null ||
+                    turno.Estado != EstadoTurnoCaja.Abierto)
+                {
+                    TempData["Error"] =
+                        "No puede revertirse un movimiento de un turno ya cerrado.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = movimiento.Id });
+                }
+            }
+
+            var tipoReversion =
+                movimiento.Tipo == TipoMovimientoCaja.IngresoManual
+                    ? TipoMovimientoCaja.ReversionIngresoManual
+                    : TipoMovimientoCaja.ReversionEgresoManual;
+
+            var direccionReversion =
+                movimiento.Direccion == DireccionMovimientoCaja.Ingreso
+                    ? DireccionMovimientoCaja.Egreso
+                    : DireccionMovimientoCaja.Ingreso;
+
+            try
+            {
+                var reversion = new MovimientoCaja
+                {
+                    EmpresaId = movimiento.EmpresaId,
+                    CajaId = movimiento.CajaId,
+
+                    Tipo = tipoReversion,
+                    Direccion = direccionReversion,
+
+                    Importe = movimiento.Importe,
+                    Fecha = DateTime.Now,
+
+                    UsuarioId = usuario.Id,
+
+                    MedioPagoId = movimiento.MedioPagoId,
+                    TurnoCajaId = movimiento.TurnoCajaId,
+                    CategoriaGastoId = movimiento.CategoriaGastoId,
+
+                    Concepto =
+                        $"Reversión de movimiento #{movimiento.Id}",
+
+                    Observaciones = motivo,
+
+                    MovimientoOrigenId = movimiento.Id
+                };
+
+                _context.MovimientosCaja.Add(reversion);
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] =
+                    "Movimiento revertido correctamente.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = movimiento.Id });
+            }
+            catch
+            {
+                ViewBag.Movimiento = movimiento;
+                ViewBag.Error =
+                    "Ocurrió un error al revertir el movimiento.";
+
+                return View();
+            }
         }
 
         //Helper methods
