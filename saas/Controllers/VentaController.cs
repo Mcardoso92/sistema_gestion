@@ -808,6 +808,42 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            var cobros =
+                await _context.CobrosVenta
+                    .AsNoTracking()
+                    .Where(c =>
+                        c.VentaId == venta.Id)
+                    .OrderBy(c => c.Fecha)
+                    .Select(c =>
+                        new CobroVentaResumenVM
+                        {
+                            Id = c.Id,
+                            Fecha = c.Fecha,
+                            Importe = c.Importe,
+
+                            MedioPagoNombre =
+                                c.MedioPago.Nombre,
+
+                            CajaNombre =
+                                c.Caja.Nombre,
+
+                            UsuarioNombre =
+                                c.Usuario.UserName ?? "",
+
+                            TurnoCajaId =
+                                c.TurnoCajaId,
+
+                            Estado =
+                                c.Estado
+                        })
+                    .ToListAsync();
+
+            decimal totalCobrado =
+                cobros
+                    .Where(c =>
+                        c.Estado == EstadoCobro.Activo)
+                    .Sum(c => c.Importe);
+
             var ventaVM = new VentaDetailsVM
             {
                 Id = venta.Id,
@@ -816,25 +852,52 @@ namespace saas.Controllers
                 Estado = venta.Estado,
                 EmpresaId = venta.EmpresaId,
                 EmpresaNombre = venta.Empresa.Nombre,
-                UsuarioNombre = $"{venta.Usuario.Nombre} {venta.Usuario.Apellido}",
-                ClienteNombre = venta.Cliente == null
-                    ? "Cliente ocasional"
-                    : string.IsNullOrWhiteSpace(venta.Cliente.Apellido)
-                        ? venta.Cliente.Nombre
-                        : $"{venta.Cliente.Nombre} {venta.Cliente.Apellido}",
-                ClienteDocumento = venta.Cliente?.Documento,
-                ClienteEmail = venta.Cliente?.Email,
-                Detalles = venta.Detalles
-                    .Select(d => new VentaDetalleDetailsVM
-                    {
-                        ProductoId = d.ProductoId,
-                        ProductoNombre = d.Producto.Nombre,
-                        CodigoBarra = d.Producto.CodigoBarra,
-                        PrecioUnitario = d.PrecioUnitario,
-                        Cantidad = d.Cantidad,
-                        Subtotal = d.Subtotal
-                    })
-                    .ToList()
+
+                UsuarioNombre =
+        $"{venta.Usuario.Nombre} {venta.Usuario.Apellido}",
+
+                ClienteNombre =
+        venta.Cliente == null
+            ? "Cliente ocasional"
+            : string.IsNullOrWhiteSpace(
+                venta.Cliente.Apellido)
+                ? venta.Cliente.Nombre
+                : $"{venta.Cliente.Nombre} {venta.Cliente.Apellido}",
+
+                ClienteDocumento =
+        venta.Cliente?.Documento,
+
+                ClienteEmail =
+        venta.Cliente?.Email,
+
+                Detalles =
+        venta.Detalles
+            .Select(d =>
+                new VentaDetalleDetailsVM
+                {
+                    ProductoId =
+                        d.ProductoId,
+
+                    ProductoNombre =
+                        d.Producto.Nombre,
+
+                    CodigoBarra =
+                        d.Producto.CodigoBarra,
+
+                    PrecioUnitario =
+                        d.PrecioUnitario,
+
+                    Cantidad =
+                        d.Cantidad,
+
+                    Subtotal =
+                        d.Subtotal
+                })
+            .ToList(),
+
+                TotalCobrado =  totalCobrado,
+
+                Cobros = cobros
             };
 
             return View(ventaVM);
@@ -1157,7 +1220,8 @@ namespace saas.Controllers
                     .Select(cm => new
                     {
                         id = cm.MedioPagoId,
-                        nombre = cm.MedioPago.Nombre
+                        nombre = cm.MedioPago.Nombre,
+                        tipo = cm.MedioPago.Tipo
                     })
                     .ToListAsync();
 
@@ -1324,7 +1388,8 @@ namespace saas.Controllers
                     .Select(m => new MedioPagoOpcionSimpleVM
                     {
                         Id = m.Id,
-                        Nombre = m.Nombre
+                        Nombre = m.Nombre,
+                        Tipo = m.Tipo
                     })
                     .ToListAsync();
         }
