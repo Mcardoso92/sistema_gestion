@@ -15,7 +15,7 @@
 }
 
 <form asp-action="Create" asp-route-empresaId="@empresaId" method="post" id="formVenta">
-    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
     <input asp-for="ClienteId" type="hidden" id="clienteId" />
     <input asp-for="ClienteNombre" type="hidden" id="clienteNombre" />
     <main class="container-fluid px-4 pb-3"
