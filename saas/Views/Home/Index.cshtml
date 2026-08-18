@@ -1,8 +1,415 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Gestión simple para tu negocio";
+    Layout = "_PublicLayout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="public-hero">
+    <div class="container-xl">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5">
+                <div class="hero-eyebrow">
+                    <span></span>
+                    Sistema de gestión para tu negocio
+                </div>
+
+                <h1 class="hero-title">
+                    Tu negocio,<br />
+                    <span>más simple.</span>
+                </h1>
+
+                <p class="hero-description">
+                    Veltika te ayuda a administrar ventas, productos, stock, clientes,
+                    compras y proveedores desde un solo lugar.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn btn-primary hero-primary-btn" href="#contacto">
+                        Probar gratis ahora
+                        <span class="material-symbols-outlined">arrow_forward</span>
+                    </a>
+
+                    <a class="btn hero-secondary-btn" href="#funcionalidades">
+                        Conocer Veltika
+                        <span class="material-symbols-outlined">play_arrow</span>
+                    </a>
+                </div>
+
+                <div class="hero-benefits">
+                    <span>
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Fácil de usar
+                    </span>
+
+                    <span>
+                        <span class="material-symbols-outlined">devices</span>
+                        Acceso desde cualquier lugar
+                    </span>
+
+                    <span>
+                        <span class="material-symbols-outlined">shield</span>
+                        Información segura
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="dashboard-preview">
+                    <div class="preview-sidebar">
+                        <div class="preview-logo">
+                            <span class="public-brand-icon small">V</span>
+                            Veltika
+                        </div>
+
+                        <div class="preview-menu">
+                            <div class="active">
+                                <span class="material-symbols-outlined">home</span>
+                                Inicio
+                            </div>
+
+                            <div>
+                                <span class="material-symbols-outlined">point_of_sale</span>
+                                Ventas
+                            </div>
+
+                            <div>
+                                <span class="material-symbols-outlined">inventory_2</span>
+                                Productos
+                            </div>
+
+                            <div>
+                                <span class="material-symbols-outlined">groups</span>
+                                Clientes
+                            </div>
+
+                            <div>
+                                <span class="material-symbols-outlined">local_shipping</span>
+                                Proveedores
+                            </div>
+
+                            <div>
+                                <span class="material-symbols-outlined">shopping_cart</span>
+                                Compras
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-content">
+                        <div class="preview-heading">
+                            <div>
+                                <h5>Dashboard</h5>
+                                <small>Resumen general de tu negocio</small>
+                            </div>
+
+                            <div class="preview-company">
+                                Mi Empresa S.A.
+                            </div>
+                        </div>
+
+                        <div class="preview-stats">
+                            <div class="preview-stat">
+                                <span>Ventas de hoy</span>
+                                <strong>$245.250</strong>
+                                <small>↑ 12,5% vs ayer</small>
+                            </div>
+
+                            <div class="preview-stat">
+                                <span>Cantidad de ventas</span>
+                                <strong>18</strong>
+                                <small>↑ 5 vs ayer</small>
+                            </div>
+
+                            <div class="preview-stat">
+                                <span>Ticket promedio</span>
+                                <strong>$13.625</strong>
+                                <small>↑ 8,3%</small>
+                            </div>
+
+                            <div class="preview-stat">
+                                <span>Stock bajo</span>
+                                <strong>7</strong>
+                                <small>Ver productos</small>
+                            </div>
+                        </div>
+
+                        <div class="preview-dashboard-row">
+                            <div class="preview-chart-card">
+                                <div class="preview-card-title">
+                                    Ventas de los últimos 7 días
+                                </div>
+
+                                <div class="fake-chart">
+                                    <div class="chart-grid-line line-1"></div>
+                                    <div class="chart-grid-line line-2"></div>
+                                    <div class="chart-grid-line line-3"></div>
+
+                                    <svg viewBox="0 0 500 160" preserveAspectRatio="none">
+                                        <polyline points="0,135 65,90 130,112 200,55 275,82 350,45 420,90 500,58"
+                                                  fill="none"
+                                                  stroke="#2563eb"
+                                                  stroke-width="4"
+                                                  stroke-linecap="round"
+                                                  stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                            </div>
+
+                            <div class="preview-activity-card">
+                                <div class="preview-card-title">
+                                    Actividad reciente
+                                </div>
+
+                                <div class="activity-item">
+                                    <div>
+                                        <strong>Venta realizada</strong>
+                                        <small>Hace 10 min</small>
+                                    </div>
+                                    <span>$15.000</span>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div>
+                                        <strong>Nueva compra</strong>
+                                        <small>Hace 45 min</small>
+                                    </div>
+                                    <span>$120.000</span>
+                                </div>
+
+                                <div class="activity-item">
+                                    <div>
+                                        <strong>Nuevo producto</strong>
+                                        <small>Hace 1 h</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="preview-stock-card">
+                            <div class="preview-card-title">
+                                Productos con stock bajo
+                            </div>
+
+                            <div class="preview-stock-products">
+                                <div>
+                                    <strong>Coca Cola 2.25L</strong>
+                                    <span>Stock actual: 3</span>
+                                </div>
+
+                                <div>
+                                    <strong>Arroz 1kg</strong>
+                                    <span>Stock actual: 2</span>
+                                </div>
+
+                                <div>
+                                    <strong>Harina 000 1kg</strong>
+                                    <span>Stock actual: 1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="funcionalidades" class="public-section">
+    <div class="container-xl">
+        <div class="section-heading">
+            <span>TODO EN UN SOLO LUGAR</span>
+            <h2>¿Qué podés hacer con Veltika?</h2>
+            <p>
+                Las herramientas que necesitás para administrar tu negocio
+                de forma simple y organizada.
+            </p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">point_of_sale</span>
+                </div>
+                <h3>Ventas</h3>
+                <p>Registrá tus ventas de manera rápida y mantené toda la información organizada.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+                <h3>Productos</h3>
+                <p>Administrá tu catálogo de productos, categorías, precios y disponibilidad.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">deployed_code</span>
+                </div>
+                <h3>Stock</h3>
+                <p>Controlá movimientos de inventario y detectá productos con stock bajo.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
+                <h3>Clientes</h3>
+                <p>Centralizá la información de tus clientes y su actividad comercial.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">local_shipping</span>
+                </div>
+                <h3>Proveedores</h3>
+                <p>Organizá tus proveedores y mantené sus datos siempre disponibles.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                </div>
+                <h3>Compras</h3>
+                <p>Registrá compras y mantené actualizado automáticamente tu inventario.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">manage_accounts</span>
+                </div>
+                <h3>Usuarios</h3>
+                <p>Administrá los usuarios y permisos de las personas que trabajan con vos.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <span class="material-symbols-outlined">monitoring</span>
+                </div>
+                <h3>Reportes</h3>
+                <p>Convertí la información de tu negocio en datos útiles para tomar decisiones.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="beneficios" class="public-section benefits-section">
+    <div class="container-xl">
+        <div class="section-heading">
+            <span>GESTIÓN SIN COMPLICACIONES</span>
+            <h2>Más control. Menos trabajo.</h2>
+            <p>
+                Veltika centraliza la operación diaria para que puedas dedicar
+                más tiempo a hacer crecer tu negocio.
+            </p>
+        </div>
+
+        <div class="benefits-grid">
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <span class="material-symbols-outlined">rocket_launch</span>
+                </div>
+                <div>
+                    <h3>Ahorrá tiempo</h3>
+                    <p>Centralizá tus tareas y evitá procesos repetitivos.</p>
+                </div>
+            </div>
+
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <span class="material-symbols-outlined">visibility</span>
+                </div>
+                <div>
+                    <h3>Control total</h3>
+                    <p>Conocé qué está pasando en tu negocio en todo momento.</p>
+                </div>
+            </div>
+
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <span class="material-symbols-outlined">verified</span>
+                </div>
+                <div>
+                    <h3>Menos errores</h3>
+                    <p>Mantené la información organizada y siempre actualizada.</p>
+                </div>
+            </div>
+
+            <div class="benefit-item">
+                <div class="benefit-icon">
+                    <span class="material-symbols-outlined">trending_up</span>
+                </div>
+                <div>
+                    <h3>Mejores decisiones</h3>
+                    <p>Usá información real para entender y hacer crecer tu negocio.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="precios" class="public-section pricing-section">
+    <div class="container-xl">
+        <div class="section-heading">
+            <span>PRECIOS SIMPLES</span>
+            <h2>Un plan para cada etapa de tu negocio</h2>
+            <p>
+                Estamos preparando los planes comerciales de Veltika.
+            </p>
+        </div>
+
+        <div class="pricing-placeholder">
+            <span class="material-symbols-outlined">sell</span>
+            <div>
+                <strong>Planes próximamente</strong>
+                <p>Queremos ofrecer una propuesta simple, transparente y sin costos ocultos.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="nosotros" class="public-section about-section">
+    <div class="container-xl">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5">
+                <span class="section-label">SOBRE VELTIKA</span>
+
+                <h2>
+                    Tecnología pensada para simplificar la gestión.
+                </h2>
+            </div>
+
+            <div class="col-lg-7">
+                <p class="about-text">
+                    Veltika nace con una idea simple: que administrar un negocio
+                    no requiera trabajar con múltiples herramientas, planillas y
+                    procesos desorganizados.
+                </p>
+
+                <p class="about-text">
+                    Estamos construyendo una plataforma donde ventas, productos,
+                    stock, clientes, compras, proveedores y usuarios puedan
+                    gestionarse desde un mismo lugar.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contacto" class="public-cta-section">
+    <div class="container-xl">
+        <div class="public-cta">
+            <div class="cta-icon">
+                <span class="material-symbols-outlined">rocket_launch</span>
+            </div>
+
+            <div class="cta-content">
+                <h2>Empezá a gestionar tu negocio de otra manera</h2>
+                <p>Descubrí todo lo que Veltika puede hacer por tu negocio.</p>
+            </div>
+
+            <a class="btn cta-button" asp-controller="Usuario" asp-action="Login">
+                Comenzar con Veltika
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+</section>

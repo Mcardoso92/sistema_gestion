@@ -15,6 +15,7 @@ namespace saas.Controllers
             _logger = logger;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();
@@ -24,6 +25,7 @@ namespace saas.Controllers
         {
             return View();
         }
+
         [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

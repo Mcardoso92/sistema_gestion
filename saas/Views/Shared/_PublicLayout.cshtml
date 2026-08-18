@@ -1,0 +1,77 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Veltika</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="public-body">
+    <header class="public-header">
+        <div class="container-xl">
+            <nav class="public-navbar">
+                <a class="public-brand" asp-controller="Home" asp-action="Index">
+                    <span class="public-brand-icon">V</span>
+                    <span>Veltika</span>
+                </a>
+
+                <div class="public-nav-links d-none d-lg-flex">
+                    <a href="#funcionalidades">Funcionalidades</a>
+                    <a href="#beneficios">Beneficios</a>
+                    <a href="#precios">Precios</a>
+                    <a href="#nosotros">Nosotros</a>
+                    <a href="#contacto">Contacto</a>
+                </div>
+
+                <div class="public-nav-actions">
+                    <a class="btn public-btn-login" asp-controller="Usuario" asp-action="Login">
+                        <span class="material-symbols-outlined">login</span>
+                        <span class="d-none d-sm-inline">Iniciar sesión</span>
+                    </a>
+
+                    <a class="btn btn-primary public-btn-primary d-none d-md-inline-flex" href="#contacto">
+                        Probar Veltika gratis
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="public-footer">
+        <div class="container-xl">
+            <div class="public-footer-main">
+                <div>
+                    <a class="public-brand public-brand-footer" asp-controller="Home" asp-action="Index">
+                        <span class="public-brand-icon">V</span>
+                        <span>Veltika</span>
+                    </a>
+                    <p>Gestión simple para hacer crecer tu negocio.</p>
+                </div>
+
+                <div class="public-footer-links">
+                    <a href="#funcionalidades">Funcionalidades</a>
+                    <a href="#beneficios">Beneficios</a>
+                    <a href="#precios">Precios</a>
+                    <a href="#nosotros">Nosotros</a>
+                </div>
+            </div>
+
+            <div class="public-footer-bottom">
+                <span>© @DateTime.Now.Year Veltika. Todos los derechos reservados.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
