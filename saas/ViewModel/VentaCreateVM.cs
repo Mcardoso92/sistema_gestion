@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace saas.ViewModel
 {
@@ -6,16 +7,42 @@ namespace saas.ViewModel
     {
         public int? ClienteId { get; set; }
 
-        public string ClienteNombre { get; set; } = "Cliente ocasional";
+        [ValidateNever]
+        public string ClienteNombre { get; set; }
+            = "Cliente ocasional";
 
-        [MinLength(1, ErrorMessage = "Debe agregar al menos un producto a la venta.")]
-        public List<VentaDetalleCreateVM> Detalles { get; set; } = new List<VentaDetalleCreateVM>();
+        [MinLength(
+            1,
+            ErrorMessage = "Debe agregar al menos un producto a la venta.")]
+        public List<VentaDetalleCreateVM> Detalles { get; set; }
+            = new List<VentaDetalleCreateVM>();
 
-        public int TotalLineas => Detalles.Count;
+        public List<VentaPagoCreateVM> Pagos { get; set; }
+            = new List<VentaPagoCreateVM>();
 
-        public int TotalUnidades => Detalles.Sum(d => d.Cantidad);
+        [ValidateNever]
+        public List<MedioPagoOpcionSimpleVM> MediosPagoDisponibles { get; set; }
+            = new List<MedioPagoOpcionSimpleVM>();
 
-        public decimal Total => Detalles.Sum(d => d.Subtotal);
+        [ValidateNever]
+        public List<CajaOpcionSimpleVM> CajasDisponibles { get; set; }
+            = new List<CajaOpcionSimpleVM>();
 
+        public int TotalLineas =>
+            Detalles.Count;
+
+        public int TotalUnidades =>
+            Detalles.Sum(d => d.Cantidad);
+
+        public decimal Total =>
+            Detalles.Sum(d => d.Subtotal);
+
+        public decimal TotalPagado =>
+            Pagos.Sum(p => p.Importe);
+
+        public decimal SaldoPendiente =>
+            Math.Max(
+                0,
+                Total - TotalPagado);
     }
 }

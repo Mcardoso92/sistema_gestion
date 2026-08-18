@@ -14,22 +14,18 @@
         Model.Detalles.All(d => d.StockSuficiente);
 }
 
-<form asp-action="Create"
-      asp-route-empresaId="@empresaId"
-      method="post"
-      id="formVenta">
-
+<form asp-action="Create" asp-route-empresaId="@empresaId" method="post" id="formVenta">
     <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
     <input asp-for="ClienteId" type="hidden" id="clienteId" />
     <input asp-for="ClienteNombre" type="hidden" id="clienteNombre" />
-
     <main class="container-fluid px-4 pb-3"
           id="puntoVenta"
           data-empresa-id="@empresaId"
           data-buscar-productos-url="@Url.Action("BuscarProductos", "Venta")"
           data-buscar-clientes-url="@Url.Action("BuscarClientes", "Venta")"
-          data-ventas-index-url="@Url.Action("Index", "Venta")">
+          data-ventas-index-url="@Url.Action("Index", "Venta")"
+          data-get-cajas-url="@Url.Action("GetCajasPorMedioPago", "Venta")"
+          data-get-medios-url="@Url.Action("GetMediosPagoPorCaja", "Venta")">
 
         <!-- Encabezado -->
         <div class="card-custom p-3 mb-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
@@ -371,6 +367,124 @@
                                 @Model.Total.ToString("C")
                             </div>
                         </div>
+                        <div class="mt-4">
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h4 class="small fw-bold text-white text-uppercase mb-0">
+                                    Pagos
+                                </h4>
+
+                                <button type="button"
+                                        id="btnAgregarPago"
+                                        class="btn btn-sm btn-light">
+                                    + Agregar pago
+                                </button>
+                            </div>
+
+                            <div id="pagosContainer"
+                                 class="d-flex flex-column gap-2">
+
+                                @for (int i = 0; i < Model.Pagos.Count; i++)
+                                {
+                                    <div class="pago-item bg-white text-dark rounded p-2"
+                                         data-index="@i">
+
+                                        <div class="row g-2">
+
+                                            <div class="col-12">
+
+                                                <select name="Pagos[@i].MedioPagoId"
+                                                        class="form-select form-select-sm medio-pago-select">
+
+                                                    <option value="">
+                                                        Medio de pago
+                                                    </option>
+
+                                                    @foreach (var medio in Model.MediosPagoDisponibles)
+                                                    {
+                                                        <option value="@medio.Id"
+                                                                selected="@(Model.Pagos[i].MedioPagoId == medio.Id)">
+                                                            @medio.Nombre
+                                                        </option>
+                                                    }
+
+                                                </select>
+
+                                            </div>
+
+                                            <div class="col-12">
+
+                                                <select name="Pagos[@i].CajaId"
+                                                        class="form-select form-select-sm caja-pago-select">
+
+                                                    <option value="">
+                                                        Caja
+                                                    </option>
+
+                                                    @foreach (var caja in Model.CajasDisponibles)
+                                                    {
+                                                        <option value="@caja.Id"
+                                                                selected="@(Model.Pagos[i].CajaId == caja.Id)">
+                                                            @caja.Nombre
+                                                        </option>
+                                                    }
+
+                                                </select>
+
+                                            </div>
+
+                                            <div class="col-9">
+
+                                                <input name="Pagos[@i].Importe"
+                                                       value="@Model.Pagos[i].Importe"
+                                                       type="number"
+                                                       min="0.01"
+                                                       step="0.01"
+                                                       class="form-control form-control-sm pago-importe"
+                                                       placeholder="Importe" />
+
+                                            </div>
+
+                                            <div class="col-3 d-grid">
+
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger btn-eliminar-pago">
+                                                    ×
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                }
+
+                            </div>
+
+                            <div class="mt-3 pt-3 border-top border-secondary">
+
+                                <div class="d-flex justify-content-between small text-white-50 mb-1">
+                                    <span>Total pagado</span>
+                                    <span id="totalPagado" class="text-white fw-semibold">
+                                        @Model.TotalPagado.ToString("C")
+                                    </span>
+                                </div>
+
+                                <div class="d-flex justify-content-between small text-white-50">
+                                    <span>Saldo pendiente</span>
+                                    <span id="saldoPendiente" class="text-white fw-semibold">
+                                        @Model.SaldoPendiente.ToString("C")
+                                    </span>
+                                </div>
+
+                                <div id="alertaClientePendiente"
+                                     class="alert alert-warning mt-2 mb-0 py-2 px-2 small d-none">
+                                    Para dejar saldo pendiente debe seleccionar un cliente.
+                                </div>
+
+                            </div>
+
+                        </div>
                     </div>
 
                     <!-- Acciones -->
@@ -412,6 +526,18 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        window.veltikaMediosPagoOptions = `
+            @Html.Raw(
+                string.Join(
+                        "",
+                        Model.MediosPagoDisponibles.Select(m =>
+                                $"<option value=\"{m.Id}\">{System.Net.WebUtility.HtmlEncode(m.Nombre)}</option>"
+                        )
+                )
+                )
+    `;
+    </script>
 
     <script src="~/js/venta-pos.js" asp-append-version="true"></script>
 }
