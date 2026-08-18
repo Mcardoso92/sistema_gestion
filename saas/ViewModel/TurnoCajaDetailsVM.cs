@@ -36,8 +36,16 @@ namespace saas.ViewModel
 
         public List<TurnoMovimientoResumenVM> Movimientos { get; set; }
             = new List<TurnoMovimientoResumenVM>();
-            
+
+        public List<TurnoCobroMedioPagoResumenVM> CobrosPorMedioPago { get; set; }
+            = new List<TurnoCobroMedioPagoResumenVM>();
+
+        public decimal TotalCobradoTurno =>
+            CobrosPorMedioPago.Sum(c => c.Total);
+
         public RegularizacionTurnoResumenVM Regularizacion { get; set; }
             = new RegularizacionTurnoResumenVM();
+
+
     }
 }

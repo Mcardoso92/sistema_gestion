@@ -330,6 +330,17 @@ namespace saas.Controllers
 
             var turnosPorPago =  new Dictionary<int, int?>();
 
+            var turnoOperativo =
+                await _context.TurnosCaja
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t =>
+                        t.EmpresaId == empresaVentaId &&
+                        t.UsuarioAperturaId == usuario.Id &&
+                        t.Estado == EstadoTurnoCaja.Abierto);
+
+            int? turnoOperativoId =
+                turnoOperativo?.Id;
+
             if (!ModelState.IsValid)
             {
                 await PrepararVentaParaVista(
@@ -508,20 +519,12 @@ namespace saas.Controllers
                         continue;
                     }
 
-                    int? turnoCajaId = null;
+                    int? turnoMovimientoCajaId = null;
 
                     if (caja.PermiteTurnos)
                     {
-                        var turno =
-                            await _context.TurnosCaja
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(t =>
-                                    t.CajaId == caja.Id &&
-                                    t.UsuarioAperturaId == usuario.Id &&
-                                    t.Estado ==
-                                        EstadoTurnoCaja.Abierto);
-
-                        if (turno == null)
+                        if (turnoOperativo == null ||
+                            turnoOperativo.CajaId != caja.Id)
                         {
                             ModelState.AddModelError(
                                 $"Pagos[{i}].CajaId",
@@ -530,12 +533,12 @@ namespace saas.Controllers
                             continue;
                         }
 
-                        turnoCajaId =
-                            turno.Id;
+                        turnoMovimientoCajaId =
+                            turnoOperativo.Id;
                     }
 
                     turnosPorPago[i] =
-                        turnoCajaId;
+                        turnoMovimientoCajaId;
                 }
 
                 if (!ModelState.IsValid)
@@ -558,8 +561,6 @@ namespace saas.Controllers
                     UsuarioId = usuario.Id,
                     ClienteId = cliente?.Id
                 };
-
-                venta.Total = totalVenta;
 
                 foreach (var detalleVM in ventaVM.Detalles)
                 {
@@ -632,8 +633,7 @@ namespace saas.Controllers
                             MedioPagoId =
                                 pago.MedioPagoId,
 
-                            TurnoCajaId =
-                                turnosPorPago[i],
+                            TurnoCajaId = turnoOperativoId,
 
                             UsuarioId =
                                 usuario.Id,
@@ -664,7 +664,15 @@ namespace saas.Controllers
 
                 await _context.SaveChangesAsync();
 
-                var movimientosCaja = cobros.Select(cobro =>
+                var movimientosCaja =
+    new List<MovimientoCaja>();
+
+                for (int i = 0; i < cobros.Count; i++)
+                {
+                    var cobro =
+                        cobros[i];
+
+                    var movimiento =
                         new MovimientoCaja
                         {
                             EmpresaId =
@@ -691,8 +699,10 @@ namespace saas.Controllers
                             MedioPagoId =
                                 cobro.MedioPagoId,
 
+                            // Solo impacta en el arqueo cuando
+                            // la caja del pago trabaja con ese turno.
                             TurnoCajaId =
-                                cobro.TurnoCajaId,
+                                turnosPorPago[i],
 
                             CategoriaGastoId =
                                 null,
@@ -705,8 +715,11 @@ namespace saas.Controllers
 
                             CobroVentaId =
                                 cobro.Id
-                        })
-                    .ToList();
+                        };
+
+                    movimientosCaja.Add(
+                        movimiento);
+                }
 
                 _context.MovimientosCaja.AddRange(movimientosCaja);
 

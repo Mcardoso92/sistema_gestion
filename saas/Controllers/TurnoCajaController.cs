@@ -25,10 +25,7 @@ namespace saas.Controllers
         }
 
         // GET: TurnoCaja
-        public async Task<IActionResult> Index(
-            string estado = "abiertos",
-            int? empresaId = null,
-            string? busqueda = null)
+        public async Task<IActionResult> Index( string estado = "abiertos", int? empresaId = null, string? busqueda = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -416,6 +413,36 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
+            var cobrosPorMedioPago =
+                await _context.CobrosVenta
+                    .AsNoTracking()
+                    .Where(c =>
+                        c.TurnoCajaId == turno.Id &&
+                        c.Estado == EstadoCobro.Activo)
+                    .GroupBy(c => new
+                    {
+                        c.MedioPagoId,
+                        c.MedioPago.Nombre
+                    })
+                    .Select(g =>
+                        new TurnoCobroMedioPagoResumenVM
+                        {
+                            MedioPagoId =
+                                g.Key.MedioPagoId,
+
+                            MedioPagoNombre =
+                                g.Key.Nombre,
+
+                            Total =
+                                g.Sum(c => c.Importe),
+
+                            CantidadCobros =
+                                g.Count()
+                        })
+                    .OrderByDescending(c =>
+                        c.Total)
+                    .ToListAsync();
+
             var movimientoRegularizacion =
                 await _context.MovimientosCaja
                     .AsNoTracking()
@@ -456,6 +483,8 @@ namespace saas.Controllers
                 ImporteRendido = turno.ImporteRendido,
 
                 Movimientos = movimientos,
+
+                CobrosPorMedioPago = cobrosPorMedioPago,
 
                 Regularizacion =
                 new RegularizacionTurnoResumenVM
