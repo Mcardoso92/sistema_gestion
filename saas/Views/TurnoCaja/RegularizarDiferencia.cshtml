@@ -1,0 +1,227 @@
+﻿@model saas.ViewModel.RegularizarDiferenciaTurnoVM
+
+@{
+    ViewData["Title"] = "Regularizar Diferencia";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h1 class="h3 fw-bold mb-1">
+                Regularizar Diferencia
+            </h1>
+
+            <p class="text-muted mb-0">
+                Turno #@Model.TurnoCajaId
+            </p>
+
+        </div>
+
+        <a asp-action="Details"
+           asp-route-id="@Model.TurnoCajaId"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <form asp-action="RegularizarDiferencia"
+          asp-route-id="@Model.TurnoCajaId"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="TurnoCajaId"
+               type="hidden" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger"></div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-7">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-4">
+                            Información del cierre
+                        </h5>
+
+                        <div class="row g-4">
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Caja
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @Model.CajaNombre
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Usuario del turno
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @Model.UsuarioTurnoNombre
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Fecha de cierre
+                                </div>
+
+                                <div>
+                                    @Model.FechaCierre.ToString("dd/MM/yyyy HH:mm")
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Efectivo esperado
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @Model.EfectivoEsperado.ToString("C")
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="text-muted small">
+                                    Efectivo contado
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @Model.EfectivoContado.ToString("C")
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-5">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body p-4">
+
+                        <h5 class="fw-bold mb-3">
+                            Diferencia
+                        </h5>
+
+                        @if (Model.EsSobrante)
+                        {
+                            <div class="alert alert-success">
+
+                                <div class="small">
+                                    Sobrante
+                                </div>
+
+                                <div class="fs-3 fw-bold">
+                                    + @Model.ImporteARegularizar.ToString("C")
+                                </div>
+
+                            </div>
+
+                            <p class="text-muted mb-0">
+                                Se generará un ingreso de ajuste en la caja.
+                            </p>
+                        }
+                        else
+                        {
+                            <div class="alert alert-danger">
+
+                                <div class="small">
+                                    Faltante
+                                </div>
+
+                                <div class="fs-3 fw-bold">
+                                    - @Model.ImporteARegularizar.ToString("C")
+                                </div>
+
+                            </div>
+
+                            <p class="text-muted mb-0">
+                                Se generará un egreso de ajuste en la caja.
+                            </p>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <label asp-for="Motivo"
+                               class="form-label fw-semibold">
+                            Motivo de regularización
+                        </label>
+
+                        <textarea asp-for="Motivo"
+                                  class="form-control"
+                                  rows="3"
+                                  maxlength="500"
+                                  placeholder="Indicá el motivo o la explicación de la diferencia"></textarea>
+
+                        <span asp-validation-for="Motivo"
+                              class="text-danger"></span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-action="Details"
+               asp-route-id="@Model.TurnoCajaId"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Confirmar regularización
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
