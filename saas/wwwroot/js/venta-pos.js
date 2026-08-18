@@ -1,52 +1,102 @@
 ﻿document.addEventListener("DOMContentLoaded", () => {
-    const puntoVenta = document.getElementById("puntoVenta");
-    const empresaId = Number(puntoVenta.dataset.empresaId);
 
-    const buscarProductosUrl = puntoVenta.dataset.buscarProductosUrl;
-    const buscarClientesUrl = puntoVenta.dataset.buscarClientesUrl;
-    const ventasIndexUrl = puntoVenta.dataset.ventasIndexUrl;
-    const btnVolverVentas = document.getElementById("btnVolverVentas");
+    const puntoVenta =
+        document.getElementById("puntoVenta");
 
-    const formVenta = document.getElementById("formVenta");
+    const empresaId =
+        Number(puntoVenta.dataset.empresaId);
 
-    const inputBuscarProducto = document.getElementById("buscarProducto");
-    const btnBuscarProducto = document.getElementById("btnBuscarProducto");
-    const resultadosProductos = document.getElementById("resultadosProductos");
+    const buscarProductosUrl =
+        puntoVenta.dataset.buscarProductosUrl;
 
-    const btnBuscarCliente = document.getElementById("btnBuscarCliente");
-    const panelBusquedaCliente = document.getElementById("panelBusquedaCliente");
-    const inputBuscarCliente = document.getElementById("buscarCliente");
-    const resultadosClientes = document.getElementById("resultadosClientes");
-    const btnQuitarCliente = document.getElementById("btnQuitarCliente");
+    const buscarClientesUrl =
+        puntoVenta.dataset.buscarClientesUrl;
 
-    const inputClienteId = document.getElementById("clienteId");
-    const inputClienteNombre = document.getElementById("clienteNombre");
-    const clienteNombreVisible = document.getElementById("clienteNombreVisible");
-    const clienteDetalleVisible = document.getElementById("clienteDetalleVisible");
+    const ventasIndexUrl =
+        puntoVenta.dataset.ventasIndexUrl;
 
-    const carritoVenta = document.getElementById("carritoVenta");
-    const totalLineas = document.getElementById("totalLineas");
-    const totalUnidades = document.getElementById("totalUnidades");
-    const totalVenta = document.getElementById("totalVenta");
+    const getCajasUrl =
+        puntoVenta.dataset.getCajasUrl;
 
-    const btnConfirmarVenta = document.getElementById("btnConfirmarVenta");
-    const btnCancelarVenta = document.getElementById("btnCancelarVenta");
+    const getMediosUrl =
+        puntoVenta.dataset.getMediosUrl;
 
-    const pagosContainer = document.getElementById("pagosContainer");
+    const btnVolverVentas =
+        document.getElementById("btnVolverVentas");
 
-    const btnAgregarPago = document.getElementById("btnAgregarPago");
+    const formVenta =
+        document.getElementById("formVenta");
 
-    const totalPagadoVisual = document.getElementById("totalPagado");
+    const inputBuscarProducto =
+        document.getElementById("buscarProducto");
 
-    const saldoPendienteVisual = document.getElementById("saldoPendiente");
+    const btnBuscarProducto =
+        document.getElementById("btnBuscarProducto");
 
-    const alertaClientePendiente = document.getElementById("alertaClientePendiente");
+    const resultadosProductos =
+        document.getElementById("resultadosProductos");
 
-    const puntoVenta = document.getElementById("puntoVenta");
+    const btnBuscarCliente =
+        document.getElementById("btnBuscarCliente");
 
-    const getCajasUrl = puntoVenta.dataset.getCajasUrl;
+    const panelBusquedaCliente =
+        document.getElementById("panelBusquedaCliente");
 
-    const empresaId = puntoVenta.dataset.empresaId;
+    const inputBuscarCliente =
+        document.getElementById("buscarCliente");
+
+    const resultadosClientes =
+        document.getElementById("resultadosClientes");
+
+    const btnQuitarCliente =
+        document.getElementById("btnQuitarCliente");
+
+    const inputClienteId =
+        document.getElementById("clienteId");
+
+    const inputClienteNombre =
+        document.getElementById("clienteNombre");
+
+    const clienteNombreVisible =
+        document.getElementById("clienteNombreVisible");
+
+    const clienteDetalleVisible =
+        document.getElementById("clienteDetalleVisible");
+
+    const carritoVenta =
+        document.getElementById("carritoVenta");
+
+    const totalLineas =
+        document.getElementById("totalLineas");
+
+    const totalUnidades =
+        document.getElementById("totalUnidades");
+
+    const totalVenta =
+        document.getElementById("totalVenta");
+
+    const btnConfirmarVenta =
+        document.getElementById("btnConfirmarVenta");
+
+    const btnCancelarVenta =
+        document.getElementById("btnCancelarVenta");
+
+    // PAGOS
+
+    const pagosContainer =
+        document.getElementById("pagosContainer");
+
+    const btnAgregarPago =
+        document.getElementById("btnAgregarPago");
+
+    const totalPagadoVisual =
+        document.getElementById("totalPagado");
+
+    const saldoPendienteVisual =
+        document.getElementById("saldoPendiente");
+
+    const alertaClientePendiente =
+        document.getElementById("alertaClientePendiente");
 
     const carrito = [];
 

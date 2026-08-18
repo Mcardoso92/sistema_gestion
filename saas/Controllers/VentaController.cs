@@ -328,6 +328,8 @@ namespace saas.Controllers
                 })
                 .ToList();
 
+            var turnosPorPago =  new Dictionary<int, int?>();
+
             if (!ModelState.IsValid)
             {
                 await PrepararVentaParaVista(
@@ -400,72 +402,324 @@ namespace saas.Controllers
 
                 decimal totalVenta = 0;
 
+                foreach (var detalleVM in ventaVM.Detalles)
+                {
+                    var producto =
+                        productosPorId[detalleVM.ProductoId];
+
+                    if (producto.Stock < detalleVM.Cantidad)
+                    {
+                        ModelState.AddModelError(
+                            nameof(ventaVM.Detalles),
+                            $"Stock insuficiente para \"{producto.Nombre}\". " +
+                            $"Disponible: {producto.Stock}. " +
+                            $"Solicitado: {detalleVM.Cantidad}.");
+
+                        await transaccion.RollbackAsync();
+
+                        await PrepararVentaParaVista(
+                            ventaVM,
+                            empresaVentaId);
+
+                        return View(ventaVM);
+                    }
+
+                    totalVenta +=
+                        producto.PrecioVenta *
+                        detalleVM.Cantidad;
+                }
+
+                ventaVM.Pagos ??= new List<VentaPagoCreateVM>();
+
+                var pagos =
+                    ventaVM.Pagos
+                        .Where(p =>
+                            p.MedioPagoId > 0 ||
+                            p.CajaId > 0 ||
+                            p.Importe > 0)
+                        .ToList();
+
+                ventaVM.Pagos = pagos;
+
+
+
+                decimal totalPagado = pagos.Sum(p => p.Importe);
+
+                if (totalPagado > totalVenta)
+                {
+                    ModelState.AddModelError(
+                        nameof(ventaVM.Pagos),
+                        "El total pagado no puede superar el total de la venta.");
+                }
+
+                if (totalPagado < totalVenta && !ventaVM.ClienteId.HasValue)
+                {
+                    ModelState.AddModelError(
+                        nameof(ventaVM.ClienteId),
+                        "Debe seleccionar un cliente para dejar saldo pendiente.");
+                }
+
+                for (int i = 0; i < pagos.Count; i++)
+                {
+                    var pago = pagos[i];
+
+                    if (pago.Importe <= 0)
+                    {
+                        ModelState.AddModelError(
+                            $"Pagos[{i}].Importe",
+                            "El importe debe ser mayor a 0.");
+
+                        continue;
+                    }
+
+                    var caja = await _context.Cajas
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(c =>
+                            c.Id == pago.CajaId &&
+                            c.EmpresaId == empresaVentaId &&
+                            c.Estado);
+
+                    if (caja == null)
+                    {
+                        ModelState.AddModelError(
+                            $"Pagos[{i}].CajaId",
+                            "La caja seleccionada no es válida.");
+
+                        continue;
+                    }
+
+                    bool medioPagoValido =
+                        await _context.CajaMediosPago
+                            .AsNoTracking()
+                            .AnyAsync(cm =>
+                                cm.CajaId == pago.CajaId &&
+                                cm.MedioPagoId == pago.MedioPagoId &&
+                                cm.Caja.EmpresaId == empresaVentaId &&
+                                cm.Caja.Estado &&
+                                cm.MedioPago.EmpresaId == empresaVentaId &&
+                                cm.MedioPago.Estado);
+
+                    if (!medioPagoValido)
+                    {
+                        ModelState.AddModelError(
+                            $"Pagos[{i}].MedioPagoId",
+                            "El medio de pago no es válido para la caja seleccionada.");
+
+                        continue;
+                    }
+
+                    int? turnoCajaId = null;
+
+                    if (caja.PermiteTurnos)
+                    {
+                        var turno =
+                            await _context.TurnosCaja
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(t =>
+                                    t.CajaId == caja.Id &&
+                                    t.UsuarioAperturaId == usuario.Id &&
+                                    t.Estado ==
+                                        EstadoTurnoCaja.Abierto);
+
+                        if (turno == null)
+                        {
+                            ModelState.AddModelError(
+                                $"Pagos[{i}].CajaId",
+                                $"Debe tener un turno abierto propio para operar la caja \"{caja.Nombre}\".");
+
+                            continue;
+                        }
+
+                        turnoCajaId =
+                            turno.Id;
+                    }
+
+                    turnosPorPago[i] =
+                        turnoCajaId;
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    await transaccion.RollbackAsync();
+
+                    await PrepararVentaParaVista(
+                        ventaVM,
+                        empresaVentaId);
+
+                    return View(ventaVM);
+                }
+
                 var venta = new Venta
                 {
                     Fecha = DateTime.Now,
-                    Total = 0,
+                    Total = totalVenta,
                     Estado = true,
                     EmpresaId = empresaVentaId,
                     UsuarioId = usuario.Id,
                     ClienteId = cliente?.Id
                 };
 
+                venta.Total = totalVenta;
+
                 foreach (var detalleVM in ventaVM.Detalles)
                 {
-                    var producto = productosPorId[detalleVM.ProductoId];
+                    var producto =
+                        productosPorId[detalleVM.ProductoId];
 
-                    if (producto.Stock < detalleVM.Cantidad)
-                    {
-                        ModelState.AddModelError(
-                            nameof(ventaVM.Detalles),
-                            $"Stock insuficiente para \"{producto.Nombre}\". Disponible: {producto.Stock}. Solicitado: {detalleVM.Cantidad}.");
+                    decimal precioUnitario =
+                        producto.PrecioVenta;
 
-                        await transaccion.RollbackAsync();
-                        await PrepararVentaParaVista(ventaVM, empresaVentaId);
+                    decimal subtotal =
+                        precioUnitario *
+                        detalleVM.Cantidad;
 
-                        return View(ventaVM);
-                    }
+                    venta.Detalles.Add(
+                        new DetalleVenta
+                        {
+                            ProductoId = producto.Id,
+                            Cantidad = detalleVM.Cantidad,
+                            PrecioUnitario = precioUnitario,
+                            Subtotal = subtotal
+                        });
 
-                    decimal precioUnitario = producto.PrecioVenta;
-                    decimal subtotal = precioUnitario * detalleVM.Cantidad;
+                    int stockAnterior =
+                        producto.Stock;
 
-                    venta.Detalles.Add(new DetalleVenta
-                    {
-                        ProductoId = producto.Id,
-                        Cantidad = detalleVM.Cantidad,
-                        PrecioUnitario = precioUnitario,
-                        Subtotal = subtotal
-                    });
+                    int stockPosterior =
+                        stockAnterior -
+                        detalleVM.Cantidad;
 
-                    int stockAnterior = producto.Stock;
-                    int stockPosterior = stockAnterior - detalleVM.Cantidad;
+                    producto.Stock =
+                        stockPosterior;
 
-                    producto.Stock = stockPosterior;
-
-                    venta.MovimientosStock.Add(new MovimientoStock
-                    {
-                        ProductoId = producto.Id,
-                        EmpresaId = empresaVentaId,
-                        Tipo = TipoMovimientoStock.Venta,
-                        Cantidad = detalleVM.Cantidad,
-                        StockAnterior = stockAnterior,
-                        StockPosterior = stockPosterior,
-                        Fecha = venta.Fecha,
-                        UsuarioId = usuario.Id
-                    });
-
-                    totalVenta += subtotal;
+                    venta.MovimientosStock.Add(
+                        new MovimientoStock
+                        {
+                            ProductoId = producto.Id,
+                            EmpresaId = empresaVentaId,
+                            Tipo = TipoMovimientoStock.Venta,
+                            Cantidad = detalleVM.Cantidad,
+                            StockAnterior = stockAnterior,
+                            StockPosterior = stockPosterior,
+                            Fecha = venta.Fecha,
+                            UsuarioId = usuario.Id
+                        });
                 }
-
-                venta.Total = totalVenta;
 
                 _context.Ventas.Add(venta);
 
                 await _context.SaveChangesAsync();
+
+                var cobros = new List<CobroVenta>();
+
+                for (int i = 0; i < pagos.Count; i++)
+                {
+                    var pago =
+                        pagos[i];
+
+                    var cobro =
+                        new CobroVenta
+                        {
+                            VentaId =
+                                venta.Id,
+
+                            EmpresaId =
+                                empresaVentaId,
+
+                            CajaId =
+                                pago.CajaId,
+
+                            MedioPagoId =
+                                pago.MedioPagoId,
+
+                            TurnoCajaId =
+                                turnosPorPago[i],
+
+                            UsuarioId =
+                                usuario.Id,
+
+                            Fecha =
+                                venta.Fecha,
+
+                            Importe =
+                                pago.Importe,
+
+                            Estado =
+                                EstadoCobro.Activo,
+
+                            FechaAnulacion =
+                                null,
+
+                            UsuarioAnulacionId =
+                                null,
+
+                            MotivoAnulacion =
+                                null
+                        };
+
+                    cobros.Add(cobro);
+                }
+
+                _context.CobrosVenta.AddRange(cobros);
+
+                await _context.SaveChangesAsync();
+
+                var movimientosCaja = cobros.Select(cobro =>
+                        new MovimientoCaja
+                        {
+                            EmpresaId =
+                                cobro.EmpresaId,
+
+                            CajaId =
+                                cobro.CajaId,
+
+                            Tipo =
+                                TipoMovimientoCaja.CobroVenta,
+
+                            Direccion =
+                                DireccionMovimientoCaja.Ingreso,
+
+                            Importe =
+                                cobro.Importe,
+
+                            Fecha =
+                                cobro.Fecha,
+
+                            UsuarioId =
+                                usuario.Id,
+
+                            MedioPagoId =
+                                cobro.MedioPagoId,
+
+                            TurnoCajaId =
+                                cobro.TurnoCajaId,
+
+                            CategoriaGastoId =
+                                null,
+
+                            Concepto =
+                                $"Cobro de venta #{venta.Id}",
+
+                            Observaciones =
+                                null,
+
+                            CobroVentaId =
+                                cobro.Id
+                        })
+                    .ToList();
+
+                _context.MovimientosCaja.AddRange(movimientosCaja);
+
+                await _context.SaveChangesAsync();
+
                 await transaccion.CommitAsync();
 
                 TempData["Success"] =
-                    "Venta registrada correctamente.";
+                    totalPagado == totalVenta
+                        ? "Venta registrada y cobrada correctamente."
+                        : totalPagado == 0
+                            ? "Venta registrada a cuenta correctamente."
+                            : "Venta registrada con saldo pendiente correctamente.";
 
                 return RedirectToAction(
                     nameof(Details),
