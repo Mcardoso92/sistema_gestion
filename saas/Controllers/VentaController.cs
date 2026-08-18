@@ -212,10 +212,10 @@ namespace saas.Controllers
             }
 
             var empresa = await _context.Empresas
-        .AsNoTracking()
-        .FirstOrDefaultAsync(e =>
-            e.Id == empresaVentaId &&
-            e.Estado);
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e =>
+                    e.Id == empresaVentaId &&
+                    e.Estado);
 
             if (empresa == null)
             {
@@ -226,8 +226,13 @@ namespace saas.Controllers
             {
                 ClienteId = null,
                 ClienteNombre = "Cliente ocasional",
-                Detalles = new List<VentaDetalleCreateVM>()
+                Detalles = new List<VentaDetalleCreateVM>(),
+                Pagos = new List<VentaPagoCreateVM>()
             };
+
+            await PrepararVentaParaVista(
+                ventaVM,
+                empresaVentaId);
 
             ViewBag.EmpresaId = empresa.Id;
             ViewBag.EmpresaNombre = empresa.Nombre;
@@ -821,6 +826,132 @@ namespace saas.Controllers
 
             return Json(clientes);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetMediosPagoPorCaja(int cajaId, int? empresaId = null)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            var caja =
+                await _context.Cajas
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c =>
+                        c.Id == cajaId &&
+                        c.Estado);
+
+            if (caja == null)
+            {
+                return NotFound();
+            }
+
+            int empresaVentaId;
+
+            if (esSuperAdmin)
+            {
+                if (!empresaId.HasValue ||
+                    caja.EmpresaId != empresaId.Value)
+                {
+                    return Forbid();
+                }
+
+                empresaVentaId =
+                    empresaId.Value;
+            }
+            else
+            {
+                if (caja.EmpresaId != usuario.EmpresaId)
+                {
+                    return Forbid();
+                }
+
+                empresaVentaId =
+                    usuario.EmpresaId;
+            }
+
+            var medios =
+                await _context.CajaMediosPago
+                    .AsNoTracking()
+                    .Where(cm =>
+                        cm.CajaId == caja.Id &&
+                        cm.Caja.EmpresaId == empresaVentaId &&
+                        cm.MedioPago.Estado)
+                    .OrderBy(cm =>
+                        cm.MedioPago.Nombre)
+                    .Select(cm => new
+                    {
+                        id = cm.MedioPagoId,
+                        nombre = cm.MedioPago.Nombre
+                    })
+                    .ToListAsync();
+
+            return Json(medios);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetCajasPorMedioPago(int medioPagoId, int? empresaId = null)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            int empresaVentaId;
+
+            if (esSuperAdmin)
+            {
+                if (!empresaId.HasValue)
+                {
+                    return BadRequest();
+                }
+
+                empresaVentaId =
+                    empresaId.Value;
+            }
+            else
+            {
+                empresaVentaId =
+                    usuario.EmpresaId;
+            }
+
+            var cajas =
+                await _context.CajaMediosPago
+                    .AsNoTracking()
+                    .Where(cm =>
+                        cm.MedioPagoId == medioPagoId &&
+                        cm.MedioPago.EmpresaId == empresaVentaId &&
+                        cm.MedioPago.Estado &&
+                        cm.Caja.EmpresaId == empresaVentaId &&
+                        cm.Caja.Estado)
+                    .OrderBy(cm =>
+                        cm.Caja.Nombre)
+                    .Select(cm => new
+                    {
+                        id = cm.CajaId,
+                        nombre = cm.Caja.Nombre
+                    })
+                    .ToListAsync();
+
+            return Json(cajas);
+        }
+
+        //Helpers Methods
         private async Task PrepararVentaParaVista(VentaCreateVM ventaVM, int empresaId)
         {
             var empresa = await _context.Empresas
@@ -902,6 +1033,33 @@ namespace saas.Controllers
                 ventaVM.ClienteNombre =
                     "Cliente ocasional";
             }
+            ventaVM.CajasDisponibles =
+                await _context.Cajas
+                    .AsNoTracking()
+                    .Where(c =>
+                        c.EmpresaId == empresaId &&
+                        c.Estado)
+                    .OrderBy(c => c.Nombre)
+                    .Select(c => new CajaOpcionSimpleVM
+                    {
+                        Id = c.Id,
+                        Nombre = c.Nombre
+                    })
+                    .ToListAsync();
+
+            ventaVM.MediosPagoDisponibles =
+                await _context.MediosPago
+                    .AsNoTracking()
+                    .Where(m =>
+                        m.EmpresaId == empresaId &&
+                        m.Estado)
+                    .OrderBy(m => m.Nombre)
+                    .Select(m => new MedioPagoOpcionSimpleVM
+                    {
+                        Id = m.Id,
+                        Nombre = m.Nombre
+                    })
+                    .ToListAsync();
         }
     }
 }

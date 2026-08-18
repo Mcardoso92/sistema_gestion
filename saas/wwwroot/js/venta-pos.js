@@ -32,6 +32,22 @@
     const btnConfirmarVenta = document.getElementById("btnConfirmarVenta");
     const btnCancelarVenta = document.getElementById("btnCancelarVenta");
 
+    const pagosContainer = document.getElementById("pagosContainer");
+
+    const btnAgregarPago = document.getElementById("btnAgregarPago");
+
+    const totalPagadoVisual = document.getElementById("totalPagado");
+
+    const saldoPendienteVisual = document.getElementById("saldoPendiente");
+
+    const alertaClientePendiente = document.getElementById("alertaClientePendiente");
+
+    const puntoVenta = document.getElementById("puntoVenta");
+
+    const getCajasUrl = puntoVenta.dataset.getCajasUrl;
+
+    const empresaId = puntoVenta.dataset.empresaId;
+
     const carrito = [];
 
     let temporizadorProductos;
@@ -46,6 +62,321 @@
     inicializarCarritoDesdeVista();
     actualizarClienteVisible();
     renderizarCarrito();
+
+    function obtenerTotalVentaNumerico() {
+
+        let total = 0;
+
+        document
+            .querySelectorAll("#carritoVenta tr[data-producto-id]")
+            .forEach(row => {
+
+                const precioInput =
+                    row.querySelector(
+                        'input[name$=".PrecioUnitario"]');
+
+                const cantidadInput =
+                    row.querySelector(
+                        'input[name$=".Cantidad"]');
+
+                if (!precioInput ||
+                    !cantidadInput) {
+                    return;
+                }
+
+                const precio =
+                    parseFloat(precioInput.value) || 0;
+
+                const cantidad =
+                    parseInt(cantidadInput.value) || 0;
+
+                total += precio * cantidad;
+            });
+
+        return total;
+    }
+
+    function obtenerTotalPagado() {
+
+        let total = 0;
+
+        document
+            .querySelectorAll(".pago-importe")
+            .forEach(input => {
+
+                const valor =
+                    parseFloat(input.value);
+
+                if (Number.isFinite(valor)) {
+                    total += valor;
+                }
+            });
+
+        return total;
+    }
+
+    function actualizarResumenPagos() {
+
+        const totalVenta =
+            obtenerTotalVentaNumerico();
+
+        const totalPagado =
+            obtenerTotalPagado();
+
+        const saldo =
+            Math.max(
+                0,
+                totalVenta - totalPagado);
+
+        totalPagadoVisual.textContent =
+            totalPagado.toLocaleString(
+                "es-AR",
+                {
+                    style: "currency",
+                    currency: "ARS"
+                });
+
+        saldoPendienteVisual.textContent =
+            saldo.toLocaleString(
+                "es-AR",
+                {
+                    style: "currency",
+                    currency: "ARS"
+                });
+
+        const clienteId =
+            document.getElementById("clienteId")?.value;
+
+        if (saldo > 0 &&
+            !clienteId) {
+
+            alertaClientePendiente.classList.remove(
+                "d-none");
+        }
+        else {
+
+            alertaClientePendiente.classList.add(
+                "d-none");
+        }
+    }
+
+    async function cargarCajasPorMedioPago(
+        medioSelect,
+        cajaSelect) {
+
+        const medioPagoId =
+            medioSelect.value;
+
+        cajaSelect.innerHTML =
+            '<option value="">Caja</option>';
+
+        if (!medioPagoId) {
+            return;
+        }
+
+        const url =
+            getCajasUrl
+            + "?medioPagoId="
+            + encodeURIComponent(medioPagoId)
+            + "&empresaId="
+            + encodeURIComponent(empresaId);
+
+        try {
+
+            const response =
+                await fetch(url);
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            const cajas =
+                await response.json();
+
+            cajas.forEach(caja => {
+
+                const option =
+                    document.createElement("option");
+
+                option.value =
+                    caja.id;
+
+                option.textContent =
+                    caja.nombre;
+
+                cajaSelect.appendChild(option);
+            });
+
+            if (cajas.length === 1) {
+                cajaSelect.value =
+                    cajas[0].id;
+            }
+        }
+        catch {
+
+            cajaSelect.innerHTML =
+                '<option value="">No disponible</option>';
+        }
+    }
+
+    function reindexarPagos() {
+
+        const pagos =
+            pagosContainer
+                .querySelectorAll(".pago-item");
+
+        pagos.forEach((pago, index) => {
+
+            pago.dataset.index =
+                index;
+
+            const medio =
+                pago.querySelector(
+                    ".medio-pago-select");
+
+            const caja =
+                pago.querySelector(
+                    ".caja-pago-select");
+
+            const importe =
+                pago.querySelector(
+                    ".pago-importe");
+
+            medio.name =
+                `Pagos[${index}].MedioPagoId`;
+
+            caja.name =
+                `Pagos[${index}].CajaId`;
+
+            importe.name =
+                `Pagos[${index}].Importe`;
+        });
+    }
+
+    function crearPago() {
+
+        const index =
+            pagosContainer
+                .querySelectorAll(
+                    ".pago-item")
+                .length;
+
+        const pago =
+            document.createElement("div");
+
+        pago.className =
+            "pago-item bg-white text-dark rounded p-2";
+
+        pago.dataset.index =
+            index;
+
+        pago.innerHTML = `
+        <div class="row g-2">
+
+            <div class="col-12">
+
+                <select
+                    name="Pagos[${index}].MedioPagoId"
+                    class="form-select form-select-sm medio-pago-select">
+
+                    <option value="">
+                        Medio de pago
+                    </option>
+
+                    ${window.veltikaMediosPagoOptions ?? ""}
+                </select>
+
+            </div>
+
+            <div class="col-12">
+
+                <select
+                    name="Pagos[${index}].CajaId"
+                    class="form-select form-select-sm caja-pago-select">
+
+                    <option value="">
+                        Caja
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-9">
+
+                <input
+                    name="Pagos[${index}].Importe"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    class="form-control form-control-sm pago-importe"
+                    placeholder="Importe" />
+
+            </div>
+
+            <div class="col-3 d-grid">
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger btn-eliminar-pago">
+                    ×
+                </button>
+
+            </div>
+
+        </div>
+    `;
+
+        pagosContainer.appendChild(
+            pago);
+
+        configurarPago(
+            pago);
+
+        actualizarResumenPagos();
+    }
+
+    function configurarPago(pago) {
+
+        const medioSelect =
+            pago.querySelector(
+                ".medio-pago-select");
+
+        const cajaSelect =
+            pago.querySelector(
+                ".caja-pago-select");
+
+        const importe =
+            pago.querySelector(
+                ".pago-importe");
+
+        const eliminar =
+            pago.querySelector(
+                ".btn-eliminar-pago");
+
+        medioSelect.addEventListener(
+            "change",
+            function () {
+
+                cargarCajasPorMedioPago(
+                    medioSelect,
+                    cajaSelect);
+            });
+
+        importe.addEventListener(
+            "input",
+            actualizarResumenPagos);
+
+        eliminar.addEventListener(
+            "click",
+            function () {
+
+                pago.remove();
+
+                reindexarPagos();
+                actualizarResumenPagos();
+            });
+    }
 
     function inicializarCarritoDesdeVista() {
         const filas = carritoVenta.querySelectorAll("tr[data-producto-id]");
@@ -1041,4 +1372,15 @@
             ocultarResultadosClientes();
         }
     });
+
+    document
+        .querySelectorAll(".pago-item")
+        .forEach(configurarPago);
+
+    btnAgregarPago.addEventListener(
+        "click",
+        crearPago);
+
+    actualizarResumenPagos();
+
 });
