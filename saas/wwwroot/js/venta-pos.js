@@ -364,6 +364,40 @@
 
             </div>
 
+            <div class="col-12 bloque-efectivo d-none">
+
+                <div class="row g-2">
+
+                    <div class="col-6">
+
+                        <label class="form-label small mb-1">
+                            Recibido
+                        </label>
+
+                        <input type="number"
+                               min="0"
+                               step="0.01"
+                               class="form-control form-control-sm efectivo-recibido"
+                               placeholder="0,00" />
+
+                    </div>
+
+                    <div class="col-6">
+
+                        <label class="form-label small mb-1">
+                            Vuelto
+                        </label>
+
+                        <div class="form-control form-control-sm bg-light efectivo-vuelto">
+                            $0,00
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
             <div class="col-3 d-grid">
 
                 <button
@@ -404,6 +438,12 @@
             pago.querySelector(
                 ".btn-eliminar-pago");
 
+        const bloqueEfectivo =
+            pago.querySelector(".bloque-efectivo");
+
+        const recibidoInput =
+            pago.querySelector(".efectivo-recibido");
+
         medioSelect.addEventListener(
             "change",
             function () {
@@ -411,11 +451,28 @@
                 cargarCajasPorMedioPago(
                     medioSelect,
                     cajaSelect);
+
+                actualizarBloqueEfectivo(
+                    pago);
             });
 
         importe.addEventListener(
             "input",
-            actualizarResumenPagos);
+            function () {
+
+                actualizarResumenPagos();
+                actualizarVuelto(pago);
+            });
+
+        if (recibidoInput) {
+
+            recibidoInput.addEventListener(
+                "input",
+                function () {
+
+                    actualizarVuelto(pago);
+                });
+        }
 
         eliminar.addEventListener(
             "click",
@@ -426,6 +483,9 @@
                 reindexarPagos();
                 actualizarResumenPagos();
             });
+
+        actualizarBloqueEfectivo(
+            pago);
     }
 
     function inicializarCarritoDesdeVista() {
@@ -1223,6 +1283,96 @@
         });
 
         contenedor.appendChild(cerrar);
+    }
+    function esMedioEfectivo(medioSelect) {
+
+        const option =
+            medioSelect.options[
+            medioSelect.selectedIndex
+            ];
+
+        if (!option) {
+            return false;
+        }
+
+        return Number(option.dataset.tipo) === 1;
+    }
+
+    function actualizarVuelto(pago) {
+
+        const importeInput =
+            pago.querySelector(".pago-importe");
+
+        const recibidoInput =
+            pago.querySelector(".efectivo-recibido");
+
+        const vueltoVisual =
+            pago.querySelector(".efectivo-vuelto");
+
+        if (!importeInput ||
+            !recibidoInput ||
+            !vueltoVisual) {
+            return;
+        }
+
+        const importe =
+            parseFloat(importeInput.value) || 0;
+
+        const recibido =
+            parseFloat(recibidoInput.value) || 0;
+
+        const vuelto =
+            Math.max(
+                0,
+                recibido - importe);
+
+        vueltoVisual.textContent =
+            vuelto.toLocaleString(
+                "es-AR",
+                {
+                    style: "currency",
+                    currency: "ARS"
+                });
+    }
+
+    function actualizarBloqueEfectivo(pago) {
+
+        const medioSelect =
+            pago.querySelector(".medio-pago-select");
+
+        const bloque =
+            pago.querySelector(".bloque-efectivo");
+
+        const recibidoInput =
+            pago.querySelector(".efectivo-recibido");
+
+        const vueltoVisual =
+            pago.querySelector(".efectivo-vuelto");
+
+        if (!medioSelect ||
+            !bloque) {
+            return;
+        }
+
+        if (esMedioEfectivo(medioSelect)) {
+
+            bloque.classList.remove("d-none");
+
+            actualizarVuelto(pago);
+        }
+        else {
+
+            bloque.classList.add("d-none");
+
+            if (recibidoInput) {
+                recibidoInput.value = "";
+            }
+
+            if (vueltoVisual) {
+                vueltoVisual.textContent =
+                    "$0,00";
+            }
+        }
     }
 
     carritoVenta.addEventListener("click", evento => {

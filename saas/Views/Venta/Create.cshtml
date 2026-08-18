@@ -403,6 +403,7 @@
                                                     @foreach (var medio in Model.MediosPagoDisponibles)
                                                     {
                                                         <option value="@medio.Id"
+                                                                data-tipo="@((int)medio.Tipo)"
                                                                 selected="@(Model.Pagos[i].MedioPagoId == medio.Id)">
                                                             @medio.Nombre
                                                         </option>
@@ -442,6 +443,40 @@
                                                        step="0.01"
                                                        class="form-control form-control-sm pago-importe"
                                                        placeholder="Importe" />
+
+                                            </div>
+
+                                            <div class="col-12 bloque-efectivo d-none">
+
+                                                <div class="row g-2">
+
+                                                    <div class="col-6">
+
+                                                        <label class="form-label small mb-1">
+                                                            Recibido
+                                                        </label>
+
+                                                        <input type="number"
+                                                               min="0"
+                                                               step="0.01"
+                                                               class="form-control form-control-sm efectivo-recibido"
+                                                               placeholder="0,00" />
+
+                                                    </div>
+
+                                                    <div class="col-6">
+
+                                                        <label class="form-label small mb-1">
+                                                            Vuelto
+                                                        </label>
+
+                                                        <div class="form-control form-control-sm bg-light efectivo-vuelto">
+                                                            $0,00
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
 
                                             </div>
 
@@ -532,11 +567,11 @@
                 string.Join(
                         "",
                         Model.MediosPagoDisponibles.Select(m =>
-                                $"<option value=\"{m.Id}\">{System.Net.WebUtility.HtmlEncode(m.Nombre)}</option>"
+                                $"<option value=\"{m.Id}\" data-tipo=\"{(int)m.Tipo}\">{System.Net.WebUtility.HtmlEncode(m.Nombre)}</option>"
                         )
                 )
                 )
-    `;
+        `;
     </script>
 
     <script src="~/js/venta-pos.js" asp-append-version="true"></script>

@@ -27,10 +27,13 @@
         public int TotalLineas => Detalles.Count;
 
         public int TotalUnidades => Detalles.Sum(d => d.Cantidad);
+        
         // Cobros
         public decimal TotalCobrado { get; set; }
 
-        public decimal SaldoPendiente { get; set; }
+        public decimal SaldoPendiente => Math.Max(0, Total - TotalCobrado);
+
+        public bool TieneSaldoPendiente => SaldoPendiente > 0;
 
         public List<CobroVentaResumenVM> Cobros { get; set; }
             = new List<CobroVentaResumenVM>();
