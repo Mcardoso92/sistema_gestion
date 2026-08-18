@@ -417,9 +417,7 @@ namespace saas.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            string id,
-            UsuarioEditVM usuario)
+        public async Task<IActionResult> Edit(string id, UsuarioEditVM usuario)
         {
             if (id != usuario.Id)
             {
@@ -819,7 +817,7 @@ namespace saas.Controllers
                     return RedirectToAction("Index", "Empresa");
                 }
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Usuario");
             }
 
             ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
@@ -839,6 +837,7 @@ namespace saas.Controllers
             return View();
         }
 
+        //Helpers Methods
         private async Task CargarCombos(UsuarioCreateVM model, bool esSuperAdmin)
         {
             IQueryable<IdentityRole> roles = _roleManager.Roles;
@@ -901,7 +900,6 @@ namespace saas.Controllers
                     .ToListAsync();
             }
         }
-
         private async Task<Dictionary<string, string>> ObtenerRolesUsuarios(IEnumerable<Usuario> usuarios)
         {
             var idsUsuarios = usuarios
