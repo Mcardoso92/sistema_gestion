@@ -416,6 +416,19 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
+            var movimientoRegularizacion =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .Include(m => m.Usuario)
+                    .Where(m =>
+                        m.TurnoCajaId == turno.Id &&
+                        (
+                            m.Tipo == TipoMovimientoCaja.AjusteSobranteCaja ||
+                            m.Tipo == TipoMovimientoCaja.AjusteFaltanteCaja
+                        ))
+                    .OrderByDescending(m => m.Fecha)
+                    .FirstOrDefaultAsync();
+
             var vm = new TurnoCajaDetailsVM
             {
                 Id = turno.Id,
@@ -442,7 +455,31 @@ namespace saas.Controllers
                 Diferencia = turno.Diferencia,
                 ImporteRendido = turno.ImporteRendido,
 
-                Movimientos = movimientos
+                Movimientos = movimientos,
+
+                Regularizacion =
+                new RegularizacionTurnoResumenVM
+                {
+                    Regularizado =
+                        movimientoRegularizacion != null,
+
+                    MovimientoCajaId =
+                        movimientoRegularizacion?.Id,
+
+                    FechaRegularizacion =
+                        movimientoRegularizacion?.Fecha,
+
+                    UsuarioRegularizacionNombre =
+                        movimientoRegularizacion != null
+                            ? movimientoRegularizacion.Usuario.UserName
+                            : null,
+
+                    Importe =
+                        movimientoRegularizacion?.Importe,
+
+                    Motivo =
+                        movimientoRegularizacion?.Observaciones
+                }
             };
 
             return View(vm);
@@ -823,6 +860,295 @@ namespace saas.Controllers
                     "Ocurrió un error al cerrar el turno.");
 
                 await CargarCajasDestino(vm, turno);
+
+                return View(vm);
+            }
+        }
+        // GET: TurnoCaja/RegularizarDiferencia/5
+        [HttpGet]
+        public async Task<IActionResult> RegularizarDiferencia(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<TurnoCaja> consulta =
+                _context.TurnosCaja
+                    .AsNoTracking()
+                    .Include(t => t.Caja)
+                    .Include(t => t.UsuarioApertura);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(t =>
+                    t.EmpresaId == usuario.EmpresaId);
+            }
+
+            var turno = await consulta
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (turno == null)
+            {
+                return NotFound();
+            }
+
+            if (turno.Estado != EstadoTurnoCaja.Cerrado)
+            {
+                TempData["Error"] =
+                    "Solo pueden regularizarse turnos cerrados.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = turno.Id });
+            }
+
+            if (!turno.Diferencia.HasValue ||
+                turno.Diferencia.Value == 0)
+            {
+                TempData["Error"] =
+                    "El turno no tiene diferencias pendientes de regularización.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = turno.Id });
+            }
+
+            bool yaRegularizado =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.TurnoCajaId == turno.Id &&
+                        (
+                            m.Tipo == TipoMovimientoCaja.AjusteSobranteCaja ||
+                            m.Tipo == TipoMovimientoCaja.AjusteFaltanteCaja
+                        ));
+
+            if (yaRegularizado)
+            {
+                TempData["Error"] =
+                    "La diferencia de este turno ya fue regularizada.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = turno.Id });
+            }
+
+            var vm = new RegularizarDiferenciaTurnoVM
+            {
+                TurnoCajaId = turno.Id,
+                CajaNombre = turno.Caja.Nombre,
+                UsuarioTurnoNombre =
+                    turno.UsuarioApertura.UserName ?? "",
+                FechaCierre =
+                    turno.FechaCierre!.Value,
+                EfectivoEsperado =
+                    turno.EfectivoEsperado!.Value,
+                EfectivoContado =
+                    turno.EfectivoContado!.Value,
+                Diferencia =
+                    turno.Diferencia.Value
+            };
+
+            return View(vm);
+        }
+        // POST: TurnoCaja/RegularizarDiferencia/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegularizarDiferencia(int id, RegularizarDiferenciaTurnoVM vm)
+        {
+            if (id != vm.TurnoCajaId)
+            {
+                return NotFound();
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<TurnoCaja> consulta =
+                _context.TurnosCaja
+                    .Include(t => t.Caja)
+                    .Include(t => t.UsuarioApertura);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(t =>
+                    t.EmpresaId == usuario.EmpresaId);
+            }
+
+            var turno = await consulta
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (turno == null)
+            {
+                return NotFound();
+            }
+
+            if (turno.Estado != EstadoTurnoCaja.Cerrado)
+            {
+                TempData["Error"] =
+                    "Solo pueden regularizarse turnos cerrados.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = turno.Id });
+            }
+
+            if (!turno.Diferencia.HasValue ||
+                turno.Diferencia.Value == 0)
+            {
+                TempData["Error"] =
+                    "El turno no tiene diferencias pendientes de regularización.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = turno.Id });
+            }
+
+            bool yaRegularizado =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.TurnoCajaId == turno.Id &&
+                        (
+                            m.Tipo == TipoMovimientoCaja.AjusteSobranteCaja ||
+                            m.Tipo == TipoMovimientoCaja.AjusteFaltanteCaja
+                        ));
+
+            if (yaRegularizado)
+            {
+                TempData["Error"] =
+                    "La diferencia de este turno ya fue regularizada.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = turno.Id });
+            }
+
+            vm.CajaNombre =
+                turno.Caja.Nombre;
+
+            vm.UsuarioTurnoNombre =
+                turno.UsuarioApertura.UserName ?? "";
+
+            vm.FechaCierre =
+                turno.FechaCierre!.Value;
+
+            vm.EfectivoEsperado =
+                turno.EfectivoEsperado!.Value;
+
+            vm.EfectivoContado =
+                turno.EfectivoContado!.Value;
+
+            vm.Diferencia =
+                turno.Diferencia.Value;
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            vm.Motivo =
+                vm.Motivo.Trim();
+
+            bool esSobrante =
+                turno.Diferencia.Value > 0;
+
+            var tipo =
+                esSobrante
+                    ? TipoMovimientoCaja.AjusteSobranteCaja
+                    : TipoMovimientoCaja.AjusteFaltanteCaja;
+
+            var direccion =
+                esSobrante
+                    ? DireccionMovimientoCaja.Ingreso
+                    : DireccionMovimientoCaja.Egreso;
+
+            decimal importe =
+                Math.Abs(turno.Diferencia.Value);
+
+            try
+            {
+                var movimiento =
+                    new MovimientoCaja
+                    {
+                        EmpresaId =
+                            turno.EmpresaId,
+
+                        CajaId =
+                            turno.CajaId,
+
+                        Tipo =
+                            tipo,
+
+                        Direccion =
+                            direccion,
+
+                        Importe =
+                            importe,
+
+                        Fecha =
+                            DateTime.Now,
+
+                        UsuarioId =
+                            usuario.Id,
+
+                        MedioPagoId =
+                            null,
+
+                        TurnoCajaId =
+                            turno.Id,
+
+                        CategoriaGastoId =
+                            null,
+
+                        Concepto =
+                            esSobrante
+                                ? $"Regularización de sobrante del turno #{turno.Id}"
+                                : $"Regularización de faltante del turno #{turno.Id}",
+
+                        Observaciones =
+                            vm.Motivo
+                    };
+
+                _context.MovimientosCaja.Add(
+                    movimiento);
+
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] =
+                    "Diferencia regularizada correctamente.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id = turno.Id });
+            }
+            catch
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Ocurrió un error al regularizar la diferencia.");
 
                 return View(vm);
             }
