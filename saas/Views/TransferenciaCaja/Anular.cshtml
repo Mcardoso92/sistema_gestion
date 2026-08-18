@@ -1,0 +1,175 @@
+﻿@model saas.ViewModel.TransferenciaCajaResumenVM
+
+@{
+    ViewData["Title"] = "Anular Transferencia";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h1 class="h3 fw-bold mb-1">
+                Anular Transferencia
+            </h1>
+
+            <p class="text-muted mb-0">
+                Se generarán movimientos compensatorios.
+            </p>
+
+        </div>
+
+        <a asp-action="Details"
+           asp-route-id="@Model.Id"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.Error
+        </div>
+    }
+
+    <div class="alert alert-warning">
+
+        <div class="fw-semibold mb-1">
+            Esta acción no elimina la transferencia.
+        </div>
+
+        <div>
+            Se conservará el registro original y se crearán
+            movimientos inversos para devolver el dinero
+            a la caja de origen.
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <h5 class="fw-bold mb-4">
+                Transferencia original
+            </h5>
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <div class="text-muted small">
+                        Caja origen
+                    </div>
+
+                    <div class="fw-semibold">
+                        @Model.CajaOrigenNombre
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="text-muted small">
+                        Caja destino
+                    </div>
+
+                    <div class="fw-semibold">
+                        @Model.CajaDestinoNombre
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="text-muted small">
+                        Fecha
+                    </div>
+
+                    <div>
+                        @Model.Fecha.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="text-muted small">
+                        Importe
+                    </div>
+
+                    <div class="fs-5 fw-bold">
+                        @Model.Importe.ToString("C")
+                    </div>
+
+                </div>
+
+                <div class="col-12">
+
+                    <div class="text-muted small">
+                        Motivo original
+                    </div>
+
+                    <div>
+                        @Model.Motivo
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <form asp-action="Anular"
+          asp-route-id="@Model.Id"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                <label for="motivoAnulacion"
+                       class="form-label fw-semibold">
+                    Motivo de la anulación
+                </label>
+
+                <textarea name="motivoAnulacion"
+                          id="motivoAnulacion"
+                          class="form-control"
+                          rows="3"
+                          maxlength="500"
+                          required></textarea>
+
+                <div class="form-text">
+                    Explicá por qué se está anulando esta transferencia.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-action="Details"
+               asp-route-id="@Model.Id"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-danger">
+                Confirmar anulación
+            </button>
+
+        </div>
+
+    </form>
+
+</div>

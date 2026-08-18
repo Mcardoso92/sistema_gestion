@@ -1,0 +1,335 @@
+﻿@model IEnumerable<saas.ViewModel.TransferenciaCajaResumenVM>
+
+@{
+    ViewData["Title"] = "Transferencias de Caja";
+
+    int? cajaOrigenActual =
+        ViewBag.CajaOrigenId as int?;
+
+    int? cajaDestinoActual =
+        ViewBag.CajaDestinoId as int?;
+
+    saas.Models.Enums.EstadoTransferenciaCaja? estadoActual =
+        ViewBag.Estado as saas.Models.Enums.EstadoTransferenciaCaja?;
+
+    DateTime? fechaDesde =
+        ViewBag.FechaDesde as DateTime?;
+
+    DateTime? fechaHasta =
+        ViewBag.FechaHasta as DateTime?;
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Transferencias de Caja
+            </h1>
+
+            <p class="text-muted mb-0">
+                Movimientos de dinero entre cajas de la empresa.
+            </p>
+        </div>
+
+        @if (!User.IsInRole("SuperAdmin"))
+        {
+            <a asp-action="Create"
+               class="btn btn-primary">
+                Nueva transferencia
+            </a>
+        }
+
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <form asp-action="Index"
+                  method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Caja origen
+                        </label>
+
+                        <select name="cajaOrigenId"
+                                class="form-select">
+
+                            <option value="">
+                                Todas
+                            </option>
+
+                            @if (ViewBag.Cajas != null)
+                            {
+                                foreach (var caja in ViewBag.Cajas)
+                                {
+                                    <option value="@caja.Id"
+                                            selected="@(cajaOrigenActual == caja.Id)">
+                                        @caja.Nombre
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Caja destino
+                        </label>
+
+                        <select name="cajaDestinoId"
+                                class="form-select">
+
+                            <option value="">
+                                Todas
+                            </option>
+
+                            @if (ViewBag.Cajas != null)
+                            {
+                                foreach (var caja in ViewBag.Cajas)
+                                {
+                                    <option value="@caja.Id"
+                                            selected="@(cajaDestinoActual == caja.Id)">
+                                        @caja.Nombre
+                                    </option>
+                                }
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Estado
+                        </label>
+
+                        <select name="estado"
+                                class="form-select">
+
+                            <option value="">
+                                Todos
+                            </option>
+
+                            @foreach (var estado in
+                                                        Enum.GetValues<saas.Models.Enums.EstadoTransferenciaCaja>())
+                            {
+                                <option value="@((int)estado)"
+                                        selected="@(estadoActual == estado)">
+                                    @estado
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Desde
+                        </label>
+
+                        <input type="date"
+                               name="fechaDesde"
+                               value="@fechaDesde?.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label fw-semibold">
+                            Hasta
+                        </label>
+
+                        <input type="date"
+                               name="fechaHasta"
+                               value="@fechaHasta?.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+
+                    </div>
+
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <div class="col-lg-4 col-md-6">
+
+                            <label class="form-label fw-semibold">
+                                Empresa
+                            </label>
+
+                            <select name="empresaId"
+                                    class="form-select">
+
+                                <option value="">
+                                    Todas
+                                </option>
+
+                                @if (ViewBag.Empresas != null)
+                                {
+                                    foreach (var empresa in ViewBag.Empresas)
+                                    {
+                                        <option value="@empresa.Id"
+                                                selected="@(ViewBag.EmpresaId == empresa.Id)">
+                                            @empresa.Nombre
+                                        </option>
+                                    }
+                                }
+
+                            </select>
+
+                        </div>
+                    }
+
+                    <div class="col-12 d-flex justify-content-end gap-2">
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                            Limpiar
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-outline-primary">
+                            Filtrar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-0">
+
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th class="ps-4">Fecha</th>
+                                <th>Origen</th>
+                                <th>Destino</th>
+                                <th>Motivo</th>
+                                <th>Usuario</th>
+                                <th>Estado</th>
+                                <th class="text-end">Importe</th>
+                                <th class="text-end pe-4">Acciones</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var transferencia in Model)
+                            {
+                                <tr>
+
+                                    <td class="ps-4">
+                                        @transferencia.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td class="fw-semibold">
+                                        @transferencia.CajaOrigenNombre
+                                    </td>
+
+                                    <td class="fw-semibold">
+                                        @transferencia.CajaDestinoNombre
+                                    </td>
+
+                                    <td>
+                                        @transferencia.Motivo
+                                    </td>
+
+                                    <td>
+                                        @transferencia.UsuarioNombre
+                                    </td>
+
+                                    <td>
+
+                                        @if (transferencia.Estado ==
+                                                                        saas.Models.Enums.EstadoTransferenciaCaja.Activa)
+                                        {
+                                            <span class="badge bg-success">
+                                                Activa
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                Anulada
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td class="text-end fw-bold">
+                                        @transferencia.Importe.ToString("C")
+                                    </td>
+
+                                    <td class="text-end pe-4">
+
+                                        <a asp-action="Details"
+                                           asp-route-id="@transferencia.Id"
+                                           class="btn btn-sm btn-outline-secondary">
+                                            Detalles
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center p-5">
+
+                    <h5 class="fw-bold mb-2">
+                        No hay transferencias
+                    </h5>
+
+                    <p class="text-muted mb-3">
+                        No se encontraron transferencias con los filtros seleccionados.
+                    </p>
+
+                    @if (!User.IsInRole("SuperAdmin"))
+                    {
+                        <a asp-action="Create"
+                           class="btn btn-primary">
+                            Nueva transferencia
+                        </a>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
