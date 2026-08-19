@@ -195,8 +195,7 @@ namespace saas.Controllers
         // POST: ReintegroVenta/Registrar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Registrar(
-            RegistrarReintegroVentaVM vm)
+        public async Task<IActionResult> Registrar(RegistrarReintegroVentaVM vm)
         {
             var usuario =
                 await _userManager.GetUserAsync(User);
@@ -502,6 +501,129 @@ namespace saas.Controllers
 
             try
             {
+                // Revalidación final dentro de la transacción SERIALIZABLE.
+                // No confiamos en las validaciones realizadas antes de abrirla.
+
+                decimal totalCobradoActual =
+                    await _context.CobrosVenta
+                        .Where(c =>
+                            c.VentaId == venta.Id &&
+                            c.Estado == EstadoCobro.Activo)
+                        .SumAsync(c =>
+                            (decimal?)c.Importe)
+                    ?? 0;
+
+                decimal totalReintegradoActual =
+                    await _context.ReintegrosVenta
+                        .Where(r =>
+                            r.VentaId == venta.Id &&
+                            r.Estado == EstadoReintegro.Activo)
+                        .SumAsync(r =>
+                            (decimal?)r.Importe)
+                    ?? 0;
+
+                decimal importeDisponibleActual =
+                    Math.Max(
+                        0,
+                        totalCobradoActual -
+                        totalReintegradoActual);
+
+                if (importeReintegro >
+                    importeDisponibleActual)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "El importe disponible para reintegrar cambió. Actualice la operación e inténtelo nuevamente.");
+
+                    await ReconstruirVM(
+                        vm,
+                        venta);
+
+                    return View(vm);
+                }
+
+                var cantidadesReintegradasActuales =
+                    await _context.DetallesReintegroVenta
+                        .Where(d =>
+                            d.ReintegroVenta.VentaId ==
+                                venta.Id &&
+                            d.ReintegroVenta.Estado ==
+                                EstadoReintegro.Activo)
+                        .GroupBy(d =>
+                            d.ProductoId)
+                        .Select(g => new
+                        {
+                            ProductoId =
+                                g.Key,
+
+                            Cantidad =
+                                g.Sum(d =>
+                                    d.Cantidad)
+                        })
+                        .ToDictionaryAsync(
+                            x => x.ProductoId,
+                            x => x.Cantidad);
+
+                foreach (var detalle in detallesValidados)
+                {
+                    var detalleVenta =
+                        venta.Detalles
+                            .First(d =>
+                                d.ProductoId ==
+                                detalle.ProductoId);
+
+                    int yaReintegrado =
+                        cantidadesReintegradasActuales
+                            .GetValueOrDefault(
+                                detalle.ProductoId);
+
+                    int disponibleActual =
+                        Math.Max(
+                            0,
+                            detalleVenta.Cantidad -
+                            yaReintegrado);
+
+                    if (detalle.Cantidad >
+                        disponibleActual)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            "",
+                            $"La cantidad disponible de \"{detalleVenta.Producto.Nombre}\" cambió. Disponible actualmente: {disponibleActual}.");
+
+                        await ReconstruirVM(
+                            vm,
+                            venta);
+
+                        return View(vm);
+                    }
+                }
+
+                decimal saldoCajaActual =
+                    await _cajaSaldoService
+                        .CalcularSaldoDisponible(
+                            caja!,
+                            usuario.Id);
+
+                if (importeReintegro >
+                    saldoCajaActual)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        nameof(vm.CajaId),
+                        $"El saldo disponible de la caja cambió. Saldo actual: {saldoCajaActual:C}.");
+
+                    await ReconstruirVM(
+                        vm,
+                        venta);
+
+                    return View(vm);
+                }
+
                 var fecha =
                     DateTime.Now;
 
@@ -688,7 +810,383 @@ namespace saas.Controllers
                 return View(vm);
             }
         }
+        // GET: ReintegroVenta/Anular/5
+        [HttpGet]
+        public async Task<IActionResult> Anular(int id)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
 
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<ReintegroVenta> consulta =
+                _context.ReintegrosVenta
+                    .AsNoTracking()
+                    .Include(r => r.MedioPago)
+                    .Include(r => r.Venta);
+
+            if (!esSuperAdmin)
+            {
+                consulta =
+                    consulta.Where(r =>
+                        r.EmpresaId == usuario.EmpresaId);
+            }
+
+            var reintegro =
+                await consulta
+                    .FirstOrDefaultAsync(r =>
+                        r.Id == id);
+
+            if (reintegro == null)
+            {
+                return NotFound();
+            }
+
+            if (reintegro.Estado != EstadoReintegro.Activo)
+            {
+                TempData["Error"] =
+                    "El reintegro ya se encuentra anulado.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = reintegro.VentaId });
+            }
+
+            var movimientoCaja =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m =>
+                        m.ReintegroVentaId == reintegro.Id &&
+                        m.Tipo == TipoMovimientoCaja.ReintegroVenta);
+
+            if (movimientoCaja == null)
+            {
+                TempData["Error"] =
+                    "No se encontró el movimiento de caja asociado al reintegro.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = reintegro.VentaId });
+            }
+
+            bool yaRevertido =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.MovimientoOrigenId ==
+                            movimientoCaja.Id);
+
+            if (yaRevertido)
+            {
+                TempData["Error"] =
+                    "El movimiento asociado a este reintegro ya fue revertido.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = reintegro.VentaId });
+            }
+
+            var vm =
+                new AnularReintegroVentaVM
+                {
+                    ReintegroVentaId =
+                        reintegro.Id,
+
+                    VentaId =
+                        reintegro.VentaId,
+
+                    Importe =
+                        reintegro.Importe,
+
+                    MedioPagoNombre =
+                        reintegro.MedioPago.Nombre
+                };
+
+            return View(vm);
+        }
+        // POST: ReintegroVenta/Anular/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Anular(
+            AnularReintegroVentaVM vm)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<ReintegroVenta> consulta =
+                _context.ReintegrosVenta
+                    .Include(r => r.MedioPago)
+                    .Include(r => r.Venta)
+                    .Include(r => r.Detalles)
+                        .ThenInclude(d => d.Producto);
+
+            if (!esSuperAdmin)
+            {
+                consulta =
+                    consulta.Where(r =>
+                        r.EmpresaId == usuario.EmpresaId);
+            }
+
+            var reintegro =
+                await consulta
+                    .FirstOrDefaultAsync(r =>
+                        r.Id == vm.ReintegroVentaId);
+
+            if (reintegro == null)
+            {
+                return NotFound();
+            }
+
+            vm.VentaId =
+                reintegro.VentaId;
+
+            vm.Importe =
+                reintegro.Importe;
+
+            vm.MedioPagoNombre =
+                reintegro.MedioPago.Nombre;
+
+            if (reintegro.Estado != EstadoReintegro.Activo)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "El reintegro ya se encuentra anulado.");
+            }
+
+            var movimientoCaja =
+                await _context.MovimientosCaja
+                    .FirstOrDefaultAsync(m =>
+                        m.ReintegroVentaId == reintegro.Id &&
+                        m.Tipo == TipoMovimientoCaja.ReintegroVenta);
+
+            if (movimientoCaja == null)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "No se encontró el movimiento de caja asociado al reintegro.");
+            }
+
+            if (movimientoCaja != null)
+            {
+                bool yaRevertido =
+                    await _context.MovimientosCaja
+                        .AsNoTracking()
+                        .AnyAsync(m =>
+                            m.MovimientoOrigenId ==
+                                movimientoCaja.Id);
+
+                if (yaRevertido)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "El movimiento asociado al reintegro ya fue revertido.");
+                }
+            }
+
+            foreach (var detalle in reintegro.Detalles)
+            {
+                if (detalle.Producto.Stock <
+                    detalle.Cantidad)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        $"No se puede anular el reintegro porque el stock actual de \"{detalle.Producto.Nombre}\" es insuficiente. " +
+                        $"Stock actual: {detalle.Producto.Stock}. Cantidad a descontar: {detalle.Cantidad}.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            vm.Motivo =
+                vm.Motivo.Trim();
+
+            await using var transaccion =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
+
+            try
+            {
+                // Revalidamos stock dentro de la transacción.
+                foreach (var detalle in reintegro.Detalles)
+                {
+                    if (detalle.Producto.Stock <
+                        detalle.Cantidad)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            "",
+                            $"El stock de \"{detalle.Producto.Nombre}\" cambió y ya no permite anular el reintegro.");
+
+                        return View(vm);
+                    }
+                }
+
+                var fecha =
+                    DateTime.Now;
+
+                reintegro.Estado =
+                    EstadoReintegro.Anulado;
+
+                reintegro.FechaAnulacion =
+                    fecha;
+
+                reintegro.UsuarioAnulacionId =
+                    usuario.Id;
+
+                reintegro.MotivoAnulacion =
+                    vm.Motivo;
+
+                foreach (var detalle in reintegro.Detalles)
+                {
+                    int stockAnterior =
+                        detalle.Producto.Stock;
+
+                    int stockPosterior =
+                        stockAnterior -
+                        detalle.Cantidad;
+
+                    detalle.Producto.Stock =
+                        stockPosterior;
+
+                    _context.MovimientosStock.Add(
+                        new MovimientoStock
+                        {
+                            ProductoId =
+                                detalle.ProductoId,
+
+                            EmpresaId =
+                                reintegro.EmpresaId,
+
+                            Tipo =
+                                TipoMovimientoStock.AnulacionReintegroVenta,
+
+                            Cantidad =
+                                detalle.Cantidad,
+
+                            StockAnterior =
+                                stockAnterior,
+
+                            StockPosterior =
+                                stockPosterior,
+
+                            Motivo =
+                                $"Anulación reintegro #{reintegro.Id} - Venta #{reintegro.VentaId}",
+
+                            Fecha =
+                                fecha,
+
+                            UsuarioId =
+                                usuario.Id,
+
+                            VentaId =
+                                reintegro.VentaId,
+
+                            CompraId =
+                                null,
+
+                            ReintegroVentaId =
+                                reintegro.Id
+                        });
+                }
+
+                var movimientoReversion =
+                    new MovimientoCaja
+                    {
+                        EmpresaId =
+                            movimientoCaja!.EmpresaId,
+
+                        CajaId =
+                            movimientoCaja.CajaId,
+
+                        Tipo =
+                            TipoMovimientoCaja.ReversionReintegroVenta,
+
+                        Direccion =
+                            DireccionMovimientoCaja.Ingreso,
+
+                        Importe =
+                            movimientoCaja.Importe,
+
+                        Fecha =
+                            fecha,
+
+                        UsuarioId =
+                            usuario.Id,
+
+                        MedioPagoId =
+                            movimientoCaja.MedioPagoId,
+
+                        TurnoCajaId =
+                            movimientoCaja.TurnoCajaId,
+
+                        CategoriaGastoId =
+                            null,
+
+                        Concepto =
+                            $"Reversión reintegro #{reintegro.Id} - Venta #{reintegro.VentaId}",
+
+                        Observaciones =
+                            vm.Motivo,
+
+                        MovimientoOrigenId =
+                            movimientoCaja.Id,
+
+                        ReintegroVentaId =
+                            reintegro.Id
+                    };
+
+                _context.MovimientosCaja.Add(
+                    movimientoReversion);
+
+                await _context.SaveChangesAsync();
+
+                await transaccion.CommitAsync();
+
+                TempData["Success"] =
+                    "Reintegro anulado correctamente.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = reintegro.VentaId });
+            }
+            catch
+            {
+                await transaccion.RollbackAsync();
+
+                ModelState.AddModelError(
+                    "",
+                    "Ocurrió un error al anular el reintegro.");
+
+                return View(vm);
+            }
+        }
 
 
         //Helper Methods

@@ -929,6 +929,51 @@ namespace saas.Controllers
                         c.Estado == EstadoCobro.Activo)
                     .Sum(c => c.Importe);
 
+            var reintegros =
+    await _context.ReintegrosVenta
+        .AsNoTracking()
+        .Where(r =>
+            r.VentaId == venta.Id)
+        .OrderBy(r =>
+            r.Fecha)
+        .Select(r =>
+            new ReintegroVentaResumenVM
+            {
+                Id =
+                    r.Id,
+
+                Fecha =
+                    r.Fecha,
+
+                Importe =
+                    r.Importe,
+
+                MedioPagoNombre =
+                    r.MedioPago.Nombre,
+
+                CajaNombre =
+                    r.Caja.Nombre,
+
+                UsuarioNombre =
+                    r.Usuario.UserName ?? "",
+
+                Estado =
+                    r.Estado
+            })
+        .ToListAsync();
+
+            decimal totalReintegrado =
+                reintegros
+                    .Where(r =>
+                        r.Estado == EstadoReintegro.Activo)
+                    .Sum(r =>
+                        r.Importe);
+
+            decimal pendienteReintegrar =
+                Math.Max(
+                    0,
+                    totalCobrado - totalReintegrado);
+
             var ventaVM = new VentaDetailsVM
             {
                 Id = venta.Id,
@@ -980,9 +1025,15 @@ namespace saas.Controllers
                 })
             .ToList(),
 
-                TotalCobrado =  totalCobrado,
+                TotalCobrado = totalCobrado,
 
-                Cobros = cobros
+                Cobros = cobros,
+
+                TotalReintegrado = totalReintegrado,
+
+                PendienteReintegrar = pendienteReintegrar,
+
+                Reintegros = reintegros
             };
 
             return View(ventaVM);

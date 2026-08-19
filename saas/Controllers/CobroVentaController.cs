@@ -599,6 +599,38 @@ namespace saas.Controllers
                 }
             }
 
+            decimal totalCobrosActivos =
+                await _context.CobrosVenta
+                    .AsNoTracking()
+                    .Where(c =>
+                        c.VentaId == cobro.VentaId &&
+                        c.Estado == EstadoCobro.Activo)
+                    .SumAsync(c =>
+                        (decimal?)c.Importe)
+                ?? 0;
+
+            decimal totalReintegrosActivos =
+                await _context.ReintegrosVenta
+                    .AsNoTracking()
+                    .Where(r =>
+                        r.VentaId == cobro.VentaId &&
+                        r.Estado == EstadoReintegro.Activo)
+                    .SumAsync(r =>
+                        (decimal?)r.Importe)
+                ?? 0;
+
+            decimal totalCobrosLuegoDeAnular =
+                totalCobrosActivos -
+                cobro.Importe;
+
+            if (totalCobrosLuegoDeAnular <
+                totalReintegrosActivos)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "No se puede anular este cobro porque existen reintegros activos asociados a la venta.");
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(vm);
@@ -614,6 +646,36 @@ namespace saas.Controllers
 
             try
             {
+                decimal totalCobrosActual =
+                    await _context.CobrosVenta
+                        .Where(c =>
+                            c.VentaId == cobro.VentaId &&
+                            c.Estado == EstadoCobro.Activo)
+                        .SumAsync(c =>
+                            (decimal?)c.Importe)
+                    ?? 0;
+
+                decimal totalReintegrosActual =
+                    await _context.ReintegrosVenta
+                        .Where(r =>
+                            r.VentaId == cobro.VentaId &&
+                            r.Estado == EstadoReintegro.Activo)
+                        .SumAsync(r =>
+                            (decimal?)r.Importe)
+                    ?? 0;
+
+                if ((totalCobrosActual - cobro.Importe) <
+                    totalReintegrosActual)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "No se puede anular el cobro porque la venta posee reintegros activos que dependen de ese importe.");
+
+                    return View(vm);
+                }
+
                 cobro.Estado =
                     EstadoCobro.Anulado;
 
