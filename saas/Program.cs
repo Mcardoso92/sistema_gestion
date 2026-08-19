@@ -3,11 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Data.Seed;
 using saas.Models;
+using saas.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<CajaSaldoService>();
 
 //Incluir dbcontext
 builder.Services.AddDbContext<SaasDbContext>(options =>
