@@ -8,6 +8,8 @@
         Venta = 4,
         AnulacionVenta = 5,
         Compra = 6,
-        AnulacionCompra = 7
+        AnulacionCompra = 7,
+        ReintegroVenta = 8,
+        AnulacionReintegroVenta = 9
     }
 }

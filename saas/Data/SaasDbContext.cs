@@ -27,6 +27,7 @@ namespace saas.Data
         public DbSet<CobroVenta> CobrosVenta { get; set; } = null!;
         public DbSet<PagoProveedor> PagosProveedor { get; set; } = null!;
         public DbSet<ReintegroVenta> ReintegrosVenta { get; set; } = null!;
+        public DbSet<DetalleReintegroVenta> DetallesReintegroVenta { get; set; } = null!;
         public DbSet<ReintegroProveedor> ReintegrosProveedor { get; set; } = null!;
         public DbSet<TransferenciaCaja> TransferenciasCaja { get; set; } = null!;
         public DbSet<MovimientoCaja> MovimientosCaja { get; set; } = null!;
@@ -131,6 +132,12 @@ namespace saas.Data
                 .HasOne(m => m.Compra)
                 .WithMany(c => c.MovimientosStock)
                 .HasForeignKey(m => m.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.ReintegroVenta)
+                .WithMany(r => r.MovimientosStock)
+                .HasForeignKey(m => m.ReintegroVentaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Proveedor>()
@@ -353,6 +360,18 @@ namespace saas.Data
                 .HasOne(r => r.UsuarioAnulacion)
                 .WithMany(u => u.ReintegrosVentaAnulados)
                 .HasForeignKey(r => r.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleReintegroVenta>()
+                .HasOne(d => d.ReintegroVenta)
+                .WithMany(r => r.Detalles)
+                .HasForeignKey(d => d.ReintegroVentaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleReintegroVenta>()
+                .HasOne(d => d.Producto)
+                .WithMany()
+                .HasForeignKey(d => d.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ReintegroProveedor>()
@@ -943,6 +962,17 @@ namespace saas.Data
             modelBuilder.Entity<TransferenciaCaja>()
                 .Property(t => t.MotivoAnulacion)
                 .HasMaxLength(500);
+
+            //Reintegro Venta
+
+            modelBuilder.Entity<DetalleReintegroVenta>(entity =>
+            {
+                entity.Property(e => e.PrecioUnitario)
+                    .HasPrecision(18, 2);
+
+                entity.Property(e => e.Subtotal)
+                    .HasPrecision(18, 2);
+            });
         }
     }
 }
