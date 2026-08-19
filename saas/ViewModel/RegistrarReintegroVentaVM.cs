@@ -8,14 +8,25 @@ namespace saas.ViewModel
 
         public decimal ImporteDisponible { get; set; }
 
-        [Range(0.01, 999999999.99, ErrorMessage = "El importe debe ser mayor a 0.")]
-        public decimal Importe { get; set; }
+        public decimal Importe =>
+            Detalles
+                .Sum(d =>
+                    d.Subtotal);
 
-        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un medio de pago.")]
+        [Range(
+            1,
+            int.MaxValue,
+            ErrorMessage = "Debe seleccionar un medio de pago.")]
         public int MedioPagoId { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una caja.")]
+        [Range(
+            1,
+            int.MaxValue,
+            ErrorMessage = "Debe seleccionar una caja.")]
         public int CajaId { get; set; }
+
+        public List<ReintegroVentaDetalleVM> Detalles { get; set; }
+            = new List<ReintegroVentaDetalleVM>();
 
         public List<MedioPagoOpcionSimpleVM> MediosPagoDisponibles { get; set; }
             = new List<MedioPagoOpcionSimpleVM>();

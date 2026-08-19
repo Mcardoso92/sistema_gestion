@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using saas.Data;
 
@@ -11,9 +12,11 @@ using saas.Data;
 namespace saas.Migrations
 {
     [DbContext(typeof(SaasDbContext))]
-    partial class SaasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260819165220_DetalleReintegroVenta")]
+    partial class DetalleReintegroVenta
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -776,9 +779,6 @@ namespace saas.Migrations
                     b.Property<int>("ProductoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReintegroVentaId")
-                        .HasColumnType("int");
-
                     b.Property<int>("StockAnterior")
                         .HasColumnType("int");
 
@@ -804,8 +804,6 @@ namespace saas.Migrations
                     b.HasIndex("Fecha");
 
                     b.HasIndex("ProductoId");
-
-                    b.HasIndex("ReintegroVentaId");
 
                     b.HasIndex("UsuarioId");
 
@@ -1801,11 +1799,6 @@ namespace saas.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("saas.Models.ReintegroVenta", "ReintegroVenta")
-                        .WithMany("MovimientosStock")
-                        .HasForeignKey("ReintegroVentaId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("saas.Models.Usuario", "Usuario")
                         .WithMany("MovimientosStock")
                         .HasForeignKey("UsuarioId")
@@ -1822,8 +1815,6 @@ namespace saas.Migrations
                     b.Navigation("Empresa");
 
                     b.Navigation("Producto");
-
-                    b.Navigation("ReintegroVenta");
 
                     b.Navigation("Usuario");
 
@@ -2283,8 +2274,6 @@ namespace saas.Migrations
                     b.Navigation("Detalles");
 
                     b.Navigation("MovimientoCaja");
-
-                    b.Navigation("MovimientosStock");
                 });
 
             modelBuilder.Entity("saas.Models.TransferenciaCaja", b =>

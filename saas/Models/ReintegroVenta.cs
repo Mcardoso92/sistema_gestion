@@ -57,6 +57,12 @@ namespace saas.Models
         public MovimientoCaja? MovimientoCaja { get; set; }
 
         [ValidateNever]
+        public ICollection<MovimientoStock> MovimientosStock { get; set; } = new List<MovimientoStock>();
+
+        [ValidateNever]
         public Usuario? UsuarioAnulacion { get; set; }
+
+        [ValidateNever]
+        public ICollection<DetalleReintegroVenta> Detalles { get; set; } = new List<DetalleReintegroVenta>();
     }
 }
