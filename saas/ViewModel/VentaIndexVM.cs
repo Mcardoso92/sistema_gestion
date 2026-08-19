@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using saas.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace saas.ViewModel
@@ -18,10 +19,15 @@ namespace saas.ViewModel
         public string? UsuarioId { get; set; }
 
         public bool? Estado { get; set; }
+        public EstadoCobroVentaFiltro? EstadoCobro { get; set; }
 
         public List<SelectListItem> Empresas { get; set; } = new();
 
         public List<SelectListItem> Usuarios { get; set; } = new();
+
+        public int CantidadConSaldoPendiente { get; set; }
+
+        public decimal TotalPendienteCobro { get; set; }
 
         public List<VentaIndexItemVM> Ventas { get; set; } = new();
     }

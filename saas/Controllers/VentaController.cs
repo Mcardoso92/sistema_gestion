@@ -117,6 +117,70 @@ namespace saas.Controllers
                     v.Estado == ventaVM.Estado.Value);
             }
 
+            if (ventaVM.EstadoCobro.HasValue)
+            {
+                switch (ventaVM.EstadoCobro.Value)
+                {
+                    case EstadoCobroVentaFiltro.Cobrada:
+
+                        consulta =
+                            consulta.Where(v =>
+                                (
+                                    v.CobrosVenta
+                                        .Where(c =>
+                                            c.Estado ==
+                                            EstadoCobro.Activo)
+                                        .Sum(c =>
+                                            (decimal?)c.Importe)
+                                    ?? 0
+                                ) >= v.Total);
+
+                        break;
+
+                    case EstadoCobroVentaFiltro.PagoParcial:
+
+                        consulta =
+                            consulta.Where(v =>
+                                (
+                                    v.CobrosVenta
+                                        .Where(c =>
+                                            c.Estado ==
+                                            EstadoCobro.Activo)
+                                        .Sum(c =>
+                                            (decimal?)c.Importe)
+                                    ?? 0
+                                ) > 0
+                                &&
+                                (
+                                    v.CobrosVenta
+                                        .Where(c =>
+                                            c.Estado ==
+                                            EstadoCobro.Activo)
+                                        .Sum(c =>
+                                            (decimal?)c.Importe)
+                                    ?? 0
+                                ) < v.Total);
+
+                        break;
+
+                    case EstadoCobroVentaFiltro.Pendiente:
+
+                        consulta =
+                            consulta.Where(v =>
+                                (
+                                    v.CobrosVenta
+                                        .Where(c =>
+                                            c.Estado ==
+                                            EstadoCobro.Activo)
+                                        .Sum(c =>
+                                            (decimal?)c.Importe)
+                                    ?? 0
+                                ) <= 0);
+
+                        break;
+                }
+            }
+
             ventaVM.Ventas = await consulta
                 .OrderByDescending(v => v.Fecha)
                 .ThenByDescending(v => v.Id)
@@ -133,10 +197,31 @@ namespace saas.Controllers
                         v.Usuario.Nombre + " " + v.Usuario.Apellido,
                     EmpresaNombre = v.Empresa.Nombre,
                     Total = v.Total,
+                    TotalCobrado =
+                        v.CobrosVenta
+                            .Where(c =>
+                                c.Estado == EstadoCobro.Activo)
+                            .Sum(c =>
+                                (decimal?)c.Importe)
+                        ?? 0,
                     Estado = v.Estado,
                     TotalUnidades = v.Detalles.Sum(d => d.Cantidad)
                 })
                 .ToListAsync();
+
+            var ventasConSaldoPendiente =
+                ventaVM.Ventas
+                    .Where(v =>
+                        v.Estado &&
+                        v.SaldoPendiente > 0)
+                    .ToList();
+
+            ventaVM.CantidadConSaldoPendiente =
+                ventasConSaldoPendiente.Count;
+
+            ventaVM.TotalPendienteCobro =
+                ventasConSaldoPendiente
+                    .Sum(v => v.SaldoPendiente);
 
             if (esSuperAdmin)
             {
