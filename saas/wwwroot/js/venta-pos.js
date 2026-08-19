@@ -164,8 +164,7 @@
 
         return total;
     }
-
-    function actualizarResumenPagos() {
+    function obtenerSaldoRestante() {
 
         const totalVenta =
             obtenerTotalVentaNumerico();
@@ -173,42 +172,57 @@
         const totalPagado =
             obtenerTotalPagado();
 
-        const saldo =
-            Math.max(
-                0,
-                totalVenta - totalPagado);
-
-        totalPagadoVisual.textContent =
-            totalPagado.toLocaleString(
-                "es-AR",
-                {
-                    style: "currency",
-                    currency: "ARS"
-                });
-
-        saldoPendienteVisual.textContent =
-            saldo.toLocaleString(
-                "es-AR",
-                {
-                    style: "currency",
-                    currency: "ARS"
-                });
-
-        const clienteId =
-            document.getElementById("clienteId")?.value;
-
-        if (saldo > 0 &&
-            !clienteId) {
-
-            alertaClientePendiente.classList.remove(
-                "d-none");
-        }
-        else {
-
-            alertaClientePendiente.classList.add(
-                "d-none");
-        }
+        return Math.max(
+            0,
+            totalVenta - totalPagado);
     }
+
+    function actualizarResumenPagos() {
+
+        function actualizarResumenPagos() {
+
+            const totalVenta =
+                obtenerTotalVentaNumerico();
+
+            const totalPagado =
+                obtenerTotalPagado();
+
+            const saldo =
+                Math.max(
+                    0,
+                    totalVenta - totalPagado);
+
+            totalPagadoVisual.textContent =
+                totalPagado.toLocaleString(
+                    "es-AR",
+                    {
+                        style: "currency",
+                        currency: "ARS"
+                    });
+
+            saldoPendienteVisual.textContent =
+                saldo.toLocaleString(
+                    "es-AR",
+                    {
+                        style: "currency",
+                        currency: "ARS"
+                    });
+
+            const clienteId =
+                document.getElementById("clienteId")?.value;
+
+            if (saldo > 0 &&
+                !clienteId) {
+
+                alertaClientePendiente.classList.remove(
+                    "d-none");
+            }
+            else {
+
+                alertaClientePendiente.classList.add(
+                    "d-none");
+            }
+        }
 
     async function cargarCajasPorMedioPago(
         medioSelect,
@@ -304,6 +318,13 @@
     }
 
     function crearPago() {
+
+        const saldoRestante =
+            obtenerSaldoRestante();
+
+        if (saldoRestante <= 0) {
+            return;
+        }
 
         const index =
             pagosContainer
@@ -416,6 +437,16 @@
 
         configurarPago(
             pago);
+
+        const importeInput =
+            pago.querySelector(
+                ".pago-importe");
+
+        if (importeInput) {
+
+            importeInput.value =
+                saldoRestante.toFixed(2);
+        }
 
         actualizarResumenPagos();
     }
@@ -542,8 +573,12 @@
         carritoVenta.innerHTML = "";
 
         if (carrito.length === 0) {
-            carritoVenta.appendChild(crearFilaCarritoVacio());
+            carritoVenta.appendChild(
+                crearFilaCarritoVacio());
+
             actualizarResumen();
+            actualizarResumenPagos();
+
             return;
         }
 
@@ -552,6 +587,7 @@
         });
 
         actualizarResumen();
+        actualizarResumenPagos();
     }
 
     function crearFilaCarritoVacio() {
