@@ -198,9 +198,10 @@
 
                     @if (Model.Estado && Model.SaldoPendiente > 0)
                     {
-                        <button type="button"
-                                class="btn btn-v-primary btn-sm fw-medium"
-                                disabled>
+                        <a asp-controller="CobroVenta"
+                           asp-action="Registrar"
+                           asp-route-ventaId="@Model.Id"
+                           class="btn btn-v-primary btn-sm fw-medium">
 
                             <span class="material-symbols-outlined align-middle me-1"
                                   style="font-size: 18px;">
@@ -208,7 +209,7 @@
                             </span>
 
                             Registrar cobro
-                        </button>
+                        </a>
                     }
 
                 </div>
