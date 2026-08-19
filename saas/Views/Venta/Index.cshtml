@@ -1,4 +1,5 @@
-﻿@model VentaIndexVM
+﻿@using saas.Models.Enums
+@model VentaIndexVM
 
 @{
     ViewData["Title"] = "Gestión de Ventas";
@@ -132,6 +133,37 @@
 
                 </div>
 
+                <!-- Estado de cobro -->
+                <div class="col-lg-2 col-md-4">
+
+                    <label asp-for="EstadoCobro"
+                           class="form-label small fw-semibold text-muted">
+                        Estado de cobro
+                    </label>
+
+                    <select asp-for="EstadoCobro"
+                            class="form-select bg-light">
+
+                        <option value="">
+                            Todos
+                        </option>
+
+                        <option value="@((int)EstadoCobroVentaFiltro.Cobrada)">
+                            Cobradas
+                        </option>
+
+                        <option value="@((int)EstadoCobroVentaFiltro.PagoParcial)">
+                            Pago parcial
+                        </option>
+
+                        <option value="@((int)EstadoCobroVentaFiltro.Pendiente)">
+                            Pendientes
+                        </option>
+
+                    </select>
+
+                </div>
+
                 <!-- Botón -->
                 <div class="col-lg-2 col-md-4">
 
@@ -215,6 +247,59 @@
 
     </div>
 
+    <!-- Resumen -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="card-custom p-3 h-100">
+
+                <div class="small text-muted mb-1">
+                    Ventas mostradas
+                </div>
+
+                <div class="h4 fw-bold mb-0">
+                    @Model.Ventas.Count
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card-custom p-3 h-100">
+
+                <div class="small text-muted mb-1">
+                    Con saldo pendiente
+                </div>
+
+                <div class="h4 fw-bold mb-0">
+                    @Model.CantidadConSaldoPendiente
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="card-custom p-3 h-100">
+
+                <div class="small text-muted mb-1">
+                    Pendiente de cobro
+                </div>
+
+                <div class="h4 fw-bold mb-0">
+                    @Model.TotalPendienteCobro.ToString("C")
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
     <!-- Tabla -->
     <div class="table-container">
 
@@ -272,7 +357,9 @@
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">
                             Estado
                         </th>
-
+                        <th class="py-3 small fw-bold text-muted text-uppercase text-center">
+                            Cobro
+                        </th>
                         <th class="pe-4 py-3 small fw-bold text-muted text-uppercase text-center">
                             Acción
                         </th>
@@ -287,7 +374,7 @@
                     {
                         <tr>
 
-                            <td colspan="@(User.IsInRole("SuperAdmin") ? 9 : 8)"
+                            <td colspan="@(User.IsInRole("SuperAdmin") ? 10 : 9)"
                                 class="text-center py-5">
 
                                 <span class="material-symbols-outlined text-muted mb-2"
@@ -400,6 +487,52 @@
                                         <span class="venta-badge-anulada">
                                             Anulada
                                         </span>
+                                    }
+
+                                </td>
+                                <!-- Estado de cobro -->
+                                <td class="text-center">
+
+                                    @if (!venta.Estado)
+                                    {
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                            —
+                                        </span>
+                                    }
+                                    else if (venta.EstaCobrada)
+                                    {
+                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                            Cobrada
+                                        </span>
+                                    }
+                                    else if (venta.TienePagoParcial)
+                                    {
+                                        <div class="d-flex flex-column align-items-center gap-1">
+
+                                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis">
+                                                Pago parcial
+                                            </span>
+
+                                            <span class="small text-muted">
+                                                Pendiente:
+                                                @venta.SaldoPendiente.ToString("C")
+                                            </span>
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex flex-column align-items-center gap-1">
+
+                                            <span class="badge bg-danger bg-opacity-10 text-danger">
+                                                Pendiente
+                                            </span>
+
+                                            <span class="small text-muted">
+                                                @venta.SaldoPendiente.ToString("C")
+                                            </span>
+
+                                        </div>
                                     }
 
                                 </td>
