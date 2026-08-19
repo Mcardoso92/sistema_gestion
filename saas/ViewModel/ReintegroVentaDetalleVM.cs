@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace saas.ViewModel
 {
@@ -6,10 +7,13 @@ namespace saas.ViewModel
     {
         public int ProductoId { get; set; }
 
+        [ValidateNever]
         public string ProductoNombre { get; set; } = null!;
 
+        [ValidateNever]
         public int CantidadVendida { get; set; }
 
+        [ValidateNever]
         public int CantidadYaReintegrada { get; set; }
 
         public int CantidadDisponible =>
@@ -17,6 +21,7 @@ namespace saas.ViewModel
                 0,
                 CantidadVendida - CantidadYaReintegrada);
 
+        [ValidateNever]
         public decimal PrecioUnitario { get; set; }
 
         [Range(
