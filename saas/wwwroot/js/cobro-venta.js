@@ -30,6 +30,9 @@
     const getCajasUrl =
         form.dataset.getCajasUrl;
 
+    const ventaId =
+        form.dataset.ventaId;
+
     function esEfectivo() {
 
         const option =
@@ -109,7 +112,10 @@
 
         const url =
             getCajasUrl
-            + "?medioPagoId="
+            + "?ventaId="
+            + encodeURIComponent(
+                ventaId)
+            + "&medioPagoId="
             + encodeURIComponent(
                 medioPagoId);
 
