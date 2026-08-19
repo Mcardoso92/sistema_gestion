@@ -115,35 +115,12 @@
 
     function obtenerTotalVentaNumerico() {
 
-        let total = 0;
-
-        document
-            .querySelectorAll("#carritoVenta tr[data-producto-id]")
-            .forEach(row => {
-
-                const precioInput =
-                    row.querySelector(
-                        'input[name$=".PrecioUnitario"]');
-
-                const cantidadInput =
-                    row.querySelector(
-                        'input[name$=".Cantidad"]');
-
-                if (!precioInput ||
-                    !cantidadInput) {
-                    return;
-                }
-
-                const precio =
-                    parseFloat(precioInput.value) || 0;
-
-                const cantidad =
-                    parseInt(cantidadInput.value) || 0;
-
-                total += precio * cantidad;
-            });
-
-        return total;
+        return carrito.reduce(
+            (total, detalle) =>
+                total +
+                (detalle.precioUnitario * detalle.cantidad),
+            0
+        );
     }
 
     function obtenerTotalPagado() {
