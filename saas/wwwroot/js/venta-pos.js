@@ -179,50 +179,48 @@
 
     function actualizarResumenPagos() {
 
-        function actualizarResumenPagos() {
+        const totalVenta =
+            obtenerTotalVentaNumerico();
 
-            const totalVenta =
-                obtenerTotalVentaNumerico();
+        const totalPagado =
+            obtenerTotalPagado();
 
-            const totalPagado =
-                obtenerTotalPagado();
+        const saldo =
+            Math.max(
+                0,
+                totalVenta - totalPagado);
 
-            const saldo =
-                Math.max(
-                    0,
-                    totalVenta - totalPagado);
+        totalPagadoVisual.textContent =
+            totalPagado.toLocaleString(
+                "es-AR",
+                {
+                    style: "currency",
+                    currency: "ARS"
+                });
 
-            totalPagadoVisual.textContent =
-                totalPagado.toLocaleString(
-                    "es-AR",
-                    {
-                        style: "currency",
-                        currency: "ARS"
-                    });
+        saldoPendienteVisual.textContent =
+            saldo.toLocaleString(
+                "es-AR",
+                {
+                    style: "currency",
+                    currency: "ARS"
+                });
 
-            saldoPendienteVisual.textContent =
-                saldo.toLocaleString(
-                    "es-AR",
-                    {
-                        style: "currency",
-                        currency: "ARS"
-                    });
+        const clienteId =
+            document.getElementById("clienteId")?.value;
 
-            const clienteId =
-                document.getElementById("clienteId")?.value;
+        if (saldo > 0 &&
+            !clienteId) {
 
-            if (saldo > 0 &&
-                !clienteId) {
-
-                alertaClientePendiente.classList.remove(
-                    "d-none");
-            }
-            else {
-
-                alertaClientePendiente.classList.add(
-                    "d-none");
-            }
+            alertaClientePendiente.classList.remove(
+                "d-none");
         }
+        else {
+
+            alertaClientePendiente.classList.add(
+                "d-none");
+        }
+    }
 
     async function cargarCajasPorMedioPago(
         medioSelect,
