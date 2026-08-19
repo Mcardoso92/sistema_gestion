@@ -1,15 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace saas.ViewModel
 {
     public class AnularCobroVentaVM
     {
         public int CobroVentaId { get; set; }
-
+        [ValidateNever]
         public int VentaId { get; set; }
-
+        [ValidateNever]
         public decimal Importe { get; set; }
-
+        [ValidateNever]
         public string MedioPagoNombre { get; set; } = null!;
 
         [Required(ErrorMessage = "Debe indicar el motivo de la anulación.")]
