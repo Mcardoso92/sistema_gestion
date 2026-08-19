@@ -1,0 +1,131 @@
+﻿@model saas.ViewModel.AnularCobroVentaVM
+
+@{
+    ViewData["Title"] = "Anular Cobro";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Anular Cobro
+            </h1>
+
+            <p class="text-muted mb-0">
+                Venta #@Model.VentaId
+            </p>
+        </div>
+
+        <a asp-controller="Venta"
+           asp-action="Details"
+           asp-route-id="@Model.VentaId"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <form asp-action="Anular"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="CobroVentaId"
+               type="hidden" />
+
+        <div asp-validation-summary="All"
+             class="alert alert-danger"></div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="text-muted small mb-1">
+                            Importe del cobro
+                        </div>
+
+                        <div class="display-6 fw-bold mb-3">
+                            @Model.Importe.ToString("C")
+                        </div>
+
+                        <div class="small text-muted">
+                            Medio de pago
+                        </div>
+
+                        <div class="fw-semibold">
+                            @Model.MedioPagoNombre
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <div class="alert alert-warning">
+                            Al anular este cobro se generará un movimiento inverso en caja
+                            y el importe volverá a quedar como saldo pendiente de la venta.
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label asp-for="Motivo"
+                                   class="form-label fw-semibold">
+                                Motivo de anulación
+                            </label>
+
+                            <textarea asp-for="Motivo"
+                                      class="form-control"
+                                      rows="4"
+                                      maxlength="500"
+                                      placeholder="Indique el motivo de la anulación..."></textarea>
+
+                            <span asp-validation-for="Motivo"
+                                  class="text-danger"></span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-controller="Venta"
+               asp-action="Details"
+               asp-route-id="@Model.VentaId"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-danger"
+                    onclick="return confirm('¿Está seguro de que desea anular este cobro?');">
+                Anular cobro
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

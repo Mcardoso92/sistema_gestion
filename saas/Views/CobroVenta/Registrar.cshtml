@@ -30,7 +30,8 @@
     <form asp-action="Registrar"
           method="post"
           id="formRegistrarCobro"
-          data-get-cajas-url="@Url.Action("GetCajasPorMedioPago", "Venta")">
+          data-get-cajas-url="@Url.Action("GetCajasPorMedioPago", "CobroVenta")"
+          data-venta-id="@Model.VentaId">
 
         @Html.AntiForgeryToken()
 

@@ -1,0 +1,21 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace saas.ViewModel
+{
+    public class AnularCobroVentaVM
+    {
+        public int CobroVentaId { get; set; }
+
+        public int VentaId { get; set; }
+
+        public decimal Importe { get; set; }
+
+        public string MedioPagoNombre { get; set; } = null!;
+
+        [Required(ErrorMessage = "Debe indicar el motivo de la anulación.")]
+        [StringLength(
+            500,
+            ErrorMessage = "El motivo no puede superar los 500 caracteres.")]
+        public string Motivo { get; set; } = string.Empty;
+    }
+}

@@ -121,8 +121,7 @@ namespace saas.Controllers
         // POST: CobroVenta/Registrar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Registrar(
-            RegistrarCobroVentaVM vm)
+        public async Task<IActionResult> Registrar(RegistrarCobroVentaVM vm)
         {
             var usuario =
                 await _userManager.GetUserAsync(User);
@@ -409,9 +408,355 @@ namespace saas.Controllers
                 return View(vm);
             }
         }
-        private async Task CargarOpciones(
-    RegistrarCobroVentaVM vm,
-    int empresaId)
+        // GET: CobroVenta/Anular/5
+        [HttpGet]
+        public async Task<IActionResult> Anular(int id)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<CobroVenta> consulta =
+                _context.CobrosVenta
+                    .AsNoTracking()
+                    .Include(c => c.MedioPago)
+                    .Include(c => c.Venta);
+
+            if (!esSuperAdmin)
+            {
+                consulta =
+                    consulta.Where(c =>
+                        c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var cobro =
+                await consulta
+                    .FirstOrDefaultAsync(c =>
+                        c.Id == id);
+
+            if (cobro == null)
+            {
+                return NotFound();
+            }
+
+            if (cobro.Estado != EstadoCobro.Activo)
+            {
+                TempData["Error"] =
+                    "El cobro ya se encuentra anulado.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = cobro.VentaId });
+            }
+
+            var movimiento =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m =>
+                        m.CobroVentaId == cobro.Id &&
+                        m.Tipo == TipoMovimientoCaja.CobroVenta);
+
+            if (movimiento == null)
+            {
+                TempData["Error"] =
+                    "No se encontró el movimiento de caja asociado al cobro.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = cobro.VentaId });
+            }
+
+            bool yaRevertido =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.MovimientoOrigenId == movimiento.Id);
+
+            if (yaRevertido)
+            {
+                TempData["Error"] =
+                    "El movimiento asociado a este cobro ya fue revertido.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = cobro.VentaId });
+            }
+
+            var vm =
+                new AnularCobroVentaVM
+                {
+                    CobroVentaId =
+                        cobro.Id,
+
+                    VentaId =
+                        cobro.VentaId,
+
+                    Importe =
+                        cobro.Importe,
+
+                    MedioPagoNombre =
+                        cobro.MedioPago.Nombre
+                };
+
+            return View(vm);
+        }
+        // POST: CobroVenta/Anular/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Anular(AnularCobroVentaVM vm)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<CobroVenta> consulta =
+                _context.CobrosVenta
+                    .Include(c => c.MedioPago)
+                    .Include(c => c.Venta);
+
+            if (!esSuperAdmin)
+            {
+                consulta =
+                    consulta.Where(c =>
+                        c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var cobro =
+                await consulta
+                    .FirstOrDefaultAsync(c =>
+                        c.Id == vm.CobroVentaId);
+
+            if (cobro == null)
+            {
+                return NotFound();
+            }
+
+            vm.VentaId =
+                cobro.VentaId;
+
+            vm.Importe =
+                cobro.Importe;
+
+            vm.MedioPagoNombre =
+                cobro.MedioPago.Nombre;
+
+            if (cobro.Estado != EstadoCobro.Activo)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "El cobro ya se encuentra anulado.");
+            }
+
+            var movimiento =
+                await _context.MovimientosCaja
+                    .FirstOrDefaultAsync(m =>
+                        m.CobroVentaId == cobro.Id &&
+                        m.Tipo == TipoMovimientoCaja.CobroVenta);
+
+            if (movimiento == null)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "No se encontró el movimiento de caja asociado al cobro.");
+            }
+
+            bool yaRevertido = false;
+
+            if (movimiento != null)
+            {
+                yaRevertido =
+                    await _context.MovimientosCaja
+                        .AsNoTracking()
+                        .AnyAsync(m =>
+                            m.MovimientoOrigenId == movimiento.Id);
+
+                if (yaRevertido)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "El movimiento asociado a este cobro ya fue revertido.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            vm.Motivo =
+                vm.Motivo.Trim();
+
+            await using var transaccion =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
+
+            try
+            {
+                cobro.Estado =
+                    EstadoCobro.Anulado;
+
+                cobro.FechaAnulacion =
+                    DateTime.Now;
+
+                cobro.UsuarioAnulacionId =
+                    usuario.Id;
+
+                cobro.MotivoAnulacion =
+                    vm.Motivo;
+
+                var movimientoReversion =
+                    new MovimientoCaja
+                    {
+                        EmpresaId =
+                            movimiento!.EmpresaId,
+
+                        CajaId =
+                            movimiento.CajaId,
+
+                        Tipo =
+                            TipoMovimientoCaja.ReversionCobroVenta,
+
+                        Direccion =
+                            DireccionMovimientoCaja.Egreso,
+
+                        Importe =
+                            movimiento.Importe,
+
+                        Fecha =
+                            DateTime.Now,
+
+                        UsuarioId =
+                            usuario.Id,
+
+                        MedioPagoId =
+                            movimiento.MedioPagoId,
+
+                        TurnoCajaId =
+                            movimiento.TurnoCajaId,
+
+                        CategoriaGastoId =
+                            null,
+
+                        Concepto =
+                            $"Reversión de cobro de venta #{cobro.VentaId}",
+
+                        Observaciones =
+                            vm.Motivo,
+
+                        MovimientoOrigenId =
+                            movimiento.Id,
+
+                        CobroVentaId =
+                            cobro.Id
+                    };
+
+                _context.MovimientosCaja.Add(
+                    movimientoReversion);
+
+                await _context.SaveChangesAsync();
+
+                await transaccion.CommitAsync();
+
+                TempData["Success"] =
+                    "Cobro anulado correctamente.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Venta",
+                    new { id = cobro.VentaId });
+            }
+            catch
+            {
+                await transaccion.RollbackAsync();
+
+                ModelState.AddModelError(
+                    "",
+                    "Ocurrió un error al anular el cobro.");
+
+                return View(vm);
+            }
+        }
+        // GET: CobroVenta/GetCajasPorMedioPago
+        [HttpGet]
+        public async Task<IActionResult> GetCajasPorMedioPago(int ventaId, int medioPagoId)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<Venta> consultaVenta =
+                _context.Ventas
+                    .AsNoTracking();
+
+            if (!esSuperAdmin)
+            {
+                consultaVenta =
+                    consultaVenta.Where(v =>
+                        v.EmpresaId == usuario.EmpresaId);
+            }
+
+            var venta =
+                await consultaVenta
+                    .FirstOrDefaultAsync(v =>
+                        v.Id == ventaId);
+
+            if (venta == null)
+            {
+                return NotFound();
+            }
+
+            var cajas =
+                await _context.CajaMediosPago
+                    .AsNoTracking()
+                    .Where(cm =>
+                        cm.MedioPagoId == medioPagoId &&
+                        cm.MedioPago.EmpresaId == venta.EmpresaId &&
+                        cm.MedioPago.Estado &&
+                        cm.Caja.EmpresaId == venta.EmpresaId &&
+                        cm.Caja.Estado)
+                    .OrderBy(cm =>
+                        cm.Caja.Nombre)
+                    .Select(cm => new
+                    {
+                        id = cm.CajaId,
+                        nombre = cm.Caja.Nombre
+                    })
+                    .ToListAsync();
+
+            return Json(cajas);
+        }
+        private async Task CargarOpciones(RegistrarCobroVentaVM vm, int empresaId)
         {
             vm.CajasDisponibles =
                 await _context.Cajas
