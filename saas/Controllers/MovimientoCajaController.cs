@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel;
 
 namespace saas.Controllers
@@ -15,13 +15,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly CajaSaldoService _cajaSaldoService;
 
         public MovimientoCajaController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            CajaSaldoService cajaSaldoService)
         {
             _context = context;
             _userManager = userManager;
+            _cajaSaldoService = cajaSaldoService;   
         }
 
         // GET: MovimientoCaja
@@ -457,8 +460,7 @@ namespace saas.Controllers
         // POST: MovimientoCaja/EgresoManual
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EgresoManual(
-            EgresoManualVM vm)
+        public async Task<IActionResult> EgresoManual(EgresoManualVM vm)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -554,9 +556,10 @@ namespace saas.Controllers
             if (caja != null)
             {
                 saldoDisponible =
-                    await CalcularSaldoDisponibleCaja(
-                        caja,
-                        usuario.Id);
+                    await _cajaSaldoService
+                        .CalcularSaldoDisponible(
+                            caja,
+                            usuario.Id);
             }
 
             vm.SaldoDisponible =
@@ -800,8 +803,7 @@ namespace saas.Controllers
             return View(vm);
         }
         [HttpGet]
-        public async Task<IActionResult> GetMediosPagoPorCaja(
-    int cajaId)
+        public async Task<IActionResult> GetMediosPagoPorCaja(int cajaId)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -849,8 +851,7 @@ namespace saas.Controllers
             return Json(medios);
         }
         [HttpGet]
-        public async Task<IActionResult> GetSaldoCaja(
-    int cajaId)
+        public async Task<IActionResult> GetSaldoCaja(int cajaId)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -881,9 +882,10 @@ namespace saas.Controllers
             }
 
             decimal saldo =
-                await CalcularSaldoDisponibleCaja(
-                    caja,
-                    usuario.Id);
+                await _cajaSaldoService
+                    .CalcularSaldoDisponible(
+                        caja,
+                        usuario.Id);
 
             return Json(new
             {
@@ -979,9 +981,7 @@ namespace saas.Controllers
         // POST: MovimientoCaja/Revertir/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Revertir(
-            int id,
-            string motivo)
+        public async Task<IActionResult> Revertir(int id, string motivo)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -1155,50 +1155,6 @@ namespace saas.Controllers
         }
 
         //Helper methods
-        private async Task<decimal> CalcularSaldoDisponibleCaja(
-    Caja caja,
-    string usuarioId)
-        {
-            if (caja.PermiteTurnos)
-            {
-                var turno = await _context.TurnosCaja
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(t =>
-                        t.CajaId == caja.Id &&
-                        t.UsuarioAperturaId == usuarioId &&
-                        t.Estado == EstadoTurnoCaja.Abierto);
-
-                if (turno == null)
-                {
-                    return 0;
-                }
-
-                decimal netoTurno =
-                    await _context.MovimientosCaja
-                        .AsNoTracking()
-                        .Where(m =>
-                            m.TurnoCajaId == turno.Id)
-                        .SumAsync(m =>
-                            m.Direccion ==
-                            DireccionMovimientoCaja.Ingreso
-                                ? m.Importe
-                                : -m.Importe);
-
-                return turno.FondoFijoAplicado
-                    + netoTurno;
-            }
-
-            return await _context.MovimientosCaja
-                .AsNoTracking()
-                .Where(m =>
-                    m.CajaId == caja.Id)
-                .SumAsync(m =>
-                    m.Direccion ==
-                    DireccionMovimientoCaja.Ingreso
-                        ? m.Importe
-                        : -m.Importe);
-        }
-
         private async Task CargarOpcionesIngreso(
             IngresoManualVM vm,
             int empresaId)
