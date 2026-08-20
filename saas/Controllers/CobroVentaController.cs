@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel;
 using System.Data;
 
@@ -15,13 +16,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly VentaSaldoService _ventaSaldoService;
 
         public CobroVentaController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager, 
+            VentaSaldoService ventaSaldoService)
         {
             _context = context;
             _userManager = userManager;
+            _ventaSaldoService = ventaSaldoService;
         }
 
         // GET: CobroVenta/Registrar/5
@@ -73,20 +77,11 @@ namespace saas.Controllers
                     new { id = venta.Id });
             }
 
-            decimal totalCobrado =
-                await _context.CobrosVenta
-                    .AsNoTracking()
-                    .Where(c =>
-                        c.VentaId == venta.Id &&
-                        c.Estado == EstadoCobro.Activo)
-                    .SumAsync(c =>
-                        (decimal?)c.Importe)
-                    ?? 0;
-
             decimal saldoPendiente =
-                Math.Max(
-                    0,
-                    venta.Total - totalCobrado);
+                await _ventaSaldoService
+                    .ObtenerSaldoPendiente(
+                        venta.Id,
+                        venta.Total);
 
             if (saldoPendiente <= 0)
             {
@@ -167,20 +162,11 @@ namespace saas.Controllers
                     new { id = venta.Id });
             }
 
-            decimal totalCobrado =
-                await _context.CobrosVenta
-                    .AsNoTracking()
-                    .Where(c =>
-                        c.VentaId == venta.Id &&
-                        c.Estado == EstadoCobro.Activo)
-                    .SumAsync(c =>
-                        (decimal?)c.Importe)
-                ?? 0;
-
             decimal saldoPendiente =
-                Math.Max(
-                    0,
-                    venta.Total - totalCobrado);
+                await _ventaSaldoService
+                    .ObtenerSaldoPendiente(
+                        venta.Id,
+                        venta.Total);
 
             vm.SaldoPendiente =
                 saldoPendiente;
@@ -284,6 +270,44 @@ namespace saas.Controllers
 
             try
             {
+                decimal saldoPendienteActual =
+                    await _ventaSaldoService
+                        .ObtenerSaldoPendiente(
+                            venta.Id,
+                            venta.Total);
+
+                if (saldoPendienteActual <= 0)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] =
+                        "La venta ya se encuentra completamente cobrada.";
+
+                    return RedirectToAction(
+                        "Details",
+                        "Venta",
+                        new { id = venta.Id });
+                }
+
+                if (vm.Importe >
+                    saldoPendienteActual)
+                {
+                    await transaccion.RollbackAsync();
+
+                    vm.SaldoPendiente =
+                        saldoPendienteActual;
+
+                    ModelState.AddModelError(
+                        nameof(vm.Importe),
+                        $"El saldo pendiente cambió. Saldo actual: {saldoPendienteActual:C}.");
+
+                    await CargarOpciones(
+                        vm,
+                        venta.EmpresaId);
+
+                    return View(vm);
+                }
+
                 var cobro =
                     new CobroVenta
                     {
@@ -384,7 +408,7 @@ namespace saas.Controllers
                 await transaccion.CommitAsync();
 
                 TempData["Success"] =
-                    vm.Importe == saldoPendiente
+                    vm.Importe == saldoPendienteActual
                         ? "La venta quedó completamente cobrada."
                         : "Cobro registrado correctamente.";
 

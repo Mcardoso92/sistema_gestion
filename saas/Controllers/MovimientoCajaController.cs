@@ -7,6 +7,7 @@ using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
 using saas.ViewModel;
+using System.Data;
 
 namespace saas.Controllers
 {
@@ -590,8 +591,38 @@ namespace saas.Controllers
                     ? null
                     : vm.Observaciones.Trim();
 
+            await using var transaccion =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
+
             try
             {
+                decimal saldoDisponibleActual =
+                    await _cajaSaldoService
+                        .CalcularSaldoDisponible(
+                            caja!,
+                            usuario.Id);
+
+                if (vm.Importe >
+                    saldoDisponibleActual)
+                {
+                    await transaccion.RollbackAsync();
+
+                    vm.SaldoDisponible =
+                        saldoDisponibleActual;
+
+                    ModelState.AddModelError(
+                        nameof(vm.Importe),
+                        $"El saldo disponible de la caja cambió. Saldo actual: {saldoDisponibleActual:C}.");
+
+                    await CargarOpcionesEgreso(
+                        vm,
+                        usuario.EmpresaId);
+
+                    return View(vm);
+                }
+
                 var movimiento =
                     new MovimientoCaja
                     {
@@ -637,6 +668,8 @@ namespace saas.Controllers
 
                 await _context.SaveChangesAsync();
 
+                await transaccion.CommitAsync();
+
                 TempData["Success"] =
                     "Egreso manual registrado correctamente.";
 
@@ -646,6 +679,8 @@ namespace saas.Controllers
             }
             catch
             {
+                await transaccion.RollbackAsync();
+
                 ModelState.AddModelError(
                     "",
                     "Ocurrió un error al registrar el egreso.");

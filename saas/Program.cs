@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<CajaSaldoService>();
+builder.Services.AddScoped<VentaSaldoService>();
 
 //Incluir dbcontext
 builder.Services.AddDbContext<SaasDbContext>(options =>

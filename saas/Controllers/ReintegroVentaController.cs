@@ -17,15 +17,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly CajaSaldoService _cajaSaldoService;
+        private readonly VentaSaldoService _ventaSaldoService;
 
         public ReintegroVentaController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            CajaSaldoService cajaSaldoService)
+            CajaSaldoService cajaSaldoService,
+            VentaSaldoService ventaSaldoService)
         {
             _context = context;
             _userManager = userManager;
             _cajaSaldoService = cajaSaldoService;
+            _ventaSaldoService = ventaSaldoService;
         }
 
         // GET: ReintegroVenta/Registrar?ventaId=5
@@ -79,30 +82,10 @@ namespace saas.Controllers
                     new { id = venta.Id });
             }
 
-            decimal totalCobrado =
-                await _context.CobrosVenta
-                    .AsNoTracking()
-                    .Where(c =>
-                        c.VentaId == venta.Id &&
-                        c.Estado == EstadoCobro.Activo)
-                    .SumAsync(c =>
-                        (decimal?)c.Importe)
-                ?? 0;
-
-            decimal totalReintegrado =
-                await _context.ReintegrosVenta
-                    .AsNoTracking()
-                    .Where(r =>
-                        r.VentaId == venta.Id &&
-                        r.Estado == EstadoReintegro.Activo)
-                    .SumAsync(r =>
-                        (decimal?)r.Importe)
-                ?? 0;
-
             decimal importeDisponible =
-                Math.Max(
-                    0,
-                    totalCobrado - totalReintegrado);
+                await _ventaSaldoService
+                    .ObtenerImporteDisponibleReintegro(
+                        venta.Id);
 
             if (importeDisponible <= 0)
             {
@@ -243,30 +226,10 @@ namespace saas.Controllers
                     new { id = venta.Id });
             }
 
-            decimal totalCobrado =
-                await _context.CobrosVenta
-                    .AsNoTracking()
-                    .Where(c =>
-                        c.VentaId == venta.Id &&
-                        c.Estado == EstadoCobro.Activo)
-                    .SumAsync(c =>
-                        (decimal?)c.Importe)
-                ?? 0;
-
-            decimal totalReintegrado =
-                await _context.ReintegrosVenta
-                    .AsNoTracking()
-                    .Where(r =>
-                        r.VentaId == venta.Id &&
-                        r.Estado == EstadoReintegro.Activo)
-                    .SumAsync(r =>
-                        (decimal?)r.Importe)
-                ?? 0;
-
             decimal importeDisponible =
-                Math.Max(
-                    0,
-                    totalCobrado - totalReintegrado);
+                await _ventaSaldoService
+                    .ObtenerImporteDisponibleReintegro(
+                        venta.Id);
 
             vm.ImporteDisponible =
                 importeDisponible;
@@ -504,29 +467,10 @@ namespace saas.Controllers
                 // Revalidación final dentro de la transacción SERIALIZABLE.
                 // No confiamos en las validaciones realizadas antes de abrirla.
 
-                decimal totalCobradoActual =
-                    await _context.CobrosVenta
-                        .Where(c =>
-                            c.VentaId == venta.Id &&
-                            c.Estado == EstadoCobro.Activo)
-                        .SumAsync(c =>
-                            (decimal?)c.Importe)
-                    ?? 0;
-
-                decimal totalReintegradoActual =
-                    await _context.ReintegrosVenta
-                        .Where(r =>
-                            r.VentaId == venta.Id &&
-                            r.Estado == EstadoReintegro.Activo)
-                        .SumAsync(r =>
-                            (decimal?)r.Importe)
-                    ?? 0;
-
                 decimal importeDisponibleActual =
-                    Math.Max(
-                        0,
-                        totalCobradoActual -
-                        totalReintegradoActual);
+                    await _ventaSaldoService
+                        .ObtenerImporteDisponibleReintegro(
+                            venta.Id);
 
                 if (importeReintegro >
                     importeDisponibleActual)
@@ -1225,34 +1169,12 @@ namespace saas.Controllers
                         })
                     .ToListAsync();
         }
-        private async Task ReconstruirVM(
-    RegistrarReintegroVentaVM vm,
-    Venta venta)
+        private async Task ReconstruirVM(RegistrarReintegroVentaVM vm, Venta venta)
         {
-            decimal totalCobrado =
-                await _context.CobrosVenta
-                    .AsNoTracking()
-                    .Where(c =>
-                        c.VentaId == venta.Id &&
-                        c.Estado == EstadoCobro.Activo)
-                    .SumAsync(c =>
-                        (decimal?)c.Importe)
-                ?? 0;
-
-            decimal totalReintegrado =
-                await _context.ReintegrosVenta
-                    .AsNoTracking()
-                    .Where(r =>
-                        r.VentaId == venta.Id &&
-                        r.Estado == EstadoReintegro.Activo)
-                    .SumAsync(r =>
-                        (decimal?)r.Importe)
-                ?? 0;
-
             vm.ImporteDisponible =
-                Math.Max(
-                    0,
-                    totalCobrado - totalReintegrado);
+                await _ventaSaldoService
+                    .ObtenerImporteDisponibleReintegro(
+                        venta.Id);
 
             var cantidadesReintegradas =
                 await _context.DetallesReintegroVenta
