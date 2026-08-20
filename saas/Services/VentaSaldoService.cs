@@ -70,5 +70,23 @@ namespace saas.Services
                 0,
                 totalCobrado - totalReintegrado);
         }
+        public async Task<bool> PuedeAnularCobro(
+            int ventaId,
+            decimal importeCobro)
+        {
+            decimal totalCobrado =
+                await ObtenerTotalCobrado(
+                    ventaId);
+
+            decimal totalReintegrado =
+                await ObtenerTotalReintegrado(
+                    ventaId);
+
+            decimal totalCobradoPosterior =
+                totalCobrado - importeCobro;
+
+            return totalCobradoPosterior >=
+                totalReintegrado;
+        }
     }
 }
