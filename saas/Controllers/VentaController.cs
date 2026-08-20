@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel;
 using System.Data;
 
@@ -16,11 +17,13 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly VentaSaldoService _ventaSaldoService;
 
-        public VentaController(SaasDbContext context, UserManager<Usuario> userManager)
+        public VentaController(SaasDbContext context, UserManager<Usuario> userManager, VentaSaldoService ventaSaldoService)
         {
             _context = context;
             _userManager = userManager;
+            _ventaSaldoService = ventaSaldoService;
         }
 
         // GET: Venta
@@ -924,10 +927,9 @@ namespace saas.Controllers
                     .ToListAsync();
 
             decimal totalCobrado =
-                cobros
-                    .Where(c =>
-                        c.Estado == EstadoCobro.Activo)
-                    .Sum(c => c.Importe);
+                await _ventaSaldoService
+                    .ObtenerTotalCobrado(
+                        venta.Id);
 
             var reintegros =
     await _context.ReintegrosVenta
@@ -963,16 +965,14 @@ namespace saas.Controllers
         .ToListAsync();
 
             decimal totalReintegrado =
-                reintegros
-                    .Where(r =>
-                        r.Estado == EstadoReintegro.Activo)
-                    .Sum(r =>
-                        r.Importe);
+                await _ventaSaldoService
+                    .ObtenerTotalReintegrado(
+                        venta.Id);
 
             decimal pendienteReintegrar =
-                Math.Max(
-                    0,
-                    totalCobrado - totalReintegrado);
+                await _ventaSaldoService
+                    .ObtenerImporteDisponibleReintegro(
+                        venta.Id);
 
             var ventaVM = new VentaDetailsVM
             {
