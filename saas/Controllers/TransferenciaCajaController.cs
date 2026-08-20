@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel;
+using System.Data;
 
 namespace saas.Controllers
 {
@@ -15,13 +16,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly CajaSaldoService _cajaSaldoService;
 
         public TransferenciaCajaController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            CajaSaldoService cajaSaldoService)
         {
             _context = context;
             _userManager = userManager;
+            _cajaSaldoService = cajaSaldoService;
         }
 
         // GET: TransferenciaCaja
@@ -280,9 +284,10 @@ namespace saas.Controllers
             if (cajaOrigen != null)
             {
                 saldoDisponible =
-                    await CalcularSaldoDisponibleCaja(
-                        cajaOrigen,
-                        usuario.Id);
+                    await _cajaSaldoService
+                        .CalcularSaldoDisponible(
+                            cajaOrigen,
+                            usuario.Id);
             }
 
             vm.SaldoDisponibleOrigen =
@@ -310,10 +315,36 @@ namespace saas.Controllers
 
             await using var transaction =
                 await _context.Database
-                    .BeginTransactionAsync();
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
 
             try
             {
+                decimal saldoDisponibleActual =
+                    await _cajaSaldoService
+                        .CalcularSaldoDisponible(
+                            cajaOrigen!,
+                            usuario.Id);
+
+                if (vm.Importe >
+                    saldoDisponibleActual)
+                {
+                    await transaction.RollbackAsync();
+
+                    vm.SaldoDisponibleOrigen =
+                        saldoDisponibleActual;
+
+                    ModelState.AddModelError(
+                        nameof(vm.Importe),
+                        $"El saldo disponible de la caja cambió. Saldo actual: {saldoDisponibleActual:C}.");
+
+                    await CargarOpcionesTransferencia(
+                        vm,
+                        usuario.EmpresaId);
+
+                    return View(vm);
+                }
+
                 var fecha =
                     DateTime.Now;
 
@@ -566,8 +597,7 @@ namespace saas.Controllers
             return View(vm);
         }
         [HttpGet]
-        public async Task<IActionResult> GetSaldoCaja(
-    int cajaId)
+        public async Task<IActionResult> GetSaldoCaja(int cajaId)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -597,9 +627,10 @@ namespace saas.Controllers
             }
 
             decimal saldo =
-                await CalcularSaldoDisponibleCaja(
-                    caja,
-                    usuario.Id);
+                await _cajaSaldoService
+                    .CalcularSaldoDisponible(
+                        caja,
+                        usuario.Id);
 
             return Json(new
             {
@@ -706,9 +737,7 @@ namespace saas.Controllers
         // POST: TransferenciaCaja/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(
-            int id,
-            string motivoAnulacion)
+        public async Task<IActionResult> Anular(int id, string motivoAnulacion)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -991,55 +1020,7 @@ namespace saas.Controllers
         }
 
         // Helpers
-
-        private async Task<decimal> CalcularSaldoDisponibleCaja(
-            Caja caja,
-            string usuarioId)
-        {
-            if (caja.PermiteTurnos)
-            {
-                var turno =
-                    await _context.TurnosCaja
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(t =>
-                            t.CajaId == caja.Id &&
-                            t.UsuarioAperturaId == usuarioId &&
-                            t.Estado == EstadoTurnoCaja.Abierto);
-
-                if (turno == null)
-                {
-                    return 0;
-                }
-
-                decimal netoTurno =
-                    await _context.MovimientosCaja
-                        .AsNoTracking()
-                        .Where(m =>
-                            m.TurnoCajaId == turno.Id)
-                        .SumAsync(m =>
-                            m.Direccion ==
-                            DireccionMovimientoCaja.Ingreso
-                                ? m.Importe
-                                : -m.Importe);
-
-                return turno.FondoFijoAplicado
-                    + netoTurno;
-            }
-
-            return await _context.MovimientosCaja
-                .AsNoTracking()
-                .Where(m =>
-                    m.CajaId == caja.Id)
-                .SumAsync(m =>
-                    m.Direccion ==
-                    DireccionMovimientoCaja.Ingreso
-                        ? m.Importe
-                        : -m.Importe);
-        }
-
-        private async Task CargarOpcionesTransferencia(
-            TransferenciaCajaCreateVM vm,
-            int empresaId)
+        private async Task CargarOpcionesTransferencia(TransferenciaCajaCreateVM vm, int empresaId)
         {
             var cajas =
                 await _context.Cajas
@@ -1062,9 +1043,7 @@ namespace saas.Controllers
             vm.CajasDestinoDisponibles =
                 cajas;
         }
-        private TransferenciaCajaResumenVM
-    CrearResumenTransferencia(
-        TransferenciaCaja transferencia)
+        private TransferenciaCajaResumenVM CrearResumenTransferencia(TransferenciaCaja transferencia)
         {
             return new TransferenciaCajaResumenVM
             {
