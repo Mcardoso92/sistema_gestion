@@ -41,8 +41,7 @@ namespace saas.Data
             ConfigurarPropiedades(modelBuilder);
         }
 
-        private static void ConfigurarRelaciones(
-            ModelBuilder modelBuilder)
+        private static void ConfigurarRelaciones(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Usuario>()
                 .HasOne(u => u.Empresa)
@@ -525,8 +524,7 @@ namespace saas.Data
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
-        private static void ConfigurarIndices(
-            ModelBuilder modelBuilder)
+        private static void ConfigurarIndices(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Empresa>()
                 .HasIndex(e => e.Nombre)
@@ -695,6 +693,16 @@ namespace saas.Data
 
             modelBuilder.Entity<TurnoCaja>()
                 .HasIndex(t => t.Estado);
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasIndex(t => t.CajaId)
+                .IsUnique()
+                .HasFilter("[Estado] = 1");
+
+            modelBuilder.Entity<TurnoCaja>()
+                .HasIndex(t => t.UsuarioAperturaId)
+                .IsUnique()
+                .HasFilter("[Estado] = 1");
 
             modelBuilder.Entity<CobroVenta>()
                 .HasIndex(c => c.VentaId);
