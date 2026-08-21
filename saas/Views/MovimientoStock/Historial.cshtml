@@ -209,7 +209,8 @@
                             movimiento.Tipo == TipoMovimientoStock.StockInicial ||
                             movimiento.Tipo == TipoMovimientoStock.AjusteEntrada ||
                             movimiento.Tipo == TipoMovimientoStock.AnulacionVenta ||
-                            movimiento.Tipo == TipoMovimientoStock.Compra;
+                            movimiento.Tipo == TipoMovimientoStock.Compra ||
+                            movimiento.Tipo == TipoMovimientoStock.ReintegroVenta;
 
                             string signo = esEntrada ? "+" : "-";
                             string claseCantidad = esEntrada ? "text-success" : "text-danger";
