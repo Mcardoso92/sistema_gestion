@@ -43,23 +43,27 @@ namespace saas.ViewModel
         public decimal TotalCobradoTurno =>
             CobrosPorMedioPago.Sum(c => c.Total);
 
+        private IEnumerable<TurnoMovimientoResumenVM>
+            MovimientosHastaCierre =>
+                Estado == EstadoTurnoCaja.Abierto ||
+                !FechaCierre.HasValue
+                    ? Movimientos
+                    : Movimientos.Where(m =>
+                        m.Fecha <= FechaCierre.Value);
+
         public decimal TotalIngresosOperativos =>
-            Movimientos
+            MovimientosHastaCierre
                 .Where(m =>
-                    m.Tipo !=
-                        TipoMovimientoCaja.TransferenciaSalida &&
                     m.Direccion ==
-                        DireccionMovimientoCaja.Ingreso)
+                    DireccionMovimientoCaja.Ingreso)
                 .Sum(m =>
                     m.Importe);
 
         public decimal TotalEgresosOperativos =>
-            Movimientos
+            MovimientosHastaCierre
                 .Where(m =>
-                    m.Tipo !=
-                        TipoMovimientoCaja.TransferenciaSalida &&
                     m.Direccion ==
-                        DireccionMovimientoCaja.Egreso)
+                    DireccionMovimientoCaja.Egreso)
                 .Sum(m =>
                     m.Importe);
 
