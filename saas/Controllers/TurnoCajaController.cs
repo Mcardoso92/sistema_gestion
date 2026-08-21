@@ -6,6 +6,7 @@ using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
 using saas.ViewModel;
+using System.Data;
 
 namespace saas.Controllers
 {
@@ -303,8 +304,58 @@ namespace saas.Controllers
                 return View(vm);
             }
 
+            await using var transaction =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
+
             try
             {
+                // Revalidamos dentro de SERIALIZABLE para evitar
+                // aperturas simultáneas sobre el mismo usuario o caja.
+
+                bool usuarioTieneTurnoAbiertoActual =
+                    await _context.TurnosCaja
+                        .AnyAsync(t =>
+                            t.UsuarioAperturaId == usuario.Id &&
+                            t.Estado == EstadoTurnoCaja.Abierto);
+
+                if (usuarioTieneTurnoAbiertoActual)
+                {
+                    await transaction.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "Ya tiene un turno de caja abierto.");
+
+                    await RecargarCajasDisponibles(
+                        vm,
+                        usuario.EmpresaId);
+
+                    return View(vm);
+                }
+
+                bool cajaTieneTurnoAbiertoActual =
+                    await _context.TurnosCaja
+                        .AnyAsync(t =>
+                            t.CajaId == caja.Id &&
+                            t.Estado == EstadoTurnoCaja.Abierto);
+
+                if (cajaTieneTurnoAbiertoActual)
+                {
+                    await transaction.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        nameof(vm.CajaId),
+                        "La caja seleccionada acaba de ser ocupada por otro turno.");
+
+                    await RecargarCajasDisponibles(
+                        vm,
+                        usuario.EmpresaId);
+
+                    return View(vm);
+                }
+
                 var turno = new TurnoCaja
                 {
                     EmpresaId = caja.EmpresaId,
@@ -329,6 +380,8 @@ namespace saas.Controllers
 
                 await _context.SaveChangesAsync();
 
+                await transaction.CommitAsync();
+
                 TempData["Success"] =
                     $"Turno abierto correctamente en {caja.Nombre}.";
 
@@ -338,6 +391,8 @@ namespace saas.Controllers
             }
             catch
             {
+                await transaction.RollbackAsync();
+
                 ModelState.AddModelError(
                     "",
                     "Ocurrió un error al abrir el turno de caja.");
@@ -793,16 +848,50 @@ namespace saas.Controllers
                 return View(vm);
             }
 
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
 
             try
             {
+                // Revalidamos el turno dentro de la transacción.
+                // Evita cierres simultáneos o movimientos ingresados
+                // entre la carga de la pantalla y la confirmación.
+
+                await _context.Entry(turno)
+                    .ReloadAsync();
+
+                if (turno.Estado !=
+                    EstadoTurnoCaja.Abierto)
+                {
+                    await transaction.RollbackAsync();
+
+                    TempData["Error"] =
+                        "El turno ya fue cerrado por otra operación.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = turno.Id });
+                }
+
+                decimal efectivoEsperadoActual =
+                    await CalcularEfectivoEsperado(
+                        turno);
+
+                vm.EfectivoEsperado =
+                    efectivoEsperadoActual;
+
+                vm.Diferencia =
+                    vm.EfectivoContado -
+                    efectivoEsperadoActual;
+
                 turno.FechaCierre = DateTime.Now;
                 turno.UsuarioCierreId = usuario.Id;
                 turno.Estado = EstadoTurnoCaja.Cerrado;
                 turno.CierreForzado = cierreForzado;
                 turno.MotivoCierreForzado = vm.MotivoCierreForzado;
-                turno.EfectivoEsperado = efectivoEsperado;
+                turno.EfectivoEsperado = efectivoEsperadoActual;
                 turno.EfectivoContado = vm.EfectivoContado;
                 turno.Diferencia = vm.Diferencia;
                 turno.ImporteRendido = vm.ImporteRendido;
@@ -854,7 +943,7 @@ namespace saas.Controllers
                         Fecha = transferencia.Fecha,
                         UsuarioId = usuario.Id,
                         MedioPagoId = null,
-                        TurnoCajaId = turno.Id,
+                        TurnoCajaId = null,
                         CategoriaGastoId = null,
                         Concepto = $"Rendición recibida del turno #{turno.Id}",
                         Observaciones = null,
