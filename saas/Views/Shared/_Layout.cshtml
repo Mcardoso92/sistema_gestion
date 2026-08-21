@@ -1,74 +1,333 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using saas.Models
 @inject UserManager<Usuario> UserManager
+
 @{
     var usuario = await UserManager.GetUserAsync(User);
+
+    string controllerActual = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
 }
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
     <title>@ViewData["Title"] - Veltika</title>
+
     <script type="importmap"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/saas.styles.css" asp-append-version="true" />
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet" />
-    <!-- Material Symbols Outlined -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"/>
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true"/>
+
+    <link rel="stylesheet"
+          href="~/saas.styles.css"
+          asp-append-version="true"/>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"/>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"/>
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
-    <header class="navbar-custom sticky-top shadow-sm py-2">
-        <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
+
+<body class="app-body">
+
+<header class="app-header sticky-top">
+
+    <div class="container-fluid px-4">
+
+        <nav class="app-navbar">
+
             <div class="d-flex align-items-center">
-                <a class="h4 mb-0 text-white fw-bold text-uppercase me-4" asp-area="" asp-controller="Home" asp-action="Index">Veltika</a>
-                <nav class="d-none d-md-flex align-items-center gap-4">
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Home" asp-action="Index">Inicio</a>
-                    @if (User.IsInRole("SuperAdmin"))
-                    {
-                        <a class="text-white-50 text-decoration-none hover-white" asp-controller="Empresa" asp-action="Index">Empresas</a>
-                    }
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Categoria" asp-action="Index">Categorías</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Producto" asp-action="Index">Productos</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Usuario" asp-action="Index">Usuarios</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Cliente" asp-action="Index">Clientes</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Venta" asp-action="Index">Ventas</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="MovimientoStock" asp-action="Index">Stock</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Proveedor" asp-action="Index">Proveedores</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="Compra" asp-action="Index">Compras</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="TurnoCaja" asp-action="Index">Turnos</a>
-                    <a class="text-white-50 text-decoration-none hover-white" asp-controller="MovimientoCaja" asp-action="Index">Mov Caja</a>
-                </nav>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-link text-white p-1 text-decoration-none rounded-circle">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </button>
-                    <button class="btn btn-link text-white p-1 text-decoration-none rounded-circle">
-                        <span class="material-symbols-outlined">settings</span>
-                    </button>
-                        @if (usuario != null)
-                        {
-                            <small class="text-white-50 text-decoration-none hover-white">@usuario.Email</small>
-                            <form asp-controller="Usuario" asp-action="Logout" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="dropdown-item">
-                                    Cerrar sesión
-                                </button>
-                            </form>
-                        }
-                        else
-                        {
-                            <a class="text-white-50 text-decoration-none hover-white" asp-area="" asp-controller="Usuario" asp-action="Login">Iniciar sesión</a>
-                        }
+
+                <a class="app-brand"
+                   asp-controller="Home"
+                   asp-action="Index">
+
+                    <span class="app-brand-icon">V</span>
+
+                    <span>Veltika</span>
+
+                </a>
+
+                <div class="app-nav-links d-none d-xl-flex">
+
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="@(controllerActual == "Home" ? "active" : "")">
+
+                        Inicio
+
+                    </a>
+
+                    <a asp-controller="Venta"
+                       asp-action="Index"
+                       class="@(controllerActual == "Venta" ? "active" : "")">
+
+                        Ventas
+
+                    </a>
+
+                    <a asp-controller="Producto"
+                       asp-action="Index"
+                       class="@(controllerActual == "Producto" ? "active" : "")">
+
+                        Productos
+
+                    </a>
+
+                    <a asp-controller="Cliente"
+                       asp-action="Index"
+                       class="@(controllerActual == "Cliente" ? "active" : "")">
+
+                        Clientes
+
+                    </a>
+
+                    <a asp-controller="MovimientoStock"
+                       asp-action="Index"
+                       class="@(controllerActual == "MovimientoStock" ? "active" : "")">
+
+                        Stock
+
+                    </a>
+
+                    <a asp-controller="Proveedor"
+                       asp-action="Index"
+                       class="@(controllerActual == "Proveedor" ? "active" : "")">
+
+                        Proveedores
+
+                    </a>
+
+                    <a asp-controller="Compra"
+                       asp-action="Index"
+                       class="@(controllerActual == "Compra" ? "active" : "")">
+
+                        Compras
+
+                    </a>
+
+                    <div class="dropdown">
+
+                        <button class="app-nav-more"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+
+                            Más
+
+                            <span class="material-symbols-outlined">
+                                expand_more
+                            </span>
+
+                        </button>
+
+                        <ul class="dropdown-menu app-dropdown">
+
+                            <li>
+                                <a class="dropdown-item"
+                                   asp-controller="Categoria"
+                                   asp-action="Index">
+
+                                    <span class="material-symbols-outlined">
+                                        category
+                                    </span>
+
+                                    Categorías
+
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                   asp-controller="Usuario"
+                                   asp-action="Index">
+
+                                    <span class="material-symbols-outlined">
+                                        group
+                                    </span>
+
+                                    Usuarios
+
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                   asp-controller="TurnoCaja"
+                                   asp-action="Index">
+
+                                    <span class="material-symbols-outlined">
+                                        point_of_sale
+                                    </span>
+
+                                    Turnos de caja
+
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                   asp-controller="MovimientoCaja"
+                                   asp-action="Index">
+
+                                    <span class="material-symbols-outlined">
+                                        payments
+                                    </span>
+
+                                    Movimientos de caja
+
+                                </a>
+                            </li>
+
+                            @if (User.IsInRole("SuperAdmin"))
+                            {
+                                <li>
+                                    <hr class="dropdown-divider"/>
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item"
+                                       asp-controller="Empresa"
+                                       asp-action="Index">
+
+                                        <span class="material-symbols-outlined">
+                                            domain
+                                        </span>
+
+                                        Empresas
+
+                                    </a>
+                                </li>
+                            }
+
+                        </ul>
+
+                    </div>
+
                 </div>
+
             </div>
-        </div>
-    </header>
+
+            <div class="app-user-area">
+
+                <button type="button"
+                        class="app-icon-button"
+                        title="Notificaciones">
+
+                    <span class="material-symbols-outlined">
+                        notifications
+                    </span>
+
+                </button>
+
+                @if (usuario != null)
+                {
+                    <div class="dropdown">
+
+                        <button class="app-user-button"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+
+                            <span class="app-user-avatar">
+
+                                @(string.IsNullOrWhiteSpace(usuario.Email)
+                                    ? "U"
+                                    : usuario.Email.Substring(0, 1).ToUpper())
+
+                            </span>
+
+                            <span class="app-user-info d-none d-md-flex">
+
+                                <span class="app-user-email">
+                                    @usuario.Email
+                                </span>
+
+                                <span class="app-user-role">
+                                    @(User.IsInRole("SuperAdmin")
+                                        ? "SuperAdmin"
+                                        : "Usuario")
+                                </span>
+
+                            </span>
+
+                            <span class="material-symbols-outlined app-user-chevron">
+                                expand_more
+                            </span>
+
+                        </button>
+
+                        <ul class="dropdown-menu dropdown-menu-end app-dropdown">
+
+                            <li>
+                                <span class="dropdown-header">
+                                    Mi cuenta
+                                </span>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item"
+                                   href="#">
+
+                                    <span class="material-symbols-outlined">
+                                        settings
+                                    </span>
+
+                                    Configuración
+
+                                </a>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider"/>
+                            </li>
+
+                            <li>
+
+                                <form asp-controller="Usuario"
+                                      asp-action="Logout"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="dropdown-item app-logout">
+
+                                        <span class="material-symbols-outlined">
+                                            logout
+                                        </span>
+
+                                        Cerrar sesión
+
+                                    </button>
+
+                                </form>
+
+                            </li>
+
+                        </ul>
+
+                    </div>
+                }
+
+            </div>
+
+        </nav>
+
+    </div>
+
+</header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @if (TempData["Success"] != null)
@@ -78,6 +337,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
+
             @if (TempData["Error"] != null)
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -90,14 +350,15 @@
         </main>
     </div>
 
-@*     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - saas - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer> *@
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="~/js/site.js"
+        asp-append-version="true">
+</script>
+
+@await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

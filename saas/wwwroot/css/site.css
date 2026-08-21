@@ -2434,4 +2434,270 @@ main {
     .features-grid {
         gap: 12px;
     }
+
+    /* =========================================================
+   VELTIKA - APP LAYOUT
+   ========================================================= */
+
+    :root {
+        --v-primary: #123f95;
+        --v-primary-hover: #0f347c;
+        --v-accent: #2563eb;
+        --v-background: #f8fafc;
+        --v-surface: #ffffff;
+        --v-text: #101828;
+        --v-text-secondary: #344054;
+        --v-text-muted: #667085;
+        --v-border: #e2e8f0;
+        --v-border-light: #eef2f6;
+        --v-radius-sm: 6px;
+        --v-radius: 8px;
+        --v-shadow: 0 8px 24px rgba(15,23,42,.07);
+    }
+
+    body.app-body {
+        min-height: 100vh;
+        margin: 0;
+        background-color: var(--v-background);
+        color: var(--v-text);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .app-header {
+        z-index: 1030;
+        background-color: rgba(255,255,255,.96);
+        border-bottom: 1px solid var(--v-border-light);
+        backdrop-filter: blur(12px);
+    }
+
+    .app-navbar {
+        min-height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+    }
+
+    .app-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: .6rem;
+        margin-right: 2rem;
+        color: #0b1930;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -.04em;
+        text-decoration: none;
+    }
+
+        .app-brand:hover {
+            color: #0b1930;
+        }
+
+    .app-brand-icon {
+        width: 30px;
+        height: 27px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #4f8cff, #164bbd);
+        border-radius: 4px 10px 4px 10px;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        transform: skewX(-8deg);
+    }
+
+    .app-nav-links {
+        align-items: center;
+        height: 68px;
+        gap: .2rem;
+    }
+
+        .app-nav-links > a,
+        .app-nav-more {
+            position: relative;
+            height: 68px;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 .8rem;
+            border: 0;
+            background: transparent;
+            color: var(--v-text-muted);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .app-nav-links > a:hover,
+            .app-nav-more:hover {
+                color: var(--v-text);
+            }
+
+            .app-nav-links > a.active {
+                color: var(--v-primary);
+            }
+
+                .app-nav-links > a.active::after {
+                    content: "";
+                    position: absolute;
+                    right: .8rem;
+                    bottom: 0;
+                    left: .8rem;
+                    height: 2px;
+                    background-color: var(--v-accent);
+                    border-radius: 2px 2px 0 0;
+                }
+
+    .app-nav-more {
+        gap: .15rem;
+    }
+
+        .app-nav-more .material-symbols-outlined {
+            font-size: 18px;
+        }
+
+    .app-user-area {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+    .app-icon-button {
+        width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: var(--v-radius-sm);
+        background: transparent;
+        color: var(--v-text-muted);
+    }
+
+        .app-icon-button:hover {
+            background-color: #f2f4f7;
+            color: var(--v-text);
+        }
+
+        .app-icon-button .material-symbols-outlined {
+            font-size: 21px;
+        }
+
+    .app-user-button {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        padding: .3rem .4rem;
+        border: 0;
+        border-radius: var(--v-radius);
+        background: transparent;
+        text-align: left;
+    }
+
+        .app-user-button:hover {
+            background-color: #f8fafc;
+        }
+
+    .app-user-avatar {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 34px;
+        border-radius: 50%;
+        background-color: #eaf1ff;
+        color: var(--v-primary);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .app-user-info {
+        flex-direction: column;
+        max-width: 180px;
+    }
+
+    .app-user-email {
+        overflow: hidden;
+        color: var(--v-text);
+        font-size: 12px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .app-user-role {
+        color: var(--v-text-muted);
+        font-size: 10px;
+    }
+
+    .app-user-chevron {
+        color: var(--v-text-muted);
+        font-size: 18px;
+    }
+
+    .app-dropdown {
+        min-width: 220px;
+        padding: .45rem;
+        border: 1px solid var(--v-border);
+        border-radius: var(--v-radius);
+        box-shadow: var(--v-shadow);
+    }
+
+        .app-dropdown .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: .6rem .7rem;
+            border-radius: var(--v-radius-sm);
+            color: var(--v-text-secondary);
+            font-size: 13px;
+        }
+
+            .app-dropdown .dropdown-item:hover {
+                background-color: #f8fafc;
+                color: var(--v-text);
+            }
+
+        .app-dropdown .material-symbols-outlined {
+            color: var(--v-text-muted);
+            font-size: 19px;
+        }
+
+        .app-dropdown .dropdown-header {
+            color: var(--v-text-muted);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+    .app-logout {
+        color: #d92d20 !important;
+    }
+
+        .app-logout .material-symbols-outlined {
+            color: #d92d20;
+        }
+
+    @media (max-width: 1199px) {
+        .app-brand {
+            margin-right: 0;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .app-navbar {
+            min-height: 62px;
+        }
+
+        .app-brand {
+            font-size: 20px;
+        }
+
+        .app-user-info {
+            display: none !important;
+        }
+    }
+
 }
