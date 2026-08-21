@@ -1205,8 +1205,34 @@ namespace saas.Controllers
             decimal importe =
                 Math.Abs(turno.Diferencia.Value);
 
+            await using var transaction =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
+
             try
             {
+                bool yaRegularizadoActual =
+                    await _context.MovimientosCaja
+                        .AnyAsync(m =>
+                            m.TurnoCajaId == turno.Id &&
+                            (
+                                m.Tipo == TipoMovimientoCaja.AjusteSobranteCaja ||
+                                m.Tipo == TipoMovimientoCaja.AjusteFaltanteCaja
+                            ));
+
+                if (yaRegularizadoActual)
+                {
+                    await transaction.RollbackAsync();
+
+                    TempData["Error"] =
+                        "La diferencia de este turno ya fue regularizada por otra operación.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = turno.Id });
+                }
+
                 var movimiento =
                     new MovimientoCaja
                     {
@@ -1254,6 +1280,8 @@ namespace saas.Controllers
 
                 await _context.SaveChangesAsync();
 
+                await transaction.CommitAsync();
+
                 TempData["Success"] =
                     "Diferencia regularizada correctamente.";
 
@@ -1263,6 +1291,8 @@ namespace saas.Controllers
             }
             catch
             {
+                await transaction.RollbackAsync();
+
                 ModelState.AddModelError(
                     "",
                     "Ocurrió un error al regularizar la diferencia.");

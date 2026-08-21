@@ -43,6 +43,23 @@ namespace saas.ViewModel
         public decimal TotalCobradoTurno =>
             CobrosPorMedioPago.Sum(c => c.Total);
 
+        public decimal TotalIngresos =>
+            Movimientos
+                .Where(m =>
+                    m.Direccion ==
+                    DireccionMovimientoCaja.Ingreso)
+                .Sum(m => m.Importe);
+
+        public decimal TotalEgresos =>
+            Movimientos
+                .Where(m =>
+                    m.Direccion ==
+                    DireccionMovimientoCaja.Egreso)
+                .Sum(m => m.Importe);
+
+        public decimal NetoMovimientos =>
+            TotalIngresos - TotalEgresos;
+
         public RegularizacionTurnoResumenVM Regularizacion { get; set; }
             = new RegularizacionTurnoResumenVM();
 
