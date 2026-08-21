@@ -25,7 +25,7 @@
 
 <body class="app-body">
     <header class="app-header">
-        <div class="container-fluid px-4">
+        <div class="container-xl">
             <div class="app-navbar">
                 <div class="app-navbar-left">
                     <a class="app-brand" asp-controller="Home" asp-action="Index">
@@ -34,18 +34,53 @@
                     </a>
 
                     <nav class="app-nav">
-                        <a class="app-nav-link @(controllerActual == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">Inicio</a>
-                        <a class="app-nav-link @(controllerActual == "Venta" ? "active" : "")" asp-controller="Venta" asp-action="Index">Ventas</a>
-                        <a class="app-nav-link @(controllerActual == "Producto" ? "active" : "")" asp-controller="Producto" asp-action="Index">Productos</a>
-                        <a class="app-nav-link @(controllerActual == "Cliente" ? "active" : "")" asp-controller="Cliente" asp-action="Index">Clientes</a>
-                        <a class="app-nav-link @(controllerActual == "MovimientoStock" ? "active" : "")" asp-controller="MovimientoStock" asp-action="Index">Stock</a>
-                        <a class="app-nav-link @(controllerActual == "Proveedor" ? "active" : "")" asp-controller="Proveedor" asp-action="Index">Proveedores</a>
-                        <a class="app-nav-link @(controllerActual == "Compra" ? "active" : "")" asp-controller="Compra" asp-action="Index">Compras</a>
+                        <a class="app-nav-link @(controllerActual == "Home" ? "active" : "")"
+                           asp-controller="Home" asp-action="Index">
+                            <span class="material-symbols-outlined">home</span>
+                            Inicio
+                        </a>
+
+                        <a class="app-nav-link @(controllerActual == "Venta" ? "active" : "")"
+                           asp-controller="Venta" asp-action="Index">
+                            <span class="material-symbols-outlined">point_of_sale</span>
+                            Ventas
+                        </a>
+
+                        <a class="app-nav-link @(controllerActual == "Producto" ? "active" : "")"
+                           asp-controller="Producto" asp-action="Index">
+                            <span class="material-symbols-outlined">inventory_2</span>
+                            Productos
+                        </a>
+
+                        <a class="app-nav-link @(controllerActual == "Cliente" ? "active" : "")"
+                           asp-controller="Cliente" asp-action="Index">
+                            <span class="material-symbols-outlined">groups</span>
+                            Clientes
+                        </a>
+
+                        <a class="app-nav-link @(controllerActual == "MovimientoStock" ? "active" : "")"
+                           asp-controller="MovimientoStock" asp-action="Index">
+                            <span class="material-symbols-outlined">deployed_code</span>
+                            Stock
+                        </a>
+
+                        <a class="app-nav-link @(controllerActual == "Proveedor" ? "active" : "")"
+                           asp-controller="Proveedor" asp-action="Index">
+                            <span class="material-symbols-outlined">local_shipping</span>
+                            Proveedores
+                        </a>
+
+                        <a class="app-nav-link @(controllerActual == "Compra" ? "active" : "")"
+                           asp-controller="Compra" asp-action="Index">
+                            <span class="material-symbols-outlined">shopping_cart</span>
+                            Compras
+                        </a>
 
                         <div class="dropdown">
                             <button class="app-nav-more" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <span class="material-symbols-outlined">more_horiz</span>
                                 Más
-                                <span class="material-symbols-outlined">expand_more</span>
+                                <span class="material-symbols-outlined app-nav-chevron">expand_more</span>
                             </button>
 
                             <ul class="dropdown-menu app-menu">
@@ -58,14 +93,14 @@
 
                                 <li>
                                     <a class="dropdown-item" asp-controller="Usuario" asp-action="Index">
-                                        <span class="material-symbols-outlined">group</span>
+                                        <span class="material-symbols-outlined">manage_accounts</span>
                                         Usuarios
                                     </a>
                                 </li>
 
                                 <li>
                                     <a class="dropdown-item" asp-controller="TurnoCaja" asp-action="Index">
-                                        <span class="material-symbols-outlined">point_of_sale</span>
+                                        <span class="material-symbols-outlined">account_balance_wallet</span>
                                         Turnos
                                     </a>
                                 </li>
