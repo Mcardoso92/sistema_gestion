@@ -466,10 +466,25 @@
 
                             @foreach (var movimiento in Model.Movimientos)
                             {
-                                <tr>
+                                bool esPosteriorAlCierre =
+                                Model.FechaCierre.HasValue &&
+                                movimiento.Fecha > Model.FechaCierre.Value;
+
+                                <tr class="@(esPosteriorAlCierre ? "table-light" : "")">
 
                                     <td class="ps-4">
-                                        @movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")
+
+                                        <div>
+                                            @movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                        </div>
+
+                                        @if (esPosteriorAlCierre)
+                                        {
+                                            <span class="badge bg-secondary mt-1">
+                                                Posterior al cierre
+                                            </span>
+                                        }
+
                                     </td>
 
                                     <td>
