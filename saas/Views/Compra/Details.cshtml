@@ -53,6 +53,18 @@
                         Anular compra
                     </button>
                 }
+                @if (Model.Estado)
+                {
+                    <a asp-controller="DevolucionCompra"
+                       asp-action="Registrar"
+                       asp-route-compraId="@Model.Id"
+                       class="btn btn-outline-primary d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined icon-sm">
+                            assignment_return
+                        </span>
+                        Devolver mercadería
+                    </a>
+                }
             </div>
         </div>
     </div>
@@ -315,6 +327,162 @@
                         </div>
                     }
                 </div>
+                <div class="card bg-white mt-4">
+                    <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h2 class="h6 mb-1">Devoluciones de mercadería</h2>
+                            <p class="text-sm text-muted-custom mb-0">
+                                Historial de productos devueltos al proveedor.
+                            </p>
+                        </div>
+
+                        @if (Model.Estado)
+                        {
+                            <a asp-controller="DevolucionCompra"
+                               asp-action="Registrar"
+                               asp-route-compraId="@Model.Id"
+                               class="btn btn-outline-primary d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined icon-sm">assignment_return</span>
+                                Registrar devolución
+                            </a>
+                        }
+                    </div>
+
+                    @if (Model.DevolucionesCompra.Any())
+                    {
+                        <div class="card-body p-0">
+
+                            @foreach (var devolucion in Model.DevolucionesCompra)
+                            {
+                                <div class="border-bottom p-4">
+
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+
+                                        <div>
+                                            <div class="fw-semibold">
+                                                Devolución #@devolucion.Id
+                                            </div>
+
+                                            <div class="text-sm text-muted-custom">
+                                                @devolucion.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                                · @devolucion.UsuarioNombre
+                                            </div>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <div class="fw-bold mb-1">
+                                                @devolucion.Total.ToString("C")
+                                            </div>
+
+                                            @if (devolucion.Estado)
+                                            {
+                                                <div class="d-flex align-items-center justify-content-end gap-2 flex-wrap">
+                                                    <span class="badge rounded-pill badge-success-light">
+                                                        Activa
+                                                    </span>
+
+                                                    <a asp-controller="DevolucionCompra"
+                                                       asp-action="Anular"
+                                                       asp-route-id="@devolucion.Id"
+                                                       class="btn btn-sm btn-outline-danger">
+                                                        Anular
+                                                    </a>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill badge-danger-light">
+                                                    Anulada
+                                                </span>
+                                            }
+                                        </div>
+
+                                    </div>
+
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Producto</th>
+                                                    <th class="text-center">Cantidad</th>
+                                                    <th class="text-end">Precio unitario</th>
+                                                    <th class="text-end">Subtotal</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+                                                @foreach (var detalle in devolucion.Detalles)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @detalle.ProductoNombre
+                                                        </td>
+
+                                                        <td class="text-center">
+                                                            @detalle.Cantidad
+                                                        </td>
+
+                                                        <td class="text-end">
+                                                            @detalle.PrecioUnitario.ToString("C")
+                                                        </td>
+
+                                                        <td class="text-end fw-semibold">
+                                                            @detalle.Subtotal.ToString("C")
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(devolucion.Observaciones))
+                                    {
+                                        <div class="mt-3 text-sm text-muted-custom">
+                                            <strong>Observaciones:</strong>
+                                            @devolucion.Observaciones
+                                        </div>
+                                    }
+
+                                    @if (!devolucion.Estado)
+                                    {
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <div class="text-sm text-muted-custom">
+                                                <strong>Anulada:</strong>
+                                                @(devolucion.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+
+                                                @if (!string.IsNullOrWhiteSpace(devolucion.UsuarioAnulacionNombre))
+                                                {
+                                                    <span> · @devolucion.UsuarioAnulacionNombre</span>
+                                                }
+
+                                                @if (!string.IsNullOrWhiteSpace(devolucion.MotivoAnulacion))
+                                                {
+                                                    <span> · Motivo: @devolucion.MotivoAnulacion</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+                            }
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-body p-4">
+                            <div class="text-center py-4">
+                                <span class="material-symbols-outlined fs-1 text-muted-custom mb-2">
+                                    assignment_return
+                                </span>
+
+                                <p class="text-muted-custom mb-0">
+                                    Todavía no se registraron devoluciones para esta compra.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
 
                 <div class="card-footer bg-white border-top p-4">
                     <div class="d-flex justify-content-end">
@@ -333,6 +501,45 @@
                                 <span class="text-sm text-muted-custom d-block">Saldo pendiente</span>
                                 <strong>@Model.SaldoPendiente.ToString("C")</strong>
                             </div>
+                            <div class="mt-3">
+                                <div class="text-muted small">
+                                    Reintegrado por proveedor
+                                </div>
+
+                                <div class="fw-semibold">
+                                    @Model.TotalReintegrado.ToString("C")
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <div class="text-muted small">
+                                    Pendiente de recuperar
+                                </div>
+
+                                <div class="fw-bold">
+                                    @Model.PendienteRecuperar.ToString("C")
+                                </div>
+                            </div>
+                            @if (Model.SaldoPendiente > 0)
+                            {
+                                <div class="alert alert-warning mt-4 mb-0">
+                                    Queda un saldo pendiente de
+                                    <strong>@Model.SaldoPendiente.ToString("C")</strong>
+                                    por pagar al proveedor.
+                                </div>
+                            }
+                            else if (Model.PendienteRecuperar > 0)
+                            {
+                                <div class="alert alert-info mt-4 mb-0">
+                                    El proveedor debe reintegrar
+                                    <strong>@Model.PendienteRecuperar.ToString("C")</strong>.
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-success mt-4 mb-0">
+                                    La compra no tiene saldos financieros pendientes.
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

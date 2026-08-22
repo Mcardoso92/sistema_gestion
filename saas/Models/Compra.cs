@@ -55,5 +55,7 @@ namespace saas.Models
 
         [ValidateNever]
         public ICollection<ReintegroProveedor> ReintegrosProveedor { get; set; } = new List<ReintegroProveedor>();
+        [ValidateNever]
+        public ICollection<DevolucionCompra> DevolucionesCompra { get; set; } = new List<DevolucionCompra>();
     }
 }

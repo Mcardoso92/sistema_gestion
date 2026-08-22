@@ -8,6 +8,7 @@ using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
 using saas.ViewModel;
+using saas.ViewModel.DevolucionCompra;
 using System.Data;
 
 namespace saas.Controllers
@@ -632,6 +633,15 @@ namespace saas.Controllers
                     compra.Id,
                     compra.Total);
 
+            decimal totalReintegrado =
+                await _compraSaldoService.ObtenerTotalReintegrado(
+                    compra.Id);
+
+            decimal pendienteRecuperar =
+                await _compraSaldoService.ObtenerPendienteRecuperar(
+                    compra.Id,
+                    compra.Total);
+
             var pagos =
                 await _context.PagosProveedor
                     .AsNoTracking()
@@ -659,6 +669,43 @@ namespace saas.Controllers
                     })
                     .ToListAsync();
 
+            var devoluciones =
+                await _context.DevolucionesCompra
+                    .AsNoTracking()
+                    .Where(d =>
+                        d.CompraId == compra.Id &&
+                        d.EmpresaId == compra.EmpresaId)
+                    .OrderByDescending(d => d.Fecha)
+                    .ThenByDescending(d => d.Id)
+                    .Select(d => new DevolucionCompraResumenVM
+                    {
+                        Id = d.Id,
+                        Fecha = d.Fecha,
+                        Total = d.Total,
+                        Estado = d.Estado,
+                        UsuarioNombre = d.Usuario.Email ?? string.Empty,
+                        Observaciones = d.Observaciones,
+                        FechaAnulacion = d.FechaAnulacion,
+                        UsuarioAnulacionNombre =
+                            d.UsuarioAnulacion != null
+                                ? d.UsuarioAnulacion.Email
+                                : null,
+                        MotivoAnulacion = d.MotivoAnulacion,
+
+                        Detalles = d.Detalles
+                            .OrderBy(x => x.Producto.Nombre)
+                            .Select(x => new DetalleDevolucionCompraResumenVM
+                            {
+                                ProductoId = x.ProductoId,
+                                ProductoNombre = x.Producto.Nombre,
+                                Cantidad = x.Cantidad,
+                                PrecioUnitario = x.PrecioUnitario,
+                                Subtotal = x.Subtotal
+                            })
+                            .ToList()
+                    })
+                    .ToListAsync();
+
             var compraVM = new CompraDetailsVM
             {
                 Id = compra.Id,
@@ -669,7 +716,10 @@ namespace saas.Controllers
                 Total = compra.Total,
                 TotalPagado = totalPagado,
                 SaldoPendiente = saldoPendiente,
+                TotalReintegrado = totalReintegrado,
+                PendienteRecuperar = pendienteRecuperar,
                 Pagos = pagos,
+                DevolucionesCompra = devoluciones,
                 Estado = compra.Estado,
                 Observaciones = compra.Observaciones,
                 UsuarioEmail = compra.Usuario.Email ?? string.Empty,
