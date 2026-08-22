@@ -12,6 +12,7 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
+builder.Services.AddScoped<CompraSaldoService>();
 
 //Incluir dbcontext
 builder.Services.AddDbContext<SaasDbContext>(options =>

@@ -1,0 +1,181 @@
+﻿@model saas.ViewModel.RegistrarPagoProveedorVM
+
+@{
+    ViewData["Title"] = "Registrar Pago";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Registrar Pago
+            </h1>
+
+            <p class="text-muted mb-0">
+                Compra #@Model.CompraId
+            </p>
+        </div>
+
+        <a asp-controller="Compra"
+           asp-action="Details"
+           asp-route-id="@Model.CompraId"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <form asp-action="Registrar"
+          method="post"
+          id="formRegistrarPagoProveedor">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="CompraId"
+               type="hidden" />
+
+        <div asp-validation-summary="All"
+             class="alert alert-danger"></div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body p-4">
+
+                        <div class="text-muted small">
+                            Saldo pendiente
+                        </div>
+
+                        <div class="display-6 fw-bold">
+                            @Model.SaldoPendiente.ToString("C")
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body p-4">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <label asp-for="MedioPagoId"
+                                       class="form-label fw-semibold">
+                                    Medio de pago
+                                </label>
+
+                                <select asp-for="MedioPagoId"
+                                        class="form-select">
+
+                                    <option value="">
+                                        Seleccionar medio
+                                    </option>
+
+                                    @foreach (var medio in Model.MediosPagoDisponibles)
+                                    {
+                                        <option value="@medio.Id">
+                                            @medio.Nombre
+                                        </option>
+                                    }
+
+                                </select>
+
+                                <span asp-validation-for="MedioPagoId"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label asp-for="CajaId"
+                                       class="form-label fw-semibold">
+                                    Caja
+                                </label>
+
+                                <select asp-for="CajaId"
+                                        class="form-select">
+
+                                    <option value="">
+                                        Seleccionar caja
+                                    </option>
+
+                                    @foreach (var caja in Model.CajasDisponibles)
+                                    {
+                                        <option value="@caja.Id">
+                                            @caja.Nombre
+                                        </option>
+                                    }
+
+                                </select>
+
+                                <span asp-validation-for="CajaId"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <label asp-for="Importe"
+                                       class="form-label fw-semibold">
+                                    Importe a pagar
+                                </label>
+
+                                <input asp-for="Importe"
+                                       type="number"
+                                       min="0.01"
+                                       step="0.01"
+                                       max="@Model.SaldoPendiente"
+                                       class="form-control" />
+
+                                <span asp-validation-for="Importe"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-controller="Compra"
+               asp-action="Details"
+               asp-route-id="@Model.CompraId"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Confirmar pago
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

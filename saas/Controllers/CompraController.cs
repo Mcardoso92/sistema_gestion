@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel;
 using System.Data;
 
@@ -16,11 +17,13 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly CompraSaldoService _compraSaldoService;
 
-        public CompraController(SaasDbContext context, UserManager<Usuario> userManager)
+        public CompraController(SaasDbContext context, UserManager<Usuario> userManager, CompraSaldoService compraSaldoService)
         {
             _context = context;
             _userManager = userManager;
+            _compraSaldoService = compraSaldoService;
         }
 
         // GET: Compra
@@ -620,6 +623,15 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            decimal totalPagado =
+                await _compraSaldoService.ObtenerTotalPagado(
+                    compra.Id);
+
+            decimal saldoPendiente =
+                await _compraSaldoService.ObtenerSaldoPendiente(
+                    compra.Id,
+                    compra.Total);
+
             var compraVM = new CompraDetailsVM
             {
                 Id = compra.Id,
@@ -628,6 +640,8 @@ namespace saas.Controllers
                 TipoComprobante = compra.TipoComprobante,
                 NumeroComprobante = compra.NumeroComprobante,
                 Total = compra.Total,
+                TotalPagado = totalPagado,
+                SaldoPendiente = saldoPendiente,
                 Estado = compra.Estado,
                 Observaciones = compra.Observaciones,
                 UsuarioEmail = compra.Usuario.Email ?? string.Empty,
