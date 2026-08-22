@@ -185,8 +185,20 @@
                 <div class="card-footer bg-white border-top p-4">
                     <div class="d-flex justify-content-end">
                         <div class="compra-total-box">
-                            <span class="text-sm text-muted-custom">Total de la compra</span>
-                            <strong class="fs-4">@Model.Total.ToString("C")</strong>
+                            <div class="mb-2">
+                                <span class="text-sm text-muted-custom d-block">Total de la compra</span>
+                                <strong class="fs-4">@Model.Total.ToString("C")</strong>
+                            </div>
+
+                            <div class="mb-2">
+                                <span class="text-sm text-muted-custom d-block">Total pagado</span>
+                                <strong>@Model.TotalPagado.ToString("C")</strong>
+                            </div>
+
+                            <div>
+                                <span class="text-sm text-muted-custom d-block">Saldo pendiente</span>
+                                <strong>@Model.SaldoPendiente.ToString("C")</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
