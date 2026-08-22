@@ -347,6 +347,142 @@
                             </a>
                         }
                     </div>
+                    <div class="card bg-white mt-4">
+                        <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <h2 class="h6 mb-1">Reintegros del proveedor</h2>
+                                <p class="text-sm text-muted-custom mb-0">
+                                    Dinero recibido del proveedor por devoluciones de mercadería.
+                                </p>
+                            </div>
+
+                            @if (Model.Estado && Model.PendienteRecuperar > 0)
+                            {
+                                <a asp-controller="ReintegroProveedor"
+                                   asp-action="Registrar"
+                                   asp-route-compraId="@Model.Id"
+                                   class="btn btn-primary d-flex align-items-center gap-2">
+                                    <span class="material-symbols-outlined icon-sm">
+                                        account_balance_wallet
+                                    </span>
+                                    Registrar reintegro
+                                </a>
+                            }
+                        </div>
+
+                        @if (Model.ReintegrosProveedor.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th class="ps-4">Fecha</th>
+                                            <th>Medio de pago</th>
+                                            <th>Caja</th>
+                                            <th>Usuario</th>
+                                            <th class="text-end">Importe</th>
+                                            <th class="text-center">Estado</th>
+                                            <th class="text-end pe-4">Acciones</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        @foreach (var reintegro in Model.ReintegrosProveedor)
+                                        {
+                                            <tr>
+                                                <td class="ps-4">
+                                                    @reintegro.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                                </td>
+
+                                                <td>
+                                                    @reintegro.MedioPagoNombre
+                                                </td>
+
+                                                <td>
+                                                    @reintegro.CajaNombre
+                                                </td>
+
+                                                <td>
+                                                    @reintegro.UsuarioNombre
+                                                </td>
+
+                                                <td class="text-end fw-semibold">
+                                                    @reintegro.Importe.ToString("C")
+                                                </td>
+
+                                                <td class="text-center">
+                                                    @if (reintegro.Estado == saas.Models.Enums.EstadoReintegro.Activo)
+                                                    {
+                                                        <span class="badge rounded-pill badge-success-light">
+                                                            Activo
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge rounded-pill badge-danger-light">
+                                                            Anulado
+                                                        </span>
+                                                    }
+                                                </td>
+
+                                                <td class="text-end pe-4">
+                                                    @if (reintegro.Estado == saas.Models.Enums.EstadoReintegro.Activo)
+                                                    {
+                                                        <a asp-controller="ReintegroProveedor"
+                                                           asp-action="Anular"
+                                                           asp-route-id="@reintegro.Id"
+                                                           class="btn btn-sm btn-outline-danger">
+                                                            Anular
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted-custom">—</span>
+                                                    }
+                                                </td>
+                                            </tr>
+
+                                            @if (reintegro.Estado == saas.Models.Enums.EstadoReintegro.Anulado)
+                                            {
+                                                <tr>
+                                                    <td colspan="7" class="bg-light ps-4 py-3">
+                                                        <div class="text-sm text-muted-custom">
+                                                            <strong>Anulado:</strong>
+                                                            @(reintegro.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+
+                                                            @if (!string.IsNullOrWhiteSpace(reintegro.UsuarioAnulacionNombre))
+                                                            {
+                                                                <span> · @reintegro.UsuarioAnulacionNombre</span>
+                                                            }
+
+                                                            @if (!string.IsNullOrWhiteSpace(reintegro.MotivoAnulacion))
+                                                            {
+                                                                <span> · Motivo: @reintegro.MotivoAnulacion</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="card-body p-4">
+                                <div class="text-center py-4">
+                                    <span class="material-symbols-outlined fs-1 text-muted-custom mb-2">
+                                        account_balance_wallet
+                                    </span>
+
+                                    <p class="text-muted-custom mb-0">
+                                        Todavía no se registraron reintegros para esta compra.
+                                    </p>
+                                </div>
+                            </div>
+                        }
+                    </div>
 
                     @if (Model.DevolucionesCompra.Any())
                     {

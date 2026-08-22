@@ -1,0 +1,169 @@
+﻿@model saas.ViewModel.ReintegroProveedor.RegistrarReintegroProveedorVM
+
+@{
+    ViewData["Title"] = "Registrar Reintegro";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Registrar Reintegro
+            </h1>
+
+            <p class="text-muted mb-0">
+                Compra #@Model.CompraId
+            </p>
+        </div>
+
+        <a asp-controller="Compra"
+           asp-action="Details"
+           asp-route-id="@Model.CompraId"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <div class="mb-4">
+                        <div class="text-muted small">
+                            Importe pendiente de recuperar
+                        </div>
+
+                        <div class="fw-bold fs-4">
+                            @Model.ImporteDisponible.ToString("C")
+                        </div>
+                    </div>
+
+                    <form asp-action="Registrar"
+                          method="post"
+                          id="formRegistrarReintegroProveedor"
+                          data-get-cajas-url="@Url.Action("GetCajasPorMedioPago", "ReintegroProveedor")"
+                          data-compra-id="@Model.CompraId"
+                          data-caja-seleccionada="@Model.CajaId">
+
+                        @Html.AntiForgeryToken()
+
+                        <input asp-for="CompraId"
+                               type="hidden" />
+
+                        <div asp-validation-summary="All"
+                             class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+
+                            <label asp-for="Importe"
+                                   class="form-label fw-semibold">
+                                Importe
+                            </label>
+
+                            <input asp-for="Importe"
+                                   type="number"
+                                   step="0.01"
+                                   min="0.01"
+                                   max="@Model.ImporteDisponible"
+                                   class="form-control" />
+
+                            <span asp-validation-for="Importe"
+                                  class="text-danger"></span>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label asp-for="MedioPagoId"
+                                   class="form-label fw-semibold">
+                                Medio de pago
+                            </label>
+
+                            <select asp-for="MedioPagoId"
+                                    class="form-select"
+                                    id="medioPagoSelect">
+
+                                <option value="">
+                                    Seleccionar medio de pago
+                                </option>
+
+                                @foreach (var medioPago
+                                                                in Model.MediosPagoDisponibles)
+                                {
+                                    <option value="@medioPago.Id">
+                                        @medioPago.Nombre
+                                    </option>
+                                }
+
+                            </select>
+
+                            <span asp-validation-for="MedioPagoId"
+                                  class="text-danger"></span>
+
+                        </div>
+
+                        <div class="mb-4">
+
+                            <label asp-for="CajaId"
+                                   class="form-label fw-semibold">
+                                Caja
+                            </label>
+
+                            <select asp-for="CajaId"
+                                    class="form-select"
+                                    id="cajaSelect">
+
+                                <option value="">
+                                    Primero seleccione un medio de pago
+                                </option>
+
+                            </select>
+
+                            <span asp-validation-for="CajaId"
+                                  class="text-danger"></span>
+
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a asp-controller="Compra"
+                               asp-action="Details"
+                               asp-route-id="@Model.CompraId"
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Confirmar reintegro
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/js/reintegro-proveedor.js"
+            asp-append-version="true"></script>
+
+}

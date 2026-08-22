@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace saas.ViewModel
+namespace saas.ViewModel.ReintegroProveedor
 {
     public class RegistrarReintegroProveedorVM
     {
