@@ -632,6 +632,33 @@ namespace saas.Controllers
                     compra.Id,
                     compra.Total);
 
+            var pagos =
+                await _context.PagosProveedor
+                    .AsNoTracking()
+                    .Where(p =>
+                        p.CompraId == compra.Id &&
+                        p.EmpresaId == compra.EmpresaId)
+                    .OrderByDescending(p => p.Fecha)
+                    .ThenByDescending(p => p.Id)
+                    .Select(p => new PagoProveedorResumenVM
+                    {
+                        Id = p.Id,
+                        Fecha = p.Fecha,
+                        Importe = p.Importe,
+                        MedioPagoNombre = p.MedioPago.Nombre,
+                        CajaNombre = p.Caja.Nombre,
+                        UsuarioNombre = p.Usuario.Email ?? string.Empty,
+                        Estado = p.Estado,
+                        TurnoCajaId = p.TurnoCajaId,
+                        FechaAnulacion = p.FechaAnulacion,
+                        UsuarioAnulacionNombre =
+                            p.UsuarioAnulacion != null
+                                ? p.UsuarioAnulacion.Email
+                                : null,
+                        MotivoAnulacion = p.MotivoAnulacion
+                    })
+                    .ToListAsync();
+
             var compraVM = new CompraDetailsVM
             {
                 Id = compra.Id,
@@ -642,6 +669,7 @@ namespace saas.Controllers
                 Total = compra.Total,
                 TotalPagado = totalPagado,
                 SaldoPendiente = saldoPendiente,
+                Pagos = pagos,
                 Estado = compra.Estado,
                 Observaciones = compra.Observaciones,
                 UsuarioEmail = compra.Usuario.Email ?? string.Empty,

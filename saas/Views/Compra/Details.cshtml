@@ -182,6 +182,124 @@
                     </table>
                 </div>
 
+                <div class="card bg-white mt-4">
+                    <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h2 class="h6 mb-1">Pagos realizados</h2>
+                            <p class="text-sm text-muted-custom mb-0">
+                                Historial financiero asociado a esta compra.
+                            </p>
+                        </div>
+
+                        @if (Model.Estado && Model.SaldoPendiente > 0)
+                        {
+                            <a asp-controller="PagoProveedor"
+                               asp-action="Registrar"
+                               asp-route-compraId="@Model.Id"
+                               class="btn btn-primary d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined icon-sm">payments</span>
+                                Registrar pago
+                            </a>
+                        }
+                    </div>
+
+                    @if (Model.Pagos.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">Fecha</th>
+                                        <th>Medio de pago</th>
+                                        <th>Caja</th>
+                                        <th>Usuario</th>
+                                        <th class="text-end">Importe</th>
+                                        <th class="text-center">Estado</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    @foreach (var pago in Model.Pagos)
+                                    {
+                                        <tr>
+                                            <td class="ps-4">
+                                                @pago.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                            </td>
+
+                                            <td>
+                                                @pago.MedioPagoNombre
+                                            </td>
+
+                                            <td>
+                                                @pago.CajaNombre
+                                            </td>
+
+                                            <td>
+                                                @pago.UsuarioNombre
+                                            </td>
+
+                                            <td class="text-end fw-semibold">
+                                                @pago.Importe.ToString("C")
+                                            </td>
+
+                                            <td class="text-center">
+                                                @if (pago.Estado == saas.Models.Enums.EstadoPago.Activo)
+                                                {
+                                                    <span class="badge rounded-pill badge-success-light">
+                                                        Activo
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge rounded-pill badge-danger-light">
+                                                        Anulado
+                                                    </span>
+                                                }
+                                            </td>
+                                        </tr>
+
+                                        @if (pago.Estado == saas.Models.Enums.EstadoPago.Anulado)
+                                        {
+                                            <tr>
+                                                <td colspan="6" class="bg-light ps-4 py-3">
+                                                    <div class="text-sm text-muted-custom">
+                                                        <strong>Anulado:</strong>
+                                                        @(pago.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+
+                                                        @if (!string.IsNullOrWhiteSpace(pago.UsuarioAnulacionNombre))
+                                                        {
+                                                            <span> · @pago.UsuarioAnulacionNombre</span>
+                                                        }
+
+                                                        @if (!string.IsNullOrWhiteSpace(pago.MotivoAnulacion))
+                                                        {
+                                                            <span> · Motivo: @pago.MotivoAnulacion</span>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="card-body p-4">
+                            <div class="text-center py-4">
+                                <span class="material-symbols-outlined fs-1 text-muted-custom mb-2">
+                                    payments
+                                </span>
+
+                                <p class="text-muted-custom mb-0">
+                                    Todavía no se registraron pagos para esta compra.
+                                </p>
+                            </div>
+                        </div>
+                    }
+                </div>
+
                 <div class="card-footer bg-white border-top p-4">
                     <div class="d-flex justify-content-end">
                         <div class="compra-total-box">
