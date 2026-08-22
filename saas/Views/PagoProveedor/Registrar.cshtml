@@ -29,7 +29,10 @@
 
     <form asp-action="Registrar"
           method="post"
-          id="formRegistrarPagoProveedor">
+          id="formRegistrarPagoProveedor"
+          data-get-cajas-url="@Url.Action("GetCajasPorMedioPago", "PagoProveedor")"
+          data-compra-id="@Model.CompraId"
+          data-caja-seleccionada="@Model.CajaId">
 
         @Html.AntiForgeryToken()
 
@@ -77,7 +80,8 @@
                                 </label>
 
                                 <select asp-for="MedioPagoId"
-                                        class="form-select">
+                                        class="form-select"
+                                        id="medioPagoSelect">
 
                                     <option value="">
                                         Seleccionar medio
@@ -105,18 +109,12 @@
                                 </label>
 
                                 <select asp-for="CajaId"
-                                        class="form-select">
+                                        class="form-select"
+                                        id="cajaSelect">
 
                                     <option value="">
-                                        Seleccionar caja
+                                        Primero seleccione un medio de pago
                                     </option>
-
-                                    @foreach (var caja in Model.CajasDisponibles)
-                                    {
-                                        <option value="@caja.Id">
-                                            @caja.Nombre
-                                        </option>
-                                    }
 
                                 </select>
 
@@ -177,5 +175,8 @@
 @section Scripts {
 
     <partial name="_ValidationScriptsPartial" />
+
+    <script src="~/js/pago-proveedor.js"
+            asp-append-version="true"></script>
 
 }

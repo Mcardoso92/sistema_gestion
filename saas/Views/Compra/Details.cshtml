@@ -215,6 +215,7 @@
                                         <th>Usuario</th>
                                         <th class="text-end">Importe</th>
                                         <th class="text-center">Estado</th>
+                                        <th class="text-end pe-4">Acciones</th>
                                     </tr>
                                 </thead>
 
@@ -256,12 +257,27 @@
                                                     </span>
                                                 }
                                             </td>
+                                            <td class="text-end pe-4">
+                                                @if (pago.Estado == saas.Models.Enums.EstadoPago.Activo)
+                                                {
+                                                    <a asp-controller="PagoProveedor"
+                                                       asp-action="Anular"
+                                                       asp-route-id="@pago.Id"
+                                                       class="btn btn-sm btn-outline-danger">
+                                                        Anular
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted-custom">—</span>
+                                                }
+                                            </td>
                                         </tr>
 
                                         @if (pago.Estado == saas.Models.Enums.EstadoPago.Anulado)
                                         {
                                             <tr>
-                                                <td colspan="6" class="bg-light ps-4 py-3">
+                                                <td colspan="7" class="bg-light ps-4 py-3">
                                                     <div class="text-sm text-muted-custom">
                                                         <strong>Anulado:</strong>
                                                         @(pago.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
