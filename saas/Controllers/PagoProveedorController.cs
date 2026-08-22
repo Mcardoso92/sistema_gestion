@@ -443,7 +443,7 @@ namespace saas.Controllers
                         vm.MedioPagoId,
 
                     TurnoCajaId =
-                        turnoOperativoActual?.Id,
+                        turnoMovimientoCajaId,
 
                     UsuarioId =
                         usuario.Id,
@@ -652,8 +652,7 @@ namespace saas.Controllers
         // POST: PagoProveedor/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(
-            AnularPagoProveedorVM vm)
+        public async Task<IActionResult> Anular(AnularPagoProveedorVM vm)
         {
             var usuario =
                 await _userManager.GetUserAsync(User);
@@ -893,26 +892,68 @@ namespace saas.Controllers
                 return View(vm);
             }
         }
+        // GET: PagoProveedor/GetCajasPorMedioPago
+        [HttpGet]
+        public async Task<IActionResult> GetCajasPorMedioPago(int compraId, int medioPagoId)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<Compra> consultaCompra =
+                _context.Compras
+                    .AsNoTracking();
+
+            if (!esSuperAdmin)
+            {
+                consultaCompra =
+                    consultaCompra.Where(c =>
+                        c.EmpresaId == usuario.EmpresaId);
+            }
+
+            var compra =
+                await consultaCompra
+                    .FirstOrDefaultAsync(c =>
+                        c.Id == compraId);
+
+            if (compra == null)
+            {
+                return NotFound();
+            }
+
+            var cajas =
+                await _context.CajaMediosPago
+                    .AsNoTracking()
+                    .Where(cm =>
+                        cm.MedioPagoId == medioPagoId &&
+                        cm.MedioPago.EmpresaId == compra.EmpresaId &&
+                        cm.MedioPago.Estado &&
+                        cm.Caja.EmpresaId == compra.EmpresaId &&
+                        cm.Caja.Estado)
+                    .OrderBy(cm =>
+                        cm.Caja.Nombre)
+                    .Select(cm => new
+                    {
+                        id = cm.CajaId,
+                        nombre = cm.Caja.Nombre
+                    })
+                    .ToListAsync();
+
+            return Json(cajas);
+        }
 
         //Helpers Methods
         private async Task CargarOpciones( RegistrarPagoProveedorVM vm, int empresaId)
         {
-            vm.CajasDisponibles =
-                await _context.Cajas
-                    .AsNoTracking()
-                    .Where(c =>
-                        c.EmpresaId == empresaId &&
-                        c.Estado)
-                    .OrderBy(c =>
-                        c.Nombre)
-                    .Select(c =>
-                        new CajaOpcionSimpleVM
-                        {
-                            Id = c.Id,
-                            Nombre = c.Nombre
-                        })
-                    .ToListAsync();
-
             vm.MediosPagoDisponibles =
                 await _context.MediosPago
                     .AsNoTracking()

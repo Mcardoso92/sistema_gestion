@@ -741,6 +741,25 @@ namespace saas.Controllers
                         nameof(Details),
                         new { id });
                 }
+                bool tienePagosActivos =
+                    await _context.PagosProveedor
+                        .AsNoTracking()
+                        .AnyAsync(p =>
+                            p.CompraId == compra.Id &&
+                            p.EmpresaId == compra.EmpresaId &&
+                            p.Estado == EstadoPago.Activo);
+
+                if (tienePagosActivos)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] =
+                        "No se puede anular la compra porque tiene pagos activos. Debe anular primero los pagos asociados.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id });
+                }
 
                 foreach (var detalle in compra.Detalles)
                 {
