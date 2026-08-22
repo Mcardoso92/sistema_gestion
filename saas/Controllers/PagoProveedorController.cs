@@ -251,299 +251,650 @@ namespace saas.Controllers
 
             if (!ModelState.IsValid)
             {
-                await CargarOpciones(vm, compra.EmpresaId);
+                await CargarOpciones(
+                    vm,
+                    compra.EmpresaId);
 
-                await using var transaccion =
+                return View(vm);
+            }
+
+            await using var transaccion =
                     await _context.Database
                         .BeginTransactionAsync(
                             IsolationLevel.Serializable);
 
-                try
+            try
+            {
+                var compraActual =
+                    await _context.Compras
+                        .FirstOrDefaultAsync(c =>
+                            c.Id == compra.Id &&
+                            c.EmpresaId == compra.EmpresaId);
+
+                if (compraActual == null)
                 {
-                    var compraActual =
-                        await _context.Compras
-                            .FirstOrDefaultAsync(c =>
-                                c.Id == compra.Id &&
-                                c.EmpresaId == compra.EmpresaId);
-
-                    if (compraActual == null)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        return NotFound();
-                    }
-
-                    if (!compraActual.Estado)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        TempData["Error"] =
-                            "La compra fue anulada antes de registrar el pago.";
-
-                        return RedirectToAction(
-                            "Details",
-                            "Compra",
-                            new { id = compra.Id });
-                    }
-
-                    decimal saldoPendienteActual =
-                        await _compraSaldoService
-                            .ObtenerSaldoPendiente(
-                                compraActual.Id,
-                                compraActual.Total);
-
-                    if (saldoPendienteActual <= 0)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        TempData["Error"] =
-                            "La compra ya se encuentra completamente pagada.";
-
-                        return RedirectToAction(
-                            "Details",
-                            "Compra",
-                            new { id = compraActual.Id });
-                    }
-
-                    if (vm.Importe > saldoPendienteActual)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        vm.SaldoPendiente =
-                            saldoPendienteActual;
-
-                        ModelState.AddModelError(
-                            nameof(vm.Importe),
-                            $"El saldo pendiente cambió. Saldo actual: {saldoPendienteActual:C}.");
-
-                        await CargarOpciones(
-                            vm,
-                            compraActual.EmpresaId);
-
-                        return View(vm);
-                    }
-
-                    var cajaActual =
-                        await _context.Cajas
-                            .FirstOrDefaultAsync(c =>
-                                c.Id == vm.CajaId &&
-                                c.EmpresaId == compraActual.EmpresaId &&
-                                c.Estado);
-
-                    if (cajaActual == null)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        ModelState.AddModelError(
-                            nameof(vm.CajaId),
-                            "La caja seleccionada dejó de estar disponible.");
-
-                        await CargarOpciones(
-                            vm,
-                            compraActual.EmpresaId);
-
-                        return View(vm);
-                    }
-
-                    bool medioPagoValidoActual =
-                        await _context.CajaMediosPago
-                            .AsNoTracking()
-                            .AnyAsync(cm =>
-                                cm.CajaId == vm.CajaId &&
-                                cm.MedioPagoId == vm.MedioPagoId &&
-                                cm.Caja.EmpresaId == compraActual.EmpresaId &&
-                                cm.Caja.Estado &&
-                                cm.MedioPago.EmpresaId == compraActual.EmpresaId &&
-                                cm.MedioPago.Estado);
-
-                    if (!medioPagoValidoActual)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        ModelState.AddModelError(
-                            nameof(vm.MedioPagoId),
-                            "El medio de pago ya no es válido para la caja seleccionada.");
-
-                        await CargarOpciones(
-                            vm,
-                            compraActual.EmpresaId);
-
-                        return View(vm);
-                    }
-
-                    var turnoOperativoActual =
-                        await _context.TurnosCaja
-                            .FirstOrDefaultAsync(t =>
-                                t.EmpresaId == compraActual.EmpresaId &&
-                                t.UsuarioAperturaId == usuario.Id &&
-                                t.Estado == EstadoTurnoCaja.Abierto);
-
-                    int? turnoMovimientoCajaId = null;
-
-                    if (cajaActual.PermiteTurnos)
-                    {
-                        if (turnoOperativoActual == null ||
-                            turnoOperativoActual.CajaId != cajaActual.Id)
-                        {
-                            await transaccion.RollbackAsync();
-
-                            ModelState.AddModelError(
-                                nameof(vm.CajaId),
-                                $"Debe tener un turno abierto propio para operar la caja \"{cajaActual.Nombre}\".");
-
-                            await CargarOpciones(
-                                vm,
-                                compraActual.EmpresaId);
-
-                            return View(vm);
-                        }
-
-                        turnoMovimientoCajaId =
-                            turnoOperativoActual.Id;
-                    }
-
-                    decimal saldoDisponibleCaja =
-                        await _cajaSaldoService
-                            .CalcularSaldoDisponible(
-                                cajaActual,
-                                usuario.Id);
-
-                    if (vm.Importe > saldoDisponibleCaja)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        ModelState.AddModelError(
-                            nameof(vm.Importe),
-                            $"La caja no tiene saldo suficiente. Disponible: {saldoDisponibleCaja:C}.");
-
-                        await CargarOpciones(
-                            vm,
-                            compraActual.EmpresaId);
-
-                        return View(vm);
-                    }
-
-                    var pago =
-    new PagoProveedor
-    {
-        CompraId =
-            compraActual.Id,
-
-        EmpresaId =
-            compraActual.EmpresaId,
-
-        CajaId =
-            vm.CajaId,
-
-        MedioPagoId =
-            vm.MedioPagoId,
-
-        TurnoCajaId =
-            turnoOperativoActual?.Id,
-
-        UsuarioId =
-            usuario.Id,
-
-        Fecha =
-            DateTime.Now,
-
-        Importe =
-            vm.Importe,
-
-        Estado =
-            EstadoPago.Activo,
-
-        FechaAnulacion =
-            null,
-
-        UsuarioAnulacionId =
-            null,
-
-        MotivoAnulacion =
-            null
-    };
-
-                    _context.PagosProveedor.Add(
-                        pago);
-
-                    await _context.SaveChangesAsync();
-
-                    var movimiento =
-                        new MovimientoCaja
-                        {
-                            EmpresaId =
-                                compraActual.EmpresaId,
-
-                            CajaId =
-                                vm.CajaId,
-
-                            Tipo =
-                                TipoMovimientoCaja.PagoProveedor,
-
-                            Direccion =
-                                DireccionMovimientoCaja.Egreso,
-
-                            Importe =
-                                vm.Importe,
-
-                            Fecha =
-                                pago.Fecha,
-
-                            UsuarioId =
-                                usuario.Id,
-
-                            MedioPagoId =
-                                vm.MedioPagoId,
-
-                            TurnoCajaId =
-                                turnoMovimientoCajaId,
-
-                            CategoriaGastoId =
-                                null,
-
-                            Concepto =
-                                $"Pago de compra #{compraActual.Id}",
-
-                            Observaciones =
-                                null,
-
-                            PagoProveedorId =
-                                pago.Id
-                        };
-
-                    _context.MovimientosCaja.Add(
-                        movimiento);
-
-                    await _context.SaveChangesAsync();
-
-                    await transaccion.CommitAsync();
-
-                    TempData["Success"] =
-                        vm.Importe == saldoPendienteActual
-                            ? "La compra quedó completamente pagada."
-                            : "Pago registrado correctamente.";
+                    await transaccion.RollbackAsync();
+
+                    return NotFound();
+                }
+
+                if (!compraActual.Estado)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] =
+                        "La compra fue anulada antes de registrar el pago.";
+
+                    return RedirectToAction(
+                        "Details",
+                        "Compra",
+                        new { id = compra.Id });
+                }
+
+                decimal saldoPendienteActual =
+                    await _compraSaldoService
+                        .ObtenerSaldoPendiente(
+                            compraActual.Id,
+                            compraActual.Total);
+
+                if (saldoPendienteActual <= 0)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] =
+                        "La compra ya se encuentra completamente pagada.";
 
                     return RedirectToAction(
                         "Details",
                         "Compra",
                         new { id = compraActual.Id });
                 }
-                catch
+
+                if (vm.Importe > saldoPendienteActual)
                 {
                     await transaccion.RollbackAsync();
 
-                    ModelState.AddModelError("", "Ocurrió un error al registrar el pago al proveedor.");
+                    vm.SaldoPendiente =
+                        saldoPendienteActual;
+
+                    ModelState.AddModelError(
+                        nameof(vm.Importe),
+                        $"El saldo pendiente cambió. Saldo actual: {saldoPendienteActual:C}.");
 
                     await CargarOpciones(
                         vm,
-                        compra.EmpresaId);
+                        compraActual.EmpresaId);
 
                     return View(vm);
                 }
+
+                var cajaActual =
+                    await _context.Cajas
+                        .FirstOrDefaultAsync(c =>
+                            c.Id == vm.CajaId &&
+                            c.EmpresaId == compraActual.EmpresaId &&
+                            c.Estado);
+
+                if (cajaActual == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        nameof(vm.CajaId),
+                        "La caja seleccionada dejó de estar disponible.");
+
+                    await CargarOpciones(
+                        vm,
+                        compraActual.EmpresaId);
+
+                    return View(vm);
+                }
+
+                bool medioPagoValidoActual =
+                    await _context.CajaMediosPago
+                        .AsNoTracking()
+                        .AnyAsync(cm =>
+                            cm.CajaId == vm.CajaId &&
+                            cm.MedioPagoId == vm.MedioPagoId &&
+                            cm.Caja.EmpresaId == compraActual.EmpresaId &&
+                            cm.Caja.Estado &&
+                            cm.MedioPago.EmpresaId == compraActual.EmpresaId &&
+                            cm.MedioPago.Estado);
+
+                if (!medioPagoValidoActual)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        nameof(vm.MedioPagoId),
+                        "El medio de pago ya no es válido para la caja seleccionada.");
+
+                    await CargarOpciones(
+                        vm,
+                        compraActual.EmpresaId);
+
+                    return View(vm);
+                }
+
+                var turnoOperativoActual =
+                    await _context.TurnosCaja
+                        .FirstOrDefaultAsync(t =>
+                            t.EmpresaId == compraActual.EmpresaId &&
+                            t.UsuarioAperturaId == usuario.Id &&
+                            t.Estado == EstadoTurnoCaja.Abierto);
+
+                int? turnoMovimientoCajaId = null;
+
+                if (cajaActual.PermiteTurnos)
+                {
+                    if (turnoOperativoActual == null ||
+                        turnoOperativoActual.CajaId != cajaActual.Id)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            nameof(vm.CajaId),
+                            $"Debe tener un turno abierto propio para operar la caja \"{cajaActual.Nombre}\".");
+
+                        await CargarOpciones(
+                            vm,
+                            compraActual.EmpresaId);
+
+                        return View(vm);
+                    }
+
+                    turnoMovimientoCajaId =
+                        turnoOperativoActual.Id;
+                }
+
+                decimal saldoDisponibleCaja =
+                    await _cajaSaldoService
+                        .CalcularSaldoDisponible(
+                            cajaActual,
+                            usuario.Id);
+
+                if (vm.Importe > saldoDisponibleCaja)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        nameof(vm.Importe),
+                        $"La caja no tiene saldo suficiente. Disponible: {saldoDisponibleCaja:C}.");
+
+                    await CargarOpciones(
+                        vm,
+                        compraActual.EmpresaId);
+
+                    return View(vm);
+                }
+
+                var pago = new PagoProveedor
+                {
+                    CompraId =
+                        compraActual.Id,
+
+                    EmpresaId =
+                        compraActual.EmpresaId,
+
+                    CajaId =
+                        vm.CajaId,
+
+                    MedioPagoId =
+                        vm.MedioPagoId,
+
+                    TurnoCajaId =
+                        turnoOperativoActual?.Id,
+
+                    UsuarioId =
+                        usuario.Id,
+
+                    Fecha =
+                        DateTime.Now,
+
+                    Importe =
+                        vm.Importe,
+
+                    Estado =
+                        EstadoPago.Activo,
+
+                    FechaAnulacion =
+                        null,
+
+                    UsuarioAnulacionId =
+                        null,
+
+                    MotivoAnulacion =
+                        null
+                };
+
+                _context.PagosProveedor.Add(
+                    pago);
+
+                await _context.SaveChangesAsync();
+
+                var movimiento =
+                    new MovimientoCaja
+                    {
+                        EmpresaId =
+                            compraActual.EmpresaId,
+
+                        CajaId =
+                            vm.CajaId,
+
+                        Tipo =
+                            TipoMovimientoCaja.PagoProveedor,
+
+                        Direccion =
+                            DireccionMovimientoCaja.Egreso,
+
+                        Importe =
+                            vm.Importe,
+
+                        Fecha =
+                            pago.Fecha,
+
+                        UsuarioId =
+                            usuario.Id,
+
+                        MedioPagoId =
+                            vm.MedioPagoId,
+
+                        TurnoCajaId =
+                            turnoMovimientoCajaId,
+
+                        CategoriaGastoId =
+                            null,
+
+                        Concepto =
+                            $"Pago de compra #{compraActual.Id}",
+
+                        Observaciones =
+                            null,
+
+                        PagoProveedorId =
+                            pago.Id
+                    };
+
+                _context.MovimientosCaja.Add(
+                    movimiento);
+
+                await _context.SaveChangesAsync();
+
+                await transaccion.CommitAsync();
+
+                TempData["Success"] =
+                    vm.Importe == saldoPendienteActual
+                        ? "La compra quedó completamente pagada."
+                        : "Pago registrado correctamente.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Compra",
+                    new { id = compraActual.Id });
             }
+            catch
+            {
+                await transaccion.RollbackAsync();
+
+                ModelState.AddModelError("", "Ocurrió un error al registrar el pago al proveedor.");
+
+                await CargarOpciones(
+                    vm,
+                    compra.EmpresaId);
+
+                return View(vm);
+            }
+        }
+        // GET: PagoProveedor/Anular/5
+        [HttpGet]
+        public async Task<IActionResult> Anular(int id)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<PagoProveedor> consulta =
+                _context.PagosProveedor
+                    .AsNoTracking()
+                    .Include(p => p.MedioPago)
+                    .Include(p => p.Compra);
+
+            if (!esSuperAdmin)
+            {
+                consulta =
+                    consulta.Where(p =>
+                        p.EmpresaId == usuario.EmpresaId);
+            }
+
+            var pago =
+                await consulta
+                    .FirstOrDefaultAsync(p =>
+                        p.Id == id);
+
+            if (pago == null)
+            {
+                return NotFound();
+            }
+
+            if (pago.Estado != EstadoPago.Activo)
+            {
+                TempData["Error"] =
+                    "El pago ya se encuentra anulado.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Compra",
+                    new { id = pago.CompraId });
+            }
+
+            var movimiento =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m =>
+                        m.PagoProveedorId == pago.Id &&
+                        m.Tipo == TipoMovimientoCaja.PagoProveedor);
+
+            if (movimiento == null)
+            {
+                TempData["Error"] =
+                    "No se encontró el movimiento de caja asociado al pago.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Compra",
+                    new { id = pago.CompraId });
+            }
+
+            bool yaRevertido =
+                await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.MovimientoOrigenId == movimiento.Id);
+
+            if (yaRevertido)
+            {
+                TempData["Error"] =
+                    "El movimiento asociado a este pago ya fue revertido.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Compra",
+                    new { id = pago.CompraId });
+            }
+
+            var vm =
+                new AnularPagoProveedorVM
+                {
+                    PagoProveedorId =
+                        pago.Id,
+
+                    CompraId =
+                        pago.CompraId,
+
+                    Importe =
+                        pago.Importe,
+
+                    MedioPagoNombre =
+                        pago.MedioPago.Nombre
+                };
 
             return View(vm);
         }
+        // POST: PagoProveedor/Anular/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Anular(
+            AnularPagoProveedorVM vm)
+        {
+            var usuario =
+                await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(
+                    usuario,
+                    "SuperAdmin");
+
+            IQueryable<PagoProveedor> consulta =
+                _context.PagosProveedor
+                    .Include(p => p.MedioPago)
+                    .Include(p => p.Compra);
+
+            if (!esSuperAdmin)
+            {
+                consulta =
+                    consulta.Where(p =>
+                        p.EmpresaId == usuario.EmpresaId);
+            }
+
+            var pago =
+                await consulta
+                    .FirstOrDefaultAsync(p =>
+                        p.Id == vm.PagoProveedorId);
+
+            if (pago == null)
+            {
+                return NotFound();
+            }
+
+            vm.CompraId =
+                pago.CompraId;
+
+            vm.Importe =
+                pago.Importe;
+
+            vm.MedioPagoNombre =
+                pago.MedioPago.Nombre;
+
+            if (pago.Estado != EstadoPago.Activo)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "El pago ya se encuentra anulado.");
+            }
+
+            var movimiento =
+                await _context.MovimientosCaja
+                    .FirstOrDefaultAsync(m =>
+                        m.PagoProveedorId == pago.Id &&
+                        m.Tipo == TipoMovimientoCaja.PagoProveedor);
+
+            if (movimiento == null)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "No se encontró el movimiento de caja asociado al pago.");
+            }
+
+            if (movimiento != null)
+            {
+                bool yaRevertido =
+                    await _context.MovimientosCaja
+                        .AsNoTracking()
+                        .AnyAsync(m =>
+                            m.MovimientoOrigenId == movimiento.Id);
+
+                if (yaRevertido)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "El movimiento asociado a este pago ya fue revertido.");
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(vm);
+            }
+
+            vm.Motivo =
+                vm.Motivo.Trim();
+
+            await using var transaccion =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
+
+            try
+            {
+                var pagoActual =
+                    await _context.PagosProveedor
+                        .FirstOrDefaultAsync(p =>
+                            p.Id == pago.Id &&
+                            p.EmpresaId == pago.EmpresaId);
+
+                if (pagoActual == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    return NotFound();
+                }
+
+                if (pagoActual.Estado != EstadoPago.Activo)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "El pago ya fue anulado.");
+
+                    return View(vm);
+                }
+
+                var movimientoActual =
+                    await _context.MovimientosCaja
+                        .FirstOrDefaultAsync(m =>
+                            m.PagoProveedorId == pagoActual.Id &&
+                            m.Tipo == TipoMovimientoCaja.PagoProveedor);
+
+                if (movimientoActual == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "No se encontró el movimiento de caja asociado al pago.");
+
+                    return View(vm);
+                }
+
+                bool movimientoYaRevertido =
+                    await _context.MovimientosCaja
+                        .AsNoTracking()
+                        .AnyAsync(m =>
+                            m.MovimientoOrigenId ==
+                            movimientoActual.Id);
+
+                if (movimientoYaRevertido)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "El movimiento asociado a este pago ya fue revertido.");
+
+                    return View(vm);
+                }
+
+                pagoActual.Estado =
+                    EstadoPago.Anulado;
+
+                pagoActual.FechaAnulacion =
+                    DateTime.Now;
+
+                pagoActual.UsuarioAnulacionId =
+                    usuario.Id;
+
+                pagoActual.MotivoAnulacion =
+                    vm.Motivo;
+
+                var movimientoReversion =
+                    new MovimientoCaja
+                    {
+                        EmpresaId =
+                            movimientoActual.EmpresaId,
+
+                        CajaId =
+                            movimientoActual.CajaId,
+
+                        Tipo =
+                            TipoMovimientoCaja.ReversionPagoProveedor,
+
+                        Direccion =
+                            DireccionMovimientoCaja.Ingreso,
+
+                        Importe =
+                            movimientoActual.Importe,
+
+                        Fecha =
+                            DateTime.Now,
+
+                        UsuarioId =
+                            usuario.Id,
+
+                        MedioPagoId =
+                            movimientoActual.MedioPagoId,
+
+                        TurnoCajaId =
+                            movimientoActual.TurnoCajaId,
+
+                        CategoriaGastoId =
+                            null,
+
+                        Concepto =
+                            $"Reversión de pago de compra #{pagoActual.CompraId}",
+
+                        Observaciones =
+                            vm.Motivo,
+
+                        MovimientoOrigenId =
+                            movimientoActual.Id,
+
+                        PagoProveedorId =
+                            pagoActual.Id
+                    };
+
+                _context.MovimientosCaja.Add(
+                    movimientoReversion);
+
+                await _context.SaveChangesAsync();
+
+                await transaccion.CommitAsync();
+
+                TempData["Success"] =
+                    "Pago anulado correctamente.";
+
+                return RedirectToAction(
+                    "Details",
+                    "Compra",
+                    new { id = pagoActual.CompraId });
+            }
+            catch
+            {
+                await transaccion.RollbackAsync();
+
+                ModelState.AddModelError(
+                    "",
+                    "Ocurrió un error al anular el pago.");
+
+                return View(vm);
+            }
+        }
+
+        //Helpers Methods
         private async Task CargarOpciones( RegistrarPagoProveedorVM vm, int empresaId)
         {
             vm.CajasDisponibles =
