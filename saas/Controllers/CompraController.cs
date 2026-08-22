@@ -10,6 +10,7 @@ using saas.Services;
 using saas.ViewModel;
 using saas.ViewModel.DevolucionCompra;
 using System.Data;
+using saas.ViewModel.ReintegroProveedor;
 
 namespace saas.Controllers
 {
@@ -669,6 +670,33 @@ namespace saas.Controllers
                     })
                     .ToListAsync();
 
+            var reintegrosProveedor =
+                await _context.ReintegrosProveedor
+                    .AsNoTracking()
+                    .Where(r =>
+                        r.CompraId == compra.Id &&
+                        r.EmpresaId == compra.EmpresaId)
+                    .OrderByDescending(r => r.Fecha)
+                    .ThenByDescending(r => r.Id)
+                    .Select(r => new ReintegroProveedorResumenVM
+                    {
+                        Id = r.Id,
+                        Fecha = r.Fecha,
+                        Importe = r.Importe,
+                        MedioPagoNombre = r.MedioPago.Nombre,
+                        CajaNombre = r.Caja.Nombre,
+                        UsuarioNombre = r.Usuario.Email ?? string.Empty,
+                        Estado = r.Estado,
+                        TurnoCajaId = r.TurnoCajaId,
+                        FechaAnulacion = r.FechaAnulacion,
+                        UsuarioAnulacionNombre =
+                            r.UsuarioAnulacion != null
+                                ? r.UsuarioAnulacion.Email
+                                : null,
+                        MotivoAnulacion = r.MotivoAnulacion
+                    })
+                    .ToListAsync();
+
             var devoluciones =
                 await _context.DevolucionesCompra
                     .AsNoTracking()
@@ -718,6 +746,7 @@ namespace saas.Controllers
                 SaldoPendiente = saldoPendiente,
                 TotalReintegrado = totalReintegrado,
                 PendienteRecuperar = pendienteRecuperar,
+                ReintegrosProveedor = reintegrosProveedor,
                 Pagos = pagos,
                 DevolucionesCompra = devoluciones,
                 Estado = compra.Estado,

@@ -1,6 +1,6 @@
 using saas.Models.Enums;
 
-namespace saas.ViewModel
+namespace saas.ViewModel.ReintegroProveedor
 {
     public class ReintegroProveedorResumenVM
     {
