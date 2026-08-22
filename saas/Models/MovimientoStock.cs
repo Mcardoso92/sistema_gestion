@@ -38,5 +38,8 @@ namespace saas.Models
 
         [ValidateNever]
         public ReintegroVenta? ReintegroVenta { get; set; }
+        public int? DevolucionCompraId { get; set; }
+        [ValidateNever]
+        public DevolucionCompra? DevolucionCompra { get; set; }
     }
 }

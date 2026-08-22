@@ -19,6 +19,8 @@ namespace saas.Data
         public DbSet<Proveedor> Proveedores { get; set; } = null!;
         public DbSet<Compra> Compras { get; set; } = null!;
         public DbSet<DetalleCompra> DetallesCompra { get; set; } = null!;
+        public DbSet<DevolucionCompra> DevolucionesCompra { get; set; } = null!;
+        public DbSet<DetalleDevolucionCompra> DetallesDevolucionCompra { get; set; } = null!;
         public DbSet<Caja> Cajas { get; set; } = null!;
         public DbSet<MedioPago> MediosPago { get; set; } = null!;
         public DbSet<CajaMedioPago> CajaMediosPago { get; set; } = null!;
@@ -139,6 +141,12 @@ namespace saas.Data
                 .HasForeignKey(m => m.ReintegroVentaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.DevolucionCompra)
+                .WithMany(d => d.MovimientosStock)
+                .HasForeignKey(m => m.DevolucionCompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Proveedor>()
                 .HasOne(p => p.Empresa)
                 .WithMany(e => e.Proveedores)
@@ -178,6 +186,48 @@ namespace saas.Data
             modelBuilder.Entity<DetalleCompra>()
                 .HasOne(d => d.Producto)
                 .WithMany(p => p.DetallesCompra)
+                .HasForeignKey(d => d.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasOne(d => d.Compra)
+                .WithMany(c => c.DevolucionesCompra)
+                .HasForeignKey(d => d.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasOne(d => d.Empresa)
+                .WithMany()
+                .HasForeignKey(d => d.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasOne(d => d.Usuario)
+                .WithMany()
+                .HasForeignKey(d => d.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasOne(d => d.UsuarioAnulacion)
+                .WithMany()
+                .HasForeignKey(d => d.UsuarioAnulacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .HasOne(d => d.DevolucionCompra)
+                .WithMany(r => r.Detalles)
+                .HasForeignKey(d => d.DevolucionCompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .HasOne(d => d.DetalleCompra)
+                .WithMany(c => c.DetallesDevolucion)
+                .HasForeignKey(d => d.DetalleCompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .HasOne(d => d.Producto)
+                .WithMany()
                 .HasForeignKey(d => d.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -610,6 +660,21 @@ namespace saas.Data
             modelBuilder.Entity<Compra>()
                 .HasIndex(c => c.UsuarioAnulacionId);
 
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasIndex(d => d.CompraId);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasIndex(d => d.EmpresaId);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasIndex(d => d.UsuarioId);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasIndex(d => d.UsuarioAnulacionId);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .HasIndex(d => d.Fecha);
+
             modelBuilder.Entity<DetalleCompra>()
                 .HasIndex(d => d.CompraId);
 
@@ -624,8 +689,28 @@ namespace saas.Data
                 })
                 .IsUnique();
 
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .HasIndex(d => d.DevolucionCompraId);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .HasIndex(d => d.DetalleCompraId);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .HasIndex(d => d.ProductoId);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .HasIndex(d => new
+                {
+                    d.DevolucionCompraId,
+                    d.DetalleCompraId
+                })
+                .IsUnique();
+
             modelBuilder.Entity<MovimientoStock>()
                 .HasIndex(m => m.CompraId);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasIndex(m => m.DevolucionCompraId);
 
             modelBuilder.Entity<Compra>()
                 .HasIndex(c => new
@@ -893,6 +978,18 @@ namespace saas.Data
 
             modelBuilder.Entity<DetalleCompra>()
                 .Property(d => d.PrecioVentaNuevo)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DevolucionCompra>()
+                .Property(d => d.Total)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .Property(d => d.PrecioUnitario)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<DetalleDevolucionCompra>()
+                .Property(d => d.Subtotal)
                 .HasPrecision(18, 2);
 
             //MovmientoStock

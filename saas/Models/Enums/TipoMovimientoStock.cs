@@ -10,6 +10,8 @@
         Compra = 6,
         AnulacionCompra = 7,
         ReintegroVenta = 8,
-        AnulacionReintegroVenta = 9
+        AnulacionReintegroVenta = 9,
+        DevolucionCompra = 10,
+        AnulacionDevolucionCompra = 11
     }
 }

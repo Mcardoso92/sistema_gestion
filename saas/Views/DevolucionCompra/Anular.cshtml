@@ -1,0 +1,113 @@
+﻿@model saas.ViewModel.DevolucionCompra.AnularDevolucionCompraVM
+
+@{
+    ViewData["Title"] = "Anular Devolución";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Anular Devolución
+            </h1>
+
+            <p class="text-muted mb-0">
+                Compra #@Model.CompraId
+            </p>
+        </div>
+
+        <a asp-controller="Compra"
+           asp-action="Details"
+           asp-route-id="@Model.CompraId"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <div class="alert alert-warning">
+                        Esta operación anulará la devolución y reingresará al stock las unidades devueltas.
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="text-muted small">
+                            Total de la devolución
+                        </div>
+
+                        <div class="fw-bold fs-5">
+                            @Model.Total.ToString("C")
+                        </div>
+                    </div>
+
+                    <form asp-action="Anular"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input asp-for="DevolucionCompraId"
+                               type="hidden" />
+
+                        <div asp-validation-summary="All"
+                             class="alert alert-danger"></div>
+
+                        <div class="mb-3">
+
+                            <label asp-for="Motivo"
+                                   class="form-label fw-semibold">
+                                Motivo de anulación
+                            </label>
+
+                            <textarea asp-for="Motivo"
+                                      class="form-control"
+                                      rows="4"
+                                      maxlength="500"
+                                      placeholder="Ingrese el motivo de la anulación"></textarea>
+
+                            <span asp-validation-for="Motivo"
+                                  class="text-danger"></span>
+
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+
+                            <a asp-controller="Compra"
+                               asp-action="Details"
+                               asp-route-id="@Model.CompraId"
+                               class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-danger">
+                                Confirmar anulación
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

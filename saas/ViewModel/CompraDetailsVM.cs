@@ -1,4 +1,6 @@
-﻿namespace saas.ViewModel
+﻿using saas.ViewModel.DevolucionCompra;
+
+namespace saas.ViewModel
 {
     public class CompraDetailsVM
     {
@@ -49,5 +51,9 @@
 
         public RegistrarReintegroProveedorVM NuevoReintegroProveedor { get; set; }
             = new RegistrarReintegroProveedorVM();
+
+        // Devoluciones de mercadería
+        public List<DevolucionCompraResumenVM> DevolucionesCompra { get; set; }
+            = new List<DevolucionCompraResumenVM>();
     }
 }

@@ -1,0 +1,217 @@
+﻿@model saas.ViewModels.DevolucionCompra.RegistrarDevolucionCompraVM
+
+@{
+    ViewData["Title"] = "Registrar Devolución";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h3 fw-bold mb-1">
+                Registrar Devolución
+            </h1>
+
+            <p class="text-muted mb-0">
+                Compra #@Model.CompraId · @Model.ProveedorNombre
+            </p>
+        </div>
+
+        <a asp-controller="Compra"
+           asp-action="Details"
+           asp-route-id="@Model.CompraId"
+           class="btn btn-outline-secondary">
+            Volver
+        </a>
+
+    </div>
+
+    <form asp-action="Registrar"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input asp-for="CompraId"
+               type="hidden" />
+
+        <div asp-validation-summary="All"
+             class="alert alert-danger"></div>
+
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-body p-4">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <div class="text-muted small">
+                            Fecha compra
+                        </div>
+
+                        <div class="fw-semibold">
+                            @Model.FechaCompra.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="text-muted small">
+                            Proveedor
+                        </div>
+
+                        <div class="fw-semibold">
+                            @Model.ProveedorNombre
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="text-muted small">
+                            Total original
+                        </div>
+
+                        <div class="fw-bold">
+                            @Model.TotalCompra.ToString("C")
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white py-3">
+
+                <h2 class="h6 mb-1">
+                    Productos
+                </h2>
+
+                <p class="text-muted small mb-0">
+                    Indique las cantidades que desea devolver al proveedor.
+                </p>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Producto</th>
+                            <th class="text-center">Comprado</th>
+                            <th class="text-center">Devuelto</th>
+                            <th class="text-center">Disponible</th>
+                            <th class="text-end">Precio unitario</th>
+                            <th class="text-center pe-4">Devolver</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @for (int i = 0; i < Model.Detalles.Count; i++)
+                        {
+                            <tr>
+
+                                <td class="ps-4">
+
+                                    @Model.Detalles[i].ProductoNombre
+
+                                    <input asp-for="Detalles[i].DetalleCompraId"
+                                           type="hidden" />
+
+                                    <input asp-for="Detalles[i].ProductoId"
+                                           type="hidden" />
+
+                                </td>
+
+                                <td class="text-center">
+                                    @Model.Detalles[i].CantidadComprada
+                                </td>
+
+                                <td class="text-center">
+                                    @Model.Detalles[i].CantidadDevuelta
+                                </td>
+
+                                <td class="text-center fw-semibold">
+                                    @Model.Detalles[i].CantidadDisponible
+                                </td>
+
+                                <td class="text-end">
+                                    @Model.Detalles[i].PrecioUnitario.ToString("C")
+                                </td>
+
+                                <td class="text-center pe-4">
+
+                                    <input asp-for="Detalles[i].CantidadDevolver"
+                                           type="number"
+                                           min="0"
+                                           max="@Model.Detalles[i].CantidadDisponible"
+                                           class="form-control text-center"
+                                           style="max-width: 110px; margin-left: auto;" />
+
+                                    <span asp-validation-for="Detalles[i].CantidadDevolver"
+                                          class="text-danger"></span>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <div class="card border-0 shadow-sm mt-4">
+
+            <div class="card-body p-4">
+
+                <label asp-for="Observaciones"
+                       class="form-label fw-semibold">
+                    Observaciones
+                </label>
+
+                <textarea asp-for="Observaciones"
+                          class="form-control"
+                          rows="3"
+                          maxlength="500"
+                          placeholder="Observaciones opcionales"></textarea>
+
+                <span asp-validation-for="Observaciones"
+                      class="text-danger"></span>
+
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+
+            <a asp-controller="Compra"
+               asp-action="Details"
+               asp-route-id="@Model.CompraId"
+               class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Confirmar devolución
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}
