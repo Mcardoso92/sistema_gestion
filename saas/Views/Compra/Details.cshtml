@@ -53,18 +53,6 @@
                         Anular compra
                     </button>
                 }
-                @if (Model.Estado)
-                {
-                    <a asp-controller="DevolucionCompra"
-                       asp-action="Registrar"
-                       asp-route-compraId="@Model.Id"
-                       class="btn btn-outline-primary d-flex align-items-center gap-2">
-                        <span class="material-symbols-outlined icon-sm">
-                            assignment_return
-                        </span>
-                        Devolver mercadería
-                    </a>
-                }
             </div>
         </div>
     </div>
