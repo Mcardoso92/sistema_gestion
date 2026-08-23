@@ -18,15 +18,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly CompraSaldoService _compraSaldoService;
+        private readonly CajaSaldoService _cajaSaldoService;
 
         public ReintegroProveedorController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            CompraSaldoService compraSaldoService)
+            CompraSaldoService compraSaldoService,
+            CajaSaldoService cajaSaldoService)
         {
             _context = context;
             _userManager = userManager;
             _compraSaldoService = compraSaldoService;
+            _cajaSaldoService = cajaSaldoService;
         }
         // GET: ReintegroProveedor/Registrar?compraId=5
         [HttpGet]
@@ -729,6 +732,69 @@ namespace saas.Controllers
                     return View(vm);
                 }
 
+                var cajaActual =
+                    await _context.Cajas
+                        .FirstOrDefaultAsync(c =>
+                            c.Id == reintegroActual.CajaId &&
+                            c.EmpresaId == reintegroActual.EmpresaId &&
+                            c.Estado);
+
+                if (cajaActual == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "La caja asociada al reintegro ya no se encuentra disponible.");
+
+                    return View(vm);
+                }
+
+                int? turnoMovimientoCajaId = null;
+
+                if (cajaActual.PermiteTurnos)
+                {
+                    var turnoActual =
+                        await _context.TurnosCaja
+                            .FirstOrDefaultAsync(t =>
+                                t.CajaId == cajaActual.Id &&
+                                t.EmpresaId == reintegroActual.EmpresaId &&
+                                t.UsuarioAperturaId == usuario.Id &&
+                                t.Estado == EstadoTurnoCaja.Abierto);
+
+                    if (turnoActual == null)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            "",
+                            $"Debe tener un turno abierto propio para operar la caja \"{cajaActual.Nombre}\".");
+
+                        return View(vm);
+                    }
+
+                    turnoMovimientoCajaId =
+                        turnoActual.Id;
+                }
+
+                decimal saldoDisponibleCaja =
+                    await _cajaSaldoService
+                        .CalcularSaldoDisponible(
+                            cajaActual,
+                            usuario.Id);
+
+                if (reintegroActual.Importe >
+                    saldoDisponibleCaja)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        $"No se puede anular el reintegro porque la caja no tiene saldo suficiente. Disponible: {saldoDisponibleCaja:C}.");
+
+                    return View(vm);
+                }
+
                 DateTime fechaAnulacion =
                     DateTime.Now;
 
@@ -772,7 +838,7 @@ namespace saas.Controllers
                             reintegroActual.MedioPagoId,
 
                         TurnoCajaId =
-                            reintegroActual.TurnoCajaId,
+                            turnoMovimientoCajaId,
 
                         CategoriaGastoId =
                             null,
