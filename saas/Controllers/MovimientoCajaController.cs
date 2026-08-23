@@ -266,8 +266,7 @@ namespace saas.Controllers
         // POST: MovimientoCaja/IngresoManual
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> IngresoManual(
-            IngresoManualVM vm)
+        public async Task<IActionResult> IngresoManual(IngresoManualVM vm)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -1107,81 +1106,207 @@ namespace saas.Controllers
                 return View();
             }
 
-            TurnoCaja? turno = null;
-
-            if (movimiento.TurnoCajaId.HasValue)
-            {
-                turno = await _context.TurnosCaja
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(t =>
-                        t.Id == movimiento.TurnoCajaId.Value);
-            }
-
-            if (movimiento.Caja.PermiteTurnos)
-            {
-                if (turno == null ||
-                    turno.Estado != EstadoTurnoCaja.Abierto)
-                {
-                    TempData["Error"] =
-                        "No puede revertirse un movimiento de un turno ya cerrado.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id = movimiento.Id });
-                }
-            }
-
-            var tipoReversion =
-                movimiento.Tipo == TipoMovimientoCaja.IngresoManual
-                    ? TipoMovimientoCaja.ReversionIngresoManual
-                    : TipoMovimientoCaja.ReversionEgresoManual;
-
-            var direccionReversion =
-                movimiento.Direccion == DireccionMovimientoCaja.Ingreso
-                    ? DireccionMovimientoCaja.Egreso
-                    : DireccionMovimientoCaja.Ingreso;
+            await using var transaccion =
+                await _context.Database
+                    .BeginTransactionAsync(
+                        IsolationLevel.Serializable);
 
             try
             {
-                var reversion = new MovimientoCaja
+                var movimientoActual =
+                    await _context.MovimientosCaja
+                        .Include(m => m.Caja)
+                        .FirstOrDefaultAsync(m =>
+                            m.Id == movimiento.Id &&
+                            m.EmpresaId == movimiento.EmpresaId);
+
+                if (movimientoActual == null)
                 {
-                    EmpresaId = movimiento.EmpresaId,
-                    CajaId = movimiento.CajaId,
+                    await transaccion.RollbackAsync();
 
-                    Tipo = tipoReversion,
-                    Direccion = direccionReversion,
+                    return NotFound();
+                }
 
-                    Importe = movimiento.Importe,
-                    Fecha = DateTime.Now,
+                if (movimientoActual.MovimientoOrigenId.HasValue)
+                {
+                    await transaccion.RollbackAsync();
 
-                    UsuarioId = usuario.Id,
+                    TempData["Error"] =
+                        "Una reversión no puede volver a revertirse desde este flujo.";
 
-                    MedioPagoId = movimiento.MedioPagoId,
-                    TurnoCajaId = movimiento.TurnoCajaId,
-                    CategoriaGastoId = movimiento.CategoriaGastoId,
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = movimientoActual.Id });
+                }
 
-                    Concepto =
-                        $"Reversión de movimiento #{movimiento.Id}",
+                bool tipoReversibleActual =
+                    movimientoActual.Tipo ==
+                        TipoMovimientoCaja.IngresoManual ||
+                    movimientoActual.Tipo ==
+                        TipoMovimientoCaja.EgresoManual;
 
-                    Observaciones = motivo,
+                if (!tipoReversibleActual)
+                {
+                    await transaccion.RollbackAsync();
 
-                    MovimientoOrigenId = movimiento.Id
-                };
+                    TempData["Error"] =
+                        "Este movimiento debe anularse desde su operación de origen.";
 
-                _context.MovimientosCaja.Add(reversion);
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = movimientoActual.Id });
+                }
+
+                bool yaRevertidoActual =
+                    await _context.MovimientosCaja
+                        .AsNoTracking()
+                        .AnyAsync(m =>
+                            m.MovimientoOrigenId ==
+                                movimientoActual.Id);
+
+                if (yaRevertidoActual)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] =
+                        "El movimiento ya fue revertido.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = movimientoActual.Id });
+                }
+
+                int? turnoMovimientoCajaId = null;
+
+                if (movimientoActual.Caja.PermiteTurnos)
+                {
+                    var turnoActual =
+                        await _context.TurnosCaja
+                            .FirstOrDefaultAsync(t =>
+                                t.CajaId ==
+                                    movimientoActual.CajaId &&
+                                t.EmpresaId ==
+                                    movimientoActual.EmpresaId &&
+                                t.UsuarioAperturaId ==
+                                    usuario.Id &&
+                                t.Estado ==
+                                    EstadoTurnoCaja.Abierto);
+
+                    if (turnoActual == null)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        TempData["Error"] =
+                            $"Debe tener un turno abierto propio para operar la caja \"{movimientoActual.Caja.Nombre}\".";
+
+                        return RedirectToAction(
+                            nameof(Details),
+                            new { id = movimientoActual.Id });
+                    }
+
+                    turnoMovimientoCajaId =
+                        turnoActual.Id;
+                }
+
+                var tipoReversion =
+                    movimientoActual.Tipo ==
+                        TipoMovimientoCaja.IngresoManual
+                            ? TipoMovimientoCaja.ReversionIngresoManual
+                            : TipoMovimientoCaja.ReversionEgresoManual;
+
+                var direccionReversion =
+                    movimientoActual.Direccion ==
+                        DireccionMovimientoCaja.Ingreso
+                            ? DireccionMovimientoCaja.Egreso
+                            : DireccionMovimientoCaja.Ingreso;
+
+                if (direccionReversion ==
+                    DireccionMovimientoCaja.Egreso)
+                {
+                    decimal saldoDisponibleActual =
+                        await _cajaSaldoService
+                            .CalcularSaldoDisponible(
+                                movimientoActual.Caja,
+                                usuario.Id);
+
+                    if (movimientoActual.Importe >
+                        saldoDisponibleActual)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        TempData["Error"] =
+                            $"No se puede revertir el movimiento porque la caja no tiene saldo suficiente. Disponible: {saldoDisponibleActual:C}.";
+
+                        return RedirectToAction(
+                            nameof(Details),
+                            new { id = movimientoActual.Id });
+                    }
+                }
+
+                var reversion =
+                    new MovimientoCaja
+                    {
+                        EmpresaId =
+                            movimientoActual.EmpresaId,
+
+                        CajaId =
+                            movimientoActual.CajaId,
+
+                        Tipo =
+                            tipoReversion,
+
+                        Direccion =
+                            direccionReversion,
+
+                        Importe =
+                            movimientoActual.Importe,
+
+                        Fecha =
+                            DateTime.Now,
+
+                        UsuarioId =
+                            usuario.Id,
+
+                        MedioPagoId =
+                            movimientoActual.MedioPagoId,
+
+                        TurnoCajaId =
+                            turnoMovimientoCajaId,
+
+                        CategoriaGastoId =
+                            movimientoActual.CategoriaGastoId,
+
+                        Concepto =
+                            $"Reversión de movimiento #{movimientoActual.Id}",
+
+                        Observaciones =
+                            motivo,
+
+                        MovimientoOrigenId =
+                            movimientoActual.Id
+                    };
+
+                _context.MovimientosCaja.Add(
+                    reversion);
 
                 await _context.SaveChangesAsync();
+
+                await transaccion.CommitAsync();
 
                 TempData["Success"] =
                     "Movimiento revertido correctamente.";
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimientoActual.Id });
             }
             catch
             {
-                ViewBag.Movimiento = movimiento;
+                await transaccion.RollbackAsync();
+
+                ViewBag.Movimiento =
+                    movimiento;
+
                 ViewBag.Error =
                     "Ocurrió un error al revertir el movimiento.";
 
