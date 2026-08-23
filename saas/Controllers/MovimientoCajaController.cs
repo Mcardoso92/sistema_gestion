@@ -1106,151 +1106,50 @@ namespace saas.Controllers
                 return View();
             }
 
-            await using var transaccion =
-                await _context.Database
-                    .BeginTransactionAsync(
-                        IsolationLevel.Serializable);
+            TurnoCaja? turno = null;
+
+            if (movimiento.TurnoCajaId.HasValue)
+            {
+                turno = await _context.TurnosCaja
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(t =>
+                        t.Id == movimiento.TurnoCajaId.Value);
+            }
+
+            if (movimiento.Caja.PermiteTurnos)
+            {
+                if (turno == null ||
+                    turno.Estado != EstadoTurnoCaja.Abierto)
+                {
+                    TempData["Error"] =
+                        "No puede revertirse un movimiento de un turno ya cerrado.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id = movimiento.Id });
+                }
+            }
+
+            var tipoReversion =
+                movimiento.Tipo == TipoMovimientoCaja.IngresoManual
+                    ? TipoMovimientoCaja.ReversionIngresoManual
+                    : TipoMovimientoCaja.ReversionEgresoManual;
+
+            var direccionReversion =
+                movimiento.Direccion == DireccionMovimientoCaja.Ingreso
+                    ? DireccionMovimientoCaja.Egreso
+                    : DireccionMovimientoCaja.Ingreso;
 
             try
             {
-                var movimientoActual =
-                    await _context.MovimientosCaja
-                        .Include(m => m.Caja)
-                        .FirstOrDefaultAsync(m =>
-                            m.Id == movimiento.Id &&
-                            m.EmpresaId == movimiento.EmpresaId);
-
-                if (movimientoActual == null)
-                {
-                    await transaccion.RollbackAsync();
-
-                    return NotFound();
-                }
-
-                if (movimientoActual.MovimientoOrigenId.HasValue)
-                {
-                    await transaccion.RollbackAsync();
-
-                    TempData["Error"] =
-                        "Una reversión no puede volver a revertirse desde este flujo.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id = movimientoActual.Id });
-                }
-
-                bool tipoReversibleActual =
-                    movimientoActual.Tipo ==
-                        TipoMovimientoCaja.IngresoManual ||
-                    movimientoActual.Tipo ==
-                        TipoMovimientoCaja.EgresoManual;
-
-                if (!tipoReversibleActual)
-                {
-                    await transaccion.RollbackAsync();
-
-                    TempData["Error"] =
-                        "Este movimiento debe anularse desde su operación de origen.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id = movimientoActual.Id });
-                }
-
-                bool yaRevertidoActual =
-                    await _context.MovimientosCaja
-                        .AsNoTracking()
-                        .AnyAsync(m =>
-                            m.MovimientoOrigenId ==
-                                movimientoActual.Id);
-
-                if (yaRevertidoActual)
-                {
-                    await transaccion.RollbackAsync();
-
-                    TempData["Error"] =
-                        "El movimiento ya fue revertido.";
-
-                    return RedirectToAction(
-                        nameof(Details),
-                        new { id = movimientoActual.Id });
-                }
-
-                int? turnoMovimientoCajaId = null;
-
-                if (movimientoActual.Caja.PermiteTurnos)
-                {
-                    var turnoActual =
-                        await _context.TurnosCaja
-                            .FirstOrDefaultAsync(t =>
-                                t.CajaId ==
-                                    movimientoActual.CajaId &&
-                                t.EmpresaId ==
-                                    movimientoActual.EmpresaId &&
-                                t.UsuarioAperturaId ==
-                                    usuario.Id &&
-                                t.Estado ==
-                                    EstadoTurnoCaja.Abierto);
-
-                    if (turnoActual == null)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        TempData["Error"] =
-                            $"Debe tener un turno abierto propio para operar la caja \"{movimientoActual.Caja.Nombre}\".";
-
-                        return RedirectToAction(
-                            nameof(Details),
-                            new { id = movimientoActual.Id });
-                    }
-
-                    turnoMovimientoCajaId =
-                        turnoActual.Id;
-                }
-
-                var tipoReversion =
-                    movimientoActual.Tipo ==
-                        TipoMovimientoCaja.IngresoManual
-                            ? TipoMovimientoCaja.ReversionIngresoManual
-                            : TipoMovimientoCaja.ReversionEgresoManual;
-
-                var direccionReversion =
-                    movimientoActual.Direccion ==
-                        DireccionMovimientoCaja.Ingreso
-                            ? DireccionMovimientoCaja.Egreso
-                            : DireccionMovimientoCaja.Ingreso;
-
-                if (direccionReversion ==
-                    DireccionMovimientoCaja.Egreso)
-                {
-                    decimal saldoDisponibleActual =
-                        await _cajaSaldoService
-                            .CalcularSaldoDisponible(
-                                movimientoActual.Caja,
-                                usuario.Id);
-
-                    if (movimientoActual.Importe >
-                        saldoDisponibleActual)
-                    {
-                        await transaccion.RollbackAsync();
-
-                        TempData["Error"] =
-                            $"No se puede revertir el movimiento porque la caja no tiene saldo suficiente. Disponible: {saldoDisponibleActual:C}.";
-
-                        return RedirectToAction(
-                            nameof(Details),
-                            new { id = movimientoActual.Id });
-                    }
-                }
-
                 var reversion =
                     new MovimientoCaja
                     {
                         EmpresaId =
-                            movimientoActual.EmpresaId,
+                            movimiento.EmpresaId,
 
                         CajaId =
-                            movimientoActual.CajaId,
+                            movimiento.CajaId,
 
                         Tipo =
                             tipoReversion,
@@ -1259,7 +1158,7 @@ namespace saas.Controllers
                             direccionReversion,
 
                         Importe =
-                            movimientoActual.Importe,
+                            movimiento.Importe,
 
                         Fecha =
                             DateTime.Now,
@@ -1268,22 +1167,22 @@ namespace saas.Controllers
                             usuario.Id,
 
                         MedioPagoId =
-                            movimientoActual.MedioPagoId,
+                            movimiento.MedioPagoId,
 
                         TurnoCajaId =
-                            turnoMovimientoCajaId,
+                            movimiento.TurnoCajaId,
 
                         CategoriaGastoId =
-                            movimientoActual.CategoriaGastoId,
+                            movimiento.CategoriaGastoId,
 
                         Concepto =
-                            $"Reversión de movimiento #{movimientoActual.Id}",
+                            $"Reversión de movimiento #{movimiento.Id}",
 
                         Observaciones =
                             motivo,
 
                         MovimientoOrigenId =
-                            movimientoActual.Id
+                            movimiento.Id
                     };
 
                 _context.MovimientosCaja.Add(
@@ -1291,19 +1190,15 @@ namespace saas.Controllers
 
                 await _context.SaveChangesAsync();
 
-                await transaccion.CommitAsync();
-
                 TempData["Success"] =
                     "Movimiento revertido correctamente.";
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimientoActual.Id });
+                    new { id = movimiento.Id });
             }
             catch
             {
-                await transaccion.RollbackAsync();
-
                 ViewBag.Movimiento =
                     movimiento;
 
