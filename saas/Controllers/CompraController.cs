@@ -840,6 +840,26 @@ namespace saas.Controllers
                         new { id });
                 }
 
+                bool tieneDevolucionesActivas =
+                    await _context.DevolucionesCompra
+                        .AsNoTracking()
+                        .AnyAsync(d =>
+                            d.CompraId == compra.Id &&
+                            d.EmpresaId == compra.EmpresaId &&
+                            d.Estado);
+
+                if (tieneDevolucionesActivas)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] =
+                        "No se puede anular la compra porque tiene devoluciones activas. Debe anular primero las devoluciones asociadas.";
+
+                    return RedirectToAction(
+                        nameof(Details),
+                        new { id });
+                }
+
                 foreach (var detalle in compra.Detalles)
                 {
                     if (detalle.Producto.Stock < detalle.Cantidad)
