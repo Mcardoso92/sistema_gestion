@@ -865,6 +865,51 @@ namespace saas.Controllers
                     return View(vm);
                 }
 
+                var cajaActual =
+                    await _context.Cajas
+                        .FirstOrDefaultAsync(c =>
+                            c.Id == movimientoActual.CajaId &&
+                            c.EmpresaId == movimientoActual.EmpresaId &&
+                            c.Estado);
+
+                if (cajaActual == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "La caja asociada al pago ya no se encuentra disponible.");
+
+                    return View(vm);
+                }
+
+                int? turnoMovimientoCajaId = null;
+
+                if (cajaActual.PermiteTurnos)
+                {
+                    var turnoActual =
+                        await _context.TurnosCaja
+                            .FirstOrDefaultAsync(t =>
+                                t.CajaId == cajaActual.Id &&
+                                t.EmpresaId == pagoActual.EmpresaId &&
+                                t.UsuarioAperturaId == usuario.Id &&
+                                t.Estado == EstadoTurnoCaja.Abierto);
+
+                    if (turnoActual == null)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            "",
+                            $"Debe tener un turno abierto propio para operar la caja \"{cajaActual.Nombre}\".");
+
+                        return View(vm);
+                    }
+
+                    turnoMovimientoCajaId =
+                        turnoActual.Id;
+                }
+
                 bool movimientoYaRevertido =
                     await _context.MovimientosCaja
                         .AsNoTracking()
@@ -923,7 +968,7 @@ namespace saas.Controllers
                             movimientoActual.MedioPagoId,
 
                         TurnoCajaId =
-                            movimientoActual.TurnoCajaId,
+                            turnoMovimientoCajaId,
 
                         CategoriaGastoId =
                             null,
