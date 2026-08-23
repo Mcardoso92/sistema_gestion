@@ -607,8 +607,7 @@ namespace saas.Controllers
         // POST: DevolucionCompra/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(
-            AnularDevolucionCompraVM vm)
+        public async Task<IActionResult> Anular(AnularDevolucionCompraVM vm)
         {
             var usuario =
                 await _userManager.GetUserAsync(User);
@@ -694,6 +693,81 @@ namespace saas.Controllers
                     ModelState.AddModelError(
                         "",
                         "La devolución ya fue anulada.");
+
+                    return View(vm);
+                }
+
+                decimal totalPagado =
+    await _context.PagosProveedor
+        .AsNoTracking()
+        .Where(p =>
+            p.CompraId == devolucionActual.CompraId &&
+            p.EmpresaId == devolucionActual.EmpresaId &&
+            p.Estado == EstadoPago.Activo)
+        .SumAsync(p =>
+            (decimal?)p.Importe)
+    ?? 0;
+
+                decimal totalReintegrado =
+                    await _context.ReintegrosProveedor
+                        .AsNoTracking()
+                        .Where(r =>
+                            r.CompraId == devolucionActual.CompraId &&
+                            r.EmpresaId == devolucionActual.EmpresaId &&
+                            r.Estado == EstadoReintegro.Activo)
+                        .SumAsync(r =>
+                            (decimal?)r.Importe)
+                    ?? 0;
+
+                decimal totalDevolucionesActivas =
+                    await _context.DevolucionesCompra
+                        .AsNoTracking()
+                        .Where(d =>
+                            d.CompraId == devolucionActual.CompraId &&
+                            d.EmpresaId == devolucionActual.EmpresaId &&
+                            d.Estado)
+                        .SumAsync(d =>
+                            (decimal?)d.Total)
+                    ?? 0;
+
+                decimal totalDevolucionesLuegoDeAnular =
+                    totalDevolucionesActivas -
+                    devolucionActual.Total;
+
+                var compra =
+                    await _context.Compras
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(c =>
+                            c.Id == devolucionActual.CompraId &&
+                            c.EmpresaId == devolucionActual.EmpresaId);
+
+                if (compra == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    return NotFound();
+                }
+
+                decimal totalNetoLuegoDeAnular =
+                    Math.Max(
+                        0,
+                        compra.Total -
+                        totalDevolucionesLuegoDeAnular);
+
+                decimal maximoReintegrableLuegoDeAnular =
+                    Math.Max(
+                        0,
+                        totalPagado -
+                        totalNetoLuegoDeAnular);
+
+                if (totalReintegrado >
+                    maximoReintegrableLuegoDeAnular)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "No se puede anular la devolución porque existen reintegros activos del proveedor que dejarían de estar justificados. Debe anular primero los reintegros correspondientes.");
 
                     return View(vm);
                 }

@@ -773,6 +773,81 @@ namespace saas.Controllers
                     return View(vm);
                 }
 
+                var compraActual =
+                    await _context.Compras
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(c =>
+                            c.Id == pagoActual.CompraId &&
+                            c.EmpresaId == pagoActual.EmpresaId);
+
+                if (compraActual == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    return NotFound();
+                }
+
+                decimal totalPagadoActual =
+                    await _context.PagosProveedor
+                        .AsNoTracking()
+                        .Where(p =>
+                            p.CompraId == pagoActual.CompraId &&
+                            p.EmpresaId == pagoActual.EmpresaId &&
+                            p.Estado == EstadoPago.Activo)
+                        .SumAsync(p =>
+                            (decimal?)p.Importe)
+                    ?? 0;
+
+                decimal totalPagadoLuegoDeAnular =
+                    totalPagadoActual -
+                    pagoActual.Importe;
+
+                decimal totalDevolucionesActivas =
+                    await _context.DevolucionesCompra
+                        .AsNoTracking()
+                        .Where(d =>
+                            d.CompraId == pagoActual.CompraId &&
+                            d.EmpresaId == pagoActual.EmpresaId &&
+                            d.Estado)
+                        .SumAsync(d =>
+                            (decimal?)d.Total)
+                    ?? 0;
+
+                decimal totalReintegrado =
+                    await _context.ReintegrosProveedor
+                        .AsNoTracking()
+                        .Where(r =>
+                            r.CompraId == pagoActual.CompraId &&
+                            r.EmpresaId == pagoActual.EmpresaId &&
+                            r.Estado == EstadoReintegro.Activo)
+                        .SumAsync(r =>
+                            (decimal?)r.Importe)
+                    ?? 0;
+
+                decimal totalNetoCompra =
+                    Math.Max(
+                        0,
+                        compraActual.Total -
+                        totalDevolucionesActivas);
+
+                decimal maximoReintegrableLuegoDeAnularPago =
+                    Math.Max(
+                        0,
+                        totalPagadoLuegoDeAnular -
+                        totalNetoCompra);
+
+                if (totalReintegrado >
+                    maximoReintegrableLuegoDeAnularPago)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError(
+                        "",
+                        "No se puede anular el pago porque existen reintegros activos del proveedor que dejarían de estar justificados. Debe anular primero los reintegros correspondientes.");
+
+                    return View(vm);
+                }
+
                 var movimientoActual =
                     await _context.MovimientosCaja
                         .FirstOrDefaultAsync(m =>
