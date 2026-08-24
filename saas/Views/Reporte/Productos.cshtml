@@ -1,0 +1,251 @@
+﻿@model saas.ViewModel.Reportes.ReporteProductosVM
+
+@{
+    ViewData["Title"] = "Reporte de productos";
+}
+
+<main class="container-fluid py-4 px-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-bold mb-1">Reporte de productos</h1>
+            <p class="text-muted mb-0">
+                Analice el catálogo, los precios y los márgenes comerciales.
+            </p>
+        </div>
+
+        <a asp-controller="Producto"
+           asp-action="Index"
+           asp-route-empresaId="@Model.EmpresaId"
+           asp-route-categoriaId="@Model.CategoriaId"
+           asp-route-estado="@Model.Estado"
+           asp-route-busqueda="@Model.Busqueda"
+           class="btn btn-v-outline d-flex align-items-center gap-2">
+
+            <span class="material-symbols-outlined">arrow_back</span>
+            Volver a productos
+        </a>
+    </div>
+
+    <section class="card-custom p-3 mb-4">
+        <form asp-action="Productos" method="get">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row g-3 align-items-end">
+                @if (ViewBag.EsSuperAdmin is true)
+                {
+                    <div class="col-lg-2 col-md-4">
+                        <label asp-for="EmpresaId" class="form-label small fw-semibold text-muted">
+                            Empresa
+                        </label>
+
+                        <select asp-for="EmpresaId" asp-items="Model.Empresas" class="form-select bg-light">
+                            <option value="">Todas las empresas</option>
+                        </select>
+
+                        <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                    </div>
+                }
+
+                <div class="col-lg-2 col-md-4">
+                    <label asp-for="CategoriaId" class="form-label small fw-semibold text-muted">
+                        Categoría
+                    </label>
+
+                    <select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-select bg-light">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <label asp-for="Estado" class="form-label small fw-semibold text-muted">
+                        Estado
+                    </label>
+
+                    <select asp-for="Estado" class="form-select bg-light">
+                        <option value="activos">Activos</option>
+                        <option value="inactivos">Inactivos</option>
+                        <option value="todos">Todos</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-4 col-md-8">
+                    <label asp-for="Busqueda" class="form-label small fw-semibold text-muted">
+                        Buscar
+                    </label>
+
+                    <input asp-for="Busqueda"
+                           class="form-control bg-light"
+                           placeholder="Nombre o código de barras" />
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <button type="submit" class="btn btn-v-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                        <span class="material-symbols-outlined">filter_alt</span>
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-primary">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Productos</div>
+                    <div class="dashboard-summary-value">@Model.CantidadProductos</div>
+                    <div class="dashboard-summary-detail">Resultados encontrados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-success">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Activos</div>
+                    <div class="dashboard-summary-value">@Model.ProductosActivos</div>
+                    <div class="dashboard-summary-detail">Productos habilitados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-warning">
+                    <span class="material-symbols-outlined">block</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Inactivos</div>
+                    <div class="dashboard-summary-value">@Model.ProductosInactivos</div>
+                    <div class="dashboard-summary-detail">Productos deshabilitados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-info">
+                    <span class="material-symbols-outlined">percent</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Margen promedio</div>
+                    <div class="dashboard-summary-value">
+                        @Model.MargenPromedioPorcentaje.ToString("N2") %
+                    </div>
+                    <div class="dashboard-summary-detail">Sobre precio de costo</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="card-custom overflow-hidden">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 border-bottom">
+            <div>
+                <h2 class="h5 fw-bold mb-1">Detalle de productos</h2>
+                <p class="text-muted small mb-0">
+                    Precios y márgenes según los filtros seleccionados.
+                </p>
+            </div>
+
+            <span class="badge text-bg-light border px-3 py-2">
+                @Model.CantidadProductos registros
+            </span>
+        </div>
+
+        @if (Model.Productos.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Producto</th>
+                            <th>Categoría</th>
+
+                            @if (ViewBag.EsSuperAdmin is true)
+                            {
+                                <th>Empresa</th>
+                            }
+
+                            <th class="text-end">Costo</th>
+                            <th class="text-end">Venta</th>
+                            <th class="text-end">Margen</th>
+                            <th class="text-end">Margen %</th>
+                            <th class="text-end">Stock</th>
+                            <th class="text-center pe-4">Estado</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var producto in Model.Productos)
+                        {
+                            string claseMargen = producto.MargenImporte < 0
+                            ? "text-danger"
+                            : "text-success";
+
+                            <tr>
+                                <td class="ps-4">
+                                    <a asp-controller="Producto"
+                                       asp-action="Details"
+                                       asp-route-id="@producto.ProductoId"
+                                       class="text-decoration-none fw-semibold">
+                                        @producto.Nombre
+                                    </a>
+
+                                    <div class="text-muted small">
+                                        @(string.IsNullOrWhiteSpace(producto.CodigoBarra)
+                                                                        ? "Sin código"
+                                                                        : producto.CodigoBarra)
+                            </div>
+                        </td>
+
+                                <td>@producto.Categoria</td>
+
+                        @if (ViewBag.EsSuperAdmin is true)
+                                {
+                                    <td>@producto.Empresa</td>
+                                }
+
+                                <td class="text-end">@producto.PrecioCosto.ToString("C")</td>
+                                <td class="text-end">@producto.PrecioVenta.ToString("C")</td>
+                                <td class="text-end fw-semibold @claseMargen">
+                                    @producto.MargenImporte.ToString("C")
+                                </td>
+                                <td class="text-end fw-semibold @claseMargen">
+                                    @producto.MargenPorcentaje.ToString("N2") %
+                                </td>
+                                <td class="text-end">@producto.Stock</td>
+
+                                <td class="text-center pe-4">
+                                    @if (producto.Estado)
+                                    {
+                                        <span class="badge text-bg-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-secondary">Inactivo</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="dashboard-empty">
+                No se encontraron productos para los filtros seleccionados.
+            </div>
+        }
+    </section>
+</main>
