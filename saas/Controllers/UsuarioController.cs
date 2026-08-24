@@ -821,12 +821,9 @@ namespace saas.Controllers
 
             if (resultado.Succeeded)
             {
-                if (await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
-                {
-                    return RedirectToAction("Index", "Empresa");
-                }
-
-                return RedirectToAction("Index", "Usuario");
+                return RedirectToAction(
+                    "Index",
+                    "Dashboard");
             }
 
             ModelState.AddModelError("", "Usuario o contraseña incorrectos.");

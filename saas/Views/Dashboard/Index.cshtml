@@ -1,0 +1,273 @@
+﻿@using System.Globalization
+@model saas.ViewModel.Dashboard.DashboardVM
+
+@{
+    ViewData["Title"] = "Dashboard";
+
+    decimal maximoGrafico = Model.VentasUltimosDias.Any()
+        ? Model.VentasUltimosDias.Max(v => v.Total)
+        : 0;
+}
+
+<main class="container-fluid px-4 mb-5 dashboard-page">
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+        <div>
+            <h1 class="display-6 fw-bold text-dark mb-1">Dashboard</h1>
+            <p class="text-muted mb-0">
+                Resumen general del estado actual del negocio.
+            </p>
+        </div>
+
+        @if (ViewBag.EsVistaGlobal is true)
+        {
+            <span class="badge text-bg-primary px-3 py-2">
+                Vista global
+            </span>
+        }
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-primary">
+                    <span class="material-symbols-outlined">today</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Ventas de hoy</div>
+                    <div class="dashboard-summary-value">@Model.TotalVentasDia.ToString("C")</div>
+                    <div class="dashboard-summary-detail">
+                        @Model.CantidadVentasDia operaciones
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-success">
+                    <span class="material-symbols-outlined">calendar_month</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Ventas del mes</div>
+                    <div class="dashboard-summary-value">@Model.TotalVentasMes.ToString("C")</div>
+                    <div class="dashboard-summary-detail">
+                        @Model.CantidadVentasMes operaciones
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-warning">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Stock bajo</div>
+                    <div class="dashboard-summary-value">@Model.ProductosStockBajo.Count</div>
+                    <div class="dashboard-summary-detail">
+                        productos para revisar
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-info">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Clientes frecuentes</div>
+                    <div class="dashboard-summary-value">@Model.ClientesFrecuentes.Count</div>
+                    <div class="dashboard-summary-detail">
+                        clientes destacados
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-8">
+            <section class="dashboard-panel h-100">
+                <div class="dashboard-panel-header">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">Ventas de los últimos 7 días</h2>
+                        <p class="text-muted small mb-0">Importes de ventas activas por día.</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-chart">
+                    @foreach (var venta in Model.VentasUltimosDias)
+                    {
+                        decimal porcentaje = maximoGrafico > 0
+                        ? venta.Total / maximoGrafico * 100
+                        : 0;
+
+                        string porcentajeTexto = porcentaje.ToString(
+                        "0.##",
+                        CultureInfo.InvariantCulture);
+
+                        <div class="dashboard-chart-item">
+                            <div class="dashboard-chart-value">
+                                @venta.Total.ToString("C0")
+                            </div>
+
+                            <div class="dashboard-chart-column">
+                                <div class="dashboard-chart-bar" style="height: @(porcentajeTexto)%"></div>
+                            </div>
+
+                            <div class="dashboard-chart-label">
+                                @venta.Fecha.ToString("ddd")
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <div class="col-xl-4">
+            <section class="dashboard-panel h-100">
+                <div class="dashboard-panel-header">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">Productos con stock bajo</h2>
+                        <p class="text-muted small mb-0">Productos en punto de reposición.</p>
+                    </div>
+
+                    <a asp-controller="Producto" asp-action="Index" class="btn btn-sm btn-v-outline">
+                        Ver productos
+                    </a>
+                </div>
+
+                @if (Model.ProductosStockBajo.Any())
+                {
+                    <div class="dashboard-list">
+                        @foreach (var producto in Model.ProductosStockBajo)
+                        {
+                            <a asp-controller="Producto" asp-action="Details"
+                               asp-route-id="@producto.ProductoId"
+                               class="dashboard-list-item">
+
+                                <div>
+                                    <div class="fw-semibold">@producto.Nombre</div>
+                                    <div class="text-muted small">
+                                        @(string.IsNullOrWhiteSpace(producto.CodigoBarra)
+                                                                        ? "Sin código"
+                                                                        : producto.CodigoBarra)
+                            </div>
+                        </div>
+
+                                <div class="text-end">
+                                    <div class="fw-bold text-danger">@producto.Stock</div>
+                                    <div class="text-muted small">
+                                        Mín. @producto.PuntoReposicion
+                                    </div>
+                                </div>
+                            </a>
+                                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="dashboard-empty">
+                        No hay productos con stock bajo.
+                    </div>
+                }
+            </section>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <section class="dashboard-panel h-100">
+                <div class="dashboard-panel-header">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">Productos más vendidos</h2>
+                        <p class="text-muted small mb-0">Ranking histórico por unidades.</p>
+                    </div>
+                </div>
+
+                @if (Model.ProductosMasVendidos.Any())
+                {
+                    <div class="dashboard-ranking">
+                        @for (int i = 0; i < Model.ProductosMasVendidos.Count; i++)
+                        {
+                            var producto = Model.ProductosMasVendidos[i];
+
+                            <div class="dashboard-ranking-item">
+                                <div class="dashboard-ranking-position">@(i + 1)</div>
+
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">@producto.Nombre</div>
+                                    <div class="text-muted small">
+                                        @producto.ImporteVendido.ToString("C")
+                                    </div>
+                                </div>
+
+                                <div class="dashboard-ranking-total">
+                                    @producto.CantidadVendida u.
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="dashboard-empty">
+                        Todavía no hay ventas registradas.
+                    </div>
+                }
+            </section>
+        </div>
+
+        <div class="col-lg-6">
+            <section class="dashboard-panel h-100">
+                <div class="dashboard-panel-header">
+                    <div>
+                        <h2 class="h5 fw-bold mb-1">Clientes frecuentes</h2>
+                        <p class="text-muted small mb-0">Ranking histórico por compras.</p>
+                    </div>
+                </div>
+
+                @if (Model.ClientesFrecuentes.Any())
+                {
+                    <div class="dashboard-ranking">
+                        @for (int i = 0; i < Model.ClientesFrecuentes.Count; i++)
+                        {
+                            var cliente = Model.ClientesFrecuentes[i];
+
+                            <a asp-controller="Cliente" asp-action="Details"
+                               asp-route-id="@cliente.ClienteId"
+                               class="dashboard-ranking-item dashboard-ranking-link">
+
+                                <div class="dashboard-ranking-position">@(i + 1)</div>
+
+                                <div class="flex-grow-1">
+                                    <div class="fw-semibold">@cliente.NombreCompleto</div>
+                                    <div class="text-muted small">
+                                        @cliente.ImporteComprado.ToString("C")
+                                    </div>
+                                </div>
+
+                                <div class="dashboard-ranking-total">
+                                    @cliente.CantidadCompras compras
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="dashboard-empty">
+                        Todavía no hay ventas asociadas a clientes.
+                    </div>
+                }
+            </section>
+        </div>
+    </div>
+</main>
