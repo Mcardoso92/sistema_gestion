@@ -205,12 +205,7 @@
                     {
                         @foreach (var movimiento in Model.Movimientos)
                         {
-                            bool esEntrada =
-                            movimiento.Tipo == TipoMovimientoStock.StockInicial ||
-                            movimiento.Tipo == TipoMovimientoStock.AjusteEntrada ||
-                            movimiento.Tipo == TipoMovimientoStock.AnulacionVenta ||
-                            movimiento.Tipo == TipoMovimientoStock.Compra ||
-                            movimiento.Tipo == TipoMovimientoStock.ReintegroVenta;
+                            bool esEntrada =  movimiento.StockPosterior > movimiento.StockAnterior;
 
                             string signo = esEntrada ? "+" : "-";
                             string claseCantidad = esEntrada ? "text-success" : "text-danger";
