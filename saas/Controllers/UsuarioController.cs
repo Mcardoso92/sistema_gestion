@@ -5,7 +5,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel;
+using saas.ViewModel.Autenticacion;
+using System.Text.Encodings.Web;
 
 namespace saas.Controllers
 {
@@ -16,12 +19,19 @@ namespace saas.Controllers
         private readonly SignInManager<Usuario> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SaasDbContext _context;
-        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, RoleManager<IdentityRole> roleManager, SaasDbContext context)
+        private readonly IEmailService _emailService;
+        public UsuarioController(
+            UserManager<Usuario> userManager,
+            SignInManager<Usuario> signInManager,
+            RoleManager<IdentityRole> roleManager,
+            SaasDbContext context,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _context = context;
+            _emailService = emailService;
         }
         // GET: Usuario
         public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null)
@@ -822,7 +832,136 @@ namespace saas.Controllers
 
             ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
             return View(model);
-        }        
+        }
+        [AllowAnonymous]
+        public IActionResult RecuperarPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> RecuperarPassword(RecuperarPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var usuario =
+                await _userManager.FindByEmailAsync(
+                    model.Email);
+
+            if (usuario != null &&
+                usuario.Estado)
+            {
+                var token =
+                    await _userManager
+                        .GeneratePasswordResetTokenAsync(
+                            usuario);
+
+                var enlace =
+                    Url.Action(
+                        nameof(RestablecerPassword),
+                        "Usuario",
+                        new
+                        {
+                            email = usuario.Email,
+                            token
+                        },
+                        Request.Scheme);
+
+                if (enlace != null)
+                {
+                    var enlaceSeguro =
+                        HtmlEncoder.Default.Encode(
+                            enlace);
+
+                    var contenidoHtml = $"""
+                <p>Recibimos una solicitud para restablecer tu contraseña de Veltika.</p>
+                <p>
+                    <a href="{enlaceSeguro}">
+                        Restablecer contraseña
+                    </a>
+                </p>
+                <p>Si no realizaste esta solicitud, podés ignorar este mensaje.</p>
+                """;
+
+                    await _emailService.EnviarAsync(
+                        usuario.Email!,
+                        "Restablecer contraseña - Veltika",
+                        contenidoHtml);
+                }
+            }
+
+            ViewData["SolicitudEnviada"] =
+                true;
+
+            return View();
+        }
+        [AllowAnonymous]
+        public IActionResult RestablecerPassword(string? email, string? token)
+        {
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(token))
+            {
+                return BadRequest();
+            }
+
+            var model =
+                new RestablecerPasswordVM
+                {
+                    Email = email,
+                    Token = token
+                };
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [AllowAnonymous]
+        public async Task<IActionResult> RestablecerPassword(RestablecerPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var usuario =
+                await _userManager.FindByEmailAsync(
+                    model.Email);
+
+            if (usuario == null ||
+                !usuario.Estado)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "El enlace no es válido o ha expirado.");
+
+                return View(model);
+            }
+
+            var resultado =
+                await _userManager.ResetPasswordAsync(
+                    usuario,
+                    model.Token,
+                    model.Password);
+
+            if (!resultado.Succeeded)
+            {
+                ModelState.AddModelError(
+                    "",
+                    "El enlace no es válido o ha expirado.");
+
+                return View(model);
+            }
+
+            TempData["Success"] =
+                "La contraseña se restableció correctamente. Ya podés iniciar sesión.";
+
+            return RedirectToAction(
+                nameof(Login));
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
