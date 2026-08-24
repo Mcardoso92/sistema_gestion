@@ -13,14 +13,27 @@
             </p>
         </div>
 
-        <a asp-controller="Venta"
-           asp-action="Index"
-           asp-route-empresaId="@Model.EmpresaId"
-           class="btn btn-v-outline d-flex align-items-center gap-2">
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-action="ExportarVentasExcel"
+               asp-route-fechaDesde="@Model.FechaDesde.ToString("yyyy-MM-dd")"
+               asp-route-fechaHasta="@Model.FechaHasta.ToString("yyyy-MM-dd")"
+               asp-route-clienteId="@Model.ClienteId"
+               asp-route-empresaId="@Model.EmpresaId"
+               class="btn btn-success d-flex align-items-center gap-2">
 
-            <span class="material-symbols-outlined">arrow_back</span>
-            Volver a ventas
-        </a>
+                <span class="material-symbols-outlined">download</span>
+                Descargar Excel
+            </a>
+
+            <a asp-controller="Venta"
+               asp-action="Index"
+               asp-route-empresaId="@Model.EmpresaId"
+               class="btn btn-v-outline d-flex align-items-center gap-2">
+
+                <span class="material-symbols-outlined">arrow_back</span>
+                Volver a ventas
+            </a>
+        </div>
     </div>
 
     <section class="card-custom p-3 mb-4">
