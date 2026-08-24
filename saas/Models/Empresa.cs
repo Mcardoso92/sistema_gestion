@@ -52,5 +52,8 @@ namespace saas.Models
 
         [ValidateNever]
         public ICollection<MovimientoCaja> MovimientosCaja { get; set; } = new List<MovimientoCaja>();
+
+        [ValidateNever]
+        public ConfiguracionEmpresa? Configuracion { get; set; }
     }
 }
