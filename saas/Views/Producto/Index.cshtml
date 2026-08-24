@@ -23,10 +23,40 @@
             <p class="text-secondary mb-0">Administra tu inventario, precios y niveles de stock en tiempo real.</p>
         </div>
         <div class="d-flex gap-2">
-            <!-- <button class="btn btn-outline-secondary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
-                <span class="material-symbols-outlined fs-5">inventory_2</span>
-                <span class="fw-medium small">Ajuste de Stock</span>
-            </button> -->
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+
+                    <span class="material-symbols-outlined fs-5">analytics</span>
+                    <span class="fw-medium small">Generar reporte</span>
+                </button>
+
+                <ul class="dropdown-menu">
+                    <li>
+                        <a asp-controller="Reporte"
+                           asp-action="Stock"
+                           asp-route-empresaId="@empresaSeleccionada"
+                           asp-route-categoriaId="@categoriaSeleccionada"
+                           class="dropdown-item">
+                            Reporte de stock
+                        </a>
+                    </li>
+
+                    <li>
+                        <a asp-controller="Reporte"
+                           asp-action="Productos"
+                           asp-route-empresaId="@empresaSeleccionada"
+                           asp-route-categoriaId="@categoriaSeleccionada"
+                           asp-route-estado="@estadoSeleccionado"
+                           asp-route-busqueda="@busqueda"
+                           class="dropdown-item">
+                            Reporte de productos
+                        </a>
+                    </li>
+                </ul>
+            </div>
             <a asp-action="Create" class="btn btn-primary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
                 <span class="material-symbols-outlined fs-5">add_circle</span>
                 <span class="fw-medium small">Nuevo Producto</span>

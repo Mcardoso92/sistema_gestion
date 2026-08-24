@@ -18,10 +18,25 @@
             <h1 class="h2 fw-semibold mb-1">Gestión de Clientes</h1>
             <p class="text-secondary mb-0">Administra los clientes registrados en tu empresa.</p>
         </div>
-        <a asp-action="Create" class="btn btn-primary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
-            <span class="material-symbols-outlined fs-5">person_add</span>
-            <span class="fw-medium small">Nuevo Cliente</span>
-        </a>
+        <div class="d-flex gap-2">
+            <a asp-controller="Reporte"
+               asp-action="Clientes"
+               asp-route-empresaId="@empresaSeleccionada"
+               asp-route-estado="@estadoSeleccionado"
+               asp-route-busqueda="@busqueda"
+               class="btn btn-outline-secondary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
+
+                <span class="material-symbols-outlined fs-5">analytics</span>
+                <span class="fw-medium small">Generar reporte</span>
+            </a>
+
+            <a asp-action="Create"
+               class="btn btn-primary d-flex align-items-center gap-2 py-2 px-3 shadow-sm rounded-1">
+
+                <span class="material-symbols-outlined fs-5">person_add</span>
+                <span class="fw-medium small">Nuevo Cliente</span>
+            </a>
+        </div>
     </div>
 
     <!-- Filter Bar -->

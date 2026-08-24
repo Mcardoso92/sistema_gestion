@@ -1,0 +1,202 @@
+﻿@model saas.ViewModel.Reportes.ReporteVentasVM
+
+@{
+    ViewData["Title"] = "Reporte de ventas";
+}
+
+<main class="container-fluid py-4 px-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-bold mb-1">Reporte de ventas</h1>
+            <p class="text-muted mb-0">
+                Analice las ventas realizadas durante el período seleccionado.
+            </p>
+        </div>
+
+        <a asp-controller="Venta"
+           asp-action="Index"
+           asp-route-empresaId="@Model.EmpresaId"
+           class="btn btn-v-outline d-flex align-items-center gap-2">
+
+            <span class="material-symbols-outlined">arrow_back</span>
+            Volver a ventas
+        </a>
+    </div>
+
+    <section class="card-custom p-3 mb-4">
+        <form asp-action="Ventas" method="get">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-2 col-md-4">
+                    <label asp-for="FechaDesde" class="form-label small fw-semibold text-muted">
+                        Desde
+                    </label>
+
+                    <input asp-for="FechaDesde" type="date" class="form-control bg-light" />
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <label asp-for="FechaHasta" class="form-label small fw-semibold text-muted">
+                        Hasta
+                    </label>
+
+                    <input asp-for="FechaHasta" type="date" class="form-control bg-light" />
+                </div>
+
+                @if (ViewBag.EsSuperAdmin is true)
+                {
+                    <div class="col-lg-3 col-md-4">
+                        <label asp-for="EmpresaId" class="form-label small fw-semibold text-muted">
+                            Empresa
+                        </label>
+
+                        <select asp-for="EmpresaId" asp-items="Model.Empresas" class="form-select bg-light">
+                            <option value="">Todas las empresas</option>
+                        </select>
+
+                        <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                    </div>
+                }
+
+                <div class="col-lg-3 col-md-6">
+                    <label asp-for="ClienteId" class="form-label small fw-semibold text-muted">
+                        Cliente
+                    </label>
+
+                    <select asp-for="ClienteId" asp-items="Model.Clientes" class="form-select bg-light">
+                        <option value="">Todos los clientes</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <button type="submit" class="btn btn-v-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                        <span class="material-symbols-outlined">filter_alt</span>
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-primary">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Total vendido</div>
+                    <div class="dashboard-summary-value">@Model.TotalVendido.ToString("C")</div>
+                    <div class="dashboard-summary-detail">
+                        En el período seleccionado
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-success">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Cantidad de ventas</div>
+                    <div class="dashboard-summary-value">@Model.CantidadVentas</div>
+                    <div class="dashboard-summary-detail">
+                        Operaciones completadas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-info">
+                    <span class="material-symbols-outlined">monitoring</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Ticket promedio</div>
+                    <div class="dashboard-summary-value">@Model.TicketPromedio.ToString("C")</div>
+                    <div class="dashboard-summary-detail">
+                        Promedio por operación
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="card-custom overflow-hidden">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 border-bottom">
+            <div>
+                <h2 class="h5 fw-bold mb-1">Detalle de ventas</h2>
+                <p class="text-muted small mb-0">
+                    Desde @Model.FechaDesde.ToString("dd/MM/yyyy")
+                    hasta @Model.FechaHasta.ToString("dd/MM/yyyy")
+                </p>
+            </div>
+
+            <span class="badge text-bg-light border px-3 py-2">
+                @Model.CantidadVentas registros
+            </span>
+        </div>
+
+        @if (Model.Ventas.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Fecha</th>
+                            <th>Venta</th>
+                            <th>Cliente</th>
+                            <th>Usuario</th>
+                            <th class="text-end">Productos</th>
+                            <th class="text-end pe-4">Total</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var venta in Model.Ventas)
+                        {
+                            <tr>
+                                <td class="ps-4 text-nowrap">
+                                    @venta.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+
+                                <td>
+                                    <a asp-controller="Venta"
+                                       asp-action="Details"
+                                       asp-route-id="@venta.VentaId"
+                                       class="text-decoration-none fw-semibold">
+                                        #@venta.VentaId
+                                    </a>
+                                </td>
+
+                                <td>@venta.Cliente</td>
+                                <td>@venta.Usuario</td>
+
+                                <td class="text-end">
+                                    @venta.CantidadProductos
+                                </td>
+
+                                <td class="text-end pe-4 fw-bold">
+                                    @venta.Total.ToString("C")
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="dashboard-empty">
+                No se encontraron ventas para los filtros seleccionados.
+            </div>
+        }
+    </section>
+</main>

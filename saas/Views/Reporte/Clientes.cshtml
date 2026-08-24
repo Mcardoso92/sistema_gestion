@@ -1,0 +1,272 @@
+﻿@model saas.ViewModel.Reportes.ReporteClientesVM
+
+@{
+    ViewData["Title"] = "Reporte de clientes";
+}
+
+<main class="container-fluid py-4 px-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div>
+            <h1 class="h2 fw-bold mb-1">Reporte de clientes</h1>
+            <p class="text-muted mb-0">
+                Analice el registro y la actividad comercial de sus clientes.
+            </p>
+        </div>
+
+        <a asp-controller="Cliente"
+           asp-action="Index"
+           asp-route-empresaId="@Model.EmpresaId"
+           asp-route-estado="@Model.Estado"
+           asp-route-busqueda="@Model.Busqueda"
+           class="btn btn-v-outline d-flex align-items-center gap-2">
+
+            <span class="material-symbols-outlined">arrow_back</span>
+            Volver a clientes
+        </a>
+    </div>
+
+    <section class="card-custom p-3 mb-4">
+        <form asp-action="Clientes" method="get">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row g-3 align-items-end">
+                @if (ViewBag.EsSuperAdmin is true)
+                {
+                    <div class="col-lg-2 col-md-4">
+                        <label asp-for="EmpresaId" class="form-label small fw-semibold text-muted">
+                            Empresa
+                        </label>
+
+                        <select asp-for="EmpresaId" asp-items="Model.Empresas" class="form-select bg-light">
+                            <option value="">Todas las empresas</option>
+                        </select>
+
+                        <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                    </div>
+                }
+
+                <div class="col-lg-2 col-md-4">
+                    <label asp-for="Estado" class="form-label small fw-semibold text-muted">
+                        Estado
+                    </label>
+
+                    <select asp-for="Estado" class="form-select bg-light">
+                        <option value="activos">Activos</option>
+                        <option value="inactivos">Inactivos</option>
+                        <option value="todos">Todos</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <label asp-for="Actividad" class="form-label small fw-semibold text-muted">
+                        Actividad
+                    </label>
+
+                    <select asp-for="Actividad" class="form-select bg-light">
+                        <option value="todos">Todos</option>
+                        <option value="con-compras">Con compras</option>
+                        <option value="sin-compras">Sin compras</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-4 col-md-8">
+                    <label asp-for="Busqueda" class="form-label small fw-semibold text-muted">
+                        Buscar
+                    </label>
+
+                    <input asp-for="Busqueda"
+                           class="form-control bg-light"
+                           placeholder="Nombre, documento o email" />
+                </div>
+
+                <div class="col-lg-2 col-md-4">
+                    <button type="submit" class="btn btn-v-primary w-100 d-flex align-items-center justify-content-center gap-2">
+                        <span class="material-symbols-outlined">filter_alt</span>
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-primary">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Clientes</div>
+                    <div class="dashboard-summary-value">@Model.CantidadClientes</div>
+                    <div class="dashboard-summary-detail">Resultados encontrados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-success">
+                    <span class="material-symbols-outlined">person_check</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Activos</div>
+                    <div class="dashboard-summary-value">@Model.ClientesActivos</div>
+                    <div class="dashboard-summary-detail">Clientes habilitados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-warning">
+                    <span class="material-symbols-outlined">person_off</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Inactivos</div>
+                    <div class="dashboard-summary-value">@Model.ClientesInactivos</div>
+                    <div class="dashboard-summary-detail">Clientes deshabilitados</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-info">
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Con compras</div>
+                    <div class="dashboard-summary-value">@Model.ClientesConCompras</div>
+                    <div class="dashboard-summary-detail">Clientes compradores</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl">
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon dashboard-icon-primary">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
+
+                <div>
+                    <div class="dashboard-summary-label">Importe comprado</div>
+                    <div class="dashboard-summary-value">
+                        @Model.ImporteTotalComprado.ToString("C")
+                    </div>
+                    <div class="dashboard-summary-detail">Ventas activas acumuladas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="card-custom overflow-hidden">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 border-bottom">
+            <div>
+                <h2 class="h5 fw-bold mb-1">Detalle de clientes</h2>
+                <p class="text-muted small mb-0">
+                    Datos de contacto y actividad comercial.
+                </p>
+            </div>
+
+            <span class="badge text-bg-light border px-3 py-2">
+                @Model.CantidadClientes registros
+            </span>
+        </div>
+
+        @if (Model.Clientes.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Cliente</th>
+                            <th>Documento</th>
+                            <th>Contacto</th>
+
+                            @if (ViewBag.EsSuperAdmin is true)
+                            {
+                                <th>Empresa</th>
+                            }
+
+                            <th class="text-end">Compras</th>
+                            <th class="text-end">Importe</th>
+                            <th class="text-end">Última compra</th>
+                            <th class="text-center pe-4">Estado</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var cliente in Model.Clientes)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <a asp-controller="Cliente"
+                                       asp-action="Details"
+                                       asp-route-id="@cliente.ClienteId"
+                                       class="text-decoration-none fw-semibold">
+                                        @cliente.NombreCompleto
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(cliente.Documento)
+                                                                ? "-"
+                                                                : cliente.Documento)
+                                                                                </td>
+
+                                <td>
+                                    <div>@(string.IsNullOrWhiteSpace(cliente.Email) ? "-" : cliente.Email)</div>
+                                    <div class="text-muted small">
+                                        @(string.IsNullOrWhiteSpace(cliente.Telefono)
+                                                                        ? "Sin teléfono"
+                                                                        : cliente.Telefono)
+                            </div>
+                        </td>
+
+                        @if (ViewBag.EsSuperAdmin is true)
+                                {
+                                    <td>@cliente.Empresa</td>
+                                }
+
+                            <td class="text-end fw-semibold">
+                                @cliente.CantidadCompras
+                            </td>
+
+                            <td class="text-end fw-semibold">
+                                @cliente.ImporteComprado.ToString("C")
+                            </td>
+
+                            <td class="text-end text-nowrap">
+                                @(cliente.UltimaCompra.HasValue
+                                                            ? cliente.UltimaCompra.Value.ToString("dd/MM/yyyy")
+                                                            : "-")
+                        </td>
+
+                                <td class="text-center pe-4">
+                            @if (cliente.Estado)
+                                    {
+                                        <span class="badge text-bg-success">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-secondary">Inactivo</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="dashboard-empty">
+                No se encontraron clientes para los filtros seleccionados.
+            </div>
+        }
+    </section>
+</main>

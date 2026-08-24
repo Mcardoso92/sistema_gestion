@@ -20,12 +20,40 @@
             </p>
         </div>
 
-        @if (User.IsInRole("SuperAdmin"))
-        {
-            @if (Model.EmpresaId.HasValue)
+        <div class="d-flex flex-wrap gap-2">
+            <a asp-controller="Reporte"
+               asp-action="Ventas"
+               asp-route-empresaId="@(User.IsInRole("SuperAdmin") ? Model.EmpresaId : null)"
+               class="btn btn-v-outline d-flex align-items-center gap-2 px-3 py-2">
+
+                <span class="material-symbols-outlined"
+                      style="font-size: 18px;">
+                    analytics
+                </span>
+
+                Generar reporte
+            </a>
+
+            @if (User.IsInRole("SuperAdmin"))
+            {
+                @if (Model.EmpresaId.HasValue)
+                {
+                    <a asp-action="Create"
+                       asp-route-empresaId="@Model.EmpresaId"
+                       class="btn btn-v-primary d-flex align-items-center gap-2 px-3 py-2">
+
+                        <span class="material-symbols-outlined"
+                              style="font-size: 18px;">
+                            add
+                        </span>
+
+                        Nueva Venta
+                    </a>
+                }
+            }
+            else
             {
                 <a asp-action="Create"
-                   asp-route-empresaId="@Model.EmpresaId"
                    class="btn btn-v-primary d-flex align-items-center gap-2 px-3 py-2">
 
                     <span class="material-symbols-outlined"
@@ -36,20 +64,7 @@
                     Nueva Venta
                 </a>
             }
-        }
-        else
-        {
-            <a asp-action="Create"
-               class="btn btn-v-primary d-flex align-items-center gap-2 px-3 py-2">
-
-                <span class="material-symbols-outlined"
-                      style="font-size: 18px;">
-                    add
-                </span>
-
-                Nueva Venta
-            </a>
-        }
+        </div>
 
     </div>
 
