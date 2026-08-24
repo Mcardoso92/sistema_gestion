@@ -4,6 +4,7 @@ using saas.Data;
 using saas.Data.Seed;
 using saas.Models;
 using saas.Services;
+using saas.Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,13 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
 builder.Services.AddScoped<CompraSaldoService>();
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection(
+        "EmailSettings"));
+
+builder.Services.AddScoped<
+    IEmailService,
+    EmailService>();
 
 //Incluir dbcontext
 builder.Services.AddDbContext<SaasDbContext>(options =>
