@@ -10,6 +10,7 @@ namespace saas.Data
         {
         }
         public DbSet<Empresa> Empresas { get; set; } = null!;
+        public DbSet<ConfiguracionEmpresa> ConfiguracionesEmpresa { get; set; } = null!;
         public DbSet<Producto> Productos { get; set; } = null!;
         public DbSet<Venta> Ventas { get; set; } = null!;
         public DbSet<DetalleVenta> DetallesVenta { get; set; } = null!;
@@ -50,6 +51,12 @@ namespace saas.Data
                 .WithMany(e => e.Usuarios)
                 .HasForeignKey(u => u.EmpresaId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ConfiguracionEmpresa>()
+                .HasOne(c => c.Empresa)
+                .WithOne(e => e.Configuracion)
+                .HasForeignKey<ConfiguracionEmpresa>(c => c.EmpresaId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Categoria>()
                 .HasOne(c => c.Empresa)
@@ -580,6 +587,10 @@ namespace saas.Data
                 .HasIndex(e => e.Nombre)
                 .IsUnique();
 
+            modelBuilder.Entity<ConfiguracionEmpresa>()
+                .HasIndex(c => c.EmpresaId)
+                .IsUnique();
+
             modelBuilder.Entity<Categoria>()
                 .HasIndex(c => new
                 {
@@ -932,10 +943,17 @@ namespace saas.Data
                 .HasIndex(m => m.TransferenciaCajaId);
         }
 
-        private static void ConfigurarPropiedades(
-            ModelBuilder modelBuilder)
+        private static void ConfigurarPropiedades(ModelBuilder modelBuilder)
         {
             //DECIMALES
+            modelBuilder.Entity<ConfiguracionEmpresa>()
+                .Property(c => c.IvaPorcentaje)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<ConfiguracionEmpresa>()
+                .Property(c => c.MontoVentaImportante)
+                .HasPrecision(18, 2);
+
             modelBuilder.Entity<Producto>()
                 .Property(p => p.PrecioCosto)
                 .HasPrecision(18, 2);

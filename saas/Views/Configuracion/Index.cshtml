@@ -1,0 +1,154 @@
+﻿@model saas.ViewModel.Configuracion.ConfiguracionEmpresaVM
+
+@{
+    ViewData["Title"] = "Configuración";
+}
+
+<main class="container-fluid py-4 px-4">
+    <div class="mb-4">
+        <h1 class="h2 fw-bold mb-1">Configuración del sistema</h1>
+        <p class="text-muted mb-0">
+            Configure los datos comerciales y parámetros generales de la empresa.
+        </p>
+    </div>
+
+    @if (ViewBag.EsSuperAdmin is true)
+    {
+        <section class="card-custom p-3 mb-4">
+            <form asp-action="Index" method="get" class="row align-items-end g-3">
+                <div class="col-md-6">
+                    <label for="empresaId" class="form-label fw-semibold">Empresa</label>
+
+                    <select id="empresaId"
+                            name="empresaId"
+                            asp-items="Model.Empresas"
+                            class="form-select">
+                    </select>
+                </div>
+
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-v-outline">
+                        Cambiar empresa
+                    </button>
+                </div>
+            </form>
+        </section>
+    }
+
+    <form asp-action="Index" method="post">
+        <input asp-for="EmpresaId" type="hidden" />
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <section class="card-custom p-4 mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-primary">store</span>
+                        <h2 class="h5 fw-bold mb-0">Datos del negocio</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="RazonSocial" class="form-label fw-semibold">Razón social</label>
+                            <input asp-for="RazonSocial" class="form-control" />
+                            <span asp-validation-for="RazonSocial" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Cuit" class="form-label fw-semibold">CUIT</label>
+                            <input asp-for="Cuit" class="form-control" placeholder="XX-XXXXXXXX-X" />
+                            <span asp-validation-for="Cuit" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="Direccion" class="form-label fw-semibold">Dirección</label>
+                            <input asp-for="Direccion" class="form-control" />
+                            <span asp-validation-for="Direccion" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Telefono" class="form-label fw-semibold">Teléfono</label>
+                            <input asp-for="Telefono" class="form-control" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card-custom p-4">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-primary">tune</span>
+                        <h2 class="h5 fw-bold mb-0">Configuración general</h2>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="Moneda" class="form-label fw-semibold">Moneda</label>
+                            <select asp-for="Moneda" asp-items="Model.Monedas" class="form-select"></select>
+                            <span asp-validation-for="Moneda" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="IvaPorcentaje" class="form-label fw-semibold">IVA general (%)</label>
+                            <input asp-for="IvaPorcentaje" class="form-control" type="number" min="0" max="100" step="0.01" />
+                            <span asp-validation-for="IvaPorcentaje" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label asp-for="MontoVentaImportante" class="form-label fw-semibold"></label>
+                            <input asp-for="MontoVentaImportante" class="form-control" type="number" min="0.01" step="0.01" />
+                            <span asp-validation-for="MontoVentaImportante" class="text-danger"></span>
+                            <div class="form-text">Déjelo vacío para desactivar esta notificación.</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="col-xl-4">
+                <section class="card-custom p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="material-symbols-outlined text-primary">image</span>
+                        <h2 class="h5 fw-bold mb-0">Logo</h2>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.LogoRuta))
+                    {
+                        <img src="@Model.LogoRuta"
+                             alt="Logo de @Model.EmpresaNombre"
+                             class="img-fluid border rounded p-3 mb-3" />
+                    }
+                    else
+                    {
+                        <div class="border rounded bg-light text-center p-5 mb-3">
+                            <span class="material-symbols-outlined text-muted fs-1">image</span>
+                            <p class="text-muted mb-0">Sin logo configurado</p>
+                        </div>
+                    }
+
+                    <p class="small text-muted mb-0">
+                        La carga y optimización del logo se incorporará en Gestión de imágenes.
+                    </p>
+                </section>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-v-primary d-flex align-items-center gap-2 px-4">
+                <span class="material-symbols-outlined">save</span>
+                Guardar configuración
+            </button>
+        </div>
+    </form>
+</main>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
