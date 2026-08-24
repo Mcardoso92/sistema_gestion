@@ -1,0 +1,94 @@
+﻿@model saas.ViewModel.Notificaciones.NotificacionesVM
+
+<div class="dropdown">
+    <button class="app-icon-btn position-relative"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-auto-close="outside"
+            aria-expanded="false"
+            title="Notificaciones">
+
+        <span class="material-symbols-outlined">notifications</span>
+
+        @if (Model.CantidadTotal > 0)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @(Model.CantidadTotal > 99 ? "99+" : Model.CantidadTotal)
+            </span>
+        }
+    </button>
+
+    <div class="dropdown-menu dropdown-menu-end shadow border-0 p-0" style="width: 360px; max-width: 90vw;">
+        <div class="p-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="h6 fw-bold mb-0">Notificaciones</h2>
+
+                @if (Model.CantidadTotal > 0)
+                {
+                    <span class="badge text-bg-danger">@Model.CantidadTotal pendientes</span>
+                }
+            </div>
+
+            <div class="d-flex gap-3 mt-2 small text-muted">
+                <span>@Model.CantidadSinStock sin stock</span>
+                <span>@Model.CantidadStockBajo con stock bajo</span>
+            </div>
+        </div>
+
+        @if (Model.Productos.Any())
+        {
+            <div style="max-height: 360px; overflow-y: auto;">
+                @foreach (var producto in Model.Productos)
+                {
+                    <a asp-controller="MovimientoStock"
+                       asp-action="Historial"
+                       asp-route-productoId="@producto.ProductoId"
+                       class="dropdown-item text-wrap py-3 border-bottom">
+
+                        <div class="d-flex gap-3">
+                            <span class="material-symbols-outlined @(producto.SinStock ? "text-danger" : "text-warning")">
+                                @(producto.SinStock ? "error" : "warning")
+                            </span>
+
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">@producto.Producto</div>
+
+                                @if (ViewBag.EsSuperAdmin is true)
+                                {
+                                    <div class="small text-muted">@producto.Empresa</div>
+                                }
+
+                                <div class="small @(producto.SinStock ? "text-danger" : "text-warning")">
+                                    @if (producto.SinStock)
+                                    {
+                                        <span>Producto sin stock</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Stock: @producto.Stock · Mínimo: @producto.PuntoReposicion</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <div class="p-2">
+                <a asp-controller="MovimientoStock"
+                   asp-action="Index"
+                   class="btn btn-sm btn-v-outline w-100">
+                    Ver gestión de stock
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="text-center p-4">
+                <span class="material-symbols-outlined text-success fs-1">check_circle</span>
+                <p class="fw-semibold mb-1">Todo en orden</p>
+                <p class="small text-muted mb-0">No hay alertas de stock.</p>
+            </div>
+        }
+    </div>
+</div>
