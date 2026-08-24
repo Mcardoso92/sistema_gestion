@@ -129,9 +129,7 @@
                 </div>
 
                 <div class="app-user-area">
-                    <button class="app-icon-btn" type="button" title="Notificaciones">
-                        <span class="material-symbols-outlined">notifications</span>
-                    </button>
+                    @await Component.InvokeAsync("Notificaciones")
 
                     @if (usuario != null)
                     {
