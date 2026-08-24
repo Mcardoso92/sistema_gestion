@@ -768,7 +768,6 @@ namespace saas.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
-
         [AllowAnonymous]
         public IActionResult Login()
         {
@@ -961,6 +960,65 @@ namespace saas.Controllers
 
             return RedirectToAction(
                 nameof(Login));
+        }
+        public IActionResult CambiarPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CambiarPassword(
+            CambiarPasswordVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var usuario =
+                await _userManager.GetUserAsync(
+                    User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            var resultado =
+                await _userManager.ChangePasswordAsync(
+                    usuario,
+                    model.PasswordActual,
+                    model.PasswordNueva);
+
+            if (!resultado.Succeeded)
+            {
+                if (resultado.Errors.Any(
+                    error =>
+                        error.Code == "PasswordMismatch"))
+                {
+                    ModelState.AddModelError(
+                        nameof(model.PasswordActual),
+                        "La contraseña actual es incorrecta.");
+                }
+                else
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "No fue posible cambiar la contraseña.");
+                }
+
+                return View(model);
+            }
+
+            await _signInManager.RefreshSignInAsync(
+                usuario);
+
+            TempData["Success"] =
+                "La contraseña se cambió correctamente.";
+
+            return RedirectToAction(
+                nameof(Index));
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
