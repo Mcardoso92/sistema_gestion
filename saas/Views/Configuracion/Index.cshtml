@@ -35,7 +35,7 @@
         </section>
     }
 
-    <form asp-action="Index" method="post">
+    <form asp-action="Index" method="post" enctype="multipart/form-data">
         <input asp-for="EmpresaId" type="hidden" />
 
         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -131,9 +131,30 @@
                         </div>
                     }
 
-                    <p class="small text-muted mb-0">
-                        La carga y optimización del logo se incorporará en Gestión de imágenes.
-                    </p>
+                    <div class="mb-3">
+                        <label asp-for="LogoArchivo" class="form-label fw-semibold"></label>
+
+                        <input asp-for="LogoArchivo"
+                               class="form-control"
+                               type="file"
+                               accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+
+                        <span asp-validation-for="LogoArchivo" class="text-danger"></span>
+
+                        <div class="form-text">
+                            Formatos permitidos: JPEG, PNG y WebP. Tamaño máximo: 2 MB.
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.LogoRuta))
+                    {
+                        <div class="form-check">
+                            <input asp-for="EliminarLogo" class="form-check-input" />
+                            <label asp-for="EliminarLogo" class="form-check-label">
+                                Eliminar logo actual
+                            </label>
+                        </div>
+                    }
                 </section>
             </div>
         </div>

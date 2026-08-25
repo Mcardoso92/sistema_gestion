@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace saas.ViewModel.Configuracion
 {
@@ -38,6 +39,10 @@ namespace saas.ViewModel.Configuracion
         public decimal? MontoVentaImportante { get; set; }
 
         public string? LogoRuta { get; set; }
+        [Display(Name = "Nuevo logo")]
+        public IFormFile? LogoArchivo { get; set; }
+
+        public bool EliminarLogo { get; set; }
 
         public List<SelectListItem> Empresas { get; set; } = new List<SelectListItem>();
 
