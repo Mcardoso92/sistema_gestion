@@ -14,6 +14,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
 builder.Services.AddScoped<CompraSaldoService>();
+builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection(
         "EmailSettings"));
@@ -67,6 +68,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();

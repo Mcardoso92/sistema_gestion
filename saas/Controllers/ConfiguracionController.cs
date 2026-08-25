@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel.Configuracion;
 
 namespace saas.Controllers
@@ -14,11 +15,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IImagenService _imagenService;
 
-        public ConfiguracionController(SaasDbContext context, UserManager<Usuario> userManager)
+        public ConfiguracionController(
+            SaasDbContext context,
+            UserManager<Usuario> userManager,
+            IImagenService imagenService)
         {
             _context = context;
             _userManager = userManager;
+            _imagenService = imagenService;
         }
 
         [HttpGet]
@@ -149,6 +155,30 @@ namespace saas.Controllers
                 _context.ConfiguracionesEmpresa.Add(configuracion);
             }
 
+            string? rutaAnterior = configuracion.LogoRuta;
+            string? rutaNueva = null;
+
+            if (vm.LogoArchivo != null)
+            {
+                ResultadoImagen resultado = await _imagenService.GuardarAsync(vm.LogoArchivo, vm.EmpresaId.Value, "logos");
+
+                if (!resultado.Exito)
+                {
+                    ModelState.AddModelError(nameof(vm.LogoArchivo), resultado.Error ?? "La imagen no es válida.");
+                    vm.EmpresaNombre = empresa!.Nombre;
+                    vm.LogoRuta = rutaAnterior;
+                    await CargarOpciones(vm, esSuperAdmin);
+                    return View(vm);
+                }
+
+                rutaNueva = resultado.Ruta;
+                configuracion.LogoRuta = rutaNueva;
+            }
+            else if (vm.EliminarLogo)
+            {
+                configuracion.LogoRuta = null;
+            }
+
             configuracion.RazonSocial = vm.RazonSocial.Trim();
             configuracion.Cuit = LimpiarTexto(vm.Cuit);
             configuracion.Direccion = LimpiarTexto(vm.Direccion);
@@ -158,7 +188,26 @@ namespace saas.Controllers
             configuracion.IvaPorcentaje = vm.IvaPorcentaje;
             configuracion.MontoVentaImportante = vm.MontoVentaImportante;
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                _imagenService.Eliminar(rutaNueva);
+
+                ModelState.AddModelError("", "No fue posible guardar la configuración.");
+                vm.EmpresaNombre = empresa!.Nombre;
+                vm.LogoRuta = rutaAnterior;
+                await CargarOpciones(vm, esSuperAdmin);
+
+                return View(vm);
+            }
+
+            if (rutaNueva != null || vm.EliminarLogo)
+            {
+                _imagenService.Eliminar(rutaAnterior);
+            }
 
             TempData["Success"] = "La configuración se guardó correctamente.";
 
