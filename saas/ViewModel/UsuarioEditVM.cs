@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace saas.ViewModel
 {
@@ -28,6 +29,9 @@ namespace saas.ViewModel
         [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una empresa.")]
         public int EmpresaId { get; set; }
         public bool EsUsuarioLogueado { get; set; }
+        public string? ImagenActual { get; set; }
+        public IFormFile? ImagenArchivo { get; set; }
+        public bool EliminarImagen { get; set; }
 
         public IEnumerable<SelectListItem> Roles { get; set; } = Enumerable.Empty<SelectListItem>();
 

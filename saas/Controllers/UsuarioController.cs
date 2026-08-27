@@ -20,18 +20,21 @@ namespace saas.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SaasDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IImagenService _imagenService;
         public UsuarioController(
             UserManager<Usuario> userManager,
             SignInManager<Usuario> signInManager,
             RoleManager<IdentityRole> roleManager,
             SaasDbContext context,
-            IEmailService emailService)
+            IEmailService emailService,
+            IImagenService imagenService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _context = context;
             _emailService = emailService;
+            _imagenService = imagenService;
         }
         // GET: Usuario
         public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null)
@@ -262,6 +265,9 @@ namespace saas.Controllers
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuarioLogueado, "SuperAdmin");
 
+            string? rutaImagenNueva = null;
+            Usuario? usuarioCreado = null;
+
             try
             {
                 if (!esSuperAdmin)
@@ -334,6 +340,9 @@ namespace saas.Controllers
 
                     return View(usuario);
                 }
+
+                usuarioCreado = usuarioDb;
+
                 var resultadoRol = await _userManager.AddToRoleAsync(usuarioDb, usuario.Rol);
 
                 if (!resultadoRol.Succeeded)
@@ -350,6 +359,40 @@ namespace saas.Controllers
                     return View(usuario);
                 }
 
+                if (usuario.ImagenArchivo != null)
+                {
+                    ResultadoImagen resultadoImagen = await _imagenService.GuardarAsync(usuario.ImagenArchivo, usuarioDb.EmpresaId, "usuarios", usuarioDb.Id);
+
+                    if (!resultadoImagen.Exito)
+                    {
+                        ModelState.AddModelError(nameof(usuario.ImagenArchivo), resultadoImagen.Error!);
+                        await _userManager.DeleteAsync(usuarioDb);
+                        await CargarCombos(usuario, esSuperAdmin);
+
+                        return View(usuario);
+                    }
+
+                    rutaImagenNueva = resultadoImagen.Ruta;
+                    usuarioDb.ImagenPerfil = rutaImagenNueva;
+
+                    var resultadoImagenUsuario = await _userManager.UpdateAsync(usuarioDb);
+
+                    if (!resultadoImagenUsuario.Succeeded)
+                    {
+                        _imagenService.Eliminar(rutaImagenNueva);
+                        await _userManager.DeleteAsync(usuarioDb);
+
+                        foreach (var error in resultadoImagenUsuario.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+
+                        await CargarCombos(usuario, esSuperAdmin);
+
+                        return View(usuario);
+                    }
+                }
+
                 TempData["Success"] = "Usuario creado correctamente.";
 
                 return RedirectToAction(nameof(Index));
@@ -357,6 +400,12 @@ namespace saas.Controllers
             }
             catch
             {
+                _imagenService.Eliminar(rutaImagenNueva);
+
+                if (usuarioCreado != null)
+                {
+                    await _userManager.DeleteAsync(usuarioCreado);
+                }
 
                 ModelState.AddModelError("", "Ocurrió un error al crear el usuario.");
 
@@ -413,6 +462,7 @@ namespace saas.Controllers
                 Email = usuarioDb.Email!,
                 Estado = usuarioDb.Estado,
                 EmpresaId = usuarioDb.EmpresaId,
+                ImagenActual = usuarioDb.ImagenPerfil,
                 EsUsuarioLogueado = usuarioDb.Id == usuarioLogueado.Id
             };
 
@@ -546,8 +596,34 @@ namespace saas.Controllers
                 return View(usuario);
             }
 
+            string? rutaAnterior = usuarioDb.ImagenPerfil;
+            string? rutaNueva = null;
+            usuario.ImagenActual = rutaAnterior;
+
             try
             {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+
+                if (usuario.ImagenArchivo != null)
+                {
+                    ResultadoImagen resultadoImagen = await _imagenService.GuardarAsync(usuario.ImagenArchivo, usuario.EmpresaId, "usuarios", usuarioDb.Id);
+
+                    if (!resultadoImagen.Exito)
+                    {
+                        ModelState.AddModelError(nameof(usuario.ImagenArchivo), resultadoImagen.Error!);
+                        await CargarCombos(usuario, esSuperAdmin);
+
+                        return View(usuario);
+                    }
+
+                    rutaNueva = resultadoImagen.Ruta;
+                    usuarioDb.ImagenPerfil = rutaNueva;
+                }
+                else if (usuario.EliminarImagen)
+                {
+                    usuarioDb.ImagenPerfil = null;
+                }
+
                 usuarioDb.Nombre = usuario.Nombre;
                 usuarioDb.Apellido = usuario.Apellido;
                 usuarioDb.Email = usuario.Email;
@@ -567,6 +643,8 @@ namespace saas.Controllers
                     {
                         ModelState.AddModelError("", error.Description);
                     }
+
+                    _imagenService.Eliminar(rutaNueva);
 
                     await CargarCombos(usuario, esSuperAdmin);
 
@@ -591,6 +669,8 @@ namespace saas.Controllers
                                     error.Description);
                             }
 
+                            _imagenService.Eliminar(rutaNueva);
+
                             await CargarCombos(usuario, esSuperAdmin);
 
                             return View(usuario);
@@ -611,6 +691,8 @@ namespace saas.Controllers
                                 rolActual);
                         }
 
+                        _imagenService.Eliminar(rutaNueva);
+
                         foreach (var error in resultadoAgregarRol.Errors)
                         {
                             ModelState.AddModelError(
@@ -624,12 +706,22 @@ namespace saas.Controllers
                     }
                 }
 
+                await transaction.CommitAsync();
+
+                if (rutaNueva != null || usuario.EliminarImagen)
+                {
+                    _imagenService.Eliminar(rutaAnterior);
+                }
+
                 TempData["Success"] = "Usuario modificado correctamente.";
 
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
+                _imagenService.Eliminar(rutaNueva);
+                usuario.ImagenActual = rutaAnterior;
+
                 ModelState.AddModelError(
                     "",
                     "Ocurrió un error al modificar el usuario.");

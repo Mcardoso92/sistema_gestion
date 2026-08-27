@@ -28,7 +28,7 @@
                         Recuerde asignarlo a la empresa correcta y seleccionar el rol adecuado.
                     </div>
                 }
-                <form asp-action="Create" method="post" id="newUserForm">
+                <form asp-action="Create" method="post" enctype="multipart/form-data" id="newUserForm">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="row g-4">
                         <div class="col-md-6">
@@ -50,6 +50,12 @@
                                 <input asp-for="Email" class="form-control border-start-0" placeholder="" type="email">                                
                             </div>
                             <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="ImagenArchivo" class="form-label">Imagen de perfil</label>
+                            <input asp-for="ImagenArchivo" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                            <span asp-validation-for="ImagenArchivo" class="text-danger"></span>
+                            <div class="form-text">La imagen es opcional. Formatos permitidos: JPG, PNG o WebP. Tamaño máximo: 2 MB.</div>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Password" class="form-label">Contraseña</label>

@@ -28,8 +28,9 @@
                         Recuerde asignarlo a la empresa correcta y seleccionar el rol adecuado.
                     </div>
                 }
-                <form asp-action="Edit" method="post" id="newUserForm">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data" id="newUserForm">
                     <input asp-for="Id" type="hidden" />
+                    <input asp-for="ImagenActual" type="hidden" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="row g-4">
                         <div class="col-md-6">
@@ -51,6 +52,28 @@
                                 <input asp-for="Email" class="form-control border-start-0" placeholder="" type="email">                                
                             </div>
                             <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="ImagenArchivo" class="form-label">Imagen de perfil</label>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.ImagenActual))
+                            {
+                                <div class="mb-3">
+                                    <img src="@Model.ImagenActual" alt="Imagen de @Model.Nombre @Model.Apellido" class="img-thumbnail rounded-circle" style="width: 140px; height: 140px; object-fit: cover;" />
+                                </div>
+                            }
+
+                            <input asp-for="ImagenArchivo" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                            <span asp-validation-for="ImagenArchivo" class="text-danger"></span>
+                            <div class="form-text">Seleccioná una imagen solamente si querés reemplazar la actual. Formatos permitidos: JPG, PNG o WebP. Tamaño máximo: 2 MB.</div>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.ImagenActual))
+                            {
+                                <div class="form-check mt-3">
+                                    <input asp-for="EliminarImagen" class="form-check-input" />
+                                    <label asp-for="EliminarImagen" class="form-check-label">Eliminar imagen actual</label>
+                                </div>
+                            }
                         </div>
                         @if (!Model.EsUsuarioLogueado)
                         {

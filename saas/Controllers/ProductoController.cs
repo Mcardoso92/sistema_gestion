@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 
 namespace saas.Controllers
 {
@@ -14,11 +15,13 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IImagenService _imagenService;
 
-        public ProductoController(SaasDbContext context, UserManager<Usuario> userManager)
+        public ProductoController(SaasDbContext context, UserManager<Usuario> userManager, IImagenService imagenService)
         {
             _context = context;
             _userManager = userManager;
+            _imagenService = imagenService;
         }
 
         // GET: Producto
@@ -172,7 +175,7 @@ namespace saas.Controllers
         // POST: Producto/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Producto producto)
+        public async Task<IActionResult> Create(Producto producto, IFormFile? imagenArchivo)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -182,6 +185,8 @@ namespace saas.Controllers
             }
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            string? rutaImagenNueva = null;
 
             try
             {
@@ -237,6 +242,25 @@ namespace saas.Controllers
 
                 await _context.SaveChangesAsync();
 
+                if (imagenArchivo != null)
+                {
+                    ResultadoImagen resultadoImagen = await _imagenService.GuardarAsync(imagenArchivo, producto.EmpresaId, "productos", producto.Id.ToString());
+
+                    if (!resultadoImagen.Exito)
+                    {
+                        ModelState.AddModelError("imagenArchivo", resultadoImagen.Error!);
+                        await transaction.RollbackAsync();
+                        CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                        return View(producto);
+                    }
+
+                    rutaImagenNueva = resultadoImagen.Ruta;
+                    producto.UrlImagen = rutaImagenNueva;
+
+                    await _context.SaveChangesAsync();
+                }
+
                 if (producto.Stock > 0)
                 {
                     var movimientoStock = new MovimientoStock
@@ -265,6 +289,7 @@ namespace saas.Controllers
             }
             catch
             {
+                _imagenService.Eliminar(rutaImagenNueva);
 
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
 
@@ -314,7 +339,7 @@ namespace saas.Controllers
         // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Producto producto)
+        public async Task<IActionResult> Edit(int id, Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false)
         {
             if (id != producto.Id)
             {
@@ -383,8 +408,31 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            string? rutaAnterior = productoDb.UrlImagen;
+            string? rutaNueva = null;
+
             try
             {
+                if (imagenArchivo != null)
+                {
+                    ResultadoImagen resultadoImagen = await _imagenService.GuardarAsync(imagenArchivo, producto.EmpresaId, "productos", producto.Id.ToString());
+
+                    if (!resultadoImagen.Exito)
+                    {
+                        ModelState.AddModelError("imagenArchivo", resultadoImagen.Error!);
+                        producto.UrlImagen = rutaAnterior;
+                        CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+
+                        return View(producto);
+                    }
+
+                    rutaNueva = resultadoImagen.Ruta;
+                    productoDb.UrlImagen = rutaNueva;
+                }
+                else if (eliminarImagen)
+                {
+                    productoDb.UrlImagen = null;
+                }
 
                 productoDb.Nombre = producto.Nombre;
                 productoDb.CodigoBarra = producto.CodigoBarra;
@@ -394,15 +442,23 @@ namespace saas.Controllers
                 productoDb.PrecioVenta = producto.PrecioVenta;
                 productoDb.PuntoReposicion = producto.PuntoReposicion;
                 productoDb.Estado = producto.Estado;
-                productoDb.UrlImagen = producto.UrlImagen;
                 productoDb.EmpresaId = producto.EmpresaId;
 
                 await _context.SaveChangesAsync();
+
+                if (rutaNueva != null || eliminarImagen)
+                {
+                    _imagenService.Eliminar(rutaAnterior);
+                }
+
                 TempData["Success"] = "Producto modificado correctamente.";
                 return RedirectToAction(nameof(Index));
             }
             catch
             {
+                _imagenService.Eliminar(rutaNueva);
+                producto.UrlImagen = rutaAnterior;
+
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
 
                 ModelState.AddModelError("", "Ocurrió un error al modificar el producto.");

@@ -13,8 +13,9 @@
                     Información del Producto
                 </div>
                 <div class="card-body p-4">
-                    <form asp-action="Edit" method="post" class="row g-4" id="productForm">
+                    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="row g-4" id="productForm">
                         <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="UrlImagen" />
                         <div class="col-md-8">
                             <label asp-for="Nombre" class="form-label">Nombre del Producto</label>
                             <input asp-for="Nombre" class="form-control" type="text" />
@@ -71,9 +72,26 @@
                             </div>
                         }
                         <div class="col-md-12">
-                            <label asp-for="UrlImagen" class="form-label">Url Imagen</label>
-                            <input asp-for="UrlImagen" class="form-control" type="text" />
-                            <span asp-validation-for="UrlImagen" class="text-danger"></span>
+                            <label for="imagenArchivo" class="form-label">Imagen del producto</label>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.UrlImagen))
+                            {
+                                <div class="mb-3">
+                                    <img src="@Model.UrlImagen" alt="Imagen de @Model.Nombre" class="img-thumbnail" style="max-width: 180px; max-height: 180px; object-fit: contain;" />
+                                </div>
+                            }
+
+                            <input id="imagenArchivo" name="imagenArchivo" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+                            @Html.ValidationMessage("imagenArchivo", null, new { @class = "text-danger" })
+                            <div class="form-text">Seleccioná una imagen solamente si querés reemplazar la actual. Formatos permitidos: JPG, PNG o WebP. Tamaño máximo: 2 MB.</div>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.UrlImagen))
+                            {
+                                <div class="form-check mt-3">
+                                    <input id="eliminarImagen" name="eliminarImagen" class="form-check-input" type="checkbox" value="true" />
+                                    <label for="eliminarImagen" class="form-check-label">Eliminar imagen actual</label>
+                                </div>
+                            }
                         </div>
                         <div class="col-12">
                             <label asp-for="Descripcion" class="form-label">Descripción</label>
