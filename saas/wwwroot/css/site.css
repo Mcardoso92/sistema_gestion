@@ -2653,3 +2653,105 @@ main {
             text-align: right;
         }
     }
+
+@media (max-width: 767px) {
+    #puntoVenta {
+        padding-right: 12px !important;
+        padding-left: 12px !important;
+    }
+
+        #puntoVenta .badge-info-custom {
+            width: 100%;
+        }
+
+        #puntoVenta .table-responsive table {
+            min-width: 700px;
+        }
+
+        #puntoVenta .summary-panel > .p-4 {
+            padding: 1rem !important;
+        }
+
+    #totalVenta {
+        font-size: clamp(1.75rem, 10vw, 3rem) !important;
+        overflow-wrap: anywhere;
+    }
+}
+@media (max-width: 575px) {
+    .dashboard-page {
+        padding-right: 12px !important;
+        padding-left: 12px !important;
+    }
+
+    .dashboard-summary-card {
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+        .dashboard-summary-card > div:last-child {
+            min-width: 0;
+        }
+
+    .dashboard-summary-value {
+        font-size: clamp(1.25rem, 7vw, 1.5rem);
+        overflow-wrap: anywhere;
+    }
+
+    .dashboard-panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+        .dashboard-panel-header .btn {
+            width: 100%;
+        }
+
+    .dashboard-list-item,
+    .dashboard-ranking-item {
+        gap: 0.75rem;
+        padding: 0.875rem 1rem;
+    }
+}
+@media (max-width: 575px) {
+    .app-body .container-fluid.px-4 {
+        padding-right: 12px !important;
+        padding-left: 12px !important;
+    }
+
+    .app-body .card-body.p-4,
+    .app-body .card-footer.p-4 {
+        padding: 1rem !important;
+    }
+
+    .app-body .display-6 {
+        font-size: 2rem;
+    }
+
+    .app-body .form-container {
+        padding: 1rem !important;
+    }
+
+    .app-body form .d-flex.justify-content-end {
+        flex-wrap: wrap;
+    }
+
+        .app-body form .d-flex.justify-content-end > .btn {
+            flex: 1 1 140px;
+        }
+}
+@media (max-width: 575px) {
+    .main-content {
+        align-items: flex-start;
+        padding: 1.5rem 0.75rem;
+    }
+
+    .login-card {
+        padding: 1.25rem;
+    }
+
+        .login-card .d-flex.justify-content-between {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+}
