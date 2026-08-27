@@ -129,7 +129,22 @@
                         @foreach (var usuario in Model)
                         {
                             <tr>
-                                <td class="fw-medium">@usuario.Nombre</td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if (!string.IsNullOrWhiteSpace(usuario.ImagenPerfil))
+                                        {
+                                            <img src="@usuario.ImagenPerfil" alt="Imagen de @usuario.Nombre" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <span class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center fw-semibold text-muted" style="width: 40px; height: 40px;">
+                                                @usuario.Nombre.Substring(0, 1).ToUpper()
+                                            </span>
+                                        }
+
+                                        <span class="fw-medium">@usuario.Nombre</span>
+                                    </div>
+                                </td>
                                 <td>@usuario.Apellido</td>
                                 <td class="text-muted">@usuario.Email</td>
                                 @if (User.IsInRole("SuperAdmin"))

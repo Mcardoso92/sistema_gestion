@@ -135,9 +135,16 @@
                     {
                         <div class="dropdown">
                             <button class="app-user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="app-avatar">
-                                    @(string.IsNullOrWhiteSpace(usuario.Email) ? "U" : usuario.Email.Substring(0, 1).ToUpper())
-                                </span>
+                                @if (!string.IsNullOrWhiteSpace(usuario.ImagenPerfil))
+                                {
+                                    <img src="@usuario.ImagenPerfil" alt="Imagen de perfil" class="app-avatar" style="object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <span class="app-avatar">
+                                        @(string.IsNullOrWhiteSpace(usuario.Email) ? "U" : usuario.Email.Substring(0, 1).ToUpper())
+                                    </span>
+                                }
 
                                 <span class="app-user-data">
                                     <span class="app-user-email">@usuario.Email</span>

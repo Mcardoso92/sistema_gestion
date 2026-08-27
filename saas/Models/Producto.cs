@@ -25,7 +25,6 @@ namespace saas.Models
         [Range(0, int.MaxValue, ErrorMessage = "El punto de reposición no puede ser negativo.")]
         public int PuntoReposicion { get; set; }
         public bool Estado { get; set; }
-        [Url(ErrorMessage = "Ingrese una URL válida.")]
         [StringLength(500, ErrorMessage = "La URL no puede superar los 500 caracteres.")]
         public string? UrlImagen { get; set; }
         [DataType(DataType.Date)]

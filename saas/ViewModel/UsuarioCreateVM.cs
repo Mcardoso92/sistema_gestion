@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 
 namespace saas.ViewModel
 {
@@ -34,6 +35,7 @@ namespace saas.ViewModel
         [Required(ErrorMessage = "Debe seleccionar un rol.")]
         public string Rol { get; set; } = null!;
         public bool Estado { get; set; } = true;
+        public IFormFile? ImagenArchivo { get; set; }
 
         public IEnumerable<SelectListItem> Roles { get; set; } = Enumerable.Empty<SelectListItem>();
 
