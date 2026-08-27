@@ -30,9 +30,96 @@
                 <div class="app-navbar-left">
                     <a class="app-brand" asp-controller="Home" asp-action="Index">
                         <span class="app-brand-icon">V</span>
-                        <span>Veltika</span>
+                        <span class="app-brand-name">Veltika</span>
                     </a>
+                    <div class="dropdown app-mobile-nav">
+                        <button class="app-mobile-nav-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menú principal">
+                            <span class="material-symbols-outlined">menu</span>
+                        </button>
 
+                        <ul class="dropdown-menu app-menu app-mobile-menu">
+                            <li>
+                                <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">
+                                    <span class="material-symbols-outlined">dashboard</span>
+                                    Dashboard
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Venta" asp-action="Index">
+                                    <span class="material-symbols-outlined">point_of_sale</span>
+                                    Ventas
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Producto" asp-action="Index">
+                                    <span class="material-symbols-outlined">inventory_2</span>
+                                    Productos
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Cliente" asp-action="Index">
+                                    <span class="material-symbols-outlined">groups</span>
+                                    Clientes
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="MovimientoStock" asp-action="Index">
+                                    <span class="material-symbols-outlined">deployed_code</span>
+                                    Stock
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Proveedor" asp-action="Index">
+                                    <span class="material-symbols-outlined">local_shipping</span>
+                                    Proveedores
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Compra" asp-action="Index">
+                                    <span class="material-symbols-outlined">shopping_cart</span>
+                                    Compras
+                                </a>
+                            </li>
+
+                            <li><hr class="dropdown-divider" /></li>
+
+                            <li>
+                                <a class="dropdown-item" asp-controller="Categoria" asp-action="Index">
+                                    <span class="material-symbols-outlined">category</span>
+                                    Categorías
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Usuario" asp-action="Index">
+                                    <span class="material-symbols-outlined">manage_accounts</span>
+                                    Usuarios
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="TurnoCaja" asp-action="Index">
+                                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                                    Turnos
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="MovimientoCaja" asp-action="Index">
+                                    <span class="material-symbols-outlined">payments</span>
+                                    Movimientos de caja
+                                </a>
+                            </li>
+
+                            @if (User.IsInRole("SuperAdmin"))
+                            {
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Empresa" asp-action="Index">
+                                        <span class="material-symbols-outlined">domain</span>
+                                        Empresas
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                     <nav class="app-nav">
                         <a class="app-nav-link @(controllerActual == "Dashboard" ? "active" : "")"
                            asp-controller="Dashboard" asp-action="Index">
