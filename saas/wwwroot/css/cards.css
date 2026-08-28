@@ -1,0 +1,54 @@
+.app-body .card,
+.app-body .card-custom,
+.app-body .dashboard-summary-card,
+.app-body .dashboard-panel {
+    border-color: var(--ui-border-light) !important;
+    border-radius: var(--ui-radius-lg);
+    box-shadow: var(--ui-shadow-sm);
+}
+
+.app-body .card-header,
+.app-body .card-header-bg {
+    padding: 1rem 1.25rem;
+    border-bottom-color: var(--ui-border-light);
+    background: var(--ui-surface-muted);
+    color: var(--ui-text);
+    font-weight: 700;
+}
+
+.app-body .card-body {
+    color: var(--ui-text);
+}
+
+.app-body .summary-card {
+    height: 100%;
+    padding: 1.25rem;
+    border: 1px solid var(--ui-border-light);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-sm);
+}
+
+.app-body .empty-state {
+    padding: 3rem 1.25rem;
+    color: var(--ui-text-muted);
+    text-align: center;
+}
+
+.app-body .card,
+.app-body .card-custom {
+    overflow: hidden;
+    border: 1px solid var(--ui-border-light) !important;
+    background: var(--ui-surface);
+}
+
+.app-body .card-header,
+.app-body .card-header-bg {
+    border-bottom: 1px solid var(--ui-border-light) !important;
+    background: var(--ui-surface-muted) !important;
+}
+
+.app-body .card-footer {
+    border-top: 1px solid var(--ui-border-light) !important;
+    background: var(--ui-surface-muted) !important;
+}

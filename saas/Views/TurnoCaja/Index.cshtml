@@ -195,13 +195,13 @@
                                     <td>
                                         @if (turno.Estado == saas.Models.Enums.EstadoTurnoCaja.Abierto)
                                         {
-                                            <span class="badge bg-success">
+                                            <span class="status-badge status-open">
                                                 Abierto
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">
+                                            <span class="status-badge status-closed">
                                                 Cerrado
                                             </span>
                                         }
@@ -211,8 +211,10 @@
 
                                         <a asp-action="Details"
                                            asp-route-id="@turno.Id"
-                                           class="btn btn-sm btn-outline-secondary">
-                                            Detalles
+                                           class="btn action-icon-btn action-view"
+                                           title="Ver detalle"
+                                           aria-label="Ver detalle">
+                                            <span class="material-symbols-outlined">visibility</span>
                                         </a>
 
                                     </td>

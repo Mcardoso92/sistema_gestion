@@ -106,18 +106,14 @@
                                 <input asp-for="Estado" class="form-check-input ms-0 mt-0" id="userStatus" role="switch" style="width: 2.8em; height: 1.4em; cursor: pointer;" type="checkbox">                                
                                 @if (Model.Estado)
                                 {
-                                    <span class="badge rounded-pill bg-success px-3 py-2 text-uppercase fw-bold"
-                                        id="statusBadge"
-                                        style="font-size: 0.65rem;">
-                                        ACTIVO
+                                    <span class="status-badge status-active" id="statusBadge">
+                                        Activo
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge rounded-pill bg-danger px-3 py-2 text-uppercase fw-bold"
-                                        id="statusBadge"
-                                        style="font-size: 0.65rem;">
-                                        INACTIVO
+                                    <span class="status-badge status-inactive" id="statusBadge">
+                                        Inactivo
                                     </span>
                                 }                                
                             </div>

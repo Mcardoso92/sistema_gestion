@@ -212,7 +212,7 @@
                                     {
                                         case EstadoStockVM.SinStock:
 
-                                            <span class="badge-status stock-status-sin">
+                                            <span class="status-badge status-empty">
                                                 <span class="dot"></span>
                                                 Sin stock
                                             </span>
@@ -221,7 +221,7 @@
 
                                         case EstadoStockVM.StockBajo:
 
-                                            <span class="badge-status stock-status-bajo">
+                                            <span class="status-badge status-low">
                                                 <span class="dot"></span>
                                                 Stock bajo
                                             </span>
@@ -230,7 +230,7 @@
 
                                         default:
 
-                                            <span class="badge-status stock-status-normal">
+                                            <span class="status-badge status-normal">
                                                 <span class="dot"></span>
                                                 Con stock
                                             </span>
@@ -244,14 +244,14 @@
 
                                     @if (producto.ProductoActivo)
                                     {
-                                        <span class="badge-status status-activo">
+                                        <span class="status-badge status-active">
                                             <span class="dot"></span>
                                             Activo
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge-status status-inactivo">
+                                        <span class="status-badge status-inactive">
                                             <span class="dot"></span>
                                             Inactivo
                                         </span>
