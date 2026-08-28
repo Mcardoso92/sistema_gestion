@@ -1,0 +1,120 @@
+.app-body .form-label {
+    margin-bottom: 0.375rem;
+    color: var(--ui-text);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.app-body .form-control,
+.app-body .form-select,
+.app-body .input-group-text {
+    min-height: 40px;
+    border-color: var(--ui-border);
+    border-radius: var(--ui-radius-sm);
+}
+
+.app-body .form-control:focus,
+.app-body .form-select:focus {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 0.2rem rgba(15, 76, 129, 0.12);
+}
+
+.app-body textarea.form-control {
+    min-height: 110px;
+}
+
+.app-body .form-text {
+    color: var(--ui-text-muted);
+    font-size: 0.8rem;
+}
+
+.app-body .text-danger.field-validation-error,
+.app-body span.text-danger {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+}
+
+.app-body .filter-panel {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--ui-border-light);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-sm);
+}
+
+.app-body .form-container {
+    border-color: var(--ui-border-light) !important;
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-sm);
+}
+
+.app-body form .row {
+    row-gap: 0.25rem;
+}
+
+.app-body .input-group > .btn {
+    min-height: 100%;
+}
+
+.app-body .form-control,
+.app-body .form-select {
+    padding: 0.5rem 0.75rem;
+    background-color: var(--ui-surface);
+    color: var(--ui-text);
+}
+
+.app-body .form-control::placeholder {
+    color: var(--ui-text-muted);
+    opacity: 0.8;
+}
+
+.app-body .form-check-input:checked {
+    border-color: var(--ui-primary);
+    background-color: var(--ui-primary);
+}
+
+.app-body .form-check-input:focus {
+    border-color: var(--ui-primary);
+    box-shadow: 0 0 0 0.2rem rgba(15, 76, 129, 0.12);
+}
+
+.app-body .card:has(form[method="get"]),
+.app-body .card-custom:has(form[method="get"]) {
+    border: 1px solid var(--ui-border-light) !important;
+    border-radius: var(--ui-radius-lg) !important;
+    background: var(--ui-surface) !important;
+    box-shadow: var(--ui-shadow-sm) !important;
+}
+
+.app-body .card:has(form[method="get"]) > .card-body,
+.app-body .card-custom:has(form[method="get"]) {
+    padding: 1.25rem !important;
+}
+
+.app-body form[method="get"] .row {
+    align-items: end;
+    row-gap: 1rem;
+}
+
+.app-body .search-input-wrapper {
+    position: relative;
+}
+
+.app-body .search-input-wrapper > .material-symbols-outlined {
+    position: absolute;
+    top: 50%;
+    left: 0.875rem;
+    z-index: 2;
+    color: var(--ui-text-muted);
+    font-size: 1.25rem;
+    line-height: 1;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.app-body .search-input-wrapper > input.form-control {
+    padding-left: 2.75rem;
+}

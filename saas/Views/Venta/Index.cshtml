@@ -376,7 +376,7 @@
                             Cobro
                         </th>
                         <th class="pe-4 py-3 small fw-bold text-muted text-uppercase text-center">
-                            Acción
+                            Acciones
                         </th>
 
                     </tr>
@@ -493,13 +493,13 @@
 
                                     @if (venta.Estado)
                                     {
-                                        <span class="venta-badge-completada">
+                                        <span class="status-badge status-completed">
                                             Completada
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="venta-badge-anulada">
+                                        <span class="status-badge status-cancelled">
                                             Anulada
                                         </span>
                                     }
@@ -510,13 +510,13 @@
 
                                     @if (!venta.Estado)
                                     {
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                        <span class="status-badge status-neutral">
                                             —
                                         </span>
                                     }
                                     else if (venta.EstaCobrada)
                                     {
-                                        <span class="badge bg-success bg-opacity-10 text-success">
+                                        <span class="status-badge status-paid">
                                             Cobrada
                                         </span>
                                     }
@@ -524,7 +524,7 @@
                                     {
                                         <div class="d-flex flex-column align-items-center gap-1">
 
-                                            <span class="badge bg-warning bg-opacity-10 text-warning-emphasis">
+                                            <span class="status-badge status-partial">
                                                 Pago parcial
                                             </span>
 
@@ -539,7 +539,7 @@
                                     {
                                         <div class="d-flex flex-column align-items-center gap-1">
 
-                                            <span class="badge bg-danger bg-opacity-10 text-danger">
+                                            <span class="status-badge status-pending">
                                                 Pendiente
                                             </span>
 
@@ -552,7 +552,7 @@
 
                                 </td>
 
-                                <!-- Acción -->
+                                <!-- Acciones -->
                                 <td class="pe-4 text-center">
 
                                     <a asp-action="Details"
