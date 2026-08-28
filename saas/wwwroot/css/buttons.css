@@ -1,0 +1,179 @@
+.app-body .btn {
+    min-height: 38px;
+    border-radius: var(--ui-radius-sm);
+    font-weight: 600;
+}
+
+.app-body .btn-sm {
+    min-height: 32px;
+}
+
+.app-body .btn-primary,
+.app-body .btn-v-primary,
+.app-body .btn-primary-veltika,
+.app-body .btn-primary-custom {
+    border-color: var(--ui-primary) !important;
+    background-color: var(--ui-primary) !important;
+    color: #ffffff !important;
+}
+
+.app-body .btn-primary:hover,
+.app-body .btn-v-primary:hover,
+.app-body .btn-primary-veltika:hover,
+.app-body .btn-primary-custom:hover {
+    border-color: var(--ui-primary-hover) !important;
+    background-color: var(--ui-primary-hover) !important;
+    color: #ffffff !important;
+}
+
+.app-body .btn-v-outline,
+.app-body .btn-outline-veltika {
+    border-color: var(--ui-primary);
+    color: var(--ui-primary);
+}
+
+.app-body .btn-v-outline:hover,
+.app-body .btn-outline-veltika:hover {
+    border-color: var(--ui-primary);
+    background-color: var(--ui-primary);
+    color: #ffffff;
+}
+
+.app-body .page-actions,
+.app-body .form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.app-body .action-icon-btn {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-body .action-icon-btn .material-symbols-outlined {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.app-body .action-view {
+    border: 1px solid var(--ui-primary) !important;
+    background: transparent !important;
+    color: var(--ui-primary) !important;
+}
+
+.app-body .action-view:hover,
+.app-body .action-view:focus-visible {
+    border-color: var(--ui-primary) !important;
+    background: var(--ui-primary) !important;
+    color: #ffffff !important;
+}
+
+.app-body .action-edit {
+    border: 1px solid var(--ui-warning) !important;
+    background: transparent !important;
+    color: var(--ui-warning) !important;
+}
+
+.app-body .action-edit:hover,
+.app-body .action-edit:focus-visible {
+    border-color: var(--ui-warning) !important;
+    background: var(--ui-warning) !important;
+    color: #ffffff !important;
+}
+
+.app-body .action-disable {
+    border: 1px solid var(--ui-danger) !important;
+    background: transparent !important;
+    color: var(--ui-danger) !important;
+}
+
+.app-body .action-disable:hover,
+.app-body .action-disable:focus-visible {
+    border-color: var(--ui-danger) !important;
+    background: var(--ui-danger) !important;
+    color: #ffffff !important;
+}
+
+/* Acciones estándar de los listados. Estas reglas prevalecen sobre estilos heredados de cada módulo. */
+.app-body table a[title="Ver detalle"],
+.app-body table .action-view {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-primary) !important;
+    border-radius: var(--ui-radius-sm) !important;
+    background: transparent !important;
+    color: var(--ui-primary) !important;
+}
+
+.app-body table a[title="Ver detalle"]:hover,
+.app-body table a[title="Ver detalle"]:focus-visible,
+.app-body table .action-view:hover,
+.app-body table .action-view:focus-visible {
+    border-color: var(--ui-primary) !important;
+    background: var(--ui-primary) !important;
+    color: #ffffff !important;
+}
+
+.app-body table a[title="Editar"] {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-warning) !important;
+    border-radius: var(--ui-radius-sm) !important;
+    background: transparent !important;
+    color: var(--ui-warning) !important;
+}
+
+.app-body table a[title="Editar"]:hover,
+.app-body table a[title="Editar"]:focus-visible {
+    background: var(--ui-warning) !important;
+    color: #ffffff !important;
+}
+
+.app-body table a[title="Desactivar"] {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ui-danger) !important;
+    border-radius: var(--ui-radius-sm) !important;
+    background: transparent !important;
+    color: var(--ui-danger) !important;
+}
+
+.app-body table a[title="Desactivar"]:hover,
+.app-body table a[title="Desactivar"]:focus-visible {
+    background: var(--ui-danger) !important;
+    color: #ffffff !important;
+}
+
+.app-body table a[title="Ver detalle"] .material-symbols-outlined,
+.app-body table a[title="Editar"] .material-symbols-outlined,
+.app-body table a[title="Desactivar"] .material-symbols-outlined {
+    font-size: 1.125rem !important;
+    line-height: 1;
+}

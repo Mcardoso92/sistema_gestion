@@ -1,0 +1,72 @@
+.app-body .status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 26px;
+    padding: 0.25rem 0.625rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.015em;
+    text-transform: none;
+    white-space: nowrap;
+}
+
+.app-body .status-badge::before {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+    flex: 0 0 auto;
+}
+
+.app-body .status-active,
+.app-body .status-completed,
+.app-body .status-open,
+.app-body .status-paid,
+.app-body .status-normal {
+    border-color: #a7d7bd !important;
+    background: #e9f7ef !important;
+    color: #146c43 !important;
+}
+
+.app-body .status-inactive,
+.app-body .status-closed,
+.app-body .status-neutral {
+    border-color: #d0d5dd !important;
+    background: #f2f4f7 !important;
+    color: #475467 !important;
+}
+
+.app-body .status-pending,
+.app-body .status-warning,
+.app-body .status-low {
+    border-color: #fedf89 !important;
+    background: #fffaeb !important;
+    color: #93370d !important;
+}
+
+.app-body .status-cancelled,
+.app-body .status-danger,
+.app-body .status-empty,
+.app-body .status-overdue {
+    border-color: #fecdca !important;
+    background: #fef3f2 !important;
+    color: #b42318 !important;
+}
+
+.app-body .status-info,
+.app-body .status-partial {
+    border-color: #b2ddff !important;
+    background: #eff8ff !important;
+    color: #175cd3 !important;
+}
+
+.app-body .status-badge .dot,
+.app-body .status-badge > .rounded-circle {
+    display: none !important;
+}

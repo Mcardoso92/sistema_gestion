@@ -14,16 +14,16 @@
 
                 @if (Model.Estado)
                 {
-                    <span class="badge bg-success">Activa</span>
+                    <span class="status-badge status-active">Activa</span>
                 }
                 else
                 {
-                    <span class="badge bg-secondary">Inactiva</span>
+                    <span class="status-badge status-inactive">Inactiva</span>
                 }
 
                 @if (Model.TieneTurnoAbierto)
                 {
-                    <span class="badge bg-primary">
+                    <span class="status-badge status-open">
                         Turno abierto
                     </span>
                 }

@@ -292,13 +292,13 @@
 
                                             @if (cobro.Estado == EstadoCobro.Activo)
                                             {
-                                                <span class="badge bg-success bg-opacity-10 text-success fw-medium">
+                                                <span class="status-badge status-active">
                                                     Activo
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-danger bg-opacity-10 text-danger fw-medium">
+                                                <span class="status-badge status-cancelled">
                                                     Anulado
                                                 </span>
                                             }
@@ -456,13 +456,13 @@
 
                                             @if (reintegro.Estado == EstadoReintegro.Activo)
                                             {
-                                                <span class="badge bg-success bg-opacity-10 text-success">
+                                                <span class="status-badge status-active">
                                                     Activo
                                                 </span>
                                             }
                                             else
                                             {
-                                                <span class="badge bg-danger bg-opacity-10 text-danger">
+                                                <span class="status-badge status-cancelled">
                                                     Anulado
                                                 </span>
                                             }
@@ -598,7 +598,7 @@
                 @if (Model.SaldoPendiente <= 0)
                 {
                     <div class="text-center">
-                        <span class="badge bg-success">
+                        <span class="status-badge status-paid">
                             Venta totalmente cobrada
                         </span>
                     </div>
@@ -606,7 +606,7 @@
                 else
                 {
                     <div class="text-center">
-                        <span class="badge bg-warning text-dark">
+                        <span class="status-badge status-pending">
                             Saldo pendiente
                         </span>
                     </div>
@@ -768,13 +768,13 @@
                         <div class="small text-end">
                             @if (Model.Estado)
                             {
-                                <span class="badge bg-success bg-opacity-10 text-success fw-medium">
+                                <span class="status-badge status-completed">
                                     Completada
                                 </span>
                             }
                             else
                             {
-                                <span class="badge bg-danger bg-opacity-10 text-danger fw-medium">
+                                <span class="status-badge status-cancelled">
                                     Anulada
                                 </span>
                             }

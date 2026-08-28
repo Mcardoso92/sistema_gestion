@@ -239,13 +239,13 @@
 
                                         @if (caja.Estado)
                                         {
-                                            <span class="badge bg-success">
+                                            <span class="status-badge status-active">
                                                 Activa
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">
+                                            <span class="status-badge status-inactive">
                                                 Inactiva
                                             </span>
                                         }
@@ -258,22 +258,28 @@
 
                                             <a asp-action="Details"
                                                asp-route-id="@caja.Id"
-                                               class="btn btn-outline-secondary">
-                                                Detalles
+                                               class="btn btn-outline-secondary action-icon-btn"
+                                               title="Ver detalle"
+                                               aria-label="Ver detalle">
+                                                <span class="material-symbols-outlined">visibility</span>
                                             </a>
 
                                             <a asp-action="Edit"
                                                asp-route-id="@caja.Id"
-                                               class="btn btn-outline-primary">
-                                                Editar
+                                               class="btn btn-outline-primary action-icon-btn"
+                                               title="Editar"
+                                               aria-label="Editar">
+                                                <span class="material-symbols-outlined">edit</span>
                                             </a>
 
                                             @if (caja.Estado)
                                             {
                                                 <a asp-action="Delete"
                                                    asp-route-id="@caja.Id"
-                                                   class="btn btn-outline-danger">
-                                                    Desactivar
+                                                   class="btn btn-outline-danger action-icon-btn"
+                                                   title="Desactivar"
+                                                   aria-label="Desactivar">
+                                                    <span class="material-symbols-outlined">block</span>
                                                 </a>
                                             }
 
