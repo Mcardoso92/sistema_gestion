@@ -91,13 +91,13 @@
                                 <td class="px-4 py-3 text-center">
                                     @if (empresa.Estado)
                                     {
-                                        <span class="badge-status status-activo">
+                                        <span class="status-badge status-active">
                                             <span class="dot"></span>Activo
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge-status status-inactivo">
+                                        <span class="status-badge status-inactive">
                                             <span class="dot"></span>Inactivo
                                         </span>
                                     }
@@ -105,11 +105,11 @@
                                 <td class="px-4 py-3">@empresa.FechaAlta.ToString("dd MMM yyyy")</td>
                                 <td class="px-4 py-3 text-end">
                                     <div class="btn-group">
-                                        <a asp-action="Details" asp-route-id="@empresa.Id" class="btn btn-sm btn-outline-primary">Ver</a>
-                                        <a asp-action="Edit" asp-route-id="@empresa.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                        <a asp-action="Details" asp-route-id="@empresa.Id" class="btn btn-sm btn-outline-primary action-icon-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                        <a asp-action="Edit" asp-route-id="@empresa.Id" class="btn btn-sm btn-outline-warning action-icon-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                         @if (empresa.Estado)
                                         {
-                                            <a asp-action="Delete" asp-route-id="@empresa.Id" class="btn btn-sm btn-outline-danger">Desactivar</a>
+                                            <a asp-action="Delete" asp-route-id="@empresa.Id" class="btn btn-sm btn-outline-danger action-icon-btn" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
                                         }
                                     </div>
                                 </td>

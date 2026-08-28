@@ -1,0 +1,57 @@
+.app-body .app-page {
+    width: 100%;
+    max-width: var(--ui-page-max-width);
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+}
+
+.app-body .app-content {
+    width: 100%;
+    max-width: var(--ui-page-max-width);
+    min-width: 0;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+}
+
+.app-body .app-content > .container-fluid,
+.app-body .app-content > main.container-fluid,
+.app-body .app-content > main.flex-grow-1 {
+    width: 100%;
+    max-width: none !important;
+    margin: 0;
+    padding: 0 !important;
+}
+
+.app-body .app-content > .alert {
+    margin-bottom: 1rem;
+}
+
+.app-body .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.app-body .page-header-content {
+    min-width: 0;
+}
+
+.app-body .page-content {
+    min-width: 0;
+}
+
+.app-body .breadcrumb {
+    margin-bottom: 0.5rem;
+}
+
+.app-body .app-section {
+    margin-bottom: 1.5rem;
+}
+
+.app-body .app-content > main,
+.app-body .app-content > div {
+    min-width: 0;
+}

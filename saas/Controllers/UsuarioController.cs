@@ -863,6 +863,11 @@ namespace saas.Controllers
         [AllowAnonymous]
         public IActionResult Login()
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
             return View();
         }
         [HttpPost]

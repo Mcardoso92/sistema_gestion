@@ -269,13 +269,13 @@
                                         @if (transferencia.Estado ==
                                                                         saas.Models.Enums.EstadoTransferenciaCaja.Activa)
                                         {
-                                            <span class="badge bg-success">
+                                            <span class="status-badge status-active">
                                                 Activa
                                             </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">
+                                            <span class="status-badge status-cancelled">
                                                 Anulada
                                             </span>
                                         }
@@ -290,8 +290,10 @@
 
                                         <a asp-action="Details"
                                            asp-route-id="@transferencia.Id"
-                                           class="btn btn-sm btn-outline-secondary">
-                                            Detalles
+                                           class="btn action-icon-btn action-view"
+                                           title="Ver detalle"
+                                           aria-label="Ver detalle">
+                                            <span class="material-symbols-outlined">visibility</span>
                                         </a>
 
                                     </td>

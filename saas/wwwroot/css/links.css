@@ -1,0 +1,25 @@
+.app-body .app-content a:not(.btn):not(.dropdown-item):not(.nav-link):not(.breadcrumb-item) {
+    color: var(--ui-primary);
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.app-body .app-content a:not(.btn):not(.dropdown-item):not(.nav-link):not(.breadcrumb-item):hover {
+    color: var(--ui-primary-hover);
+    text-decoration-color: currentColor;
+}
+
+.app-body .app-content a:focus-visible {
+    outline: 3px solid rgba(15, 76, 129, 0.22);
+    outline-offset: 2px;
+}
+
+.app-body .breadcrumb-item a {
+    color: var(--ui-text-muted);
+    text-decoration: none;
+}
+
+.app-body .breadcrumb-item a:hover {
+    color: var(--ui-primary);
+}

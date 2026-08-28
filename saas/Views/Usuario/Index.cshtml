@@ -159,24 +159,24 @@
                                 <td>
                                     @if (usuario.Estado)
                                     {
-                                        <span class="badge badge-active rounded-pill px-3 py-2 text-uppercase fw-bold" style="font-size: 0.65rem;">
+                                        <span class="status-badge status-active">
                                             <span class="d-inline-block rounded-circle bg-success me-1" style="width: 6px; height: 6px;"></span> Activo
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="badge badge-inactive rounded-pill px-3 py-2 text-uppercase fw-bold" style="font-size: 0.65rem;">
+                                        <span class="status-badge status-inactive">
                                             <span class="d-inline-block rounded-circle bg-danger me-1" style="width: 6px; height: 6px;"></span> Inactivo
                                         </span>
                                     }
                                 </td>
                                 <td class="text-muted">@usuario.FechaAlta.ToString("dd/MM/yyyy")</td>
                                 <td class="pe-4 text-end">
-                                    <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">Ver</a>
-                                    <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-warning">Editar</a>
+                                    <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary action-icon-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                    <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-warning action-icon-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                     @if (usuario.Estado)
                                     {
-                                        <a asp-action="Delete" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-danger"> Desactivar </a>
+                                        <a asp-action="Delete" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-danger action-icon-btn" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
                                     }
                                 </td>
                             </tr>
