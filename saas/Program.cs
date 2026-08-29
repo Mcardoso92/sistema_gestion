@@ -16,6 +16,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
 builder.Services.AddScoped<CompraSaldoService>();
+builder.Services.AddScoped<EmpresaInicializacionService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection(
