@@ -369,6 +369,20 @@ namespace saas.Controllers
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
+            IQueryable<Producto> consulta = _context.Productos;
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+            }
+
+            var productoDb = await consulta.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (productoDb == null)
+            {
+                return NotFound();
+            }
+
             if (!esSuperAdmin)
             {
                 producto.EmpresaId = usuario.EmpresaId;
@@ -419,21 +433,6 @@ namespace saas.Controllers
                 ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
                 return View(producto);
-            }
-
-            IQueryable<Producto> consulta = _context.Productos;
-
-            if (!esSuperAdmin)
-            {
-                consulta = consulta.Where(p =>
-                    p.EmpresaId == usuario.EmpresaId);
-            }
-
-            var productoDb = await consulta.FirstOrDefaultAsync(p => p.Id == id);
-
-            if (productoDb == null)
-            {
-                return NotFound();
             }
 
             string? rutaAnterior = productoDb.UrlImagen;
