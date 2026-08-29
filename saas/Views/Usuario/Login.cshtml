@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Iniciar sesión";
+    Layout = "_PublicLayout";
 }
 
 
@@ -43,7 +44,10 @@
                 Iniciar Sesión
             </button>
             <div class="text-center">
-                <!-- <p class="small text-muted mb-0">¿No tienes cuenta? <a class="text-decoration-none text-primary fw-semibold" href="#">Contacta a soporte</a></p> -->
+                <span class="small text-muted">¿Todavía no tenés una cuenta?</span>
+                <a asp-action="Registro" class="small text-decoration-none text-primary fw-semibold">
+                    Crear cuenta
+                </a>
             </div>
         </form>
     </div>
