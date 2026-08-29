@@ -22,13 +22,15 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly IEmailService _emailService;
         private readonly IImagenService _imagenService;
+        private readonly EmpresaInicializacionService _empresaInicializacionService;
         public UsuarioController(
             UserManager<Usuario> userManager,
             SignInManager<Usuario> signInManager,
             RoleManager<IdentityRole> roleManager,
             SaasDbContext context,
             IEmailService emailService,
-            IImagenService imagenService)
+            IImagenService imagenService,
+            EmpresaInicializacionService empresaInicializacionService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -36,6 +38,7 @@ namespace saas.Controllers
             _context = context;
             _emailService = emailService;
             _imagenService = imagenService;
+            _empresaInicializacionService = empresaInicializacionService;
         }
         // GET: Usuario
         public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null)
@@ -887,6 +890,107 @@ namespace saas.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+        }
+        [AllowAnonymous]
+        public IActionResult Registro()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [EnableRateLimiting("autenticacion")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Registro(RegistroEmpresaVM model)
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            model.Nombre = model.Nombre.Trim();
+            model.Apellido = model.Apellido.Trim();
+            model.Email = model.Email.Trim();
+            model.EmpresaNombre = model.EmpresaNombre.Trim();
+
+            bool existeEmail = await _userManager.FindByEmailAsync(model.Email) != null;
+            bool existeEmpresa = await _context.Empresas.AnyAsync(e => e.Nombre.ToLower() == model.EmpresaNombre.ToLower());
+
+            if (existeEmail || existeEmpresa)
+            {
+                ModelState.AddModelError("", "No fue posible completar el registro con los datos ingresados.");
+                return View(model);
+            }
+
+            Usuario? usuarioCreado = null;
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                DateTime fechaAlta = DateTime.Now;
+
+                var empresa = new Empresa
+                {
+                    Nombre = model.EmpresaNombre,
+                    Estado = true,
+                    FechaAlta = fechaAlta
+                };
+
+                _context.Empresas.Add(empresa);
+                await _context.SaveChangesAsync();
+
+                await _empresaInicializacionService.InicializarAsync(empresa.Id, fechaAlta);
+
+                usuarioCreado = new Usuario
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    Nombre = model.Nombre,
+                    Apellido = model.Apellido,
+                    EmpresaId = empresa.Id,
+                    Estado = true,
+                    FechaAlta = fechaAlta
+                };
+
+                var resultadoUsuario = await _userManager.CreateAsync(usuarioCreado, model.Password);
+
+                if (!resultadoUsuario.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    ModelState.AddModelError("", "No fue posible crear el usuario. Revisá los datos y la contraseña.");
+                    return View(model);
+                }
+
+                var resultadoRol = await _userManager.AddToRoleAsync(usuarioCreado, "AdminEmpresa");
+
+                if (!resultadoRol.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    ModelState.AddModelError("", "No fue posible completar el registro.");
+                    return View(model);
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                ModelState.AddModelError("", "Ocurrió un error al crear la cuenta. Intentá nuevamente.");
+                return View(model);
+            }
+
+            await _signInManager.SignInAsync(usuarioCreado, isPersistent: false);
+
+            return RedirectToAction("Index", "Dashboard");
         }
         [AllowAnonymous]
         public IActionResult Login()
