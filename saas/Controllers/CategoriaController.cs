@@ -140,7 +140,7 @@ namespace saas.Controllers
         // POST: Categoria/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Categoria categoria)
+        public async Task<IActionResult> Create([Bind("Nombre,EmpresaId")] Categoria categoria)
         {
             try
             {
@@ -167,6 +167,24 @@ namespace saas.Controllers
                 if (!esSuperAdmin)
                 {
                     categoria.EmpresaId = usuario.EmpresaId;
+                }
+
+                bool empresaValida = await _context.Empresas.AnyAsync(e =>
+                    e.Id == categoria.EmpresaId &&
+                    e.Estado);
+
+                if (!empresaValida)
+                {
+                    ModelState.AddModelError(
+                        nameof(categoria.EmpresaId),
+                        "La empresa seleccionada no es válida o se encuentra inactiva.");
+
+                    if (esSuperAdmin)
+                    {
+                        CargarEmpresas(categoria.EmpresaId);
+                    }
+
+                    return View(categoria);
                 }
 
                 bool existeCategoria = await _context.Categorias.AnyAsync(c =>
@@ -249,7 +267,7 @@ namespace saas.Controllers
         // POST: Categoria/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Categoria categoria)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Estado,EmpresaId")] Categoria categoria)
         {
             if (id != categoria.Id)
             {
@@ -272,6 +290,24 @@ namespace saas.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (esSuperAdmin)
+                {
+                    CargarEmpresas(categoria.EmpresaId);
+                }
+
+                return View(categoria);
+            }
+
+            bool empresaValida = await _context.Empresas.AnyAsync(e =>
+                e.Id == categoria.EmpresaId &&
+                e.Estado);
+
+            if (!empresaValida)
+            {
+                ModelState.AddModelError(
+                    nameof(categoria.EmpresaId),
+                    "La empresa seleccionada no es válida o se encuentra inactiva.");
+
                 if (esSuperAdmin)
                 {
                     CargarEmpresas(categoria.EmpresaId);

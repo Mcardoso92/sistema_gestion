@@ -9,6 +9,7 @@ using saas.Services;
 using saas.ViewModel;
 using saas.ViewModel.Autenticacion;
 using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace saas.Controllers
 {
@@ -282,6 +283,20 @@ namespace saas.Controllers
                     return View(usuario);
                 }
 
+                bool empresaValida = await _context.Empresas.AnyAsync(e =>
+                    e.Id == usuario.EmpresaId &&
+                    e.Estado);
+
+                if (!empresaValida)
+                {
+                    ModelState.AddModelError(
+                        nameof(usuario.EmpresaId),
+                        "La empresa seleccionada no es válida o se encuentra inactiva.");
+
+                    await CargarCombos(usuario, esSuperAdmin);
+                    return View(usuario);
+                }
+
                 var existeUsuario = await _userManager.FindByEmailAsync(usuario.Email);
 
                 if (existeUsuario != null)
@@ -292,7 +307,7 @@ namespace saas.Controllers
                     return View(usuario);
                 }
 
-                if (!esSuperAdmin && usuario.Rol == "SuperAdmin")
+                if (!esSuperAdmin && string.Equals(usuario.Rol, "SuperAdmin", StringComparison.OrdinalIgnoreCase))
                 {
                     ModelState.AddModelError(
                         "Rol",
@@ -467,7 +482,7 @@ namespace saas.Controllers
             };
 
             // Obtengo el rol actual del usuario a editar
-            viewModel.Rol = (await _userManager.GetRolesAsync(usuarioDb)).FirstOrDefault();
+            viewModel.Rol = (await _userManager.GetRolesAsync(usuarioDb)).FirstOrDefault() ?? string.Empty;
 
 
             // Cargo los combos
@@ -544,8 +559,21 @@ namespace saas.Controllers
                 return View(usuario);
             }
 
-            if (!esSuperAdmin &&
-                usuario.Rol == "SuperAdmin")
+            bool empresaValida = await _context.Empresas.AnyAsync(e =>
+                e.Id == usuario.EmpresaId &&
+                e.Estado);
+
+            if (!empresaValida)
+            {
+                ModelState.AddModelError(
+                    nameof(usuario.EmpresaId),
+                    "La empresa seleccionada no es válida o se encuentra inactiva.");
+
+                await CargarCombos(usuario, esSuperAdmin);
+                return View(usuario);
+            }
+
+            if (!esSuperAdmin && string.Equals(usuario.Rol, "SuperAdmin", StringComparison.OrdinalIgnoreCase))
             {
                 ModelState.AddModelError(
                     nameof(usuario.Rol),
@@ -872,6 +900,7 @@ namespace saas.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("autenticacion")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginVM model)
         {
@@ -890,7 +919,7 @@ namespace saas.Controllers
 
             if (!usuario.Estado)
             {
-                ModelState.AddModelError("", "El usuario se encuentra inactivo.");
+                ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
                 return View(model);
             }
 
@@ -905,7 +934,7 @@ namespace saas.Controllers
 
                 if (!empresaActiva)
                 {
-                    ModelState.AddModelError("", "La empresa se encuentra inactiva.");
+                    ModelState.AddModelError("", "Usuario o contraseña incorrectos.");
                     return View(model);
                 }
             }
@@ -933,6 +962,7 @@ namespace saas.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("autenticacion")]
         [AllowAnonymous]
         public async Task<IActionResult> RecuperarPassword(RecuperarPasswordVM model)
         {

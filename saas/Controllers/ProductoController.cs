@@ -175,7 +175,7 @@ namespace saas.Controllers
         // POST: Producto/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Producto producto, IFormFile? imagenArchivo)
+        public async Task<IActionResult> Create([Bind("CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,Stock,PuntoReposicion,EmpresaId")] Producto producto, IFormFile? imagenArchivo)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -199,6 +199,20 @@ namespace saas.Controllers
                 {
                     CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
 
+                    return View(producto);
+                }
+
+                bool empresaValida = await _context.Empresas.AnyAsync(e =>
+                    e.Id == producto.EmpresaId &&
+                    e.Estado);
+
+                if (!empresaValida)
+                {
+                    ModelState.AddModelError(
+                        nameof(producto.EmpresaId),
+                        "La empresa seleccionada no es válida o se encuentra inactiva.");
+
+                    CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
                     return View(producto);
                 }
 
@@ -339,7 +353,7 @@ namespace saas.Controllers
         // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,PuntoReposicion,Estado,EmpresaId")] Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false)
         {
             if (id != producto.Id)
             {
@@ -364,6 +378,20 @@ namespace saas.Controllers
             {
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
 
+                return View(producto);
+            }
+
+            bool empresaValida = await _context.Empresas.AnyAsync(e =>
+                e.Id == producto.EmpresaId &&
+                e.Estado);
+
+            if (!empresaValida)
+            {
+                ModelState.AddModelError(
+                    nameof(producto.EmpresaId),
+                    "La empresa seleccionada no es válida o se encuentra inactiva.");
+
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
                 return View(producto);
             }
 

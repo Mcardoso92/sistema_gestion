@@ -67,12 +67,11 @@
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Venta)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Venta.Id)
+        <dd class="col-sm-10">
+            @(Model.Venta?.Id.ToString() ?? "-")
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-v-outline">Volver al listado</a>
 </div>

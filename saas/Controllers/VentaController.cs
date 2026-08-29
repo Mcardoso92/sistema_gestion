@@ -426,9 +426,6 @@ namespace saas.Controllers
                         t.UsuarioAperturaId == usuario.Id &&
                         t.Estado == EstadoTurnoCaja.Abierto);
 
-            int? turnoOperativoId =
-                turnoOperativo?.Id;
-
             if (!ModelState.IsValid)
             {
                 await PrepararVentaParaVista(
@@ -721,7 +718,7 @@ namespace saas.Controllers
                             MedioPagoId =
                                 pago.MedioPagoId,
 
-                            TurnoCajaId = turnoOperativoId,
+                            TurnoCajaId = turnosPorPago[i],
 
                             UsuarioId =
                                 usuario.Id,
@@ -1078,6 +1075,38 @@ namespace saas.Controllers
                     await transaccion.RollbackAsync();
 
                     TempData["Error"] = "La venta ya se encuentra anulada.";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                bool tieneCobrosActivos = await _context.CobrosVenta
+                    .AsNoTracking()
+                    .AnyAsync(c =>
+                        c.VentaId == venta.Id &&
+                        c.EmpresaId == venta.EmpresaId &&
+                        c.Estado == EstadoCobro.Activo);
+
+                if (tieneCobrosActivos)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] = "No se puede anular la venta porque tiene cobros activos. Debe anular primero los cobros asociados.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                bool tieneReintegrosActivos = await _context.ReintegrosVenta
+                    .AsNoTracking()
+                    .AnyAsync(r =>
+                        r.VentaId == venta.Id &&
+                        r.EmpresaId == venta.EmpresaId &&
+                        r.Estado == EstadoReintegro.Activo);
+
+                if (tieneReintegrosActivos)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] = "No se puede anular la venta porque tiene reintegros activos. Debe anular primero los reintegros asociados.";
+
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
