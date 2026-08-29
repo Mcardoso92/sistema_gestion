@@ -1529,6 +1529,14 @@
         window.location.href = ventasIndexUrl;
     });
 
+    formVenta.addEventListener("formdata", evento => {
+        document.querySelectorAll(".pago-importe").forEach(input => {
+            if (input.name && input.value) {
+                evento.formData.set(input.name, input.value.replace(".", ","));
+            }
+        });
+    });
+
     formVenta.addEventListener("submit", evento => {
         if (carrito.length === 0) {
             evento.preventDefault();
