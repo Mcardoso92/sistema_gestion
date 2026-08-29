@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
-using saas.Models.Enums;
-using saas.Helpers;
+using saas.Services;
 
 namespace saas.Controllers
 {
@@ -12,10 +11,12 @@ namespace saas.Controllers
     public class EmpresaController : Controller
     {
         private readonly SaasDbContext _context;
+        private readonly EmpresaInicializacionService _empresaInicializacionService;
 
-        public EmpresaController(SaasDbContext context)
+        public EmpresaController(SaasDbContext context, EmpresaInicializacionService empresaInicializacionService)
         {
             _context = context;
+            _empresaInicializacionService = empresaInicializacionService;
         }
 
         // GET: Empresa
@@ -118,16 +119,7 @@ namespace saas.Controllers
 
                     await _context.SaveChangesAsync();
 
-                    var mediosPagoPredeterminados =
-                        ConfiguracionInicialEmpresa
-                            .CrearMediosPagoPredeterminados(
-                                empresa.Id,
-                                fechaAlta);
-
-                    _context.MediosPago.AddRange(
-                        mediosPagoPredeterminados);
-
-                    await _context.SaveChangesAsync();
+                    await _empresaInicializacionService.InicializarAsync(empresa.Id, fechaAlta);
 
                     await transaction.CommitAsync();
 
