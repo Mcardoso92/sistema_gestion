@@ -22,6 +22,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
+	  <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.8.43" PrivateAssets="all" />
+	  <PackageReference Include="NuGet.Packaging" Version="6.12.5" PrivateAssets="all" />
+	  <PackageReference Include="NuGet.Protocol" Version="6.12.5" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

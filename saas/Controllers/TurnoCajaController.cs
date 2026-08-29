@@ -875,6 +875,29 @@ namespace saas.Controllers
                         new { id = turno.Id });
                 }
 
+                if (vm.ImporteRendido > 0 && vm.CajaDestinoId.HasValue)
+                {
+                    bool cajaDestinoValidaActual = await _context.Cajas
+                        .AsNoTracking()
+                        .AnyAsync(c =>
+                            c.Id == vm.CajaDestinoId.Value &&
+                            c.EmpresaId == turno.EmpresaId &&
+                            c.Id != turno.CajaId &&
+                            c.Estado &&
+                            c.Tipo == TipoCaja.Efectivo);
+
+                    if (!cajaDestinoValidaActual)
+                    {
+                        await transaction.RollbackAsync();
+
+                        ModelState.AddModelError(nameof(vm.CajaDestinoId), "La caja destino dejó de estar disponible.");
+
+                        await CargarCajasDestino(vm, turno);
+
+                        return View(vm);
+                    }
+                }
+
                 decimal efectivoEsperadoActual =
                     await CalcularEfectivoEsperado(
                         turno);
