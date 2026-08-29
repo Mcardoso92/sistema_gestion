@@ -102,6 +102,8 @@
 
     let temporizadorProductos;
     let temporizadorClientes;
+    let productosEncontrados = [];
+    let indiceProductoSeleccionado = -1;
 
     const formatoMoneda = new Intl.NumberFormat("es-AR", {
         style: "currency",
@@ -965,7 +967,7 @@
 
         if (!termino) {
             ocultarResultadosProductos();
-            return;
+            return [];
         }
 
         try {
@@ -998,14 +1000,18 @@
             const productos = await respuesta.json();
 
             mostrarResultadosProductos(productos);
+            return productos;
         } catch (error) {
             ocultarResultadosProductos();
             mostrarMensaje(error.message, "danger");
+            return [];
         }
     }
 
     function mostrarResultadosProductos(productos) {
         resultadosProductos.innerHTML = "";
+        productosEncontrados = Array.isArray(productos) ? productos : [];
+        indiceProductoSeleccionado = productosEncontrados.length > 0 ? 0 : -1;
 
         if (!Array.isArray(productos) || productos.length === 0) {
             const item = document.createElement("div");
@@ -1019,7 +1025,7 @@
             return;
         }
 
-        productos.forEach(producto => {
+        productosEncontrados.forEach(producto => {
             const boton = document.createElement("button");
             boton.type = "button";
             boton.className =
@@ -1074,9 +1080,53 @@
         });
 
         resultadosProductos.classList.remove("d-none");
+        actualizarProductoSeleccionado();
+    }
+
+    function actualizarProductoSeleccionado() {
+        const botones = resultadosProductos.querySelectorAll("button");
+
+        botones.forEach((boton, indice) => {
+            const seleccionado = indice === indiceProductoSeleccionado;
+            boton.classList.toggle("active", seleccionado);
+        });
+    }
+
+    function moverSeleccionProducto(direccion) {
+        if (productosEncontrados.length === 0) {
+            return;
+        }
+
+        indiceProductoSeleccionado += direccion;
+
+        if (indiceProductoSeleccionado < 0) {
+            indiceProductoSeleccionado = productosEncontrados.length - 1;
+        }
+
+        if (indiceProductoSeleccionado >= productosEncontrados.length) {
+            indiceProductoSeleccionado = 0;
+        }
+
+        actualizarProductoSeleccionado();
+
+        const botonSeleccionado = resultadosProductos.querySelector(".active");
+        botonSeleccionado?.scrollIntoView({ block: "nearest" });
+    }
+
+    function agregarProductoSeleccionado() {
+        const producto = productosEncontrados[indiceProductoSeleccionado];
+
+        if (!producto) {
+            return false;
+        }
+
+        agregarProducto(producto);
+        return true;
     }
 
     function ocultarResultadosProductos() {
+        productosEncontrados = [];
+        indiceProductoSeleccionado = -1;
         resultadosProductos.innerHTML = "";
         resultadosProductos.classList.add("d-none");
     }
@@ -1215,6 +1265,7 @@
         panelBusquedaCliente.classList.add("d-none");
         inputBuscarCliente.value = "";
         ocultarResultadosClientes();
+        inputBuscarProducto.focus();
     }
 
     function quitarCliente() {
@@ -1437,6 +1488,7 @@
 
     inputBuscarProducto.addEventListener("input", () => {
         clearTimeout(temporizadorProductos);
+        ocultarResultadosProductos();
 
         temporizadorProductos = setTimeout(
             buscarProductos,
@@ -1444,15 +1496,47 @@
         );
     });
 
-    inputBuscarProducto.addEventListener(
-        "keydown",
-        evento => {
-            if (evento.key === "Enter") {
-                evento.preventDefault();
-                buscarProductos();
-            }
+    inputBuscarProducto.addEventListener("keydown", async evento => {
+        if (evento.key === "ArrowDown") {
+            evento.preventDefault();
+            moverSeleccionProducto(1);
+            return;
         }
-    );
+
+        if (evento.key === "ArrowUp") {
+            evento.preventDefault();
+            moverSeleccionProducto(-1);
+            return;
+        }
+
+        if (evento.key !== "Enter") {
+            return;
+        }
+
+        evento.preventDefault();
+        clearTimeout(temporizadorProductos);
+
+        const termino = inputBuscarProducto.value.trim().toLowerCase();
+
+        if (!termino) {
+            return;
+        }
+
+        if (resultadosProductos.classList.contains("d-none")) {
+            await buscarProductos();
+        }
+
+        const coincidenciaExacta = productosEncontrados.find(producto =>
+            producto.codigoBarra?.trim().toLowerCase() === termino
+        );
+
+        if (coincidenciaExacta) {
+            agregarProducto(coincidenciaExacta);
+            return;
+        }
+
+        agregarProductoSeleccionado();
+    });
 
     btnBuscarCliente.addEventListener("click", () => {
         panelBusquedaCliente.classList.toggle("d-none");
@@ -1601,5 +1685,6 @@
         crearPago);
 
     actualizarResumenPagos();
+    inputBuscarProducto.focus();
 
 });
