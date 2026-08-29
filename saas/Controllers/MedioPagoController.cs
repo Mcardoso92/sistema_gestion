@@ -402,9 +402,7 @@ namespace saas.Controllers
         // POST: MedioPago/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            int id,
-            MedioPagoEditVM medioPagoVM)
+        public async Task<IActionResult> Edit(int id, MedioPagoEditVM medioPagoVM)
         {
             if (id != medioPagoVM.Id)
             {
@@ -481,7 +479,6 @@ namespace saas.Controllers
             {
                 medioPago.Nombre = medioPagoVM.Nombre;
                 medioPago.Descripcion = medioPagoVM.Descripcion;
-                medioPago.Tipo = medioPagoVM.Tipo;
                 medioPago.Estado = medioPagoVM.Estado;
 
                 bool tieneMovimientos = await _context.MovimientosCaja
@@ -497,6 +494,8 @@ namespace saas.Controllers
 
                     return View(medioPagoVM);
                 }
+
+                medioPago.Tipo = medioPagoVM.Tipo;
 
                 await _context.SaveChangesAsync();
 

@@ -17,14 +17,17 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly VentaSaldoService _ventaSaldoService;
+        private readonly CajaSaldoService _cajaSaldoService;
         public CobroVentaController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            VentaSaldoService ventaSaldoService)
+            VentaSaldoService ventaSaldoService,
+            CajaSaldoService cajaSaldoService)
         {
             _context = context;
             _userManager = userManager;
             _ventaSaldoService = ventaSaldoService;
+            _cajaSaldoService = cajaSaldoService;
         }
 
         // GET: CobroVenta/Registrar/5
@@ -322,10 +325,7 @@ namespace saas.Controllers
                         MedioPagoId =
                             vm.MedioPagoId,
 
-                        // Turno operativo del usuario,
-                        // aunque el movimiento no afecte arqueo.
-                        TurnoCajaId =
-                            turnoOperativo?.Id,
+                        TurnoCajaId = turnoMovimientoCajaId,
 
                         UsuarioId =
                             usuario.Id,
@@ -665,7 +665,58 @@ namespace saas.Controllers
                         "No se puede anular el cobro porque la venta posee reintegros activos que dependen de ese importe.");
 
                     return View(vm);
-                }       
+                }
+
+                var cajaActual = await _context.Cajas
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(c =>
+                        c.Id == movimiento!.CajaId &&
+                        c.EmpresaId == cobro.EmpresaId &&
+                        c.Estado);
+
+                if (cajaActual == null)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError("", "La caja asociada al cobro ya no se encuentra disponible.");
+
+                    return View(vm);
+                }
+
+                int? turnoMovimientoCajaId = null;
+
+                if (cajaActual.PermiteTurnos)
+                {
+                    var turnoActual = await _context.TurnosCaja
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(t =>
+                            t.CajaId == cajaActual.Id &&
+                            t.EmpresaId == cobro.EmpresaId &&
+                            t.UsuarioAperturaId == usuario.Id &&
+                            t.Estado == EstadoTurnoCaja.Abierto);
+
+                    if (turnoActual == null)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ModelState.AddModelError("", $"Debe tener un turno abierto propio para operar la caja \"{cajaActual.Nombre}\".");
+
+                        return View(vm);
+                    }
+
+                    turnoMovimientoCajaId = turnoActual.Id;
+                }
+
+                decimal saldoDisponibleCaja = await _cajaSaldoService.CalcularSaldoDisponible(cajaActual, usuario.Id);
+
+                if (movimiento!.Importe > saldoDisponibleCaja)
+                {
+                    await transaccion.RollbackAsync();
+
+                    ModelState.AddModelError("", $"No se puede anular el cobro porque la caja no tiene saldo suficiente. Disponible: {saldoDisponibleCaja:C}.");
+
+                    return View(vm);
+                }
 
                 cobro.Estado =
                     EstadoCobro.Anulado;
@@ -706,8 +757,7 @@ namespace saas.Controllers
                         MedioPagoId =
                             movimiento.MedioPagoId,
 
-                        TurnoCajaId =
-                            movimiento.TurnoCajaId,
+                        TurnoCajaId = turnoMovimientoCajaId,
 
                         CategoriaGastoId =
                             null,

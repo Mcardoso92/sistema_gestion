@@ -313,6 +313,7 @@ namespace saas.Controllers
                         cm.MedioPagoId == vm.MedioPagoId &&
                         cm.Caja.EmpresaId == usuario.EmpresaId &&
                         cm.Caja.Estado &&
+                        cm.MedioPago.EmpresaId == usuario.EmpresaId &&
                         cm.MedioPago.Estado);
 
             if (!medioPagoValido)
@@ -507,6 +508,7 @@ namespace saas.Controllers
                         cm.MedioPagoId == vm.MedioPagoId &&
                         cm.Caja.EmpresaId == usuario.EmpresaId &&
                         cm.Caja.Estado &&
+                        cm.MedioPago.EmpresaId == usuario.EmpresaId &&
                         cm.MedioPago.Estado);
 
             if (!medioPagoValido)
@@ -1140,8 +1142,63 @@ namespace saas.Controllers
                     ? DireccionMovimientoCaja.Egreso
                     : DireccionMovimientoCaja.Ingreso;
 
+            await using var transaccion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+
             try
             {
+                bool reversionRegistrada = await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m => m.MovimientoOrigenId == movimiento.Id);
+
+                if (reversionRegistrada)
+                {
+                    await transaccion.RollbackAsync();
+
+                    TempData["Error"] = "El movimiento ya fue revertido por otra operación.";
+
+                    return RedirectToAction(nameof(Details), new { id = movimiento.Id });
+                }
+
+                if (direccionReversion == DireccionMovimientoCaja.Egreso)
+                {
+                    decimal saldoDisponible;
+
+                    if (movimiento.Caja.PermiteTurnos)
+                    {
+                        decimal netoTurno = await _context.MovimientosCaja
+                            .AsNoTracking()
+                            .Where(m => m.TurnoCajaId == movimiento.TurnoCajaId)
+                            .SumAsync(m =>
+                                m.Direccion == DireccionMovimientoCaja.Ingreso
+                                    ? m.Importe
+                                    : -m.Importe);
+
+                        saldoDisponible = turno!.FondoFijoAplicado + netoTurno;
+                    }
+                    else
+                    {
+                        saldoDisponible = await _context.MovimientosCaja
+                            .AsNoTracking()
+                            .Where(m =>
+                                m.CajaId == movimiento.CajaId &&
+                                m.EmpresaId == movimiento.EmpresaId)
+                            .SumAsync(m =>
+                                m.Direccion == DireccionMovimientoCaja.Ingreso
+                                    ? m.Importe
+                                    : -m.Importe);
+                    }
+
+                    if (movimiento.Importe > saldoDisponible)
+                    {
+                        await transaccion.RollbackAsync();
+
+                        ViewBag.Movimiento = movimiento;
+                        ViewBag.Error = $"No se puede revertir el ingreso porque la caja no tiene saldo suficiente. Disponible: {saldoDisponible:C}.";
+
+                        return View();
+                    }
+                }
+
                 var reversion =
                     new MovimientoCaja
                     {
@@ -1190,6 +1247,8 @@ namespace saas.Controllers
 
                 await _context.SaveChangesAsync();
 
+                await transaccion.CommitAsync();
+
                 TempData["Success"] =
                     "Movimiento revertido correctamente.";
 
@@ -1199,6 +1258,8 @@ namespace saas.Controllers
             }
             catch
             {
+                await transaccion.RollbackAsync();
+
                 ViewBag.Movimiento =
                     movimiento;
 
