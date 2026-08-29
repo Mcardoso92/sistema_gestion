@@ -561,17 +561,15 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    @{
+        string mediosPagoOptions = string.Join(
+            "",
+            Model.MediosPagoDisponibles.Select(m =>
+                $"<option value=\"{m.Id}\" data-tipo=\"{(int)m.Tipo}\">{System.Net.WebUtility.HtmlEncode(m.Nombre)}</option>"));
+    }
+
     <script>
-        window.veltikaMediosPagoOptions = `
-            @Html.Raw(
-                string.Join(
-                        "",
-                        Model.MediosPagoDisponibles.Select(m =>
-                                $"<option value=\"{m.Id}\" data-tipo=\"{(int)m.Tipo}\">{System.Net.WebUtility.HtmlEncode(m.Nombre)}</option>"
-                        )
-                )
-                )
-        `;
+        window.veltikaMediosPagoOptions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(mediosPagoOptions));
     </script>
 
     <script src="~/js/venta-pos.js" asp-append-version="true"></script>

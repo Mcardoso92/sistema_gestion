@@ -126,7 +126,6 @@ namespace saas.Controllers
 
             return View(stockVM);
         }
-
         [HttpGet]
         [Authorize(Roles = "AdminEmpresa")]
         public async Task<IActionResult> Ajustar(int productoId)
@@ -417,7 +416,6 @@ namespace saas.Controllers
 
             return View(historialVM);
         }
-
         // GET: MovimientoStock/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -426,149 +424,35 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            var movimientoStock = await _context.MovimientosStock
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            IQueryable<MovimientoStock> consulta = _context.MovimientosStock
+                .AsNoTracking()
                 .Include(m => m.Empresa)
                 .Include(m => m.Producto)
                 .Include(m => m.Usuario)
-                .Include(m => m.Venta)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Include(m => m.Venta);
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(m => m.EmpresaId == usuario.EmpresaId);
+            }
+
+            var movimientoStock = await consulta.FirstOrDefaultAsync(m => m.Id == id);
+
             if (movimientoStock == null)
             {
                 return NotFound();
             }
 
             return View(movimientoStock);
-        }
-
-        // GET: MovimientoStock/Create
-        public IActionResult Create()
-        {
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre");
-            ViewData["ProductoId"] = new SelectList(_context.Productos, "Id", "Nombre");
-            ViewData["UsuarioId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["VentaId"] = new SelectList(_context.Ventas, "Id", "Id");
-            return View();
-        }
-
-        // POST: MovimientoStock/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProductoId,EmpresaId,Tipo,Cantidad,StockAnterior,StockPosterior,Motivo,Fecha,UsuarioId,VentaId")] MovimientoStock movimientoStock)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(movimientoStock);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", movimientoStock.EmpresaId);
-            ViewData["ProductoId"] = new SelectList(_context.Productos, "Id", "Nombre", movimientoStock.ProductoId);
-            ViewData["UsuarioId"] = new SelectList(_context.Users, "Id", "Id", movimientoStock.UsuarioId);
-            ViewData["VentaId"] = new SelectList(_context.Ventas, "Id", "Id", movimientoStock.VentaId);
-            return View(movimientoStock);
-        }
-
-        // GET: MovimientoStock/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var movimientoStock = await _context.MovimientosStock.FindAsync(id);
-            if (movimientoStock == null)
-            {
-                return NotFound();
-            }
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", movimientoStock.EmpresaId);
-            ViewData["ProductoId"] = new SelectList(_context.Productos, "Id", "Nombre", movimientoStock.ProductoId);
-            ViewData["UsuarioId"] = new SelectList(_context.Users, "Id", "Id", movimientoStock.UsuarioId);
-            ViewData["VentaId"] = new SelectList(_context.Ventas, "Id", "Id", movimientoStock.VentaId);
-            return View(movimientoStock);
-        }
-
-        // POST: MovimientoStock/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ProductoId,EmpresaId,Tipo,Cantidad,StockAnterior,StockPosterior,Motivo,Fecha,UsuarioId,VentaId")] MovimientoStock movimientoStock)
-        {
-            if (id != movimientoStock.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(movimientoStock);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MovimientoStockExists(movimientoStock.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["EmpresaId"] = new SelectList(_context.Empresas, "Id", "Nombre", movimientoStock.EmpresaId);
-            ViewData["ProductoId"] = new SelectList(_context.Productos, "Id", "Nombre", movimientoStock.ProductoId);
-            ViewData["UsuarioId"] = new SelectList(_context.Users, "Id", "Id", movimientoStock.UsuarioId);
-            ViewData["VentaId"] = new SelectList(_context.Ventas, "Id", "Id", movimientoStock.VentaId);
-            return View(movimientoStock);
-        }
-
-        // GET: MovimientoStock/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var movimientoStock = await _context.MovimientosStock
-                .Include(m => m.Empresa)
-                .Include(m => m.Producto)
-                .Include(m => m.Usuario)
-                .Include(m => m.Venta)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (movimientoStock == null)
-            {
-                return NotFound();
-            }
-
-            return View(movimientoStock);
-        }
-
-        // POST: MovimientoStock/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var movimientoStock = await _context.MovimientosStock.FindAsync(id);
-            if (movimientoStock != null)
-            {
-                _context.MovimientosStock.Remove(movimientoStock);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-        private bool MovimientoStockExists(int id)
-        {
-            return _context.MovimientosStock.Any(e => e.Id == id);
         }
     }
 }

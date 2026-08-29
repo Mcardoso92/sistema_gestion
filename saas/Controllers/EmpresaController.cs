@@ -83,7 +83,7 @@ namespace saas.Controllers
         // POST: Empresa/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Empresa empresa)
+        public async Task<IActionResult> Create([Bind("Nombre")] Empresa empresa)
         {
             if (!ModelState.IsValid)
             {
@@ -151,7 +151,6 @@ namespace saas.Controllers
                 return View(empresa);
             }
         }
-
         // GET: Empresa/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -168,11 +167,10 @@ namespace saas.Controllers
             }
             return View(empresa);
         }
-
         // POST: Empresa/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Empresa empresa)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Estado")] Empresa empresa)
         {
             if (id != empresa.Id)
             {
@@ -219,7 +217,6 @@ namespace saas.Controllers
                 return View(empresa);
             }
         }
-
         // GET: Empresa/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
@@ -237,7 +234,6 @@ namespace saas.Controllers
 
             return View(empresa);
         }
-
         // POST: Empresa/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]

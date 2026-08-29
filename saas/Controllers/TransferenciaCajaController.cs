@@ -872,12 +872,55 @@ namespace saas.Controllers
                     new { id = transferencia.Id });
             }
 
-            await using var transaction =
-                await _context.Database
-                    .BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
             try
             {
+                await _context.Entry(transferencia).ReloadAsync();
+
+                if (transferencia.Estado == EstadoTransferenciaCaja.Anulada)
+                {
+                    await transaction.RollbackAsync();
+
+                    TempData["Error"] = "La transferencia ya fue anulada por otra operación.";
+
+                    return RedirectToAction(nameof(Details), new { id = transferencia.Id });
+                }
+
+                bool reversionRegistradaDuranteLaOperacion = await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .AnyAsync(m =>
+                        m.MovimientoOrigenId == movimientoSalida.Id ||
+                        m.MovimientoOrigenId == movimientoEntrada.Id);
+
+                if (reversionRegistradaDuranteLaOperacion)
+                {
+                    await transaction.RollbackAsync();
+
+                    TempData["Error"] = "Los movimientos de la transferencia ya fueron revertidos por otra operación.";
+
+                    return RedirectToAction(nameof(Details), new { id = transferencia.Id });
+                }
+
+                decimal saldoDisponibleDestino = await _context.MovimientosCaja
+                    .AsNoTracking()
+                    .Where(m =>
+                        m.CajaId == transferencia.CajaDestinoId &&
+                        m.EmpresaId == transferencia.EmpresaId)
+                    .SumAsync(m =>
+                        m.Direccion == DireccionMovimientoCaja.Ingreso
+                            ? m.Importe
+                            : -m.Importe);
+
+                if (transferencia.Importe > saldoDisponibleDestino)
+                {
+                    await transaction.RollbackAsync();
+
+                    ViewBag.Error = $"No se puede anular la transferencia porque la caja destino no tiene saldo suficiente. Disponible: {saldoDisponibleDestino:C}.";
+
+                    return View(CrearResumenTransferencia(transferencia));
+                }
+
                 DateTime fecha =
                     DateTime.Now;
 

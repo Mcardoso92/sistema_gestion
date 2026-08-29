@@ -21,7 +21,8 @@ namespace saas.ViewModel
 
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
         [DataType(DataType.Password)]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$", ErrorMessage = "La contraseña debe incluir una mayúscula, una minúscula y un número.")]
         public string Password { get; set; } = null!;
 
         [Required(ErrorMessage = "Debe confirmar la contraseña.")]
