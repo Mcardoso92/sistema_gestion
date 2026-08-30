@@ -4,7 +4,8 @@
 }
 
 .app-body .page-title,
-.app-body h1.display-6 {
+.app-body h1.display-6,
+.public-body .page-title {
     margin-bottom: 0.25rem;
     color: var(--ui-text);
     font-size: clamp(1.75rem, 3vw, 2.5rem);
@@ -22,7 +23,8 @@
     line-height: 1.2;
 }
 
-.app-body .page-subtitle {
+.app-body .page-subtitle,
+.public-body .page-subtitle {
     margin-bottom: 0;
     color: var(--ui-text-muted);
 }
