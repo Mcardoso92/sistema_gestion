@@ -1,0 +1,231 @@
+.dashboard-preview {
+    display: block;
+}
+
+.preview-navbar {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--ui-border-light);
+    background: var(--ui-surface);
+}
+
+.preview-navbar .preview-logo {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.preview-navbar .preview-menu {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 2px;
+}
+
+.preview-navbar .preview-menu div {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    padding: 9px 2px;
+    border-radius: 0;
+    color: var(--ui-text-muted);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.preview-navbar .preview-menu div.active {
+    border-bottom: 2px solid var(--ui-primary);
+    background: transparent;
+    color: var(--ui-primary);
+}
+
+.preview-navbar .preview-menu .material-symbols-outlined,
+.preview-user .material-symbols-outlined {
+    font-size: 13px;
+}
+
+.preview-navbar .preview-menu .preview-menu-arrow {
+    margin-left: -2px;
+    font-size: 10px;
+}
+
+.preview-user {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 3px;
+    padding-right: 2px;
+    color: var(--ui-text);
+    font-weight: 600;
+}
+
+.preview-notification-count {
+    position: absolute;
+    top: -4px;
+    left: 8px;
+    width: 13px;
+    height: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ui-danger);
+    color: #ffffff;
+    font-size: 7px;
+    font-weight: 800;
+}
+
+.preview-avatar {
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ui-primary-soft);
+    color: var(--ui-primary);
+    font-size: 8px;
+    font-weight: 800;
+}
+
+.preview-ranking-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.preview-ranking-card {
+    padding: 12px;
+    border: 1px solid var(--ui-border-light);
+    border-radius: 7px;
+    background: var(--ui-surface);
+}
+
+.preview-ranking-item {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--ui-border-light);
+}
+
+.preview-ranking-item:last-child {
+    border-bottom: 0;
+}
+
+.preview-ranking-position {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--ui-primary-soft);
+    color: var(--ui-primary);
+    font-weight: 800;
+}
+
+.preview-ranking-item > span:last-child {
+    color: var(--ui-text-muted);
+}
+
+.preview-stat {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+}
+
+.preview-stat > div {
+    min-width: 0;
+}
+
+.preview-stat > div > span,
+.preview-stat > div > strong,
+.preview-stat > div > small {
+    display: block;
+}
+
+.preview-stat-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 17px;
+}
+
+.preview-stat-icon-primary {
+    background: #dbeafe;
+    color: #075985;
+}
+
+.preview-stat-icon-success {
+    background: #d5f5ed;
+    color: #087f6d;
+}
+
+.preview-stat-icon-warning {
+    background: #fff0c7;
+    color: #9a6700;
+}
+
+.preview-stat-icon-info {
+    background: #e6e9ff;
+    color: #4054b2;
+}
+
+.preview-bar-chart {
+    height: 115px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    gap: 8px;
+    padding-top: 16px;
+}
+
+.preview-bar-chart > div {
+    height: 100%;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.preview-bar-chart span,
+.preview-bar-chart small {
+    color: var(--ui-text-muted);
+    font-size: 7px;
+}
+
+.preview-bar-chart i {
+    width: 70%;
+    max-width: 28px;
+    min-height: 2px;
+    margin: 4px 0;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, #0f6ba8, #00355f);
+}
+
+@media (min-width: 1200px) {
+    .dashboard-preview {
+        width: calc(100% + (100vw - 1140px) / 2 - 30px);
+        min-width: 0;
+        margin: 0;
+    }
+}
+
+@media (min-width: 1400px) {
+    .dashboard-preview {
+        width: calc(100% + (100vw - 1320px) / 2 - 30px);
+    }
+}

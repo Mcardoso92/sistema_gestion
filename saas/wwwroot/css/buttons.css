@@ -1,17 +1,23 @@
-.app-body .btn {
+.app-body .btn,
+.public-body .btn {
     min-height: 38px;
     border-radius: var(--ui-radius-sm);
     font-weight: 600;
 }
 
-.app-body .btn-sm {
+.app-body .btn-sm,
+.public-body .btn-sm {
     min-height: 32px;
 }
 
 .app-body .btn-primary,
 .app-body .btn-v-primary,
 .app-body .btn-primary-veltika,
-.app-body .btn-primary-custom {
+.app-body .btn-primary-custom,
+.public-body .btn-primary,
+.public-body .btn-v-primary,
+.public-body .btn-primary-veltika,
+.public-body .btn-primary-custom {
     border-color: var(--ui-primary) !important;
     background-color: var(--ui-primary) !important;
     color: #ffffff !important;
@@ -20,20 +26,28 @@
 .app-body .btn-primary:hover,
 .app-body .btn-v-primary:hover,
 .app-body .btn-primary-veltika:hover,
-.app-body .btn-primary-custom:hover {
+.app-body .btn-primary-custom:hover,
+.public-body .btn-primary:hover,
+.public-body .btn-v-primary:hover,
+.public-body .btn-primary-veltika:hover,
+.public-body .btn-primary-custom:hover {
     border-color: var(--ui-primary-hover) !important;
     background-color: var(--ui-primary-hover) !important;
     color: #ffffff !important;
 }
 
 .app-body .btn-v-outline,
-.app-body .btn-outline-veltika {
+.app-body .btn-outline-veltika,
+.public-body .btn-v-outline,
+.public-body .btn-outline-veltika {
     border-color: var(--ui-primary);
     color: var(--ui-primary);
 }
 
 .app-body .btn-v-outline:hover,
-.app-body .btn-outline-veltika:hover {
+.app-body .btn-outline-veltika:hover,
+.public-body .btn-v-outline:hover,
+.public-body .btn-outline-veltika:hover {
     border-color: var(--ui-primary);
     background-color: var(--ui-primary);
     color: #ffffff;
