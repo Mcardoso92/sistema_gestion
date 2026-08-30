@@ -52,3 +52,11 @@
     border-top: 1px solid var(--ui-border-light) !important;
     background: var(--ui-surface-muted) !important;
 }
+
+.login-card {
+    border: 1px solid var(--ui-border-light);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
+    color: var(--ui-text);
+    box-shadow: var(--ui-shadow-md);
+}
