@@ -7,6 +7,9 @@
     int? categoriaSeleccionada = ViewBag.CategoriaId as int?;
     int? empresaSeleccionada = ViewBag.EmpresaId as int?;
     string? busqueda = ViewBag.Busqueda?.ToString();
+    int paginaActual = ViewBag.PaginaActual is int pagina ? pagina : 1;
+    int totalPaginas = ViewBag.TotalPaginas is int paginas ? paginas : 0;
+    int totalProductos = ViewBag.TotalProductos is int total ? total : 0;
 
     IEnumerable<Categoria> categorias = ViewBag.Categorias as IEnumerable<Categoria>
         ?? Enumerable.Empty<Categoria>();
@@ -220,12 +223,14 @@
                                     }
                                 </td>
                                 <td class="px-4 py-3 text-end">
-                                    <a asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-primary action-icon-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
-                                    <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-warning action-icon-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
+                                    <div class="table-actions">
+                                    <a asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                    <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-sm btn-light table-action-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                     @if (producto.Estado)
                                     {
-                                        <a asp-action="Delete" asp-route-id="@producto.Id" class="btn btn-sm btn-outline-danger action-icon-btn" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
+                                        <a asp-action="Delete" asp-route-id="@producto.Id" class="btn btn-sm btn-light table-action-btn table-action-danger" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
                                     }
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -233,12 +238,6 @@
                 </tbody>
             </table>
         </div>
-        <!-- Pagination Footer (Identical to SCREEN_11) -->
-        <div class="card-footer bg-light border-top-0 px-4 py-3">
-            <span class="small text-secondary">
-                @Model.Count()
-                @(Model.Count() == 1 ? "producto encontrado" : "productos encontrados")
-            </span>
-        </div>
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = paginaActual, TotalPaginas = totalPaginas, TotalRegistros = totalProductos, NombreSingular = "producto encontrado", NombrePlural = "productos encontrados" }' />
     </div>
 </main>

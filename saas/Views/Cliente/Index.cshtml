@@ -193,10 +193,10 @@
                                 </td>
 
                                 <td class="px-4 py-3 text-end">
-                                    <div class="btn-group">
+                                    <div class="table-actions">
                                         <a asp-action="Details"
                                            asp-route-id="@cliente.Id"
-                                           class="btn btn-sm btn-outline-primary action-icon-btn"
+                                           class="btn btn-sm btn-light table-action-btn"
                                            title="Ver detalle"
                                            aria-label="Ver detalle">
                                             <span class="material-symbols-outlined">visibility</span>
@@ -204,7 +204,7 @@
 
                                         <a asp-action="Edit"
                                            asp-route-id="@cliente.Id"
-                                           class="btn btn-sm btn-outline-warning action-icon-btn"
+                                           class="btn btn-sm btn-light table-action-btn"
                                            title="Editar"
                                            aria-label="Editar">
                                             <span class="material-symbols-outlined">edit</span>
@@ -214,7 +214,7 @@
                                         {
                                             <a asp-action="Delete"
                                                asp-route-id="@cliente.Id"
-                                               class="btn btn-sm btn-outline-danger action-icon-btn"
+                                               class="btn btn-sm btn-light table-action-btn table-action-danger"
                                                title="Desactivar"
                                                aria-label="Desactivar">
                                                 <span class="material-symbols-outlined">block</span>
@@ -229,12 +229,6 @@
             </table>
         </div>
 
-        <!-- Pagination Footer -->
-        <div class="card-footer bg-light border-top-0 px-4 py-3">
-            <span class="small text-secondary">
-                @Model.Count()
-                @(Model.Count() == 1 ? "cliente encontrado" : "clientes encontrados")
-            </span>
-        </div>
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = ViewBag.PaginaActual, TotalPaginas = ViewBag.TotalPaginas, TotalRegistros = ViewBag.TotalRegistros, NombreSingular = "cliente encontrado", NombrePlural = "clientes encontrados" }' />
     </div>
 </main>

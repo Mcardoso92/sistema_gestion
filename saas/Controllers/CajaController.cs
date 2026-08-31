@@ -25,7 +25,7 @@ namespace saas.Controllers
         }
 
         // GET: Caja
-        public async Task<IActionResult> Index(CajaIndexVM cajaVM)
+        public async Task<IActionResult> Index(CajaIndexVM cajaVM, int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -87,8 +87,24 @@ namespace saas.Controllers
                     .Where(c => c.Nombre.Contains(busqueda));
             }
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalCajas = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalCajas / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalCajas;
+
             cajaVM.Cajas = await consulta
                 .OrderBy(c => c.Nombre)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(c => new CajaIndexItemVM
                 {
                     Id = c.Id,

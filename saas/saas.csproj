@@ -25,6 +25,7 @@
 	  <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.8.43" PrivateAssets="all" />
 	  <PackageReference Include="NuGet.Packaging" Version="6.12.5" PrivateAssets="all" />
 	  <PackageReference Include="NuGet.Protocol" Version="6.12.5" PrivateAssets="all" />
+	  <PackageReference Include="SkiaSharp" Version="4.151.1" />
   </ItemGroup>
 
 </Project>

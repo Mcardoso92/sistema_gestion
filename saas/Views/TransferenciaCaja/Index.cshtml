@@ -287,14 +287,15 @@
                                     </td>
 
                                     <td class="text-end pe-4">
-
+                                        <div class="table-actions">
                                         <a asp-action="Details"
                                            asp-route-id="@transferencia.Id"
-                                           class="btn action-icon-btn action-view"
+                                           class="btn btn-sm btn-light table-action-btn"
                                            title="Ver detalle"
                                            aria-label="Ver detalle">
                                             <span class="material-symbols-outlined">visibility</span>
                                         </a>
+                                        </div>
 
                                     </td>
 
@@ -331,6 +332,8 @@
             }
 
         </div>
+
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = ViewBag.PaginaActual, TotalPaginas = ViewBag.TotalPaginas, TotalRegistros = ViewBag.TotalRegistros, NombreSingular = "transferencia encontrada", NombrePlural = "transferencias encontradas" }' />
 
     </div>
 

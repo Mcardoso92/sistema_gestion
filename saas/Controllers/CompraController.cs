@@ -29,7 +29,7 @@ namespace saas.Controllers
         }
 
         // GET: Compra
-        public async Task<IActionResult> Index(CompraIndexVM compraVM)
+        public async Task<IActionResult> Index(CompraIndexVM compraVM, int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -108,9 +108,25 @@ namespace saas.Controllers
                 }
             }
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalCompras = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalCompras / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalCompras;
+
             compraVM.Compras = await consulta
                 .OrderByDescending(c => c.Fecha)
                 .ThenByDescending(c => c.Id)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(c => new CompraItemVM
                 {
                     Id = c.Id,

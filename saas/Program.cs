@@ -110,7 +110,16 @@ app.Use(async (context, next) =>
 
     await next();
 });
-app.UseStaticFiles();
+
+// Guarda los archivos estáticos en la caché del navegador durante 7 días.
+// No afecta datos dinámicos como ventas, stock, caja o usuarios.
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = context =>
+    {
+        context.Context.Response.Headers.CacheControl = "public,max-age=604800";
+    }
+});
 app.UseRouting();
 app.UseRateLimiter();
 

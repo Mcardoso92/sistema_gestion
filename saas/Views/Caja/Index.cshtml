@@ -254,11 +254,11 @@
 
                                     <td class="text-end pe-4">
 
-                                        <div class="btn-group btn-group-sm">
+                                        <div class="table-actions">
 
                                             <a asp-action="Details"
                                                asp-route-id="@caja.Id"
-                                               class="btn btn-outline-secondary action-icon-btn"
+                                               class="btn btn-sm btn-light table-action-btn"
                                                title="Ver detalle"
                                                aria-label="Ver detalle">
                                                 <span class="material-symbols-outlined">visibility</span>
@@ -266,7 +266,7 @@
 
                                             <a asp-action="Edit"
                                                asp-route-id="@caja.Id"
-                                               class="btn btn-outline-primary action-icon-btn"
+                                               class="btn btn-sm btn-light table-action-btn"
                                                title="Editar"
                                                aria-label="Editar">
                                                 <span class="material-symbols-outlined">edit</span>
@@ -276,7 +276,7 @@
                                             {
                                                 <a asp-action="Delete"
                                                    asp-route-id="@caja.Id"
-                                                   class="btn btn-outline-danger action-icon-btn"
+                                                   class="btn btn-sm btn-light table-action-btn table-action-danger"
                                                    title="Desactivar"
                                                    aria-label="Desactivar">
                                                     <span class="material-symbols-outlined">block</span>
@@ -317,6 +317,8 @@
             }
 
         </div>
+
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = ViewBag.PaginaActual, TotalPaginas = ViewBag.TotalPaginas, TotalRegistros = ViewBag.TotalRegistros, NombreSingular = "caja encontrada", NombrePlural = "cajas encontradas" }' />
 
     </div>
 

@@ -35,7 +35,8 @@ namespace saas.Controllers
             EstadoTransferenciaCaja? estado = null,
             DateTime? fechaDesde = null,
             DateTime? fechaHasta = null,
-            int? empresaId = null)
+            int? empresaId = null,
+            int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -103,9 +104,25 @@ namespace saas.Controllers
                     t.Fecha < hastaExclusivo);
             }
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalTransferencias = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalTransferencias / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalTransferencias;
+
             var transferencias =
                 await consulta
                     .OrderByDescending(t => t.Fecha)
+                    .Skip((pagina - 1) * tamanioPagina)
+                    .Take(tamanioPagina)
                     .Select(t => new TransferenciaCajaResumenVM
                     {
                         Id = t.Id,

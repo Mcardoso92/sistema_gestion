@@ -41,8 +41,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.375rem;
+    flex-wrap: nowrap;
+    gap: 0.25rem;
 }
 
 .app-body .table .btn-sm {
@@ -83,4 +83,32 @@
 
 .app-body .table td > p:last-child {
     margin-bottom: 0;
+}
+.pagination-footer {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+}
+
+.pagination-controls {
+    grid-column: 2;
+    justify-self: center;
+}
+
+.pagination-total {
+    grid-column: 3;
+    justify-self: end;
+    text-align: right;
+}
+
+@media (max-width: 767.98px) {
+    .pagination-footer {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .pagination-total {
+        text-align: center;
+    }
 }
