@@ -172,12 +172,14 @@
                                 </td>
                                 <td class="text-muted">@usuario.FechaAlta.ToString("dd/MM/yyyy")</td>
                                 <td class="pe-4 text-end">
-                                    <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary action-icon-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
-                                    <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-warning action-icon-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
+                                    <div class="table-actions">
+                                    <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                    <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-light table-action-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                     @if (usuario.Estado)
                                     {
-                                        <a asp-action="Delete" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-danger action-icon-btn" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
+                                        <a asp-action="Delete" asp-route-id="@usuario.Id" class="btn btn-sm btn-light table-action-btn table-action-danger" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
                                     }
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -186,12 +188,6 @@
                 </tbody>
             </table>
         </div>
-        <!-- Pagination -->
-        <div class="card-footer bg-white border-top p-4">
-            <span class="small text-muted">
-                @Model.Count()
-                @(Model.Count() == 1 ? "usuario encontrado" : "usuarios encontrados")
-            </span>
-        </div>
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = ViewBag.PaginaActual, TotalPaginas = ViewBag.TotalPaginas, TotalRegistros = ViewBag.TotalRegistros, NombreSingular = "usuario encontrado", NombrePlural = "usuarios encontrados" }' />
     </div>
 </main>

@@ -274,7 +274,7 @@
                 </div>
 
                 <div class="h4 fw-bold mb-0">
-                    @Model.Ventas.Count
+                    @ViewBag.TotalRegistros
                 </div>
 
             </div>
@@ -317,18 +317,6 @@
 
     <!-- Tabla -->
     <div class="table-container">
-
-        <div class="px-4 py-3 border-bottom bg-light d-flex justify-content-between align-items-center">
-
-            <h2 class="h5 fw-bold text-dark mb-0">
-                Ventas
-            </h2>
-
-            <span class="badge bg-secondary bg-opacity-10 text-secondary border">
-                @Model.Ventas.Count @(Model.Ventas.Count == 1 ? "registro" : "registros")
-            </span>
-
-        </div>
 
         <div class="table-responsive">
 
@@ -554,10 +542,10 @@
 
                                 <!-- Acciones -->
                                 <td class="pe-4 text-center">
-
+                                    <div class="table-actions">
                                     <a asp-action="Details"
                                        asp-route-id="@venta.Id"
-                                       class="venta-action"
+                                       class="btn btn-sm btn-light table-action-btn"
                                        title="Ver detalle">
 
                                         <span class="material-symbols-outlined">
@@ -565,6 +553,7 @@
                                         </span>
 
                                     </a>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -572,5 +561,7 @@
                 </tbody>
             </table>
         </div>
+
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = ViewBag.PaginaActual, TotalPaginas = ViewBag.TotalPaginas, TotalRegistros = ViewBag.TotalRegistros, NombreSingular = "venta encontrada", NombrePlural = "ventas encontradas" }' />
     </div>
 </main>

@@ -261,11 +261,11 @@
 
                                 <td class="px-4 py-3 text-end">
 
-                                    <div class="d-inline-flex align-items-center gap-1">
+                                    <div class="table-actions">
 
                                         <a asp-action="Historial"
                                            asp-route-productoId="@producto.ProductoId"
-                                           class="stock-action-btn"
+                                           class="btn btn-sm btn-light table-action-btn"
                                            title="Ver historial">
                                             <span class="material-symbols-outlined">
                                                 history
@@ -278,7 +278,7 @@
                                         {
                                             <a asp-action="Ajustar"
                                                asp-route-productoId="@producto.ProductoId"
-                                               class="stock-action-btn"
+                                               class="btn btn-sm btn-light table-action-btn"
                                                title="Ajustar stock">
 
                                                 <span class="material-symbols-outlined">
@@ -301,16 +301,7 @@
 
         </div>
 
-        <div class="card-footer bg-light border-top-0 px-4 py-3">
-            <span class="small text-secondary">
-
-                @Model.Productos.Count
-                @(Model.Productos.Count == 1
-                                ? "producto encontrado"
-                                : "productos encontrados")
-
-            </span>
-        </div>
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = ViewBag.PaginaActual, TotalPaginas = ViewBag.TotalPaginas, TotalRegistros = ViewBag.TotalRegistros, NombreSingular = "producto encontrado", NombrePlural = "productos encontrados" }' />
 
     </div>
 

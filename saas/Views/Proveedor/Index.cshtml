@@ -115,15 +115,6 @@
     </div>
 
     <div class="card bg-white">
-        <div class="card-header card-header-bg py-3 d-flex justify-content-between align-items-center">
-            <h2 class="h6 mb-0">Listado de proveedores</h2>
-
-            <span class="text-sm text-muted-custom">
-                @Model.Proveedores.Count
-                @(Model.Proveedores.Count == 1 ? "proveedor" : "proveedores")
-            </span>
-        </div>
-
         @if (Model.Proveedores.Any())
         {
             <div class="table-responsive">
@@ -222,10 +213,10 @@
                                 </td>
 
                                 <td class="text-end pe-4">
-                                    <div class="d-inline-flex align-items-center gap-1">
+                                    <div class="table-actions">
                                         <a asp-action="Details"
                                            asp-route-id="@proveedor.Id"
-                                           class="btn btn-sm btn-light proveedor-action-btn"
+                                           class="btn btn-sm btn-light table-action-btn"
                                            title="Ver detalle">
                                             <span class="material-symbols-outlined icon-sm">
                                                 visibility
@@ -234,7 +225,7 @@
 
                                         <a asp-action="Edit"
                                            asp-route-id="@proveedor.Id"
-                                           class="btn btn-sm btn-light proveedor-action-btn"
+                                           class="btn btn-sm btn-light table-action-btn"
                                            title="Editar">
                                             <span class="material-symbols-outlined icon-sm">
                                                 edit
@@ -245,7 +236,7 @@
                                         {
                                             <a asp-action="Delete"
                                                asp-route-id="@proveedor.Id"
-                                               class="btn btn-sm btn-light proveedor-action-btn proveedor-action-danger"
+                                               class="btn btn-sm btn-light table-action-btn table-action-danger"
                                                title="Desactivar">
                                                 <span class="material-symbols-outlined icon-sm">
                                                     block
@@ -274,5 +265,7 @@
                 </p>
             </div>
         }
+
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = ViewBag.PaginaActual, TotalPaginas = ViewBag.TotalPaginas, TotalRegistros = ViewBag.TotalRegistros, NombreSingular = "proveedor encontrado", NombrePlural = "proveedores encontrados" }' />
     </div>
 </main>

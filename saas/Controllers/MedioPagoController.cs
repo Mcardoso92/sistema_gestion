@@ -27,7 +27,8 @@ namespace saas.Controllers
         public async Task<IActionResult> Index(
             string estado = "activos",
             int? empresaId = null,
-            string? busqueda = null)
+            string? busqueda = null,
+            int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -84,8 +85,24 @@ namespace saas.Controllers
                      m.Descripcion.Contains(busqueda)));
             }
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalMediosPago = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalMediosPago / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalMediosPago;
+
             var mediosPago = await consulta
                 .OrderBy(m => m.Nombre)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(m => new MedioPagoIndexVM
                 {
                     Id = m.Id,
