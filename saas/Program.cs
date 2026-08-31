@@ -18,6 +18,9 @@ builder.Services.AddScoped<VentaSaldoService>();
 builder.Services.AddScoped<CompraSaldoService>();
 builder.Services.AddScoped<EmpresaInicializacionService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
+// Mantiene la vista previa de cada importación fuera del navegador hasta que el usuario la confirme.
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IProductoImportacionService, ProductoImportacionService>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection(
         "EmailSettings"));
