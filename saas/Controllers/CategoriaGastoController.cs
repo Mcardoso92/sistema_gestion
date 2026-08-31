@@ -24,7 +24,7 @@ namespace saas.Controllers
         }
 
         // GET: CategoriaGasto
-        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null)
+        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -79,8 +79,24 @@ namespace saas.Controllers
                      c.Descripcion.Contains(busqueda)));
             }
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalCategorias = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalCategorias / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalCategorias;
+
             var categorias = await consulta
                 .OrderBy(c => c.Nombre)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(c => new CategoriaGastoIndexVM
                 {
                     Id = c.Id,

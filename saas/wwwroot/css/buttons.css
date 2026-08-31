@@ -10,6 +10,32 @@
     min-height: 32px;
 }
 
+.app-body .btn-pagination,
+.public-body .btn-pagination {
+    border: 1px solid var(--ui-border);
+    background: var(--ui-surface);
+    color: var(--ui-text-muted);
+}
+
+.app-body .btn-pagination:hover,
+.app-body .btn-pagination:focus,
+.public-body .btn-pagination:hover,
+.public-body .btn-pagination:focus {
+    border-color: var(--ui-primary);
+    background: var(--ui-primary-soft);
+    color: var(--ui-primary);
+}
+
+.app-body .btn-pagination.disabled,
+.app-body .btn-pagination:disabled,
+.public-body .btn-pagination.disabled,
+.public-body .btn-pagination:disabled {
+    border-color: var(--ui-border-light);
+    background: var(--ui-surface-muted);
+    color: var(--ui-text-muted);
+    opacity: 0.65;
+}
+
 .app-body .btn-primary,
 .app-body .btn-v-primary,
 .app-body .btn-primary-veltika,
@@ -76,6 +102,29 @@
 .app-body .action-icon-btn .material-symbols-outlined {
     font-size: 1.125rem;
     line-height: 1;
+}
+
+.app-body .table-action-btn {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.app-body .table-action-btn .material-symbols-outlined {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
+.app-body .table-action-danger:hover,
+.app-body .table-action-danger:focus {
+    border-color: var(--ui-danger);
+    background: #fbe9e9;
+    color: var(--ui-danger);
 }
 
 .app-body .action-view {

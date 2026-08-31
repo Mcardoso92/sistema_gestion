@@ -27,7 +27,7 @@ namespace saas.Controllers
         }
 
         // GET: Venta
-        public async Task<IActionResult> Index(VentaIndexVM ventaVM)
+        public async Task<IActionResult> Index(VentaIndexVM ventaVM, int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -184,9 +184,39 @@ namespace saas.Controllers
                 }
             }
 
+            var resumenPendiente = await consulta
+                .Where(v => v.Estado)
+                .Select(v => new
+                {
+                    Saldo = v.Total - (v.CobrosVenta.Where(c => c.Estado == EstadoCobro.Activo).Sum(c => (decimal?)c.Importe) ?? 0)
+                })
+                .Where(v => v.Saldo > 0)
+                .GroupBy(v => 1)
+                .Select(g => new { Cantidad = g.Count(), Total = g.Sum(v => v.Saldo) })
+                .FirstOrDefaultAsync();
+
+            ventaVM.CantidadConSaldoPendiente = resumenPendiente?.Cantidad ?? 0;
+            ventaVM.TotalPendienteCobro = resumenPendiente?.Total ?? 0;
+
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalVentas = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalVentas / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalVentas;
+
             ventaVM.Ventas = await consulta
                 .OrderByDescending(v => v.Fecha)
                 .ThenByDescending(v => v.Id)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(v => new VentaIndexItemVM
                 {
                     Id = v.Id,
@@ -211,20 +241,6 @@ namespace saas.Controllers
                     TotalUnidades = v.Detalles.Sum(d => d.Cantidad)
                 })
                 .ToListAsync();
-
-            var ventasConSaldoPendiente =
-                ventaVM.Ventas
-                    .Where(v =>
-                        v.Estado &&
-                        v.SaldoPendiente > 0)
-                    .ToList();
-
-            ventaVM.CantidadConSaldoPendiente =
-                ventasConSaldoPendiente.Count;
-
-            ventaVM.TotalPendienteCobro =
-                ventasConSaldoPendiente
-                    .Sum(v => v.SaldoPendiente);
 
             if (esSuperAdmin)
             {

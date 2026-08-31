@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using SkiaSharp;
 
 namespace saas.Services
 {
     public class ImagenService : IImagenService
     {
         private const long TamanioMaximo = 2 * 1024 * 1024;
+        private const int DimensionMaximaProducto = 1200;
+        private const int DimensionMaximaUsuario = 500;
+        private const int DimensionMaximaLogo = 800;
+        private const int CalidadWebp = 80;
         private readonly IWebHostEnvironment _environment;
 
         public ImagenService(IWebHostEnvironment environment)
@@ -88,24 +93,51 @@ namespace saas.Services
                 nombreBase = $"{nombreBase}-{identificadorSeguro}";
             }
 
-            string nombreArchivo = $"{nombreBase}-{Guid.NewGuid():N}{extension}";
+            int dimensionMaxima = carpetaValida switch
+            {
+                "productos" => DimensionMaximaProducto,
+                "usuarios" => DimensionMaximaUsuario,
+                "logos" => DimensionMaximaLogo,
+                _ => DimensionMaximaProducto
+            };
+
+            string nombreArchivo = $"{nombreBase}-{Guid.NewGuid():N}.webp";
             string rutaFisica = Path.Combine(directorio, nombreArchivo);
 
             try
             {
-                await using var destino = new FileStream(
-                    rutaFisica,
-                    FileMode.CreateNew,
-                    FileAccess.Write,
-                    FileShare.None);
+                await using Stream origen = archivo.OpenReadStream();
+                using SKBitmap imagenOriginal = SKBitmap.Decode(origen) ?? throw new InvalidOperationException();
+                SKBitmap? imagenRedimensionada = null;
 
-                await archivo.CopyToAsync(destino);
+                int anchoNuevo = imagenOriginal.Width;
+                int altoNuevo = imagenOriginal.Height;
+
+                if (imagenOriginal.Width > dimensionMaxima || imagenOriginal.Height > dimensionMaxima)
+                {
+                    decimal escala = Math.Min((decimal)dimensionMaxima / imagenOriginal.Width, (decimal)dimensionMaxima / imagenOriginal.Height);
+                    anchoNuevo = (int)Math.Round(imagenOriginal.Width * escala);
+                    altoNuevo = (int)Math.Round(imagenOriginal.Height * escala);
+                    imagenRedimensionada = imagenOriginal.Resize(new SKImageInfo(anchoNuevo, altoNuevo), new SKSamplingOptions(SKFilterMode.Linear, SKMipmapMode.Linear));
+                }
+
+                using SKBitmap imagenFinal = imagenRedimensionada ?? imagenOriginal.Copy();
+                using SKImage imagenSalida = SKImage.FromBitmap(imagenFinal);
+                using SKData datosImagen = imagenSalida.Encode(SKEncodedImageFormat.Webp, CalidadWebp);
+
+                await using FileStream destino = new FileStream(rutaFisica, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+                datosImagen.SaveTo(destino);
             }
             catch
             {
+                if (File.Exists(rutaFisica))
+                {
+                    File.Delete(rutaFisica);
+                }
+
                 return new ResultadoImagen
                 {
-                    Error = "No fue posible guardar la imagen."
+                    Error = "No fue posible procesar y guardar la imagen."
                 };
             }
 

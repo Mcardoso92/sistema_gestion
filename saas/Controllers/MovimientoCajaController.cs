@@ -39,7 +39,8 @@ namespace saas.Controllers
             DireccionMovimientoCaja? direccion = null,
             DateTime? fechaDesde = null,
             DateTime? fechaHasta = null,
-            int? empresaId = null)
+            int? empresaId = null,
+            int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -133,8 +134,36 @@ namespace saas.Controllers
                     m.Fecha < hastaExclusivo);
             }
 
+            IQueryable<MovimientoCaja> movimientosVigentesConsulta = consulta.Where(m =>
+                !m.MovimientoOrigenId.HasValue &&
+                !_context.MovimientosCaja.Any(r => r.MovimientoOrigenId == m.Id));
+
+            decimal totalIngresos = await movimientosVigentesConsulta
+                .Where(m => m.Direccion == DireccionMovimientoCaja.Ingreso)
+                .SumAsync(m => (decimal?)m.Importe) ?? 0;
+
+            decimal totalEgresos = await movimientosVigentesConsulta
+                .Where(m => m.Direccion == DireccionMovimientoCaja.Egreso)
+                .SumAsync(m => (decimal?)m.Importe) ?? 0;
+
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalMovimientos = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalMovimientos / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalMovimientos;
+
             var movimientos = await consulta
                 .OrderByDescending(m => m.Fecha)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(m => new MovimientoCajaResumenVM
                 {
                     Id = m.Id,
@@ -163,33 +192,6 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
-            var idsMovimientos =
-                movimientos
-                    .Select(m => m.Id)
-                    .ToList();
-
-            var idsRevertidos =
-                await _context.MovimientosCaja
-                    .AsNoTracking()
-                    .Where(m =>
-                        m.MovimientoOrigenId.HasValue &&
-                        idsMovimientos.Contains(
-                            m.MovimientoOrigenId.Value))
-                    .Select(m =>
-                        m.MovimientoOrigenId!.Value)
-                    .Distinct()
-                    .ToListAsync();
-
-            var idsRevertidosSet =
-                idsRevertidos.ToHashSet();
-
-            var movimientosVigentes =
-                movimientos
-                    .Where(m =>
-                        !m.EsReversion &&
-                        !idsRevertidosSet.Contains(m.Id))
-                    .ToList();
-
             var vm = new MovimientoCajaIndexVM
             {
                 Movimientos = movimientos,
@@ -206,19 +208,8 @@ namespace saas.Controllers
                 EmpresaId =
                     esSuperAdmin ? empresaId : null,
 
-                TotalIngresos =
-                    movimientosVigentes
-                        .Where(m =>
-                            m.Direccion ==
-                            DireccionMovimientoCaja.Ingreso)
-                        .Sum(m => m.Importe),
-
-                TotalEgresos =
-                    movimientosVigentes
-                        .Where(m =>
-                            m.Direccion ==
-                            DireccionMovimientoCaja.Egreso)
-                        .Sum(m => m.Importe)
+                TotalIngresos = totalIngresos,
+                TotalEgresos = totalEgresos
             };
 
             vm.NetoPeriodo =
