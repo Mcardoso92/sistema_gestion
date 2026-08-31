@@ -25,7 +25,7 @@ namespace saas.Controllers
         }
 
         // GET: TurnoCaja
-        public async Task<IActionResult> Index( string estado = "abiertos", int? empresaId = null, string? busqueda = null)
+        public async Task<IActionResult> Index(string estado = "abiertos", int? empresaId = null, string? busqueda = null, int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -86,8 +86,24 @@ namespace saas.Controllers
                     t.UsuarioApertura.UserName!.Contains(busqueda));
             }
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalTurnos = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalTurnos / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalTurnos;
+
             var turnos = await consulta
                 .OrderByDescending(t => t.FechaApertura)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(t => new TurnoCajaIndexVM
                 {
                     Id = t.Id,

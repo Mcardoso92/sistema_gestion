@@ -1,0 +1,27 @@
+@model PaginacionVM
+
+@{
+    var parametrosAnteriores = Context.Request.Query.ToDictionary(p => p.Key, p => (string?)p.Value.ToString());
+    var parametrosSiguientes = new Dictionary<string, string?>(parametrosAnteriores);
+
+    parametrosAnteriores["pagina"] = (Model.PaginaActual - 1).ToString();
+    parametrosSiguientes["pagina"] = (Model.PaginaActual + 1).ToString();
+
+    string urlAnterior = Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(Context.Request.Path, parametrosAnteriores);
+    string urlSiguiente = Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(Context.Request.Path, parametrosSiguientes);
+}
+
+<div class="card-footer bg-light border-top-0 px-4 py-3 pagination-footer gap-2">
+    @if (Model.TotalPaginas > 1)
+    {
+        <div class="pagination-controls d-flex align-items-center gap-2">
+            <a href="@urlAnterior" class="btn btn-sm btn-pagination @(Model.PaginaActual <= 1 ? "disabled" : "")">Anterior</a>
+            <span class="small text-secondary">Página @Model.PaginaActual de @Model.TotalPaginas</span>
+            <a href="@urlSiguiente" class="btn btn-sm btn-pagination @(Model.PaginaActual >= Model.TotalPaginas ? "disabled" : "")">Siguiente</a>
+        </div>
+    }
+
+    <span class="pagination-total small text-secondary">
+        @Model.TotalRegistros @(Model.TotalRegistros == 1 ? Model.NombreSingular : Model.NombrePlural)
+    </span>
+</div>

@@ -22,7 +22,7 @@ namespace saas.Controllers
         }
 
         // GET: Proveedor
-        public async Task<IActionResult> Index(ProveedorIndexVM proveedorVM)
+        public async Task<IActionResult> Index(ProveedorIndexVM proveedorVM, int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -76,8 +76,24 @@ namespace saas.Controllers
                      p.CUIT.Contains(cuitBusqueda)));
             }
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalProveedores = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalProveedores / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalProveedores;
+
             proveedorVM.Proveedores = await consulta
                 .OrderBy(p => p.RazonSocial)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(p => new ProveedorIndexItemVM
                 {
                     Id = p.Id,

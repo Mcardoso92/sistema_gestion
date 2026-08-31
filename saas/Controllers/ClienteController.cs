@@ -23,7 +23,7 @@ namespace saas.Controllers
         }
 
         // GET: Cliente
-        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null)
+        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, int pagina = 1)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -88,9 +88,25 @@ namespace saas.Controllers
             ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
             ViewBag.Busqueda = busqueda;
 
+            const int tamanioPagina = 20;
+            pagina = Math.Max(pagina, 1);
+            int totalClientes = await clientes.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalClientes / (double)tamanioPagina);
+
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalClientes;
+
             var listaClientes = await clientes
                 .OrderBy(c => c.Nombre)
                 .ThenBy(c => c.Apellido)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .ToListAsync();
 
             return View(listaClientes);
