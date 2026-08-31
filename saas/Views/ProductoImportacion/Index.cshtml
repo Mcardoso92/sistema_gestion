@@ -1,0 +1,77 @@
+@model saas.ViewModel.ProductoImportacion.ProductoImportacionArchivoVM
+
+@{
+    ViewData["Title"] = "Importar productos";
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <a asp-controller="Producto" asp-action="Index" class="text-decoration-none text-secondary">← Volver a Productos</a>
+            <h1 class="h2 fw-semibold mb-1 mt-2">Importar productos</h1>
+            <p class="text-secondary mb-0">Cargá varios productos mediante la plantilla oficial de Veltika.</p>
+        </div>
+        <a asp-action="DescargarPlantilla" class="btn btn-v-outline d-flex align-items-center gap-2">
+            <span class="material-symbols-outlined">download</span>
+            Descargar plantilla
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">Seleccionar archivo</div>
+                <div class="card-body p-4">
+                    <form asp-action="Analizar" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="mb-4">
+                                <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                <select asp-for="EmpresaId" asp-items="ViewBag.Empresas" class="form-select">
+                                    <option value="">-- Seleccione una empresa --</option>
+                                </select>
+                                <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                            </div>
+                        }
+
+                        <div class="mb-4">
+                            <label asp-for="Archivo" class="form-label">Archivo Excel</label>
+                            <input asp-for="Archivo" class="form-control" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                            <span asp-validation-for="Archivo" class="text-danger"></span>
+                            <div class="form-text">Formato permitido: .xlsx. Tamaño máximo: 5 MB.</div>
+                        </div>
+
+                        <div class="border-top pt-4 d-flex justify-content-end gap-2">
+                            <a asp-controller="Producto" asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                            <button type="submit" class="btn btn-v-primary d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined">preview</span>
+                                Analizar archivo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">Cómo funciona</div>
+                <div class="card-body p-4">
+                    <ol class="mb-0 ps-3 d-flex flex-column gap-3 text-secondary">
+                        <li>Descargá la plantilla oficial.</li>
+                        <li>Completá una fila por producto sin cambiar los encabezados.</li>
+                        <li>Seleccioná el archivo y analizalo.</li>
+                        <li>Revisá la vista previa antes de confirmar.</li>
+                    </ol>
+                    <div class="alert alert-info mt-4 mb-0">Si alguna fila contiene errores, no se importará ningún producto.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
