@@ -1,6 +1,6 @@
 # Roadmap - Veltika
 
-Versión: 2.0
+Versión: 2.1
 
 Última actualización: 01/09/2026
 
@@ -46,6 +46,10 @@ Actualmente el sistema incluye, entre otras capacidades:
 - Exportaciones a Excel.
 - Importación masiva de productos y stock.
 - Flujo POS optimizado para búsqueda, teclado y escaneo de códigos de barra.
+- Registro autoservicio de empresas.
+- Web pública con identidad visual integrada con la aplicación privada.
+- Infraestructura productiva operativa en AWS.
+- Deploy asistido y documentado con backups y recuperación.
 
 ---
 
@@ -201,29 +205,102 @@ La evolución post-MVP buscará pasar de indicadores descriptivos a análisis co
 
 ---
 
-# 4. Camino hacia el MVP público
+## Etapa 7 — Web pública, onboarding e identidad
 
-La prioridad inmediata no es agregar indefinidamente nuevos módulos de negocio, sino estabilizar, validar y preparar Veltika para usuarios reales.
+Objetivo:
 
-Los objetivos de esta etapa incluyen:
+Preparar la entrada pública a Veltika y reducir la fricción inicial de una empresa nueva.
 
-- Completar y unificar la experiencia visual de la aplicación.
-- Finalizar la web pública de Veltika.
-- Mejorar onboarding y configuración inicial.
-- Revisar seguridad y aislamiento multiempresa.
-- Mejorar validaciones y manejo de errores.
-- Completar pruebas de los flujos críticos.
-- Revisar rendimiento y consultas principales.
-- Preparar despliegue productivo.
-- Configurar dominio, HTTPS, base de datos y almacenamiento.
-- Definir backups y recuperación.
-- Incorporar observabilidad y logging adecuados para producción.
-- Realizar pruebas piloto con comercios reales.
-- Recopilar feedback antes de priorizar nuevas funcionalidades grandes.
+Principales capacidades actuales:
+
+- Home pública.
+- Layout público separado de la aplicación autenticada.
+- Identidad visual unificada entre experiencia pública y privada.
+- Navegación principal reorganizada.
+- Registro autoservicio de nuevas empresas.
+- Inicialización automática de datos base al crear una empresa.
+- Importación masiva de productos para acelerar la puesta en marcha.
 
 Estado:
 
-🚧 En evolución
+✅ Base funcional completada
+
+La evolución de la web pública continuará principalmente en SEO, páginas de funcionalidades, contenidos, analítica y adquisición.
+
+---
+
+## Etapa 8 — Infraestructura y producción
+
+Objetivo:
+
+Disponer de un entorno productivo real, reproducible y recuperable para ejecutar Veltika fuera del ambiente local.
+
+Infraestructura actual documentada:
+
+- AWS EC2 con Windows Server.
+- IIS y App Pool propios de Veltika.
+- ASP.NET Core en ambiente `Production`.
+- SQL Server Express con base `Veltika_DB`.
+- Dominio `www.veltika.com.ar`.
+- Configuración sensible mediante variables de entorno del servidor.
+- Publicación Release.
+- Migraciones idempotentes para producción.
+- Scripts de creación e instalación de paquetes de deploy.
+- Validación SHA256 del paquete.
+- Backup SQL previo y posterior al deploy.
+- Backups locales.
+- Backups externos en Amazon S3.
+- Respaldo de publicación e IIS antes de actualizar.
+- Conservación de uploads productivos entre despliegues.
+- Verificación HTTP posterior al deploy.
+- Procedimiento de recuperación y rollback documentado.
+- Smoke test post-deploy definido.
+
+Estado:
+
+✅ Infraestructura productiva operativa
+
+El siguiente nivel de automatización —GitHub Actions, almacenamiento privado de artefactos y despliegue mediante AWS Systems Manager— queda como evolución futura y no es requisito para validar el MVP.
+
+---
+
+# 4. Estado hacia el MVP con usuarios reales
+
+Veltika ya dispone de aplicación funcional, web pública e infraestructura productiva. La prioridad inmediata pasa de "construir la plataforma" a **validarla con usuarios reales y cerrar los riesgos operativos restantes**.
+
+## Ya disponible
+
+- [x] Web pública / Home.
+- [x] Registro autoservicio de empresas.
+- [x] Inicialización de datos base.
+- [x] Infraestructura AWS EC2.
+- [x] IIS y aplicación desplegada en producción.
+- [x] SQL Server productivo.
+- [x] Dominio productivo.
+- [x] Configuración de producción separada de desarrollo.
+- [x] Secretos fuera del repositorio.
+- [x] Proceso de deploy documentado y asistido por scripts.
+- [x] Backups SQL locales y externos en S3 integrados al proceso de deploy.
+- [x] Procedimiento de recuperación documentado.
+- [x] Cobertura automatizada de flujos críticos del MVP.
+- [x] Optimización inicial de rendimiento, imágenes y paginación.
+- [x] Importación masiva para facilitar la carga inicial.
+
+## A validar o continuar antes/durante los pilotos
+
+- [ ] Ejecutar smoke tests completos sobre cada versión desplegada.
+- [ ] Validar HTTPS/certificado y bindings definitivos como parte de la operación productiva cuando corresponda.
+- [ ] Verificar periódicamente que los backups de S3 puedan restaurarse correctamente; no limitarse a comprobar que el archivo exista.
+- [ ] Revisar logs y diagnóstico con uso real y definir si hace falta observabilidad adicional.
+- [ ] Probar recuperación de contraseña y correo transaccional en condiciones reales.
+- [ ] Realizar pruebas piloto con comercios reales.
+- [ ] Registrar problemas de UX y fricción detectados durante los pilotos.
+- [ ] Medir tiempo hasta la primera operación útil de una empresa nueva.
+- [ ] Recopilar feedback antes de priorizar funcionalidades grandes del post-MVP.
+
+Estado:
+
+🚧 Preparación para validación real
 
 ---
 
@@ -343,12 +420,11 @@ Objetivos futuros:
 
 # 7. Web pública y adquisición
 
-Veltika contará con una web pública independiente de la experiencia privada de la aplicación.
+La Home pública ya forma parte de Veltika. La evolución de esta área se enfoca en convertir esa presencia pública en un canal de adquisición y explicación del producto.
 
-Objetivos:
+Objetivos futuros:
 
-- Home pública.
-- Páginas de funcionalidades.
+- Páginas públicas específicas para funcionalidades.
 - Arquitectura SEO.
 - URLs amigables.
 - Sitemap y robots.txt.
