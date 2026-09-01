@@ -1,17 +1,31 @@
 # ADR-014 - Arquitectura Multiempresa
 
-**Estado:** Aceptado
+Última revisión: 01/09/2026
 
-## Decisión
+## Estado
 
-Una única base de datos compartida con aislamiento por EmpresaId.
+Supersedido por `ADR-001-Arquitectura-SaaS-Multiempresa.md`.
 
-## Motivos
+## Decisión histórica
 
--   Menor costo.
--   Administración simplificada.
--   Escalabilidad suficiente para V1.
+Este documento registró la decisión de utilizar:
 
-## Consecuencias
+```text
+una única base de datos compartida
++
+aislamiento por EmpresaId
+```
 
-Toda consulta debe respetar el filtro por EmpresaId.
+## Motivos registrados
+
+- Menor costo.
+- Administración simplificada.
+- Escalabilidad suficiente para la primera versión.
+
+## Motivo de supersesión
+
+Durante la auditoría documental del 01/09/2026 se confirmó que este ADR describe la misma decisión arquitectónica que `ADR-001` y no una evolución independiente.
+
+Para evitar dos fuentes vigentes sobre la estrategia multiempresa, la decisión fue consolidada en `ADR-001-Arquitectura-SaaS-Multiempresa.md`.
+
+Este archivo se conserva únicamente como registro histórico de la documentación anterior.
