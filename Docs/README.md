@@ -38,7 +38,7 @@ Docs/
 └── README.md
 ```
 
-> La carpeta `Docs/` se encuentra actualmente en proceso de sincronización con el estado real del código. Algunos documentos funcionales antiguos todavía requieren revisión y existen módulos implementados que aún no poseen documentación propia.
+> Las reglas de negocio fueron revisadas contra el estado real del código el 01/09/2026. La siguiente etapa de la auditoría documental es revisar los ADR y los archivos auxiliares que permanecen directamente dentro de `Docs/`.
 
 ---
 
@@ -136,66 +136,72 @@ Los documentos de esta carpeta explican **cómo debe comportarse Veltika desde e
 
 La implementación debe respetar estas reglas, pero la documentación también debe mantenerse sincronizada cuando las reglas cambian.
 
-## Estructura actual
+## Core
 
-### Core
+- `01-Empresa.md`
+- `02-Categoría.md`
+- `03-Producto.md`
+- `07-Sucursal.md`
 
-Actualmente incluye documentación para:
+> `Sucursal` está documentada como concepto futuro. No se encuentra implementada actualmente en el MVP.
 
-- Empresa.
-- Categoría.
-- Producto.
-- Sucursal.
+## Comercial
 
-> `Sucursal` se encuentra documentada como concepto, pero su existencia en documentación no implica que esté implementada en el MVP actual.
+- `08-Cliente.md`
+- `09-Proveedor.md`
+- `10-Venta.md`
+- `11-DetalleVenta.md`
+- `12-Compra.md`
+- `13-DetalleCompra.md`
+- `14-CobroVenta.md`
+- `15-PagoProveedor.md`
+- `16-DevolucionCompra.md`
+- `17-ReintegroProveedor.md`
+- `18-ReintegroVenta.md`
 
-### Comercial
+Esta sección cubre tanto los comprobantes comerciales principales como sus operaciones financieras y de reversión relacionadas.
 
-Incluye:
+## Inventario
 
-- Cliente.
-- Proveedor.
-- Venta.
-- DetalleVenta.
-- Compra.
-- DetalleCompra.
+- `14-MovimientoStock.md`
+- `15-Stock.md`
+- `16-AjusteStock.md`
+- `17-ProductoImportacion.md`
+- `Reglas_Negocio_Stock_Veltika.md`
 
-### Inventario
+Incluye reglas de stock, trazabilidad, ajustes e importación masiva inicial de Productos mediante Excel.
 
-Incluye:
+## Caja
 
-- MovimientoStock.
-- Stock.
-- AjusteStock.
-- Reglas generales de stock.
+- `17-Caja.md`
+- `18-MovimientoCaja.md`
+- `19-TurnoCaja.md`
+- `20-MedioPago.md`
+- `21-CategoriaGasto.md`
+- `22-TransferenciaCaja.md`
 
-### Caja
+Esta sección documenta la estructura de Cajas, movimientos financieros, turnos, medios de pago, clasificación de gastos y transferencias internas entre Cajas.
 
-Actualmente incluye:
+## Seguridad
 
-- Caja.
-- MovimientoCaja.
+- `04-Usuario.md`
+- `05-Roles.md`
+- `06-Permisos.md`
 
-Existen funcionalidades de caja implementadas que todavía deben documentarse de forma específica, como turnos, transferencias, medios de pago y otras operaciones financieras.
+La autorización actual combina ASP.NET Core Identity, Roles y validaciones server-side de Empresa/recurso. El modelo de permisos granulares configurables todavía no está implementado.
 
-### Seguridad
+## Configuración
 
-Incluye:
+- `20-Configuracion.md`
 
-- Usuario.
-- Roles.
-- Permisos.
+Documenta la configuración actual de Empresa basada en `ConfiguracionEmpresa`.
 
-### Configuración
+## Reportes
 
-Incluye la documentación general de configuración de empresa.
+- `21-Reportes.md`
+- `22-Dashboard.md`
 
-### Reportes
-
-Incluye:
-
-- Reportes.
-- Dashboard.
+Documenta los reportes operativos existentes, exportaciones Excel y el Dashboard descriptivo actual.
 
 ---
 
@@ -375,13 +381,15 @@ Al 01/09/2026:
 
 ✅ Configuración de producción documentada.
 
-🚧 Reglas de negocio antiguas en proceso de revisión contra el código actual.
+✅ Reglas de negocio antiguas revisadas contra el código actual.
 
-🚧 Faltan documentos funcionales para varios módulos incorporados después de la documentación inicial.
+✅ Documentación funcional agregada para TurnoCaja, MedioPago, CategoriaGasto, TransferenciaCaja, CobroVenta, PagoProveedor, DevolucionCompra, ReintegroProveedor, ReintegroVenta y ProductoImportacion.
 
-🚧 ADR pendientes de revisión para detectar duplicados y decisiones faltantes.
+✅ Índice funcional sincronizado con la documentación vigente.
 
-🚧 Existen archivos `.cs` auxiliares dentro de `Docs/` que deben revisarse y eliminarse si ya no cumplen una función documental.
+🚧 ADR pendientes de revisión para detectar duplicados, decisiones obsoletas y decisiones faltantes.
+
+🚧 Existen archivos `.cs` auxiliares dentro de `Docs/` que deben compararse con el código actual y eliminarse si ya no cumplen una función documental.
 
 ---
 
