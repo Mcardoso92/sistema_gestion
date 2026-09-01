@@ -1,266 +1,397 @@
 # Módulo Cliente
 
+Última actualización: 01/09/2026
+
 ---
 
 # 1. Objetivo
 
-El módulo Cliente permite administrar la información de las personas o empresas que realizan compras dentro de Veltika.
+El módulo Cliente administra las personas o entidades que pueden asociarse a ventas dentro de Veltika.
 
-Cada cliente pertenece exclusivamente a una empresa y podrá ser utilizado en las ventas, reportes, cuentas corrientes y futuras funcionalidades comerciales.
+Cada cliente pertenece a una única empresa y su información debe mantenerse aislada de las demás empresas del SaaS.
 
-Este módulo constituye la base para la gestión de clientes y el análisis comercial.
-
----
-
-# 2. Alcance
-
-El módulo permite registrar, modificar, activar, desactivar y consultar clientes pertenecientes a una empresa.
-
-Cada cliente podrá asociarse a múltiples ventas y conservar su historial de operaciones.
+La asociación de un cliente a una venta permite conservar información comercial e histórica, aunque el cliente sea desactivado posteriormente.
 
 ---
 
-# 3. Actores
+# 2. Alcance actual
 
-- Super Administrador
-- Administrador de Empresa
-- Vendedor
-- Cajero
+Actualmente permite:
 
----
-
-# 4. Permisos
-
-## Super Administrador
-
-✅ Visualizar clientes de cualquier empresa
-
-✅ Crear clientes
-
-✅ Editar clientes
-
-✅ Activar clientes
-
-✅ Desactivar clientes
-
-## Administrador de Empresa
-
-✅ Crear clientes
-
-✅ Editar clientes
-
-✅ Activar clientes
-
-✅ Desactivar clientes
-
-✅ Consultar clientes
-
-## Vendedor
-
-✅ Consultar clientes
-
-✅ Registrar clientes
-
-✅ Editar información básica
-
-## Cajero
-
-✅ Consultar clientes
-
-✅ Registrar clientes durante una venta
-
-❌ Desactivar clientes
+- Listar clientes.
+- Buscar clientes.
+- Filtrar por estado.
+- Filtrar por empresa para `SuperAdmin`.
+- Consultar detalle.
+- Crear clientes.
+- Editar clientes.
+- Desactivar clientes mediante baja lógica.
+- Reactivar clientes desde edición.
+- Asociar clientes a ventas.
 
 ---
 
-# 5. Funcionalidades
+# 3. Actores y permisos
 
-Actualmente
+El módulo administrativo está protegido mediante:
 
-- Registrar cliente
-- Editar cliente
-- Activar cliente
-- Desactivar cliente
-- Consultar clientes
-- Buscar clientes
+```text
+[Authorize(Roles = "SuperAdmin,AdminEmpresa")]
+```
 
-Versiones futuras
+Por lo tanto, el CRUD administrativo actual no está habilitado directamente para roles genéricos de vendedor o cajero.
 
-- Cuenta corriente
-- Historial de compras
-- Programa de puntos
-- Descuentos personalizados
-- Clasificación de clientes
-- Importación masiva
-- Exportación
-- Integración con CRM
-- Clientes frecuentes
-- Etiquetas
+## SuperAdmin
 
----
+Puede:
 
-# 6. Campos
+- Consultar clientes de todas las empresas.
+- Filtrar por empresa.
+- Crear clientes para una empresa activa.
+- Editar clientes de cualquier empresa.
+- Cambiar la empresa asociada durante edición, sujeto a validaciones.
+- Desactivar y reactivar clientes.
 
-| Campo | Descripción |
-|---------|-------------|
-| Id | Identificador único |
-| EmpresaId | Empresa propietaria |
-| Nombre | Nombre del cliente |
-| Apellido | Apellido del cliente |
-| Documento | DNI o documento identificatorio |
-| Telefono | Teléfono |
-| Email | Correo electrónico |
-| Direccion | Dirección |
-| Estado | Activo o Inactivo |
+## AdminEmpresa
 
-Campos futuros
+Puede:
 
-- CUIT
-- Razón Social
-- FechaNacimiento
-- Localidad
-- Provincia
-- País
-- Código Postal
-- Observaciones
-- LimiteCredito
-- SaldoCuentaCorriente
-- FechaAlta
-- FechaModificacion
-- UsuarioAlta
-- UsuarioModificacion
+- Consultar únicamente clientes de su empresa.
+- Crear clientes para su empresa.
+- Editar clientes de su empresa.
+- Desactivar y reactivar clientes de su empresa.
+
+Para `AdminEmpresa`, `EmpresaId` se obtiene del usuario autenticado y no se confía en el valor enviado desde el cliente.
 
 ---
 
-# 7. Validaciones
+# 4. Modelo actual
 
-- El nombre es obligatorio.
-- El apellido es obligatorio.
-- El documento no puede repetirse dentro de la misma empresa (si se informa).
-- El correo electrónico debe tener un formato válido.
-- La empresa debe existir.
-- El estado inicial será Activo.
+La entidad `Cliente` contiene:
 
----
+| Campo | Tipo | Regla |
+|---|---|---|
+| Id | int | Identificador único |
+| Nombre | string | Obligatorio, máximo 50 caracteres |
+| Apellido | string? | Opcional, máximo 50 caracteres |
+| Documento | string? | Opcional, máximo 20 caracteres |
+| Email | string? | Opcional, formato email, máximo 100 caracteres |
+| Telefono | string? | Opcional, formato teléfono, máximo 30 caracteres |
+| Direccion | string? | Opcional, máximo 150 caracteres |
+| Estado | bool | Activo o inactivo |
+| FechaAlta | DateTime | Fecha de creación |
+| EmpresaId | int | Empresa propietaria |
 
-# 8. Reglas de negocio
+Relaciones:
 
-- Cada cliente pertenece exclusivamente a una empresa.
-- Un cliente puede realizar múltiples compras.
-- Las ventas conservarán el cliente asociado aunque éste sea desactivado.
-- Un cliente desactivado no podrá utilizarse en nuevas ventas.
-- La eliminación física de clientes no estará permitida.
-
----
-
-# 9. Casos de uso
-
-## Crear cliente
-
-El usuario registra un nuevo cliente.
-
-Resultado esperado:
-
-- Cliente creado correctamente.
-- Disponible para futuras ventas.
+- Empresa.
+- Ventas.
 
 ---
 
-## Editar cliente
+# 5. Listado y búsqueda
 
-Permite modificar la información del cliente.
+El listado muestra clientes activos por defecto.
+
+Permite filtrar por:
+
+- Activos.
+- Inactivos.
+- Todos.
+- Empresa para `SuperAdmin`.
+
+La búsqueda permite coincidencias en:
+
+- Nombre.
+- Apellido.
+- Documento.
+- Email.
+
+Los resultados se ordenan por nombre y luego apellido.
+
+La paginación actual utiliza 20 registros por página.
+
+Las consultas de listado utilizan `AsNoTracking()`.
 
 ---
 
-## Desactivar cliente
+# 6. Creación
 
-El cliente deja de poder utilizarse en nuevas operaciones.
+La creación utiliza `ClienteCreateVM` para limitar y controlar los datos recibidos desde la vista.
 
-Las ventas históricas permanecen registradas.
+Puede ingresarse:
+
+- Nombre.
+- Apellido.
+- Documento.
+- Email.
+- Teléfono.
+- Dirección.
+- Empresa únicamente cuando opera un `SuperAdmin`.
+
+El servidor asigna automáticamente:
+
+```text
+Estado = true
+FechaAlta = DateTime.Now
+```
+
+Para usuarios que no son `SuperAdmin`:
+
+```text
+EmpresaId = usuario.EmpresaId
+```
 
 ---
 
-## Consultar clientes
+# 7. Normalización de datos
 
-Permite visualizar todos los clientes registrados por la empresa.
+Antes de persistir, el controller normaliza los campos de texto.
+
+- `Nombre` se guarda sin espacios externos.
+- Apellido vacío se convierte en `null`.
+- Documento vacío se convierte en `null`.
+- Email vacío se convierte en `null`.
+- Teléfono vacío se convierte en `null`.
+- Dirección vacía se convierte en `null`.
+
+Los valores opcionales informados se guardan utilizando `Trim()`.
 
 ---
 
-## Buscar cliente
+# 8. Validaciones
 
-Permite localizar clientes mediante distintos criterios de búsqueda.
+## Nombre
+
+- Obligatorio.
+- Máximo 50 caracteres.
+
+El apellido **no es obligatorio** en el modelo actual.
+
+## Documento
+
+- Opcional.
+- Máximo 20 caracteres.
+- Si se informa, no puede repetirse dentro de la misma empresa.
+
+El mismo documento puede existir en empresas diferentes.
+
+## Email
+
+- Opcional.
+- Debe tener formato válido cuando se informa.
+- Máximo 100 caracteres.
+
+Actualmente no existe una regla de unicidad de email por empresa.
+
+## Teléfono
+
+- Opcional.
+- Debe cumplir la validación de teléfono cuando se informa.
+- Máximo 30 caracteres.
+
+## Dirección
+
+- Opcional.
+- Máximo 150 caracteres.
+
+## Empresa
+
+La empresa debe:
+
+- Existir.
+- Estar activa.
 
 ---
 
-# 10. Casos de error
+# 9. Edición y reactivación
+
+La edición utiliza `ClienteEditVM`.
+
+Pueden modificarse:
+
+- Nombre.
+- Apellido.
+- Documento.
+- Email.
+- Teléfono.
+- Dirección.
+- Estado.
+
+Para `SuperAdmin` también puede modificarse la empresa.
+
+Para `AdminEmpresa`, la empresa permanece restringida a la del usuario autenticado.
+
+La fecha de alta original no se modifica.
+
+Una persona inactiva puede reactivarse desde edición estableciendo nuevamente:
+
+```text
+Estado = true
+```
+
+Antes de guardar se vuelven a validar empresa y documento duplicado.
+
+---
+
+# 10. Desactivación
+
+La baja es lógica:
+
+```text
+Estado = false
+```
+
+El cliente no se elimina físicamente.
+
+Si ya se encuentra inactivo, el controller rechaza una nueva solicitud de desactivación e informa la situación.
+
+La baja lógica preserva las ventas históricas asociadas.
+
+---
+
+# 11. Relación con ventas
+
+Un cliente puede estar asociado a múltiples ventas.
+
+La desactivación del cliente no elimina ni modifica ventas históricas.
+
+La disponibilidad de clientes para nuevas ventas debe respetar el estado y la empresa dentro del flujo de Venta/POS.
+
+La existencia del módulo Cliente no implica que todas las ventas deban obligatoriamente poseer un cliente; esa regla corresponde al módulo Venta.
+
+---
+
+# 12. Seguridad multiempresa
+
+Para usuarios que no son `SuperAdmin`, las consultas de listado, detalle, edición y desactivación se restringen por:
+
+```text
+Cliente.EmpresaId == usuario.EmpresaId
+```
+
+El `EmpresaId` enviado por formularios no es fuente confiable para `AdminEmpresa`.
+
+Las validaciones de empresa se realizan en servidor.
+
+Nunca debe permitirse acceder, modificar o asociar un cliente perteneciente a otra empresa.
+
+---
+
+# 13. Reglas de negocio
+
+1. Cada cliente pertenece a una única empresa.
+2. Un cliente puede estar asociado a múltiples ventas.
+3. El nombre es obligatorio.
+4. El apellido es opcional.
+5. El documento es opcional.
+6. Si se informa documento, debe ser único dentro de la empresa.
+7. Email, teléfono y dirección son opcionales.
+8. Una empresa nueva asociada al cliente debe existir y estar activa.
+9. Un cliente nuevo comienza activo.
+10. La fecha de alta se genera en servidor.
+11. La baja es lógica.
+12. La reactivación se realiza desde edición.
+13. La baja del cliente no altera operaciones históricas.
+14. Un `AdminEmpresa` sólo puede operar clientes de su empresa.
+15. Los campos opcionales vacíos se normalizan a `null`.
+
+---
+
+# 14. Casos de error relevantes
 
 - Nombre vacío.
-- Apellido vacío.
-- Documento duplicado.
-- Correo electrónico inválido.
-- Empresa inexistente.
-- Usuario sin permisos.
-- Intento de modificar un cliente inexistente.
+- Nombre con más de 50 caracteres.
+- Apellido con más de 50 caracteres.
+- Documento con más de 20 caracteres.
+- Documento duplicado dentro de la empresa.
+- Email inválido.
+- Email con más de 100 caracteres.
+- Teléfono inválido.
+- Teléfono con más de 30 caracteres.
+- Dirección con más de 150 caracteres.
+- Empresa inexistente o inactiva.
+- Cliente inexistente.
+- Intento de acceder a un cliente de otra empresa.
+- ID inconsistente durante edición.
+- Intento de desactivar nuevamente un cliente inactivo.
+- Error de persistencia.
 
 ---
 
-# 11. Flujo funcional
+# 15. Integraciones actuales
 
-1. El usuario ingresa al módulo Clientes.
-2. Selecciona "Nuevo Cliente".
-3. Completa la información requerida.
-4. El sistema valida los datos.
-5. Se registra el cliente.
-6. El cliente queda disponible para futuras ventas.
+El módulo se integra principalmente con:
 
----
+- Empresa.
+- Venta.
+- POS.
+- Dashboard.
+- Reportes comerciales.
 
-# 12. Integraciones
-
-Este módulo se relaciona con:
-
-- Empresa
-- Ventas
-- Caja
-- Reportes
-- Auditoría
+El historial comercial puede derivarse de las ventas asociadas, aunque actualmente no existe un módulo avanzado independiente de CRM o cuenta corriente.
 
 ---
 
-# 13. Mejoras futuras
+# 16. Capacidades no implementadas
 
-- Cuenta corriente.
-- Programa de fidelización.
-- Historial completo de compras.
-- Ranking de clientes.
+Actualmente Cliente no posee campos o módulos específicos para:
+
+- CUIT separado del documento general.
+- Razón social.
+- Fecha de nacimiento.
+- Localidad estructurada.
+- Provincia.
+- País.
+- Código postal.
+- Observaciones.
+- Límite de crédito.
+- Saldo de cuenta corriente.
+- Programa de puntos.
+- Descuentos personalizados por cliente.
+- Etiquetas.
+- Segmentación persistida.
+- CRM externo.
+- Importación masiva específica de clientes.
+
+Tampoco existe actualmente un CRUD administrativo de clientes habilitado directamente para roles `Vendedor` o `Cajero`.
+
+---
+
+# 17. Evolución futura
+
+La evolución se gestiona mediante Roadmap y GitHub Issues.
+
+Entre las mejoras previstas o posibles se encuentran:
+
+- Historial consolidado de compras.
+- Total gastado.
+- Ticket promedio.
+- Última compra.
+- Frecuencia de compra.
 - Segmentación comercial.
-- Integración con CRM.
-- Envío de promociones.
-- Estadísticas de consumo.
+- Cuenta corriente.
+- Crédito y condiciones de pago.
+- Alertas de vencimiento.
+- Descuentos o condiciones comerciales.
+- Fidelización.
+
+No se mantiene un roadmap por versiones independiente dentro de este documento.
 
 ---
 
-# 14. Roadmap
+# 18. Estado
 
-Versión 1.0
+✅ CRUD administrativo implementado.
 
-- Alta
-- Edición
-- Activación
-- Desactivación
-- Consulta
-- Búsqueda
+✅ Seguridad multiempresa implementada.
 
-Versión 2.0
+✅ Baja lógica y reactivación implementadas.
 
-- Cuenta corriente
-- Historial de compras
-- Descuentos personalizados
-- Clasificación de clientes
+✅ Búsqueda, filtros y paginación implementados.
 
-Versión 3.0
+✅ Documento único por empresa cuando se informa.
 
-- CRM
-- Programa de puntos
-- Segmentación avanzada
-- Marketing automatizado
+✅ Integración con ventas implementada.
+
+🚧 Cuenta corriente y funcionalidades CRM/comerciales avanzadas reservadas para evolución post-MVP.
