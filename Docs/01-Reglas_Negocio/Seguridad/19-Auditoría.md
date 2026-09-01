@@ -1,285 +1,79 @@
-# Módulo Auditoría
+# Auditoría y trazabilidad - estado actual
 
----
+Última revisión: 01/09/2026
 
-# 1. Objetivo
+## Estado
 
-El módulo Auditoría permite registrar todas las acciones relevantes realizadas por los usuarios dentro de Veltika.
+**No existe actualmente un módulo genérico de Auditoría implementado en Veltika.**
 
-Su finalidad es garantizar la trazabilidad completa de las operaciones del sistema, permitiendo conocer quién realizó una acción, cuándo la realizó, desde dónde y sobre qué información.
+Este documento se conserva para distinguir la trazabilidad que ya existe en el sistema de una futura auditoría transversal de acciones de usuario.
 
-Este módulo constituye uno de los pilares de seguridad y control del sistema.
+## Trazabilidad existente
 
----
+Veltika ya conserva trazabilidad funcional mediante los propios registros históricos del dominio. Entre otros ejemplos:
 
-# 2. Alcance
+- Ventas y Compras conservan sus documentos y detalles históricos.
+- Cobros y pagos se preservan y sus correcciones se realizan mediante anulaciones/reversiones.
+- Reintegros y devoluciones mantienen el registro original y los movimientos compensatorios correspondientes.
+- `MovimientoStock` registra los cambios relevantes de inventario.
+- `MovimientoCaja` registra ingresos, egresos y reversiones financieras.
+- `TurnoCaja` conserva apertura, cierre, usuario, importes esperados/contados y diferencias.
+- Las operaciones históricas críticas no se corrigen mediante eliminación física del registro original.
 
-El módulo registra automáticamente las operaciones realizadas sobre los distintos módulos de Veltika.
+Esta trazabilidad de dominio es parte del comportamiento actual del sistema y no debe confundirse con una tabla central de auditoría.
 
-Los registros de auditoría son generados por el sistema y no pueden crearse, modificarse ni eliminarse manualmente.
+## Lo que NO está implementado
 
----
+Actualmente no existe una entidad/tabla genérica `Auditoria` que registre automáticamente para toda la aplicación datos como:
 
-# 3. Actores
-
-- Super Administrador
-- Administrador de Empresa
-- Auditor
-
----
-
-# 4. Permisos
-
-## Super Administrador
-
-✅ Consultar todos los registros.
-
-✅ Exportar auditorías.
-
-## Administrador de Empresa
-
-✅ Consultar auditorías de su empresa.
-
-## Auditor
-
-✅ Consultar auditorías.
-
-❌ Ningún usuario puede modificar o eliminar registros.
-
----
-
-# 5. Funcionalidades
-
-Actualmente
-
-- Registrar acciones automáticamente.
-- Consultar auditorías.
-- Buscar auditorías.
-- Filtrar auditorías.
-- Visualizar detalle.
-
-Versiones futuras
-
-- Exportación a Excel.
-- Exportación PDF.
-- Alertas automáticas.
-- Auditoría avanzada.
-- Firma digital.
-- Integración con SIEM.
-
----
-
-# 6. Campos
-
-| Campo | Descripción |
-|---------|-------------|
-| Id | Identificador único |
-| EmpresaId | Empresa afectada |
-| UsuarioId | Usuario responsable |
-| Modulo | Módulo afectado |
-| Accion | Acción realizada |
-| RegistroId | Registro involucrado |
-| FechaHora | Fecha y hora |
-| DireccionIP | Dirección IP |
-| Observaciones | Información adicional |
-
-Campos futuros
-
-- Navegador
-- SistemaOperativo
-- Dispositivo
-- SessionId
-- ValorAnterior
-- ValorNuevo
-
----
-
-# 7. Validaciones
-
-- Debe existir un usuario autenticado.
-- Debe existir una acción.
-- El módulo es obligatorio.
-- La fecha será generada automáticamente.
-- El registro nunca podrá modificarse.
-
----
-
-# 8. Reglas de negocio
-
-- Toda acción relevante generará un registro.
-- Los registros nunca podrán eliminarse.
-- Los registros nunca podrán modificarse.
-- Toda auditoría conservará el historial completo.
-- La auditoría será automática.
-
----
-
-# 9. Casos de uso
-
-## Registrar acción
-
-El sistema registra automáticamente una operación realizada por un usuario.
-
-Resultado esperado:
-
-- Acción almacenada.
-- Historial actualizado.
-
----
-
-## Consultar auditoría
-
-Permite visualizar todas las acciones registradas.
-
----
-
-## Buscar auditoría
-
-Permite localizar acciones mediante distintos filtros.
-
----
-
-# 10. Casos de error
-
-- Usuario inexistente.
-- Acción inválida.
-- Registro inexistente.
-- Usuario sin permisos.
-
----
-
-# 11. Flujo funcional
-
-1. El usuario realiza una operación.
-2. El sistema ejecuta la acción.
-3. La operación finaliza correctamente.
-4. Se genera automáticamente el registro de auditoría.
-5. El historial queda disponible para futuras consultas.
-
----
-
-# 12. Integraciones
-
-Este módulo se relaciona con:
-
-- Empresa
-- Usuario
-- Producto
-- Categoría
-- Cliente
-- Proveedor
-- Venta
-- Compra
-- Stock
-- Caja
-- Configuración
-
----
-
-# 13. Mejoras futuras
-
-- Firma digital.
-- Exportación.
-- Alertas automáticas.
-- Dashboard de auditoría.
-- Integración con herramientas de monitoreo.
-- Auditoría de API.
-- Historial de cambios por campo.
-
----
-
-# 14. Roadmap
-
-Versión 1.0
-
-- Registro automático.
-- Consulta.
-- Filtros.
-
-Versión 2.0
-
-- Exportación.
-- Alertas.
-- Historial avanzado.
-
-Versión 3.0
-
-- Firma digital.
-- Integración SIEM.
-- IA para detección de anomalías.
-
----
-
-# 15. Decisiones de Arquitectura
-
-## Registro automático
-
-La auditoría será generada exclusivamente por el sistema.
-
-Los usuarios no podrán registrar auditorías manualmente.
-
----
-
-## Historial inmutable
-
-Una vez almacenado un registro, no podrá modificarse ni eliminarse.
-
-La auditoría constituye evidencia histórica del sistema.
-
----
-
-## Acciones auditadas
-
-Inicialmente se registrarán:
-
-- Inicio de sesión.
-- Cierre de sesión.
-- Creación.
-- Modificación.
-- Activación.
-- Desactivación.
-- Anulación.
-- Ajustes de stock.
-- Apertura de caja.
-- Cierre de caja.
-
-En futuras versiones podrán incorporarse nuevas acciones.
-
----
-
-## Alcance
-
-No todas las operaciones del sistema serán auditadas.
-
-Únicamente aquellas consideradas relevantes desde el punto de vista funcional y de seguridad.
-
----
-
-## Información registrada
-
-Cada auditoría almacenará:
-
-- Usuario.
 - Empresa.
+- Usuario.
 - Módulo.
 - Acción.
 - Registro afectado.
-- Fecha y hora.
+- Fecha/hora.
 - Dirección IP.
-- Observaciones.
+- Valor anterior/nuevo.
 
----
+Tampoco existe actualmente:
 
-## Escalabilidad
+- `AuditoriaController`.
+- Pantalla central de consulta de auditorías.
+- Rol `Auditor`.
+- Exportación de auditorías.
+- Integración SIEM.
+- Firma digital de eventos.
 
-El diseño permitirá incorporar nuevos módulos sin modificar la estructura de Auditoría.
+Por lo tanto, estas capacidades no deben presentarse como funcionalidades actuales de Veltika.
 
-Bastará con registrar el nombre del módulo y la acción correspondiente.
+## Decisión actual
 
----
+Para el MVP se prioriza la trazabilidad específica de cada dominio y la conservación de los registros históricos críticos.
 
-## Integridad
+No se incorporará una infraestructura genérica de auditoría únicamente por anticipación. Si durante la validación real aparece una necesidad concreta de registrar acciones administrativas transversales, deberá diseñarse una solución que:
 
-Toda operación crítica del sistema deberá poder reconstruirse consultando la Auditoría.
+- respete el aislamiento multiempresa;
+- diferencie eventos técnicos de eventos funcionales;
+- no duplique innecesariamente la información ya registrada en movimientos y documentos históricos;
+- permita determinar usuario, recurso y acción cuando resulte necesario;
+- mantenga los eventos de auditoría inmutables;
+- contemple crecimiento de volumen y políticas de retención.
 
-La información registrada servirá como respaldo para controles internos, investigaciones y seguimiento de actividades.
+## Casos que podrían justificar una auditoría transversal futura
+
+- Cambios administrativos sensibles.
+- Modificación de configuraciones de Empresa.
+- Gestión de usuarios y roles.
+- Activaciones y desactivaciones relevantes.
+- Accesos o acciones de SuperAdmin sobre Empresas.
+- Operaciones cuya trazabilidad no quede suficientemente representada por los registros del dominio.
+
+## Relación con otras decisiones
+
+La auditoría futura deberá respetar:
+
+- seguridad multiempresa;
+- reglas críticas ejecutadas en servidor;
+- inmutabilidad de operaciones históricas;
+- Identity para identificar al usuario autenticado;
+- principio de evitar sobrearquitectura antes de validar una necesidad real.
