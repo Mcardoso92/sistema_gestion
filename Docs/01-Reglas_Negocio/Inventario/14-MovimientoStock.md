@@ -1,343 +1,629 @@
 # Módulo Movimiento de Stock
 
+Última actualización: 01/09/2026
+
 ---
 
 # 1. Objetivo
 
-El módulo Movimiento de Stock registra todos los cambios producidos sobre el inventario de los productos dentro de Veltika.
+El módulo Movimiento de Stock registra la trazabilidad de las variaciones de inventario de los productos dentro de Veltika.
 
-Cada modificación del stock genera un movimiento que indica el motivo, el usuario responsable, la fecha y la cantidad afectada.
+Cada movimiento conserva:
 
-Este módulo constituye la base de la trazabilidad del inventario y garantiza que toda variación del stock pueda ser auditada.
+- Producto afectado.
+- Empresa.
+- Tipo de movimiento.
+- Cantidad involucrada.
+- Stock anterior.
+- Stock posterior.
+- Fecha.
+- Usuario responsable.
+- Motivo cuando corresponde.
+- Referencias comerciales cuando existen.
 
----
-
-# 2. Alcance
-
-El módulo permite registrar y consultar todos los movimientos de stock generados automáticamente por el sistema.
-
-Los movimientos nunca serán creados manualmente, salvo aquellos correspondientes a Ajustes de Stock autorizados.
-
-Cada movimiento representa una modificación puntual sobre un producto.
-
----
-
-# 3. Actores
-
-- Super Administrador
-- Administrador de Empresa
-- Responsable de Depósito
-- Auditor
+Su función es permitir reconstruir cómo evolucionó el stock de un producto y qué operación originó cada cambio.
 
 ---
 
-# 4. Permisos
+# 2. Alcance actual
 
-## Super Administrador
+Actualmente el módulo permite:
 
-✅ Consultar todos los movimientos
+- Consultar el stock actual de productos.
+- Buscar productos por nombre o código de barras.
+- Filtrar productos por estado de stock.
+- Consultar historial de movimientos.
+- Filtrar movimientos por producto.
+- Filtrar movimientos por tipo.
+- Filtrar movimientos por fechas.
+- Filtrar por empresa para `SuperAdmin`.
+- Consultar el detalle de un movimiento.
+- Registrar ajustes manuales de entrada y salida para `AdminEmpresa`.
+- Registrar movimientos automáticos provenientes de operaciones comerciales.
 
-✅ Registrar ajustes de stock
-
-## Administrador de Empresa
-
-✅ Consultar movimientos
-
-✅ Registrar ajustes de stock
-
-## Responsable de Depósito
-
-✅ Consultar movimientos
-
-✅ Registrar ajustes (según permisos)
-
-## Auditor
-
-✅ Consultar movimientos
-
-❌ No puede modificar información
+Los movimientos no poseen CRUD de edición ni eliminación.
 
 ---
 
-# 5. Funcionalidades
+# 3. Acceso y permisos
 
-Actualmente
+El controller utiliza:
 
-- Registrar movimientos automáticos
-- Consultar movimientos
-- Buscar movimientos
-- Filtrar movimientos
+```text
+[Authorize(Roles = "SuperAdmin,AdminEmpresa")]
+```
 
-Versiones futuras
+## SuperAdmin
 
-- Ajustes masivos
-- Transferencias entre sucursales
-- Inventarios físicos
-- Conteos cíclicos
-- Alertas automáticas
-- Exportación
-- Dashboard de movimientos
+Puede:
 
----
+- Consultar stock de todas las empresas.
+- Filtrar por empresa.
+- Consultar historiales y detalles.
 
-# 6. Campos
+Actualmente la acción `Ajustar` está restringida específicamente a:
 
-| Campo | Descripción |
-|---------|-------------|
-| Id | Identificador único |
-| EmpresaId | Empresa propietaria |
-| SucursalId | Sucursal afectada |
-| ProductoId | Producto involucrado |
-| UsuarioId | Usuario responsable |
-| TipoMovimiento | Motivo del movimiento |
-| Cantidad | Cantidad modificada |
-| StockAnterior | Stock antes del movimiento |
-| StockNuevo | Stock luego del movimiento |
-| FechaMovimiento | Fecha y hora |
-| Observaciones | Motivo adicional |
+```text
+[Authorize(Roles = "AdminEmpresa")]
+```
 
-Campos futuros
+Por lo tanto, `SuperAdmin` no ingresa por esa acción mientras conserve esa autorización específica.
 
-- CompraId
-- VentaId
-- AjusteId
-- TransferenciaId
-- Lote
-- NumeroSerie
-- DocumentoReferencia
-- IPUsuario
+## AdminEmpresa
+
+Puede:
+
+- Consultar stock de su empresa.
+- Consultar historial de su empresa.
+- Consultar detalles de movimientos de su empresa.
+- Registrar ajustes manuales de entrada y salida sobre productos activos de su empresa.
+
+Actualmente no existen permisos propios para roles `Responsable de Depósito` o `Auditor`.
 
 ---
 
-# 7. Validaciones
+# 4. Modelo actual
 
-- Debe existir un producto.
-- Debe existir un usuario.
-- La cantidad no puede ser cero.
-- El tipo de movimiento es obligatorio.
-- El stock resultante no podrá ser negativo (según configuración).
-- Todo movimiento debe tener un origen.
+La entidad `MovimientoStock` contiene:
 
----
+| Campo | Tipo | Regla |
+|---|---|---|
+| Id | int | Identificador único |
+| ProductoId | int | Producto afectado |
+| EmpresaId | int | Empresa propietaria |
+| Tipo | TipoMovimientoStock | Tipo/origen del movimiento |
+| Cantidad | int | Mayor o igual a 1 |
+| StockAnterior | int | No negativo |
+| StockPosterior | int | No negativo |
+| Motivo | string? | Opcional, máximo 250 caracteres |
+| Fecha | DateTime | Fecha y hora del movimiento |
+| UsuarioId | string | Usuario responsable |
+| VentaId | int? | Venta asociada cuando corresponde |
+| CompraId | int? | Compra asociada cuando corresponde |
+| ReintegroVentaId | int? | Reintegro de Venta asociado cuando corresponde |
+| DevolucionCompraId | int? | Devolución de Compra asociada cuando corresponde |
 
-# 8. Reglas de negocio
+Relaciones:
 
-- Todo cambio de stock genera un movimiento.
-- Los movimientos nunca podrán eliminarse.
-- Los movimientos nunca podrán modificarse.
-- El sistema registrará automáticamente la fecha y el usuario.
-- Todo movimiento deberá indicar su origen.
-- El historial de movimientos será permanente.
+- Producto.
+- Empresa.
+- Usuario.
+- Venta opcional.
+- Compra opcional.
+- ReintegroVenta opcional.
+- DevolucionCompra opcional.
 
----
-
-# 9. Casos de uso
-
-## Registrar movimiento por compra
-
-Al confirmar una compra, el sistema genera automáticamente un movimiento de ingreso.
-
-Resultado esperado:
-
-- Stock actualizado.
-- Movimiento registrado.
-
----
-
-## Registrar movimiento por venta
-
-Al confirmar una venta, el sistema genera automáticamente un movimiento de egreso.
-
-Resultado esperado:
-
-- Stock actualizado.
-- Movimiento registrado.
+Actualmente no existe `SucursalId`.
 
 ---
 
-## Registrar ajuste de stock
+# 5. Tipos de movimiento actuales
 
-Un usuario autorizado realiza una corrección del inventario.
+El enum `TipoMovimientoStock` contiene actualmente:
 
-Resultado esperado:
+```text
+StockInicial = 1
+AjusteEntrada = 2
+AjusteSalida = 3
+Venta = 4
+AnulacionVenta = 5
+Compra = 6
+AnulacionCompra = 7
+ReintegroVenta = 8
+AnulacionReintegroVenta = 9
+DevolucionCompra = 10
+AnulacionDevolucionCompra = 11
+```
 
-- Stock actualizado.
-- Motivo registrado.
-- Auditoría completa.
-
----
-
-## Consultar movimientos
-
-Permite visualizar el historial completo de movimientos de un producto.
-
----
-
-# 10. Casos de error
-
-- Producto inexistente.
-- Usuario inexistente.
-- Movimiento sin origen.
-- Stock insuficiente.
-- Usuario sin permisos.
-- Tipo de movimiento inválido.
+Estos valores representan los tipos de movimiento reconocidos actualmente por el sistema.
 
 ---
 
-# 11. Flujo funcional
+# 6. Stock inicial
 
-1. Se produce una operación (compra, venta o ajuste).
-2. El sistema identifica el producto afectado.
-3. Obtiene el stock actual.
-4. Calcula el nuevo stock.
-5. Actualiza el inventario.
-6. Registra el movimiento.
-7. Guarda el historial para futuras auditorías.
+Al crear productos mediante los flujos que admiten stock inicial, el sistema puede registrar un movimiento de tipo:
 
----
+```text
+StockInicial
+```
 
-# 12. Integraciones
+El objetivo es evitar que una existencia inicial aparezca en inventario sin trazabilidad.
 
-Este módulo se relaciona con:
-
-- Producto
-- Stock
-- Compra
-- Venta
-- Ajuste de Stock
-- Sucursal
-- Auditoría
-- Reportes
+La cantidad, stock anterior y stock posterior deben reflejar el estado real del producto en ese momento.
 
 ---
 
-# 13. Mejoras futuras
+# 7. Movimientos por Venta
 
-- Inventarios físicos.
-- Conteos cíclicos.
-- Transferencias.
-- Lotes.
-- Series.
-- Alertas de stock.
-- Dashboard.
-- IA para predicción de faltantes.
+Al confirmar una Venta:
 
----
+```text
+StockPosterior = StockAnterior - CantidadVendida
+```
 
-# 14. Roadmap
+Se genera un movimiento:
 
-Versión 1.0
+```text
+Tipo = Venta
+```
 
-- Movimientos automáticos
-- Consulta
-- Historial
+La Venta valida previamente que exista stock suficiente, por lo que el resultado no debe quedar negativo.
 
-Versión 2.0
+Cuando una Venta se anula y cumple sus reglas:
 
-- Ajustes
-- Inventarios
-- Transferencias
+```text
+StockPosterior = StockAnterior + CantidadVendida
+```
 
-Versión 3.0
+Se genera:
 
-- IA
-- Predicción de stock
-- Automatización
-- Dashboard
+```text
+Tipo = AnulacionVenta
+```
 
 ---
 
-# 15. Decisiones de Arquitectura
+# 8. Movimientos por Compra
 
-## El stock nunca se modifica directamente
+Al confirmar una Compra:
 
-El inventario de un producto únicamente podrá modificarse mediante un Movimiento de Stock.
+```text
+StockPosterior = StockAnterior + CantidadComprada
+```
 
-No existirá una funcionalidad que permita editar manualmente el valor del stock.
+Se genera:
 
----
+```text
+Tipo = Compra
+```
 
-## Origen obligatorio
+Cuando una Compra se anula:
 
-Todo movimiento deberá indicar el motivo que lo generó.
+```text
+StockPosterior = StockAnterior - CantidadComprada
+```
 
-Los tipos iniciales serán:
+Se genera:
 
-- Compra
-- Venta
-- Ajuste
-- Devolución de Cliente
-- Devolución a Proveedor
-- Transferencia entre sucursales (futuro)
+```text
+Tipo = AnulacionCompra
+```
 
-No se permitirán movimientos sin un origen definido.
-
----
-
-## Historial inmutable
-
-Una vez registrado un movimiento, no podrá modificarse ni eliminarse.
-
-Esto garantiza la trazabilidad completa del inventario.
+La anulación sólo puede realizarse si existe stock suficiente para retirar esas unidades.
 
 ---
 
-## Ajustes de stock
+# 9. Movimientos por reintegro de Venta
 
-Los ajustes representan una excepción.
+El sistema contempla tipos específicos para las variaciones producidas por reintegros:
 
-Solo podrán realizarlos usuarios autorizados.
+```text
+ReintegroVenta
+AnulacionReintegroVenta
+```
 
-Será obligatorio registrar un motivo.
+`MovimientoStock` puede conservar la referencia:
+
+```text
+ReintegroVentaId
+```
+
+Esto permite distinguir estos movimientos de una anulación completa de Venta.
+
+---
+
+# 10. Movimientos por devolución de Compra
+
+El sistema contempla:
+
+```text
+DevolucionCompra
+AnulacionDevolucionCompra
+```
+
+`MovimientoStock` puede conservar:
+
+```text
+DevolucionCompraId
+```
+
+La lógica comercial específica se encuentra en el módulo DevolucionCompra.
+
+---
+
+# 11. Ajustes manuales de stock
+
+Los ajustes manuales ya están implementados.
+
+Actualmente sólo `AdminEmpresa` puede utilizar las acciones `Ajustar`.
+
+El producto debe:
+
+- Existir.
+- Pertenecer a la empresa del usuario.
+- Estar activo.
+
+Existen dos tipos de ajuste:
+
+```text
+Entrada -> AjusteEntrada
+Salida -> AjusteSalida
+```
+
+Cada ajuste registra un `Motivo`.
+
+---
+
+# 12. Ajuste de entrada
+
+Para una entrada manual:
+
+```text
+StockPosterior = StockAnterior + Cantidad
+```
+
+El movimiento generado utiliza:
+
+```text
+Tipo = AjusteEntrada
+```
+
+La cantidad debe ser válida según el ViewModel.
+
+---
+
+# 13. Ajuste de salida
+
+Para una salida manual:
+
+```text
+StockPosterior = StockAnterior - Cantidad
+```
+
+Antes de aplicarla se valida:
+
+```text
+Cantidad <= StockAnterior
+```
+
+Si la cantidad solicitada supera el stock disponible, el ajuste se rechaza.
+
+El movimiento utiliza:
+
+```text
+Tipo = AjusteSalida
+```
+
+---
+
+# 14. Motivo de ajuste
+
+En ajustes manuales el motivo se obtiene del ViewModel y se almacena en:
+
+```text
+MovimientoStock.Motivo
+```
+
+El modelo permite hasta 250 caracteres.
+
+Los movimientos automáticos pueden no utilizar un motivo textual porque su origen se expresa mediante `Tipo` y, cuando corresponde, mediante una referencia comercial.
+
+---
+
+# 15. Stock no negativo
+
+El modelo valida:
+
+```text
+StockAnterior >= 0
+StockPosterior >= 0
+```
+
+Además, los flujos de salida revisados actualmente evitan stock negativo:
+
+- Venta valida disponibilidad.
+- Anulación de Compra valida disponibilidad.
+- AjusteSalida valida disponibilidad.
+
+Por lo tanto, el comportamiento operativo actual trabaja sin stock negativo.
+
+---
+
+# 16. Consulta de stock actual
+
+`MovimientoStockController.Index` utiliza los Productos como fuente del stock actual.
+
+Permite buscar por:
+
+- Nombre.
+- Código de barras.
+
+Y clasifica el stock en:
+
+```text
+SinStock: Stock == 0
+StockBajo: Stock > 0 y Stock <= PuntoReposicion
+ConStock: Stock > PuntoReposicion
+```
+
+La página utiliza 20 productos por página.
+
+La vista también informa si el Producto se encuentra activo.
+
+---
+
+# 17. Historial de movimientos
+
+La acción `Historial` permite filtrar por:
+
+- Empresa para `SuperAdmin`.
+- Producto.
+- Tipo de movimiento.
+- Fecha desde.
+- Fecha hasta.
+
+Los resultados se ordenan por:
+
+```text
+Fecha descendente
+Id descendente
+```
+
+Actualmente no se aplica paginación al listado del historial dentro del controller revisado.
+
+---
+
+# 18. Información presentada en historial
+
+Cada fila expone actualmente:
+
+- Id.
+- Fecha.
+- Producto.
+- Código de barras.
+- Empresa.
+- Usuario.
+- Tipo.
+- Cantidad.
+- Stock anterior.
+- Stock posterior.
+- Motivo.
+- VentaId.
+
+Aunque el modelo también posee `CompraId`, `ReintegroVentaId` y `DevolucionCompraId`, el ViewModel actual del historial revisado no proyecta todas esas referencias.
+
+---
+
+# 19. Consulta de detalle
+
+La acción `Details` permite consultar un MovimientoStock puntual.
+
+Para usuarios que no son `SuperAdmin`, la consulta queda limitada mediante:
+
+```text
+MovimientoStock.EmpresaId == usuario.EmpresaId
+```
+
+Se cargan actualmente:
+
+- Empresa.
+- Producto.
+- Usuario.
+- Venta.
+
+El modelo posee otras referencias opcionales aunque la acción actual no incluya explícitamente todas sus navegaciones.
+
+---
+
+# 20. Seguridad multiempresa
+
+`MovimientoStock` posee `EmpresaId` propio.
+
+Para usuarios `AdminEmpresa`:
+
+- Stock actual se filtra por su empresa.
+- Historial se filtra por su empresa.
+- Detalles se filtran por su empresa.
+- Ajustes sólo permiten productos de su empresa.
+
+Para `SuperAdmin` puede utilizarse filtro de empresa en las vistas correspondientes.
+
+Nunca debe aceptarse un `ProductoId` de otro tenant para generar un movimiento.
+
+---
+
+# 21. Inmutabilidad
+
+Actualmente no existen acciones de:
+
+- Editar MovimientoStock.
+- Eliminar MovimientoStock.
+
+Una operación incorrecta debe resolverse mediante una operación compensatoria o la anulación funcional del documento comercial que originó el movimiento.
 
 Ejemplos:
 
-- Rotura
-- Robo
-- Error de carga
-- Diferencia de inventario
-- Producto vencido
+```text
+Venta -> AnulacionVenta
+Compra -> AnulacionCompra
+ReintegroVenta -> AnulacionReintegroVenta
+DevolucionCompra -> AnulacionDevolucionCompra
+```
 
-Todos los ajustes quedarán registrados para auditoría.
-
----
-
-## Stock negativo
-
-En la versión 1.0, Veltika no permitirá stock negativo.
-
-Una venta no podrá confirmarse si la cantidad solicitada supera el stock disponible.
-
-En futuras versiones esta regla podrá configurarse según las necesidades de cada empresa.
+Esto conserva ambos eventos en lugar de modificar el historial anterior.
 
 ---
 
-## Trazabilidad completa
+# 22. Relación entre stock actual e historial
 
-Será posible reconstruir el historial completo de un producto consultando sus movimientos.
+El stock operativo actual se almacena en:
 
-Ejemplo:
+```text
+Producto.Stock
+```
 
-01/06 Compra +20
+`MovimientoStock` constituye el historial de cambios.
 
-03/06 Venta -2
+Por lo tanto:
 
-05/06 Venta -5
+- `Producto.Stock` permite conocer rápidamente la existencia actual.
+- `MovimientoStock` permite reconstruir cómo se llegó a ese valor.
 
-08/06 Ajuste -1
-
-Stock actual: 12
+Los movimientos no sustituyen el campo de stock actual del Producto.
 
 ---
 
-## Auditoría
+# 23. Atomicidad
 
-Cada movimiento almacenará:
+Los flujos críticos revisados coordinan el cambio de `Producto.Stock` y la creación del MovimientoStock dentro de una transacción.
 
-- Usuario que realizó la operación.
-- Fecha y hora.
-- Tipo de movimiento.
-- Stock anterior.
-- Stock nuevo.
+Esto aplica, entre otros, a:
 
-De esta forma será posible conocer exactamente cuándo, cómo y por qué cambió el inventario de cualquier producto.
+- Ajustes manuales.
+- Ventas.
+- Compras.
+- Anulaciones comerciales.
+
+La intención es impedir que quede actualizado el stock sin su movimiento correspondiente o viceversa.
+
+---
+
+# 24. Reglas de negocio
+
+1. Cada MovimientoStock pertenece a una Empresa.
+2. Cada movimiento corresponde a un Producto.
+3. Actualmente no existe relación con Sucursal.
+4. La cantidad registrada es positiva.
+5. La dirección del cambio se interpreta mediante `Tipo` y los stocks anterior/posterior.
+6. StockAnterior y StockPosterior no pueden ser negativos según el modelo.
+7. El movimiento registra fecha y usuario.
+8. El motivo es opcional a nivel de entidad, pero forma parte del flujo de ajustes manuales.
+9. Las operaciones automáticas generan movimientos específicos según su origen.
+10. Existen tipos compensatorios para anulaciones.
+11. Los movimientos no poseen edición administrativa.
+12. Los movimientos no poseen eliminación administrativa.
+13. El stock actual reside en `Producto.Stock`.
+14. El historial reside en `MovimientoStock`.
+15. Los ajustes de salida no pueden superar el stock disponible.
+16. Sólo `AdminEmpresa` puede ejecutar actualmente `Ajustar`.
+17. La seguridad multiempresa debe validarse antes de cualquier cambio de stock.
+18. Las referencias comerciales son opcionales y dependen del tipo de movimiento.
+
+---
+
+# 25. Casos de error relevantes
+
+- Producto inexistente.
+- Producto perteneciente a otra empresa.
+- Producto inactivo al intentar ajustarlo.
+- Usuario no autenticado.
+- Usuario sin rol permitido.
+- Cantidad de ajuste inválida.
+- Tipo de ajuste inválido.
+- Salida superior al stock disponible.
+- Movimiento inexistente al consultar detalle.
+- Error de persistencia durante el ajuste.
+
+Ante un error de persistencia en un ajuste, la transacción se revierte y se restaura el valor de stock manejado por el contexto.
+
+---
+
+# 26. Integraciones actuales
+
+MovimientoStock se integra actualmente con:
+
+- Producto.
+- Empresa.
+- Usuario.
+- Venta.
+- Compra.
+- ReintegroVenta.
+- DevolucionCompra.
+- Ajustes manuales de stock.
+- Reportes y consultas de inventario.
+
+Actualmente no existe integración con Sucursal.
+
+---
+
+# 27. Capacidades no implementadas
+
+Actualmente no forman parte de `MovimientoStock`:
+
+- Transferencia de stock entre sucursales.
+- Transferencia entre depósitos.
+- Lotes.
+- Números de serie.
+- Documento de referencia genérico.
+- IP del usuario.
+- Inventario físico formal como documento.
+- Conteos cíclicos formales.
+- Ajustes masivos.
+- Exportación específica del historial desde este controller.
+- Dashboard específico de movimientos.
+
+---
+
+# 28. Evolución futura
+
+La evolución del inventario se administra mediante Roadmap y GitHub Issues.
+
+Entre las capacidades previstas o posibles se encuentran:
+
+- Inventario físico.
+- Conteos cíclicos.
+- Transferencias entre futuras sucursales/depósitos.
+- Lotes y vencimientos.
+- Series.
+- Stock reservado.
+- Reposición sugerida.
+- Alertas y análisis de rotación.
+- Mejoras de exportación y auditoría.
+
+No se mantiene un roadmap de versiones independiente dentro de este documento.
+
+---
+
+# 29. Estado
+
+✅ Stock actual por Producto implementado.
+
+✅ Historial de MovimientoStock implementado.
+
+✅ Stock inicial implementado como tipo de movimiento.
+
+✅ Ajustes manuales de entrada/salida implementados.
+
+✅ Movimientos de Venta y anulación implementados.
+
+✅ Movimientos de Compra y anulación implementados.
+
+✅ Tipos para reintegros y anulaciones implementados.
+
+✅ Tipos para devoluciones de Compra y anulaciones implementados.
+
+✅ Seguridad multiempresa implementada.
+
+✅ Filtros de historial implementados.
+
+🚧 Transferencias, inventarios físicos, conteos cíclicos, lotes y series reservados para evolución futura.
