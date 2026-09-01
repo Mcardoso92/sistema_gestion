@@ -1,283 +1,529 @@
 # Módulo Caja
 
+Última actualización: 01/09/2026
+
 ---
 
 # 1. Objetivo
 
-El módulo Caja permite administrar el estado de las cajas operativas de cada sucursal dentro de Veltika.
+El módulo Caja permite administrar las cuentas o destinos financieros operativos de cada Empresa dentro de Veltika.
 
-Cada caja representa el punto donde se registran los ingresos y egresos de dinero generados por las operaciones comerciales.
+Una Caja puede representar actualmente:
 
-Su función principal es controlar el saldo actual de la caja y su disponibilidad para operar.
+- Efectivo.
+- Banco.
+- Billetera virtual.
+- Otro destino financiero.
 
----
-
-# 2. Alcance
-
-El módulo permite abrir, consultar y cerrar cajas de una sucursal.
-
-No registra directamente ingresos o egresos de dinero, ya que dichas operaciones son administradas por el módulo MovimientoCaja.
+Las Cajas se relacionan con medios de pago, movimientos financieros, transferencias y, cuando corresponde, turnos operativos de efectivo.
 
 ---
 
-# 3. Actores
+# 2. Concepto actual
 
-- Super Administrador
-- Administrador de Empresa
-- Cajero
+En la implementación vigente, `Caja` no representa una apertura/cierre de jornada.
 
----
+La entidad `Caja` representa el recurso financiero permanente.
 
-# 4. Permisos
+La apertura y cierre operativo se modela mediante:
 
-## Super Administrador
+```text
+TurnoCaja
+```
 
-✅ Consultar todas las cajas.
+Por lo tanto:
 
-✅ Abrir cajas.
+```text
+Caja      -> recurso financiero
+TurnoCaja -> período operativo de apertura/cierre
+```
 
-✅ Cerrar cajas.
-
-## Administrador de Empresa
-
-✅ Consultar cajas.
-
-✅ Abrir cajas.
-
-✅ Cerrar cajas.
-
-## Cajero
-
-✅ Consultar su caja.
-
-✅ Abrir su caja (según configuración).
-
-✅ Cerrar su caja.
-
-❌ No puede modificar saldos manualmente.
+Esta separación es fundamental para comprender el diseño actual.
 
 ---
 
-# 5. Funcionalidades
+# 3. Modelo Caja
 
-Actualmente
-
-- Apertura de caja.
-- Consulta de caja.
-- Cierre de caja.
-- Consulta del saldo actual.
-
-Versiones futuras
-
-- Arqueo de caja.
-- Turnos de caja.
-- Múltiples cajas por sucursal.
-- Caja compartida.
-- Conciliación bancaria.
-- Integración con terminales POS.
-
----
-
-# 6. Campos
+La entidad contiene actualmente:
 
 | Campo | Descripción |
-|---------|-------------|
-| Id | Identificador único |
+|---|---|
+| Id | Identificador |
+| Nombre | Nombre de la Caja |
+| Tipo | Tipo financiero |
+| PermiteTurnos | Indica si utiliza TurnoCaja |
+| FondoFijo | Fondo fijo configurado |
+| Estado | Activa/Inactiva |
+| FechaAlta | Fecha de creación |
 | EmpresaId | Empresa propietaria |
-| SucursalId | Sucursal |
-| UsuarioId | Cajero responsable |
-| FechaApertura | Fecha y hora de apertura |
-| FechaCierre | Fecha y hora de cierre |
-| SaldoInicial | Monto inicial |
-| SaldoActual | Monto actualizado automáticamente |
-| Estado | Abierta o Cerrada |
 
-Campos futuros
+Relaciones actuales:
 
-- SaldoEsperado
-- Diferencia
-- Observaciones
-- Turno
-- CajaFisica
-- CajaVirtual
+- Empresa.
+- CajaMediosPago.
+- TurnosCaja.
+- MovimientosCaja.
+- TransferenciasOrigen.
+- TransferenciasDestino.
 
----
+No posee actualmente:
 
-# 7. Validaciones
-
-- Debe existir una empresa.
-- Debe existir una sucursal.
-- Debe existir un usuario.
-- El saldo inicial no podrá ser negativo.
-- No podrá abrirse una nueva caja si ya existe una caja abierta para el mismo usuario (según configuración).
-- Solo podrá cerrarse una caja abierta.
+- SucursalId.
+- UsuarioId responsable permanente.
+- FechaApertura.
+- FechaCierre.
+- SaldoInicial.
+- SaldoActual persistido.
 
 ---
 
-# 8. Reglas de negocio
+# 4. Tipos de Caja
 
-- Cada caja pertenece a una empresa.
-- Cada caja pertenece a una sucursal.
-- Cada caja tendrá un usuario responsable.
-- El saldo actual será actualizado automáticamente mediante los movimientos de caja.
-- No podrá modificarse manualmente el saldo actual.
-- Una caja cerrada no permitirá registrar nuevos movimientos.
+`TipoCaja` contiene actualmente:
 
----
+```text
+Efectivo = 1
+Banco = 2
+BilleteraVirtual = 3
+Otro = 4
+```
 
-# 9. Casos de uso
-
-## Abrir caja
-
-El usuario inicia una nueva jornada de trabajo.
-
-Resultado esperado:
-
-- Caja abierta.
-- Saldo inicial registrado.
+El tipo permite distinguir el comportamiento financiero esperado de la Caja.
 
 ---
 
-## Consultar caja
+# 5. Acceso y permisos
 
-Permite visualizar el estado actual de la caja.
+`CajaController` posee actualmente:
 
----
+```text
+[Authorize(Roles = "SuperAdmin,AdminEmpresa")]
+```
 
-## Cerrar caja
+## SuperAdmin
 
-Finaliza la jornada operativa.
+Puede administrar Cajas de múltiples Empresas y utilizar el filtro de Empresa.
 
-Resultado esperado:
+## AdminEmpresa
 
-- Caja cerrada.
-- Se registra la fecha y hora de cierre.
+Puede administrar únicamente las Cajas de su propia Empresa.
 
----
+Actualmente `Cajero` no posee acceso directo al CRUD administrativo de Caja.
 
-# 10. Casos de error
-
-- Usuario inexistente.
-- Caja ya abierta.
-- Caja inexistente.
-- Caja ya cerrada.
-- Usuario sin permisos.
+La operación cotidiana de apertura/cierre corresponde al módulo `TurnoCaja`, con sus propias reglas de autorización.
 
 ---
 
-# 11. Flujo funcional
+# 6. Listado
 
-1. El usuario inicia su jornada.
-2. Abre la caja.
-3. Ingresa el saldo inicial.
-4. El sistema habilita las operaciones.
-5. Durante el día se generan movimientos.
-6. El saldo se actualiza automáticamente.
-7. El usuario realiza el cierre de caja.
-8. La caja queda bloqueada para nuevas operaciones.
+El listado permite actualmente:
 
----
+- Buscar por Nombre.
+- Filtrar por Estado.
+- Filtrar por Tipo.
+- Filtrar por Empresa para SuperAdmin.
+- Visualizar saldo actual calculado.
+- Visualizar FondoFijo.
+- Visualizar si permite turnos.
 
-# 12. Integraciones
+Por defecto se muestran Cajas activas.
 
-Este módulo se relaciona con:
+La paginación utiliza:
 
-- Empresa
-- Sucursal
-- Usuario
-- MovimientoCaja
-- Venta
-- Reportes
-- Auditoría
+```text
+20 registros por página
+```
 
 ---
 
-# 13. Mejoras futuras
+# 7. Saldo actual
 
-- Arqueo automático.
-- Múltiples turnos.
-- Conciliación bancaria.
-- Integración con POS.
-- Integración con Mercado Pago.
-- Caja virtual.
-- Caja bancaria.
+`Caja` no almacena un campo persistido `SaldoActual`.
 
----
+El saldo se calcula a partir de `MovimientoCaja`:
 
-# 14. Roadmap
+```text
+Ingresos - Egresos
+```
 
-Versión 1.0
+Conceptualmente:
 
-- Apertura.
-- Consulta.
-- Cierre.
+```text
+SaldoActual = SUM(Ingresos) - SUM(Egresos)
+```
 
-Versión 2.0
-
-- Arqueo.
-- Turnos.
-- Conciliación.
-
-Versión 3.0
-
-- POS.
-- Mercado Pago.
-- Automatización.
+Por lo tanto, los movimientos financieros constituyen la base para justificar el saldo mostrado.
 
 ---
 
-# 15. Decisiones de Arquitectura
+# 8. Creación
 
-## Caja como estado
+Para crear una Caja se define:
 
-La caja representa únicamente el estado actual de una jornada operativa.
+- Nombre.
+- Empresa.
+- Tipo.
+- Si permite turnos.
+- Fondo fijo.
+- Medios de pago asociados.
 
-No almacena ingresos ni egresos.
+Al crearse:
 
----
+```text
+Estado = true
+FechaAlta = DateTime.Now
+```
 
-## Saldo automático
-
-El saldo actual será calculado automáticamente mediante los movimientos registrados.
-
-No podrá modificarse manualmente.
-
----
-
-## Una caja abierta
-
-En la versión 1.0, un usuario solo podrá tener una caja abierta al mismo tiempo.
+La creación de Caja y sus relaciones con medios de pago se realiza dentro de una transacción.
 
 ---
 
-## Caja cerrada
+# 9. Nombre
 
-Una vez cerrada la caja:
+El Nombre es obligatorio y admite hasta 100 caracteres.
 
-- No podrán registrarse nuevas ventas.
-- No podrán registrarse nuevos movimientos.
-- No podrá reabrirse.
+Antes de persistirse se normaliza mediante `Trim()`.
 
-Si el usuario necesita continuar operando, deberá abrir una nueva caja.
+No puede existir otra Caja activa con el mismo Nombre dentro de la misma Empresa.
 
----
-
-## Apertura obligatoria
-
-Para registrar ventas será obligatorio contar con una caja abierta.
-
-Si no existe una caja abierta, el sistema impedirá continuar con la operación.
+La unicidad se aplica al contexto de Empresa y a Cajas activas.
 
 ---
 
-## Historial permanente
+# 10. Empresa
 
-Las cajas nunca serán eliminadas.
+Toda Caja pertenece a una Empresa mediante:
 
-Cada apertura y cierre formará parte del historial operativo de la empresa.
+```text
+EmpresaId
+```
+
+La Empresa debe existir y estar activa.
+
+Para `AdminEmpresa`, el EmpresaId se determina desde el usuario autenticado y no se confía en un valor enviado por el navegador.
+
+`SuperAdmin` puede seleccionar la Empresa en los flujos administrativos correspondientes.
 
 ---
 
-## Integridad financiera
+# 11. Fondo fijo
 
-El saldo de una caja siempre deberá poder justificarse mediante la suma de todos los movimientos registrados durante su período de apertura.
+`Caja` posee:
+
+```text
+FondoFijo
+```
+
+con validación:
+
+```text
+FondoFijo >= 0
+```
+
+El fondo fijo se utiliza especialmente en la operatoria de TurnoCaja.
+
+Cuando se abre un turno, el modelo `TurnoCaja` conserva el valor aplicado en:
+
+```text
+FondoFijoAplicado
+```
+
+Esto permite mantener el valor histórico utilizado durante ese turno aunque posteriormente cambie la configuración de la Caja.
+
+---
+
+# 12. Turnos
+
+Los turnos ya están implementados.
+
+Una Caja puede indicar:
+
+```text
+PermiteTurnos = true/false
+```
+
+Actualmente sólo una Caja de tipo:
+
+```text
+Efectivo
+```
+
+puede permitir turnos.
+
+Intentar configurar turnos en una Caja Banco, BilleteraVirtual u Otro es inválido.
+
+---
+
+# 13. TurnoCaja
+
+`TurnoCaja` registra actualmente:
+
+- EmpresaId.
+- CajaId.
+- UsuarioAperturaId.
+- FechaApertura.
+- Estado.
+- FechaCierre.
+- UsuarioCierreId.
+- CierreForzado.
+- MotivoCierreForzado.
+- FondoFijoAplicado.
+- EfectivoEsperado.
+- EfectivoContado.
+- Diferencia.
+- ImporteRendido.
+
+Por lo tanto, apertura, cierre, arqueo y diferencia pertenecen conceptualmente a `TurnoCaja`, no a la entidad `Caja`.
+
+---
+
+# 14. Arqueo y diferencia
+
+El arqueo ya está implementado mediante los campos de TurnoCaja:
+
+```text
+EfectivoEsperado
+EfectivoContado
+Diferencia
+ImporteRendido
+```
+
+Por lo tanto, no debe documentarse como una funcionalidad futura genérica.
+
+La diferencia permite conservar el resultado entre el efectivo esperado por el sistema y el efectivo contado al cierre.
+
+---
+
+# 15. Medios de pago
+
+Una Caja puede asociarse a uno o más MediosPago mediante:
+
+```text
+CajaMedioPago
+```
+
+Los medios seleccionados deben:
+
+- Existir.
+- Estar activos.
+- Pertenecer a la misma Empresa.
+- Ser compatibles con el Tipo de Caja.
+
+La compatibilidad se valida mediante:
+
+```text
+CompatibilidadFinanciera.EsCompatible(...)
+```
+
+Los IDs enviados desde el formulario son validados en servidor.
+
+---
+
+# 16. Estado y baja lógica
+
+Caja posee:
+
+```text
+Estado
+```
+
+El flujo administrativo utiliza activación/inactivación en lugar de eliminar físicamente el historial financiero.
+
+Una Caja inactiva permanece registrada y conserva sus relaciones históricas.
+
+La reactivación debe respetar nuevamente las reglas de negocio y consistencia aplicables.
+
+---
+
+# 17. Edición
+
+La edición permite administrar la configuración de la Caja sin alterar su historial financiero previo.
+
+Entre los datos configurables se encuentran:
+
+- Nombre.
+- Tipo.
+- PermiteTurnos.
+- FondoFijo.
+- Estado.
+- Medios de pago asociados.
+
+La edición debe mantener la seguridad multiempresa y la compatibilidad financiera de los medios seleccionados.
+
+---
+
+# 18. Movimientos financieros
+
+Los ingresos y egresos no se almacenan como campos acumulados dentro de Caja.
+
+Se registran mediante:
+
+```text
+MovimientoCaja
+```
+
+Cada movimiento referencia la Caja correspondiente.
+
+El saldo actual se obtiene a partir de esos movimientos.
+
+Las reglas detalladas se documentan en `18-MovimientoCaja.md`.
+
+---
+
+# 19. Transferencias
+
+Caja ya posee integración con transferencias financieras mediante:
+
+```text
+TransferenciasOrigen
+TransferenciasDestino
+```
+
+Una transferencia permite mover fondos entre Cajas según las reglas del módulo `TransferenciaCaja`.
+
+Por lo tanto, la transferencia entre destinos financieros no debe considerarse una capacidad inexistente del modelo actual.
+
+---
+
+# 20. Seguridad multiempresa
+
+Las consultas administrativas se filtran por:
+
+```text
+Caja.EmpresaId
+```
+
+Para usuarios que no son SuperAdmin:
+
+```text
+Caja.EmpresaId == usuario.EmpresaId
+```
+
+Además:
+
+- Los medios de pago deben pertenecer a la misma Empresa.
+- Las Empresas seleccionadas deben existir y estar activas.
+- No debe confiarse en IDs enviados por el cliente para autorizar acceso entre tenants.
+
+---
+
+# 21. Sucursales
+
+Actualmente Caja no posee:
+
+```text
+SucursalId
+```
+
+No existe una relación productiva Caja → Sucursal.
+
+El alcance actual es por Empresa.
+
+Cuando se implemente multi-sucursal deberá definirse expresamente si una Caja pertenece a una Sucursal, si puede ser compartida o si determinadas Cajas financieras operan a nivel Empresa.
+
+No debe asumirse ese diseño antes de implementar el módulo Sucursal.
+
+---
+
+# 22. Reglas de negocio
+
+1. Caja representa un recurso financiero permanente, no una jornada de apertura/cierre.
+2. Toda Caja pertenece a una Empresa.
+3. Actualmente no pertenece a una Sucursal.
+4. El Nombre es obligatorio y admite hasta 100 caracteres.
+5. No puede existir otra Caja activa con el mismo Nombre dentro de la Empresa.
+6. Los tipos actuales son Efectivo, Banco, BilleteraVirtual y Otro.
+7. FondoFijo no puede ser negativo.
+8. Sólo las Cajas Efectivo pueden permitir Turnos.
+9. La apertura/cierre operativo se administra mediante TurnoCaja.
+10. El arqueo y la diferencia están implementados en TurnoCaja.
+11. Caja no almacena SaldoActual persistido.
+12. El saldo se calcula mediante MovimientoCaja.
+13. Los medios de pago asociados deben pertenecer a la misma Empresa.
+14. Los medios de pago deben ser compatibles con el TipoCaja.
+15. Caja utiliza Estado para activación/inactivación.
+16. El historial financiero no debe eliminarse al inactivar una Caja.
+17. SuperAdmin puede administrar múltiples Empresas.
+18. AdminEmpresa sólo administra Cajas de su Empresa.
+19. Cajero no posee actualmente acceso al CRUD administrativo de Caja.
+20. Las transferencias entre Cajas ya forman parte del modelo actual.
+
+---
+
+# 23. Casos de error relevantes
+
+- Usuario no autenticado.
+- Usuario sin rol autorizado.
+- Empresa inexistente o inactiva.
+- Intento de acceso a Caja de otra Empresa.
+- Nombre duplicado dentro de la Empresa.
+- TipoCaja inválido.
+- Fondo fijo negativo.
+- Intentar habilitar turnos en una Caja que no sea Efectivo.
+- Medio de pago inexistente.
+- Medio de pago inactivo.
+- Medio de pago de otra Empresa.
+- Medio de pago incompatible con el TipoCaja.
+
+---
+
+# 24. Integraciones actuales
+
+Caja se integra actualmente con:
+
+- Empresa.
+- MedioPago.
+- CajaMedioPago.
+- TurnoCaja.
+- MovimientoCaja.
+- TransferenciaCaja.
+- Cobros de Venta.
+- Pagos a Proveedor.
+- Reintegros y otros movimientos financieros según su flujo.
+
+Actualmente no se integra con Sucursal.
+
+---
+
+# 25. Capacidades no implementadas o pendientes de evolución
+
+Entre las capacidades que todavía requieren evolución se encuentran:
+
+- Sucursales.
+- Caja por Sucursal.
+- Conciliación bancaria formal.
+- Conciliación automática con proveedores de pago.
+- Integraciones directas con terminales físicas POS.
+- Integración financiera automática con Mercado Pago.
+- Políticas más granulares por empleado.
+- Indicadores históricos avanzados de diferencias de Caja.
+
+---
+
+# 26. Estado actual
+
+✅ CRUD administrativo de Cajas implementado.
+
+✅ Tipos Efectivo/Banco/BilleteraVirtual/Otro implementados.
+
+✅ Fondo fijo implementado.
+
+✅ Asociación Caja ↔ MedioPago implementada.
+
+✅ Compatibilidad financiera implementada.
+
+✅ Turnos de Caja implementados.
+
+✅ Apertura y cierre mediante TurnoCaja implementados.
+
+✅ Arqueo, efectivo esperado/contado y diferencia implementados.
+
+✅ Movimientos de Caja implementados.
+
+✅ Saldo calculado desde movimientos implementado.
+
+✅ Transferencias entre Cajas implementadas.
+
+✅ Seguridad multiempresa implementada.
+
+🚧 Sucursales, conciliación bancaria e integraciones financieras externas quedan para evolución futura.
