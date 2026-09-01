@@ -1,148 +1,379 @@
-# Reglas de Negocio --- Stock
+# Reglas Generales de Negocio — Inventario y Stock
 
-**Proyecto:** Veltika\
-**Sprint:** 3.0\
-**Issue:** #10 --- Stock\
-**Estado:** Reglas aprobadas para diseño e implementación
+**Proyecto:** Veltika  
+**Última actualización:** 01/09/2026  
+**Estado:** Alineado con la implementación actual
 
-## A. Stock actual y producto
+---
 
-1.  `Producto.Stock` sigue siendo el valor oficial del stock actual.
-2.  Ninguna operación normal puede modificar `Producto.Stock` sin
-    generar un `MovimientoStock`.
-3.  El stock nunca puede quedar negativo.
-4.  `PuntoReposicion` se mantiene como concepto de stock mínimo.
-5.  Stock `<= PuntoReposicion` se considera stock bajo.
-6.  Stock `0` se considera sin stock.
-7.  Un producto puede crearse con stock inicial `0` o mayor.
-8.  Si el producto se crea con stock inicial mayor a `0`, Veltika genera
-    automáticamente un `MovimientoStock` de tipo `StockInicial`.
+# 1. Propósito
 
-> Se mantiene la experiencia actual de `Producto.Create`: el usuario
-> puede indicar el stock inicial al crear el producto. La trazabilidad
-> se incorpora internamente mediante `MovimientoStock`.
+Este documento resume las reglas generales del dominio de Inventario y Stock de Veltika.
 
-## B. Ajustes manuales
+No reemplaza la documentación específica de:
 
-9.  Se permiten ajustes manuales de stock únicamente al `AdminEmpresa`.
-10. Existen dos ajustes explícitos: **Entrada** y **Salida**.
-11. El usuario ingresa una `Cantidad`; nunca escribe directamente el
-    nuevo stock.
-12. La cantidad del ajuste debe ser mayor que `0`.
-13. En una salida manual se valida que exista stock suficiente.
-14. Todo ajuste manual exige ingresar un motivo.
-15. El motivo tiene una longitud máxima de 250 caracteres.
-16. Antes de confirmar el ajuste se muestra el stock actual y el stock
-    resultante.
-17. Una vez confirmado, un movimiento no puede editarse.
-18. Un movimiento no puede eliminarse.
+- `14-MovimientoStock.md`
+- `15-Stock.md`
+- `16-AjusteStock.md`
 
-## C. Historial
+Cuando exista una regla más detallada en esos documentos, debe considerarse esa documentación junto con el código actual como fuente de verdad.
 
-19. Cada movimiento guarda `StockAnterior`.
-20. Cada movimiento guarda `StockPosterior`.
-21. Cada movimiento guarda la cantidad involucrada.
-22. Cada movimiento guarda fecha y hora.
-23. Cada movimiento guarda el usuario que lo realizó.
-24. Cada movimiento guarda la empresa.
-25. Los movimientos se muestran del más reciente al más antiguo.
-26. Se puede consultar el historial por producto.
-27. Existe una pantalla general de movimientos de stock.
-28. Se puede filtrar el historial por producto.
-29. Se puede filtrar por tipo de movimiento.
-30. Se puede filtrar por fecha desde/hasta.
-31. `SuperAdmin` puede filtrar por empresa.
-32. `AdminEmpresa` solamente puede consultar movimientos de su empresa.
+---
 
-## D. Integración con Ventas
+# 2. Principio general
 
-33. Confirmar una venta genera un movimiento `Venta` por cada producto.
-34. La venta descuenta `Producto.Stock`.
-35. No se permite vender una cantidad superior al stock disponible.
-36. Stock y venta se actualizan dentro de la misma transacción.
-37. Si falla cualquier movimiento de stock, falla toda la venta.
-38. Anular una venta genera movimientos `AnulacionVenta`.
-39. La anulación devuelve exactamente las cantidades vendidas.
-40. El movimiento de anulación referencia a la venta original.
-41. Nunca se borra el movimiento original de venta cuando la venta se
-    anula.
+La arquitectura actual utiliza:
 
-## E. Integración futura con Compras --- Issue #15
+```text
+Producto.Stock -> existencia actual
+MovimientoStock -> historial de variaciones
+```
 
-42. Confirmar una compra aumentará automáticamente el stock.
-43. Se generará un movimiento `Compra` por cada producto.
-44. Cada movimiento quedará relacionado con `CompraId`.
-45. Anular una compra generará el movimiento inverso.
-46. No se podrá anular una compra si quitar ese stock provoca stock
-    negativo.
+No existe una entidad `Stock` independiente.
 
-> Las reglas de precios, costo promedio, costo histórico y actualización
-> del precio de venta se definirán en el Issue #15 --- Compras.
+No existe una entidad `AjusteStock` independiente.
 
-## F. Productos inactivos
+Actualmente tampoco existe stock por Sucursal o Depósito.
 
-47. Un producto inactivo conserva su stock histórico.
-48. Se puede consultar su historial aunque esté inactivo.
-49. Un producto inactivo no puede recibir ajustes manuales.
-50. Un producto con stock mayor a `0` puede desactivarse.
-51. Reactivar un producto conserva el stock que tenía.
+---
 
-## G. Seguridad
+# 3. Stock actual
 
-52. `AdminEmpresa` solamente manipula stock de su empresa.
-53. Nunca se acepta como confiable un `EmpresaId` enviado por el
-    navegador.
-54. Se valida `Producto.EmpresaId` en servidor antes de ajustar stock.
-55. El acceso directo mediante URL a movimientos o productos de otra
-    empresa debe ser rechazado.
-56. `SuperAdmin` puede consultar stock de todas las empresas.
-57. Para operar sobre stock de una empresa, `SuperAdmin` debe hacerlo en
-    el contexto explícito de esa empresa.
+1. `Producto.Stock` es el valor operativo actual del inventario.
+2. El stock utiliza tipo `int`.
+3. El stock no puede ser negativo.
+4. Un Producto puede crearse con stock inicial cero o mayor.
+5. Si existe stock inicial mayor a cero, debe generarse trazabilidad mediante `MovimientoStock.StockInicial`.
+6. Un Producto inactivo conserva el stock que tenía.
+7. Reactivar un Producto no reinicia su stock.
+8. El stock actual no se recalcula sumando todos los movimientos cada vez que se consulta.
+9. `MovimientoStock` explica cómo se llegó al valor almacenado en `Producto.Stock`.
 
-## H. Alertas y UX
+---
 
-58. El módulo Stock muestra todos los productos con su existencia.
-59. Se distingue visualmente entre `Con stock`, `Stock bajo` y
-    `Sin stock`.
-60. Existe filtro para productos con stock bajo.
-61. Existe filtro para productos sin stock.
-62. Existe búsqueda por nombre.
-63. Existe búsqueda por código de barras.
-64. `SuperAdmin` dispone de filtro por empresa.
-65. Desde el listado de Stock se puede acceder directamente a `Ajustar`.
-66. Desde el listado se puede acceder al historial del producto.
+# 4. Punto de reposición
 
-> Para V1, las alertas son indicadores visuales y filtros. Las
-> notificaciones automáticas quedan fuera de alcance.
+`Producto.PuntoReposicion` está implementado.
 
-## I. Integridad técnica
+La clasificación actual es:
 
-67. El ajuste vuelve a leer el stock desde base de datos antes de
-    confirmar.
-68. El servidor calcula `StockPosterior`; nunca se confía en un valor
-    calculado por el navegador.
-69. `EmpresaId`, `UsuarioId`, `Fecha`, `StockAnterior` y
-    `StockPosterior` son determinados por el servidor.
-70. La modificación del producto y la creación del movimiento ocurren
-    dentro de la misma transacción.
-71. Si falla el registro del movimiento, el stock no cambia.
-72. Los movimientos de stock no utilizan Soft Delete.
-73. Se crean índices adecuados para `ProductoId`, `EmpresaId`, `Fecha` y
-    referencias de origen como `VentaId`.
-74. El stock continúa siendo entero (`int`) para V1.
+```text
+SinStock  -> Stock == 0
+StockBajo -> Stock > 0 && Stock <= PuntoReposicion
+ConStock  -> Stock > PuntoReposicion
+```
 
-## Tipos de movimiento previstos
+Por lo tanto, el concepto de reposición mínima ya forma parte de la versión actual.
 
--   `StockInicial`
--   `AjusteEntrada`
--   `AjusteSalida`
--   `Venta`
--   `AnulacionVenta`
--   `Compra`
--   `AnulacionCompra`
+---
 
-## Principio general
+# 5. Trazabilidad
 
-`Producto.Stock` mantiene la existencia actual para consultas rápidas.
-`MovimientoStock` constituye el historial inmutable y trazable que
-explica cómo se llegó a esa existencia.
+Toda variación operativa de inventario debe generar un `MovimientoStock` asociado al mismo cambio de stock.
+
+Cada movimiento registra actualmente:
+
+- Producto.
+- Empresa.
+- Tipo.
+- Cantidad.
+- Stock anterior.
+- Stock posterior.
+- Fecha.
+- Usuario.
+- Motivo opcional.
+- Referencias comerciales opcionales según el origen.
+
+Los movimientos no poseen edición ni eliminación administrativa.
+
+Una corrección debe generar una operación compensatoria en lugar de alterar el historial anterior.
+
+---
+
+# 6. Tipos de movimiento actuales
+
+El enum vigente contiene:
+
+```text
+StockInicial
+AjusteEntrada
+AjusteSalida
+Venta
+AnulacionVenta
+Compra
+AnulacionCompra
+ReintegroVenta
+AnulacionReintegroVenta
+DevolucionCompra
+AnulacionDevolucionCompra
+```
+
+La lista debe mantenerse sincronizada con `TipoMovimientoStock`.
+
+---
+
+# 7. Ajustes manuales
+
+Actualmente los ajustes manuales están implementados.
+
+Reglas principales:
+
+1. Sólo `AdminEmpresa` puede utilizar actualmente `MovimientoStockController.Ajustar`.
+2. El Producto debe pertenecer a la empresa del usuario.
+3. El Producto debe estar activo.
+4. Existen dos tipos: Entrada y Salida.
+5. La cantidad debe ser mayor a cero.
+6. El usuario no ingresa el stock final; el servidor lo calcula.
+7. El motivo es obligatorio y admite hasta 250 caracteres.
+8. Una salida no puede superar el stock disponible.
+9. Cada ajuste genera un `MovimientoStock`.
+10. Stock y movimiento se persisten dentro de una misma transacción.
+
+---
+
+# 8. Integración con Ventas
+
+Al confirmar una Venta:
+
+```text
+Producto.Stock -= CantidadVendida
+```
+
+Reglas:
+
+1. No puede venderse una cantidad superior al stock disponible.
+2. Se genera un movimiento `Venta` por Producto afectado.
+3. El movimiento puede referenciar `VentaId`.
+4. Stock, Venta y movimientos se procesan dentro del flujo transaccional correspondiente.
+5. Anular una Venta restaura las cantidades vendidas.
+6. La restauración genera `AnulacionVenta`.
+7. El movimiento original no se elimina.
+
+---
+
+# 9. Integración con Compras
+
+Compras ya está implementado y no debe considerarse funcionalidad futura.
+
+Al confirmar una Compra:
+
+```text
+Producto.Stock += CantidadComprada
+```
+
+Reglas:
+
+1. Se genera un movimiento `Compra` por Producto afectado.
+2. El movimiento puede referenciar `CompraId`.
+3. La Compra actualiza además el costo del Producto según sus propias reglas.
+4. Anular una Compra intenta retirar las unidades previamente ingresadas.
+5. La anulación no puede provocar stock negativo.
+6. La anulación genera `AnulacionCompra`.
+7. Los movimientos originales permanecen en el historial.
+
+---
+
+# 10. Reintegros de Venta
+
+El inventario contempla actualmente:
+
+```text
+ReintegroVenta
+AnulacionReintegroVenta
+```
+
+`MovimientoStock` puede almacenar:
+
+```text
+ReintegroVentaId
+```
+
+Estos movimientos permiten registrar cambios parciales vinculados con reintegros sin confundirlos con la anulación total de una Venta.
+
+---
+
+# 11. Devoluciones de Compra
+
+El inventario contempla actualmente:
+
+```text
+DevolucionCompra
+AnulacionDevolucionCompra
+```
+
+`MovimientoStock` puede almacenar:
+
+```text
+DevolucionCompraId
+```
+
+Estos procesos poseen sus propias reglas comerciales y modifican el inventario mediante movimientos específicos.
+
+---
+
+# 12. Productos inactivos
+
+1. Un Producto inactivo conserva su stock.
+2. Conserva su historial de movimientos.
+3. Puede consultarse su información histórica.
+4. No puede recibir ajustes manuales mediante el flujo actual.
+5. Otros flujos operativos también deben respetar las restricciones de Producto activo que correspondan.
+
+---
+
+# 13. Seguridad multiempresa
+
+1. `Producto` pertenece a una Empresa mediante `EmpresaId`.
+2. `MovimientoStock` también almacena `EmpresaId`.
+3. `AdminEmpresa` sólo puede consultar y operar sobre inventario de su propia empresa.
+4. Nunca debe confiarse en un `EmpresaId` enviado por el navegador para autorizar un cambio de stock.
+5. El servidor debe validar la pertenencia del Producto antes de modificar inventario.
+6. El acceso directo mediante IDs de otra empresa debe rechazarse.
+7. `SuperAdmin` puede consultar stock de múltiples empresas mediante el contexto/filtro correspondiente.
+
+---
+
+# 14. Consulta y UX actual
+
+El módulo permite actualmente:
+
+- Listar productos con stock.
+- Buscar por nombre.
+- Buscar por código de barras.
+- Filtrar por estado de stock.
+- Filtrar por empresa para `SuperAdmin`.
+- Consultar PuntoReposicion.
+- Acceder al historial.
+- Filtrar historial por Producto.
+- Filtrar historial por tipo.
+- Filtrar historial por fecha desde/hasta.
+- Acceder al ajuste manual para `AdminEmpresa`.
+
+El listado principal utiliza paginación de 20 productos por página.
+
+El historial actual no posee paginación en el controller revisado.
+
+---
+
+# 15. Valorización
+
+La valorización de inventario ya está disponible mediante Reportes de Stock.
+
+Puede calcularse utilizando los datos actuales del Producto, por ejemplo:
+
+```text
+Valor a costo = Stock × PrecioCosto
+Valor a venta = Stock × PrecioVenta
+```
+
+No existe un campo persistido `ValorInventario` dentro de una entidad Stock.
+
+---
+
+# 16. Integridad técnica
+
+1. El servidor obtiene el stock actual desde base de datos antes de operaciones sensibles.
+2. El servidor calcula el stock posterior.
+3. No se confía en un stock final calculado por el navegador.
+4. Usuario, empresa y fecha se determinan en servidor según el flujo.
+5. Los cambios de inventario y sus movimientos deben mantenerse coordinados transaccionalmente.
+6. Los movimientos no utilizan Soft Delete como mecanismo administrativo.
+7. Los movimientos históricos no deben reescribirse para corregir una operación pasada.
+8. Las salidas deben validar disponibilidad suficiente antes de persistirse.
+
+---
+
+# 17. Lo que no existe actualmente
+
+No forman parte de la implementación vigente:
+
+- Stock por Sucursal.
+- Stock por Depósito.
+- Transferencias entre ubicaciones.
+- Stock reservado.
+- Stock comprometido.
+- Reservas de inventario.
+- Inventario físico formal.
+- Conteos cíclicos.
+- Lotes.
+- Vencimientos.
+- Números de serie.
+- Stock máximo.
+- Política configurable de stock negativo.
+- Ajustes masivos.
+- Aprobación de ajustes.
+- Evidencia fotográfica o adjuntos para ajustes.
+
+---
+
+# 18. Evolución futura
+
+La evolución del inventario debe gestionarse desde el Roadmap y GitHub Issues, evitando duplicar planes de versiones en este documento.
+
+Entre las capacidades previstas o posibles se encuentran:
+
+- Inventario físico.
+- Conteos cíclicos.
+- Sucursales y depósitos.
+- Existencias por ubicación.
+- Transferencias.
+- Reservas de stock.
+- Lotes y vencimientos.
+- Series.
+- Reposición sugerida.
+- Días de stock.
+- Rotación.
+- Productos sin movimiento.
+- Alertas avanzadas.
+- Permisos granulares.
+
+---
+
+# 19. Documentos relacionados
+
+Para detalle funcional consultar:
+
+```text
+14-MovimientoStock.md
+15-Stock.md
+16-AjusteStock.md
+```
+
+También deben considerarse las reglas específicas de:
+
+- Producto.
+- Venta.
+- Compra.
+- ReintegroVenta.
+- DevolucionCompra.
+- Reportes.
+
+---
+
+# 20. Estado actual
+
+✅ `Producto.Stock` como existencia actual.
+
+✅ `MovimientoStock` como trazabilidad histórica.
+
+✅ Punto de reposición.
+
+✅ Stock inicial trazable.
+
+✅ Ajustes manuales.
+
+✅ Integración con Venta y anulación.
+
+✅ Integración con Compra y anulación.
+
+✅ Integración con ReintegroVenta.
+
+✅ Integración con DevolucionCompra.
+
+✅ Seguridad multiempresa.
+
+✅ Consulta y filtros de inventario.
+
+✅ Valorización mediante Reportes.
+
+🚧 Inventario físico, ubicaciones múltiples, reservas y trazabilidad avanzada quedan para evolución futura.
