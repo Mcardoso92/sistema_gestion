@@ -1,327 +1,198 @@
 # Convenciones de Desarrollo - Veltika
 
-Versión: 1.0
+Versión: 2.0
 
-Última actualización: 22/07/2026
+Última actualización: 01/09/2026
 
----
+## 1. Objetivo
 
-# 1. Objetivo
+Este documento establece criterios comunes para mantener Veltika consistente, legible, seguro y mantenible.
 
-Este documento establece las convenciones de desarrollo utilizadas en Veltika.
+Las convenciones son una guía de diseño. No deben convertirse en reglas rígidas que obliguen a agregar capas o abstracciones sin una necesidad concreta.
 
-Su finalidad es mantener un código consistente, legible y fácil de mantener durante toda la vida del proyecto.
+## 2. Principios
 
-Todas las nuevas funcionalidades deberán respetar estas convenciones.
+Se prioriza:
 
----
+- simplicidad;
+- legibilidad;
+- mantenibilidad;
+- seguridad;
+- consistencia;
+- reutilización cuando aporta valor;
+- reglas de negocio claras;
+- evitar duplicación y deuda técnica;
+- evitar sobrearquitectura.
 
-# 2. Principios de desarrollo
+Primero se entiende la regla de negocio y después se elige la implementación.
 
-Durante el desarrollo del sistema se seguirán los siguientes principios.
+## 3. Arquitectura
 
-- Simplicidad.
-- Legibilidad.
-- Escalabilidad.
-- Reutilización.
-- Modularidad.
-- Mantenibilidad.
+Veltika utiliza ASP.NET Core MVC con Razor Views, Entity Framework Core, ASP.NET Core Identity y SQL Server.
 
-Siempre se priorizará un código fácil de entender antes que soluciones innecesariamente complejas.
+### Controllers
 
----
+Los Controllers coordinan la solicitud HTTP y pueden:
 
-# 3. Arquitectura
+- validar entrada y `ModelState`;
+- resolver usuario, rol y Empresa;
+- aplicar autorización sobre el recurso;
+- ejecutar consultas con Entity Framework Core;
+- coordinar transacciones;
+- invocar Services cuando una responsabilidad merece separación o reutilización;
+- construir ViewModels y devolver respuestas.
 
-Veltika utiliza una arquitectura basada en ASP.NET Core MVC.
+Los Controllers no deben confiar en valores del navegador para decisiones críticas y deben evitar acumular lógica compleja que pueda aislarse claramente.
 
-La responsabilidad de cada capa será la siguiente.
+### Services
 
-## Controllers
+Los Services se incorporan cuando aportan valor concreto, por ejemplo:
 
-- Reciben las solicitudes del usuario.
-- Validan el modelo.
-- Invocan los Services.
-- Devuelven la respuesta.
+- lógica reutilizada por varios Controllers;
+- cálculos o reglas con responsabilidad propia;
+- integraciones externas;
+- procesos complejos que conviene aislar;
+- operaciones que necesitan pruebas independientes.
 
-Los Controllers no deberán contener lógica de negocio.
+No es obligatorio crear un Service para cada entidad ni envolver Entity Framework Core en una capa genérica sin necesidad.
 
----
+### Entity Framework Core
 
-## Services
+EF Core es el mecanismo principal de acceso a datos. Se utiliza directamente cuando hacerlo mantiene el código claro y seguro.
 
-Los Services serán responsables de implementar las reglas de negocio del sistema.
+Las operaciones críticas que modifican múltiples registros relacionados deben ser atómicas y utilizar transacciones cuando corresponda.
 
-Toda lógica que no corresponda a la presentación deberá implementarse aquí.
+### Views
 
----
+Las Views presentan información y comportamiento de interfaz. Pueden contener lógica de presentación simple, pero no deben decidir reglas de negocio ni autorización sobre recursos.
 
-## Entity Framework
+Las validaciones del navegador mejoran UX, pero nunca reemplazan la validación server-side.
 
-Será el encargado del acceso a datos.
+## 4. Convenciones de nombres
 
-Las consultas y persistencia utilizarán Entity Framework Core.
+- Clases y métodos: `PascalCase`.
+- Variables locales y parámetros: `camelCase`.
+- Claves primarias: normalmente `Id`.
+- Claves foráneas: normalmente terminan en `Id`.
+- Entidades: nombres de dominio en singular.
 
----
+Los nombres deben describir intención de negocio y mantenerse consistentes con el vocabulario de Veltika.
 
-## Views
+## 5. Modelos y ViewModels
 
-Las Views únicamente mostrarán información al usuario.
+Los modelos de dominio representan información persistida y relaciones del negocio.
 
-No deberán contener lógica de negocio.
+Se utilizan Data Annotations y/o Fluent API según corresponda.
 
----
+Los ViewModels se utilizan cuando la entrada o salida de una pantalla no coincide limpiamente con una entidad, especialmente para:
 
-# 4. Convenciones de nombres
+- operaciones comerciales;
+- formularios con múltiples entidades;
+- búsquedas y resultados específicos;
+- reducir riesgo de overposting;
+- separar datos calculados o exclusivos de UI.
 
-## Clases
+No es necesario crear un ViewModel trivial cuando no aporta una separación real y el binding utilizado es explícito y seguro.
 
-Las clases utilizarán nombres en singular.
+## 6. Base de datos
 
-Ejemplos
+- Motor: SQL Server.
+- Persistencia: Entity Framework Core Code First.
+- Los cambios de esquema se versionan mediante migraciones.
+- Las migraciones ya aplicadas no deben reescribirse para alterar historia; los cambios nuevos deben realizarse con nuevas migraciones.
+- Las migraciones de producción se aplican mediante el proceso de deploy documentado.
 
-- Empresa
-- Producto
-- Venta
-- Cliente
+## 7. Validaciones y reglas críticas
 
----
+Las validaciones simples pueden declararse con Data Annotations.
 
-## Tablas
+Las reglas de negocio se validan en servidor. Entre ellas:
 
-Las tablas utilizarán nombres en plural.
+- pertenencia a Empresa;
+- existencia y estado del recurso;
+- stock disponible;
+- saldos de Caja;
+- asociaciones entre Caja y MedioPago;
+- turnos requeridos;
+- importes máximos;
+- precios, subtotales y totales;
+- duplicados y restricciones del dominio.
 
-Ejemplos
+Todo dato crítico recibido desde HTML, JavaScript, URL o formulario se considera entrada no confiable y debe verificarse nuevamente.
 
-- Empresas
-- Productos
-- Ventas
-- Clientes
+## 8. Seguridad multiempresa
 
----
+La seguridad multiempresa es transversal.
 
-## Propiedades
+- Los recursos deben validarse contra la Empresa permitida para el usuario.
+- Un `EmpresaId` recibido desde el cliente no constituye autorización.
+- `AdminEmpresa` opera dentro de su Empresa.
+- `SuperAdmin` sólo obtiene alcance global donde la operación lo permite expresamente.
+- Las consultas y escrituras deben evitar exposición cruzada entre Empresas.
 
-Las propiedades utilizarán PascalCase.
+## 9. Eliminación e historia
 
-Ejemplos
+El Soft Delete se utiliza en módulos administrativos cuando corresponde; no es una regla universal para todas las entidades.
 
-- Nombre
-- PrecioVenta
-- FechaAlta
+Los registros históricos/transaccionales deben preservar trazabilidad mediante estados, anulaciones, reversiones o movimientos compensatorios según el dominio.
 
----
+No se debe eliminar físicamente información histórica crítica para simular una corrección.
 
-## Métodos
+## 10. Transacciones y concurrencia
 
-Los métodos utilizarán PascalCase y comenzarán con un verbo.
+Una operación que deba persistirse como una unidad debe ser atómica.
 
-Ejemplos
+Las operaciones comerciales, de stock y de Caja que puedan competir por saldo, cantidad o estado deben revalidar dentro de la transacción. Cuando el caso lo requiere, Veltika utiliza `IsolationLevel.Serializable`.
 
-- CrearProducto()
-- ActualizarStock()
-- RegistrarVenta()
+No debe asumirse que una validación realizada antes de comenzar una operación crítica continúa siendo válida al momento de guardar.
 
----
+## 11. Trazabilidad
 
-## Variables locales
+Veltika conserva trazabilidad principalmente mediante los registros históricos del dominio: documentos comerciales, movimientos de stock, movimientos de Caja, turnos, devoluciones, reintegros y reversiones.
 
-Las variables utilizarán camelCase.
+No existe actualmente una infraestructura genérica de auditoría para todas las acciones. No debe documentarse una funcionalidad como existente hasta que esté implementada.
 
-Ejemplos
+## 12. Manejo de errores
 
-- producto
-- cantidad
-- precioFinal
+- No mostrar excepciones técnicas al usuario final.
+- Dar mensajes funcionales comprensibles.
+- Registrar información técnica suficiente para diagnóstico cuando corresponda.
+- No exponer secretos, cadenas de conexión ni credenciales.
+- Ante errores en operaciones atómicas, realizar rollback y no dejar estados parciales.
 
----
+## 13. Interfaz de usuario
 
-# 5. Modelos
+La aplicación debe mantener:
 
-Todos los modelos deberán cumplir las siguientes reglas.
+- identidad visual consistente;
+- navegación simple;
+- formularios y controles reutilizables;
+- mensajes claros;
+- diseño responsive;
+- separación entre la web pública y la aplicación autenticada mediante componentes/layouts apropiados.
 
-- Tendrán una clave primaria llamada Id.
-- Utilizarán Data Annotations para las validaciones simples.
-- Las relaciones se implementarán mediante propiedades de navegación.
-- Las claves foráneas finalizarán con Id.
+CSS y JavaScript compartidos deben organizarse por responsabilidad y evitar duplicación innecesaria.
 
-Ejemplo
+## 14. Git
 
-- EmpresaId
-- CategoriaId
-- UsuarioId
+Los cambios deben ser pequeños, comprensibles y con commits descriptivos.
 
----
+Las funcionalidades pueden trabajarse por issue/branch/PR según el flujo utilizado en ese momento. Antes de integrar cambios se deben ejecutar las pruebas correspondientes y revisar que la documentación afectada continúe siendo válida.
 
-# 6. Relaciones
+## 15. Documentación
 
-Las relaciones utilizarán Entity Framework Core.
+La documentación oficial se encuentra en `Docs/`:
 
-Ejemplo
+- `00-Proyecto`: arquitectura, roadmap, infraestructura, deploy y convenciones.
+- `01-Reglas_Negocio`: comportamiento funcional.
+- `02-Decisiones`: ADR.
 
-Empresa
+La documentación debe evolucionar con el código. Un documento obsoleto debe actualizarse, marcarse como histórico o eliminarse si no conserva valor documental.
 
-↓
+No todo cambio necesita un ADR. Los ADR se reservan para decisiones estructurales que futuros desarrolladores necesiten comprender.
 
-Productos
+## 16. Filosofía de evolución
 
-↓
+Veltika crece progresivamente. Una abstracción, integración o módulo nuevo debe incorporarse porque resuelve una necesidad concreta y no sólo porque podría resultar útil en el futuro.
 
-Ventas
-
-↓
-
-DetalleVenta
-
-Las relaciones se implementarán mediante propiedades virtuales cuando corresponda.
-
----
-
-# 7. Base de datos
-
-La base de datos utilizada será SQL Server.
-
-Las migraciones serán administradas mediante Entity Framework Core.
-
-Las migraciones generadas no deberán modificarse manualmente.
-
----
-
-# 8. Validaciones
-
-Las validaciones se dividirán en dos grupos.
-
-## Data Annotations
-
-Se utilizarán para:
-
-- Campos obligatorios.
-- Longitud máxima.
-- Rangos.
-- Formatos.
-
-## Services
-
-Se utilizarán para reglas de negocio.
-
-Ejemplos
-
-- Producto duplicado.
-- Stock insuficiente.
-- Cliente inexistente.
-- Caja cerrada.
-
----
-
-# 9. Eliminación de información
-
-Veltika utilizará eliminación lógica.
-
-Los registros no serán eliminados físicamente.
-
-Cada entidad que corresponda contará con un campo Estado.
-
-La información histórica deberá conservarse.
-
----
-
-# 10. Auditoría
-
-Toda operación importante será registrada automáticamente.
-
-Ejemplos
-
-- Altas.
-- Modificaciones.
-- Activaciones.
-- Desactivaciones.
-- Ventas.
-- Compras.
-- Ajustes.
-- Apertura y cierre de caja.
-
-Los registros de auditoría nunca podrán modificarse ni eliminarse.
-
----
-
-# 11. Multiempresa
-
-Toda la información pertenecerá a una Empresa.
-
-Ningún usuario podrá acceder a información perteneciente a otra empresa.
-
-La separación de datos forma parte de la arquitectura principal del sistema.
-
----
-
-# 12. Manejo de errores
-
-Los errores deberán gestionarse de forma clara y consistente.
-
-- Nunca mostrar mensajes técnicos al usuario.
-- Mostrar mensajes comprensibles.
-- Registrar errores críticos cuando corresponda.
-- Validar siempre antes de guardar información.
-
----
-
-# 13. Interfaz de usuario
-
-La interfaz deberá cumplir las siguientes reglas.
-
-- Diseño limpio.
-- Navegación simple.
-- Formularios consistentes.
-- Mensajes claros.
-- Diseño responsive.
-
-Toda la aplicación deberá mantener la misma identidad visual.
-
----
-
-# 14. Git
-
-Cada nueva funcionalidad deberá desarrollarse de forma independiente.
-
-Los commits deberán ser pequeños y descriptivos.
-
-Ejemplos
-
-- Agrega CRUD de Empresa
-- Implementa validaciones de Producto
-- Corrige filtro de Categorías
-
----
-
-# 15. Documentación
-
-Todo módulo nuevo deberá contar con documentación funcional antes de comenzar su desarrollo.
-
-La documentación oficial del proyecto se organizará de la siguiente manera.
-
-docs
-
-- Arquitectura General
-- Roadmap
-- Convenciones
-- Módulos
-
-La documentación deberá mantenerse actualizada junto con el código.
-
----
-
-# 16. Filosofía del proyecto
-
-Veltika se desarrolla siguiendo una filosofía de crecimiento progresivo.
-
-Cada módulo deberá implementarse completamente antes de comenzar el siguiente.
-
-Se priorizará siempre:
-
-- Calidad.
-- Simplicidad.
-- Escalabilidad.
-- Código limpio.
-- Facilidad de mantenimiento.
-
-El objetivo no es desarrollar el sistema más complejo, sino construir una plataforma sólida, profesional y preparada para evolucionar durante muchos años.
+Se prioriza una base sólida que pueda evolucionar sin introducir complejidad prematura.
