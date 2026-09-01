@@ -38,7 +38,7 @@ Docs/
 └── README.md
 ```
 
-> Las reglas de negocio fueron revisadas contra el estado real del código el 01/09/2026. La siguiente etapa de la auditoría documental es revisar los ADR y los archivos auxiliares que permanecen directamente dentro de `Docs/`.
+> La documentación fue auditada globalmente contra el estado del repositorio el 01/09/2026. Los documentos deben seguir revisándose cada vez que una modificación funcional o arquitectónica cambie el comportamiento que describen.
 
 ---
 
@@ -50,91 +50,43 @@ Contiene la documentación transversal del proyecto y del producto.
 
 `ArquitecturaGeneral.md`
 
-Describe:
-
-- Arquitectura MVC actual.
-- Stack tecnológico.
-- Arquitectura SaaS multiempresa.
-- Responsabilidades de Views, Controllers y Services.
-- Persistencia con Entity Framework Core.
-- Seguridad.
-- Inventario.
-- Caja.
-- Infraestructura productiva.
-- Principios de evolución arquitectónica.
+Describe la arquitectura MVC, stack tecnológico, SaaS multiempresa, responsabilidades, persistencia, seguridad, inventario, Caja, infraestructura productiva y principios de evolución arquitectónica.
 
 ## Convenciones
 
 `Convenciones.md`
 
-Define criterios comunes de desarrollo para mantener consistencia en el código.
+Define criterios comunes de desarrollo alineados con la arquitectura actual. Services y ViewModels se utilizan cuando aportan separación, seguridad o reutilización; no se fuerzan abstracciones sin necesidad.
 
 ## Roadmap
 
 `Roadmap.md`
 
-Resume:
-
-- Estado actual de Veltika.
-- Etapas completadas.
-- Camino hacia validación con usuarios reales.
-- Evolución post-MVP.
-- Evolución comercial del SaaS.
-
-El roadmap no reemplaza los GitHub Issues.
+Resume el estado actual, camino hacia validación con usuarios reales y evolución post-MVP/comercial. El Roadmap no reemplaza los GitHub Issues.
 
 ## Infraestructura
 
 `Infraestructura Veltika.md`
 
-Documenta el entorno productivo actual:
-
-- AWS.
-- EC2.
-- Windows Server.
-- IIS.
-- SQL Server Express.
-- Dominio.
-- Backups.
-- Recuperación.
-- Evolución futura de infraestructura.
+Documenta AWS, EC2, Windows Server, IIS, SQL Server Express, dominio, backups, recuperación y evolución futura.
 
 ## Configuración de producción
 
 `Configuracion de produccion.md`
 
-Documenta:
-
-- Configuración por ambiente.
-- Variables de entorno.
-- Manejo de secretos.
-- Reglas para despliegues productivos.
+Documenta configuración por ambiente, variables, secretos y reglas productivas.
 
 ## Guía de deploy
 
 `Guia de deploy Veltika.md`
 
-Describe el procedimiento operativo para publicar Veltika en producción, incluyendo:
-
-- Build y tests.
-- Publicación Release.
-- Migraciones idempotentes.
-- Empaquetado.
-- SHA256.
-- Backups.
-- Instalación.
-- Smoke tests.
-- Recuperación.
+Documenta build/tests, Release, migraciones idempotentes, empaquetado, SHA256, backups, instalación, smoke tests y recuperación.
 
 ---
 
 # 3. 01-Reglas_Negocio
 
-Contiene la especificación funcional de los módulos del sistema.
-
-Los documentos de esta carpeta explican **cómo debe comportarse Veltika desde el punto de vista del negocio**.
-
-La implementación debe respetar estas reglas, pero la documentación también debe mantenerse sincronizada cuando las reglas cambian.
+Contiene la especificación funcional de los módulos. Explica cómo debe comportarse Veltika desde el punto de vista del negocio y debe mantenerse sincronizada con la implementación.
 
 ## Core
 
@@ -143,7 +95,7 @@ La implementación debe respetar estas reglas, pero la documentación también d
 - `03-Producto.md`
 - `07-Sucursal.md`
 
-> `Sucursal` está documentada como concepto futuro. No se encuentra implementada actualmente en el MVP.
+> `Sucursal` está documentada como concepto futuro y no está implementada actualmente en el MVP.
 
 ## Comercial
 
@@ -159,8 +111,6 @@ La implementación debe respetar estas reglas, pero la documentación también d
 - `17-ReintegroProveedor.md`
 - `18-ReintegroVenta.md`
 
-Esta sección cubre tanto los comprobantes comerciales principales como sus operaciones financieras y de reversión relacionadas.
-
 ## Inventario
 
 - `14-MovimientoStock.md`
@@ -168,8 +118,6 @@ Esta sección cubre tanto los comprobantes comerciales principales como sus oper
 - `16-AjusteStock.md`
 - `17-ProductoImportacion.md`
 - `Reglas_Negocio_Stock_Veltika.md`
-
-Incluye reglas de stock, trazabilidad, ajustes e importación masiva inicial de Productos mediante Excel.
 
 ## Caja
 
@@ -180,15 +128,14 @@ Incluye reglas de stock, trazabilidad, ajustes e importación masiva inicial de 
 - `21-CategoriaGasto.md`
 - `22-TransferenciaCaja.md`
 
-Esta sección documenta la estructura de Cajas, movimientos financieros, turnos, medios de pago, clasificación de gastos y transferencias internas entre Cajas.
-
 ## Seguridad
 
 - `04-Usuario.md`
 - `05-Roles.md`
 - `06-Permisos.md`
+- `19-Auditoría.md`
 
-La autorización actual combina ASP.NET Core Identity, Roles y validaciones server-side de Empresa/recurso. El modelo de permisos granulares configurables todavía no está implementado.
+La autorización actual combina ASP.NET Core Identity, Roles y validaciones server-side de Empresa/recurso. Los permisos granulares configurables todavía no están implementados. `19-Auditoría.md` documenta el estado real de trazabilidad y deja explícito que actualmente no existe un módulo genérico de Auditoría.
 
 ## Configuración
 
@@ -201,42 +148,23 @@ Documenta la configuración actual de Empresa basada en `ConfiguracionEmpresa`.
 - `21-Reportes.md`
 - `22-Dashboard.md`
 
-Documenta los reportes operativos existentes, exportaciones Excel y el Dashboard descriptivo actual.
+Documenta los reportes operativos existentes, exportaciones Excel y Dashboard descriptivo actual.
 
 ---
 
-# 4. Estructura recomendada para reglas de negocio
+# 4. Criterios para reglas de negocio
 
-No todos los documentos necesitan exactamente la misma cantidad de secciones, pero deberían cubrir cuando corresponda:
+Según corresponda, los documentos deberían cubrir objetivo, alcance, actores, permisos, funcionalidades, datos, validaciones, reglas, casos de uso/error, flujo, integraciones, trazabilidad, seguridad multiempresa, mejoras futuras y ADR relacionados.
 
-- Objetivo.
-- Alcance.
-- Actores.
-- Permisos.
-- Funcionalidades.
-- Datos relevantes.
-- Validaciones.
-- Reglas de negocio.
-- Casos de uso.
-- Casos de error.
-- Flujo funcional.
-- Integraciones con otros módulos.
-- Trazabilidad.
-- Seguridad multiempresa.
-- Mejoras futuras.
-- Decisiones arquitectónicas relacionadas.
-
-No es necesario mantener un roadmap independiente dentro de cada documento si la evolución futura ya se gestiona mediante el Roadmap general y GitHub Issues.
+No es necesario duplicar un roadmap dentro de cada módulo si la evolución futura ya se gestiona mediante Roadmap e Issues.
 
 ---
 
 # 5. 02-Decisiones
 
-Esta carpeta contiene los **Architecture Decision Records (ADR)** de Veltika.
+Los Architecture Decision Records registran decisiones estructurales y el motivo por el cual fueron tomadas.
 
-Los ADR registran decisiones importantes y, principalmente, el motivo por el cual fueron tomadas.
-
-Actualmente existen:
+ADR vigentes:
 
 1. `ADR-001-Arquitectura-SaaS-Multiempresa.md`
 2. `ADR-002-Soft-Delete.md`
@@ -251,117 +179,65 @@ Actualmente existen:
 11. `ADR-011-AWS.md`
 12. `ADR-012-SQLServer.md`
 13. `ADR-013-CodeFirst.md`
-14. `ADR-014-MultiEmpresa.md`
-15. `ADR-015-SoftDelete.md`
 16. `ADR-016-Identity.md`
 
-Durante la revisión documental deberá evaluarse la duplicación conceptual entre algunos ADR, particularmente:
+ADR históricos/supersedidos conservados intencionalmente:
 
-- ADR-001 y ADR-014 sobre multiempresa.
-- ADR-002 y ADR-015 sobre Soft Delete.
-
-No deben eliminarse automáticamente: primero debe revisarse si representan decisiones distintas, una evolución de la decisión anterior o simplemente documentación duplicada.
+- `ADR-014-MultiEmpresa.md` → supersedido por ADR-001.
+- `ADR-015-SoftDelete.md` → supersedido por ADR-002.
 
 ---
 
 # 6. Cuándo crear un ADR
 
-Debe considerarse un ADR cuando una decisión:
+Debe considerarse cuando una decisión afecta múltiples módulos, define tecnología estructural, introduce una restricción importante o tiene alternativas razonables cuyo motivo de elección conviene preservar.
 
-- Afecta a múltiples módulos.
-- Cambia una regla arquitectónica importante.
-- Define una tecnología estructural.
-- Introduce una restricción que futuros desarrolladores deben conocer.
-- Tiene alternativas razonables y se necesita conservar por qué se eligió una.
+Ejemplos: estrategia multiempresa, Soft Delete, Identity, proveedor cloud, persistencia, transacciones, almacenamiento de archivos o separación pública/autenticada si se consolida como decisión arquitectónica estable.
 
-Ejemplos:
-
-- Estrategia multiempresa.
-- Soft Delete.
-- Autenticación con Identity.
-- Proveedor cloud.
-- Estrategia de persistencia.
-- Diseño de transacciones.
-- Almacenamiento de archivos.
-- Separación entre web pública y aplicación autenticada, si se considera una decisión arquitectónica estable.
-
-Un ADR no debe utilizarse para registrar pequeños cambios de implementación.
+Un ADR no debe registrar pequeños cambios de implementación.
 
 ---
 
 # 7. Fuentes de verdad
 
-La documentación se organiza según el tipo de información:
-
 ## Comportamiento actual
-
-Fuente principal:
 
 - Código en `main`.
 - Tests.
-- Base de reglas de negocio actualizada.
+- Reglas de negocio vigentes.
 
 ## Reglas de negocio
-
-Fuente principal:
 
 - `Docs/01-Reglas_Negocio/`.
 
 ## Decisiones arquitectónicas
 
-Fuente principal:
-
 - `Docs/02-Decisiones/`.
 
 ## Estado y dirección del producto
-
-Fuente principal:
 
 - `Roadmap.md`.
 - GitHub Issues.
 
 ## Infraestructura y operación
 
-Fuente principal:
-
 - `Infraestructura Veltika.md`.
 - `Configuracion de produccion.md`.
 - `Guia de deploy Veltika.md`.
 
-Cuando dos fuentes se contradigan, la discrepancia debe resolverse explícitamente; no se debe asumir automáticamente que el documento más antiguo sigue vigente.
+Cuando dos fuentes se contradigan, la discrepancia debe resolverse explícitamente.
 
 ---
 
 # 8. Filosofía de desarrollo
 
-Veltika se desarrolla siguiendo estos principios:
-
-- Código limpio y mantenible.
-- Seguridad primero.
-- Reglas de negocio antes que implementación.
-- Consistencia entre módulos.
-- Evitar duplicación.
-- Evitar deuda técnica innecesaria.
-- Refactorizar cuando exista una mejora clara.
-- Evitar sobrearquitectura.
-- Seguridad multiempresa como requisito transversal.
-- Evolución guiada por necesidades reales.
-- Documentación viva junto al código.
+Veltika se desarrolla priorizando código limpio, seguridad, reglas de negocio, consistencia, baja duplicación, deuda técnica controlada, refactorización con propósito, seguridad multiempresa, evolución guiada por necesidades reales y ausencia de sobrearquitectura.
 
 ---
 
 # 9. Criterio de finalización de un Issue
 
-Un Issue funcional se considera finalizado cuando, según corresponda:
-
-- La funcionalidad está implementada.
-- Se validaron sus reglas de negocio.
-- Se revisó seguridad y aislamiento multiempresa.
-- Se realizaron pruebas adecuadas.
-- Se revisaron errores y casos límite relevantes.
-- La experiencia de usuario es consistente con el resto del sistema.
-- La documentación afectada fue actualizada.
-- Las decisiones arquitectónicas relevantes fueron registradas.
+Según corresponda, un Issue funcional se considera finalizado cuando la funcionalidad está implementada, sus reglas y seguridad fueron validadas, existen pruebas adecuadas, se revisaron casos límite, la UX es consistente y la documentación afectada fue actualizada.
 
 No todos los cambios requieren un ADR, pero todo cambio que invalide documentación existente debe actualizarla.
 
@@ -371,36 +247,38 @@ No todos los cambios requieren un ADR, pero todo cambio que invalide documentaci
 
 Al 01/09/2026:
 
-✅ Arquitectura general actualizada.
+✅ Arquitectura general revisada.
 
-✅ Roadmap actualizado al estado real del proyecto.
+✅ Roadmap alineado con el estado real del proyecto.
 
-✅ Infraestructura productiva actualizada.
+✅ Infraestructura productiva y proceso de deploy documentados.
 
-✅ Guía de deploy disponible.
+✅ Reglas de negocio existentes revisadas contra el código.
 
-✅ Configuración de producción documentada.
+✅ Documentación funcional incorporada para los módulos recientes.
 
-✅ Reglas de negocio antiguas revisadas contra el código actual.
+✅ Índice funcional sincronizado.
 
-✅ Documentación funcional agregada para TurnoCaja, MedioPago, CategoriaGasto, TransferenciaCaja, CobroVenta, PagoProveedor, DevolucionCompra, ReintegroProveedor, ReintegroVenta y ProductoImportacion.
+✅ ADR revisados y actualizados.
 
-✅ Índice funcional sincronizado con la documentación vigente.
+✅ ADR duplicados consolidados como decisiones supersedidas.
 
-🚧 ADR pendientes de revisión para detectar duplicados, decisiones obsoletas y decisiones faltantes.
+✅ Copias antiguas de código eliminadas de `Docs/`.
 
-🚧 Existen archivos `.cs` auxiliares dentro de `Docs/` que deben compararse con el código actual y eliminarse si ya no cumplen una función documental.
+✅ Convenciones alineadas con la arquitectura actual.
+
+✅ Documento de Auditoría corregido para no presentar funcionalidades inexistentes como implementadas.
+
+**La auditoría documental global queda completada al 01/09/2026.**
+
+Esto no significa que la documentación quede congelada: debe actualizarse junto con cada cambio funcional, arquitectónico u operativo relevante.
 
 ---
 
 # 11. Criterio de mantenimiento
 
-La carpeta `Docs/` no debe convertirse en un archivo histórico de documentación obsoleta presentada como vigente.
+`Docs/` no debe convertirse en un archivo de documentación obsoleta presentada como vigente.
 
-Cuando un documento deje de representar el comportamiento real deberá:
-
-1. Actualizarse, si la regla sigue existiendo pero cambió.
-2. Marcarse explícitamente como histórico, si existe una razón para conservarlo.
-3. Eliminarse, si sólo representa una copia vieja sin valor documental.
+Cuando un documento deje de representar el comportamiento real deberá actualizarse, marcarse explícitamente como histórico o eliminarse si sólo representa una copia vieja sin valor documental.
 
 La documentación debe ayudar a entender Veltika tal como funciona hoy y por qué fue construido de esa manera.
