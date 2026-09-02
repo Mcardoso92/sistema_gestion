@@ -31,6 +31,7 @@
                             <label asp-for="CodigoBarra" class="form-label">Código de Barras</label>
                             <input asp-for="CodigoBarra" class="form-control" type="text" autocomplete="off" />
                             <span asp-validation-for="CodigoBarra" class="text-danger"></span>
+                            <div class="form-text">Opcional. Admite el código del fabricante o un código interno, incluso con letras.</div>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="CategoriaId" class="form-label">Categoría</label>
@@ -100,7 +101,7 @@
                 Código de barras
             </h6>
             <p class="text-muted" style="font-size: 13px;">
-                Ingrese el código de barras del producto cuando corresponda. Puede utilizarse para localizarlo rápidamente.
+                Puede ingresar el código del fabricante o un código interno. Se conserva como texto para admitir letras y ceros iniciales.
             </p>
         </div>
 
@@ -127,4 +128,5 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="~/js/producto-form.js" asp-append-version="true"></script>
 }

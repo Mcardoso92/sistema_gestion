@@ -338,6 +338,13 @@ namespace saas.Controllers
                 historialVM.ProductoActivo = producto.Estado;
             }
 
+            if (historialVM.FechaDesde.HasValue && historialVM.FechaHasta.HasValue && historialVM.FechaHasta.Value.Date < historialVM.FechaDesde.Value.Date)
+            {
+                ModelState.AddModelError(nameof(historialVM.FechaHasta), "La fecha Hasta no puede ser anterior a la fecha Desde.");
+                await CargarFiltrosHistorialAsync(historialVM, usuario, esSuperAdmin);
+                return View(historialVM);
+            }
+
             IQueryable<MovimientoStock> consulta = _context.MovimientosStock
                 .AsNoTracking()
                 .Include(m => m.Producto)
@@ -395,8 +402,15 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
-            IQueryable<Producto> productosConsulta = _context.Productos
-                .AsNoTracking();
+            await CargarFiltrosHistorialAsync(historialVM, usuario, esSuperAdmin);
+
+            return View(historialVM);
+        }
+
+        // Conserva productos y empresas disponibles cuando el rango de fechas no es válido.
+        private async Task CargarFiltrosHistorialAsync(StockHistorialVM historialVM, Usuario usuario, bool esSuperAdmin)
+        {
+            IQueryable<Producto> productosConsulta = _context.Productos.AsNoTracking();
 
             if (!esSuperAdmin)
             {
@@ -407,31 +421,22 @@ namespace saas.Controllers
                 productosConsulta = productosConsulta.Where(p => p.EmpresaId == historialVM.EmpresaId.Value);
             }
 
-            historialVM.Productos = await productosConsulta
-                .OrderBy(p => p.Nombre)
-                .Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = p.Nombre
-                })
-                .ToListAsync();
+            historialVM.Productos = await productosConsulta.OrderBy(p => p.Nombre).Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = p.Nombre
+            }).ToListAsync();
 
             if (esSuperAdmin)
             {
-                historialVM.Empresas = await _context.Empresas
-                    .AsNoTracking()
-                    .Where(e => e.Estado)
-                    .OrderBy(e => e.Nombre)
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.Id.ToString(),
-                        Text = e.Nombre
-                    })
-                    .ToListAsync();
+                historialVM.Empresas = await _context.Empresas.AsNoTracking().Where(e => e.Estado).OrderBy(e => e.Nombre).Select(e => new SelectListItem
+                {
+                    Value = e.Id.ToString(),
+                    Text = e.Nombre
+                }).ToListAsync();
             }
-
-            return View(historialVM);
         }
+
         // GET: MovimientoStock/Details/5
         public async Task<IActionResult> Details(int? id)
         {

@@ -22,7 +22,10 @@
         </div>
     </div>
 
-    <form asp-action="Create" method="post" id="compraForm">
+    <form asp-action="Create"
+          method="post"
+          id="compraForm"
+          data-categorias-producto-url="@Url.Action("ObtenerCategoriasProducto", "Compra")">
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
         <div class="card bg-white mb-4">
@@ -80,10 +83,18 @@
                     <p class="text-sm text-muted-custom mb-0">Ingresá cantidad, costo y, si corresponde, un nuevo precio de venta.</p>
                 </div>
 
-                <button type="button" id="agregarProductoBtn" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                    <span class="material-symbols-outlined icon-sm">add</span>
-                    Agregar producto
-                </button>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button type="button"
+                            id="nuevoProductoBtn"
+                            class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined icon-sm">inventory_2</span>
+                        Nuevo producto
+                    </button>
+                    <button type="button" id="agregarProductoBtn" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                        <span class="material-symbols-outlined icon-sm">add</span>
+                        Agregar producto
+                    </button>
+                </div>
             </div>
 
             <div class="table-responsive">
@@ -104,22 +115,37 @@
                         {
                             var detalle = Model.Detalles[i];
 
-                            <tr class="compra-detalle-row">
+                            <tr class="compra-detalle-row" data-producto-nuevo="@(detalle.EsProductoNuevo ? "true" : "false")">
                                 <td class="ps-4">
                                     <select name="Detalles[@i].ProductoId" class="form-select form-select-sm producto-select" data-field="ProductoId">
-                                        <option value="">Seleccione...</option>
-                                        @foreach (var producto in Model.Productos)
+                                        @if (detalle.EsProductoNuevo)
                                         {
-                                            if (producto.Value == detalle.ProductoId.ToString())
+                                            <option value="0" selected>@detalle.ProductoNuevoNombre (nuevo)</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="">Seleccione...</option>
+                                            @foreach (var producto in Model.Productos)
                                             {
-                                                <option value="@producto.Value" selected>@producto.Text</option>
-                                            }
-                                            else
-                                            {
-                                                <option value="@producto.Value">@producto.Text</option>
+                                                if (producto.Value == detalle.ProductoId.ToString())
+                                                {
+                                                    <option value="@producto.Value" selected>@producto.Text</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@producto.Value">@producto.Text</option>
+                                                }
                                             }
                                         }
                                     </select>
+                                    @if (detalle.EsProductoNuevo)
+                                    {
+                                        <input type="hidden" data-field="EsProductoNuevo" value="true" />
+                                        <input type="hidden" data-field="ProductoNuevoNombre" value="@detalle.ProductoNuevoNombre" />
+                                        <input type="hidden" data-field="ProductoNuevoCodigoBarra" value="@detalle.ProductoNuevoCodigoBarra" />
+                                        <input type="hidden" data-field="ProductoNuevoCategoriaId" value="@detalle.ProductoNuevoCategoriaId" />
+                                        <input type="hidden" data-field="ProductoNuevoPuntoReposicion" value="@detalle.ProductoNuevoPuntoReposicion" />
+                                    }
                                 </td>
 
                                 <td>
@@ -179,6 +205,44 @@
         </div>
     </form>
 </main>
+
+<div class="modal fade" id="nuevoProductoModal" tabindex="-1" aria-labelledby="nuevoProductoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="nuevoProductoForm">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="nuevoProductoModalLabel">Nuevo producto</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nuevoProductoNombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                        <input type="text" name="Nombre" id="nuevoProductoNombre" class="form-control" maxlength="100" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevoProductoCodigo" class="form-label">Código de barras</label>
+                        <input type="text" name="CodigoBarra" id="nuevoProductoCodigo" class="form-control" maxlength="100" autocomplete="off" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="nuevoProductoCategoria" class="form-label">Categoría <span class="text-danger">*</span></label>
+                        <select name="CategoriaId" id="nuevoProductoCategoria" class="form-select" required>
+                            <option value="">Seleccione...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="nuevoProductoReposicion" class="form-label">Punto de reposición</label>
+                        <input type="number" name="PuntoReposicion" id="nuevoProductoReposicion" class="form-control" min="0" value="0" required />
+                    </div>
+                    <p class="form-text mt-3 mb-0">El stock, el costo y el precio de venta se definirán en esta compra.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear y agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <template id="detalleCompraTemplate">
     <tr class="compra-detalle-row">

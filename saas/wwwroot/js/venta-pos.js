@@ -296,6 +296,15 @@
 
     function crearPago() {
 
+        if (carrito.length === 0) {
+            mostrarMensaje(
+                "Agregá al menos un producto antes de registrar un pago.",
+                "warning"
+            );
+            inputBuscarProducto.focus();
+            return;
+        }
+
         const saldoRestante =
             obtenerSaldoRestante();
 
@@ -962,11 +971,21 @@
             cantidadLineas === 0 || !stockValido;
     }
 
-    async function buscarProductos() {
+    async function buscarProductos(mostrarAdvertencia = false) {
         const termino = inputBuscarProducto.value.trim();
 
         if (!termino) {
             ocultarResultadosProductos();
+
+            // El aviso se muestra solo en búsquedas explícitas, no durante el autocompletado.
+            if (mostrarAdvertencia) {
+                mostrarMensaje(
+                    "Ingresá un producto para realizar la búsqueda.",
+                    "warning"
+                );
+                inputBuscarProducto.focus();
+            }
+
             return [];
         }
 
@@ -1481,10 +1500,9 @@
         );
     });
 
-    btnBuscarProducto.addEventListener(
-        "click",
-        buscarProductos
-    );
+    btnBuscarProducto.addEventListener("click", () => {
+        buscarProductos(true);
+    });
 
     inputBuscarProducto.addEventListener("input", () => {
         clearTimeout(temporizadorProductos);
@@ -1519,6 +1537,11 @@
         const termino = inputBuscarProducto.value.trim().toLowerCase();
 
         if (!termino) {
+            mostrarMensaje(
+                "Ingresá un producto para realizar la búsqueda.",
+                "warning"
+            );
+            inputBuscarProducto.focus();
             return;
         }
 
@@ -1572,27 +1595,32 @@
         quitarCliente
     );
 
+    // Descarta todos los datos temporales y deja el punto de venta listo para una nueva operación.
     btnCancelarVenta.addEventListener("click", () => {
-        if (carrito.length === 0) {
-            quitarCliente();
+        const tieneCliente = inputClienteId.value.trim() !== "";
+        const tienePagos = pagosContainer.querySelectorAll(".pago-item").length > 0;
+
+        if (carrito.length === 0 && !tieneCliente && !tienePagos) {
+            mostrarMensaje("No hay una venta en curso para cancelar.", "info");
             inputBuscarProducto.focus();
             return;
         }
 
-        const confirmar = window.confirm(
-            "¿Está seguro de que desea cancelar la venta actual?"
-        );
+        const confirmar = window.confirm("¿Está seguro de que desea cancelar la venta actual? Se descartarán los datos cargados.");
 
         if (!confirmar) {
             return;
         }
 
         carrito.splice(0, carrito.length);
+        pagosContainer.innerHTML = "";
         quitarCliente();
         ocultarResultadosProductos();
         ocultarResultadosClientes();
         renderizarCarrito();
         inputBuscarProducto.value = "";
+        inputBuscarCliente.value = "";
+        mostrarMensaje("La venta actual fue cancelada.", "success");
         inputBuscarProducto.focus();
     });
 
