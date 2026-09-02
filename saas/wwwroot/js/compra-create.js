@@ -6,6 +6,11 @@
     const emptyState = document.getElementById("compraEmptyState");
     const totalCompra = document.getElementById("totalCompra");
     const empresaSelect = document.getElementById("empresaSelect");
+    const nuevoProductoBtn = document.getElementById("nuevoProductoBtn");
+    const nuevoProductoModal = document.getElementById("nuevoProductoModal");
+    const nuevoProductoForm = document.getElementById("nuevoProductoForm");
+    const nuevoProductoCategoria = document.getElementById("nuevoProductoCategoria");
+    const categoriasProductoUrl = compraForm?.dataset.categoriasProductoUrl;
 
     if (!compraForm || !detalleBody || !detalleTemplate || !agregarProductoBtn) {
         return;
@@ -30,6 +35,36 @@
 
     const obtenerFilas = () =>
         Array.from(detalleBody.querySelectorAll(".compra-detalle-row"));
+
+    const cargarCategoriasProducto = async () => {
+        const empresaId = obtenerEmpresaId();
+        const url = new URL(categoriasProductoUrl, window.location.origin);
+
+        if (empresaId) {
+            url.searchParams.set("empresaId", empresaId);
+        }
+
+        try {
+            const response = await fetch(url, { headers: { Accept: "application/json" } });
+
+            if (!response.ok) {
+                throw new Error();
+            }
+
+            const categorias = await response.json();
+            nuevoProductoCategoria.replaceChildren(new Option("Seleccione...", ""));
+
+            categorias.forEach(categoria => {
+                nuevoProductoCategoria.add(new Option(categoria.nombre, categoria.id));
+            });
+
+            return true;
+        }
+        catch {
+            alert("No fue posible obtener las categorías disponibles.");
+            return false;
+        }
+    };
 
     const actualizarEstadoVacio = () => {
         const hayFilas = obtenerFilas().length > 0;
@@ -260,7 +295,7 @@
         });
     };
 
-    const agregarFila = () => {
+    const agregarFila = producto => {
         if (empresaSelect && !empresaSelect.value) {
             alert(
                 "Debe seleccionar una empresa antes de agregar productos."
@@ -276,12 +311,71 @@
 
         detalleBody.appendChild(fragment);
 
+        if (producto) {
+            const productoSelect = fila.querySelector(".producto-select");
+            const precioActualInput = fila.querySelector(".precio-actual-input");
+            productoSelect.replaceChildren(new Option(`${producto.nombre} (nuevo)`, "0", true, true));
+            precioActualInput.value = "0";
+            fila.dataset.productoNuevo = "true";
+
+            const camposOcultos = {
+                EsProductoNuevo: "true",
+                ProductoNuevoNombre: producto.nombre,
+                ProductoNuevoCodigoBarra: producto.codigoBarra,
+                ProductoNuevoCategoriaId: producto.categoriaId,
+                ProductoNuevoPuntoReposicion: producto.puntoReposicion
+            };
+
+            Object.entries(camposOcultos).forEach(([campo, valor]) => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.dataset.field = campo;
+                input.value = valor ?? "";
+                fila.appendChild(input);
+            });
+        }
+
         renumerarFilas();
         recalcularTotal();
         actualizarEstadoVacio();
     };
 
-    agregarProductoBtn.addEventListener("click", agregarFila);
+    agregarProductoBtn.addEventListener("click", () => agregarFila());
+
+    nuevoProductoBtn?.addEventListener("click", async () => {
+        const empresaId = obtenerEmpresaId();
+
+        if (empresaSelect && !empresaId) {
+            alert("Debe seleccionar una empresa antes de crear un producto.");
+            return;
+        }
+
+        if (!await cargarCategoriasProducto()) {
+            return;
+        }
+
+        nuevoProductoForm.reset();
+        bootstrap.Modal.getOrCreateInstance(nuevoProductoModal).show();
+    });
+
+    nuevoProductoForm?.addEventListener("submit", event => {
+        event.preventDefault();
+
+        if (!nuevoProductoForm.reportValidity()) {
+            return;
+        }
+
+        const datos = new FormData(nuevoProductoForm);
+
+        agregarFila({
+            nombre: datos.get("Nombre").trim(),
+            codigoBarra: datos.get("CodigoBarra").trim(),
+            categoriaId: datos.get("CategoriaId"),
+            puntoReposicion: datos.get("PuntoReposicion")
+        });
+
+        bootstrap.Modal.getInstance(nuevoProductoModal)?.hide();
+    });
 
     empresaSelect?.addEventListener("change", () => {
         if (obtenerFilas().length === 0) {
@@ -328,6 +422,17 @@
                 "Todas las líneas deben tener un producto seleccionado."
             );
 
+            return;
+        }
+
+        const nuevoProductoSinPrecioVenta = filas.some(fila =>
+            fila.dataset.productoNuevo === "true" &&
+            !fila.querySelector(".nuevo-precio-input")?.value
+        );
+
+        if (nuevoProductoSinPrecioVenta) {
+            event.preventDefault();
+            alert("Debe indicar el precio de venta de cada producto nuevo.");
             return;
         }
 
