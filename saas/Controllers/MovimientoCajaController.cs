@@ -54,6 +54,35 @@ namespace saas.Controllers
                     usuario,
                     "SuperAdmin");
 
+            if (!esSuperAdmin)
+            {
+                empresaId = null;
+            }
+
+            var vm = new MovimientoCajaIndexVM
+            {
+                CajaId = cajaId,
+                MedioPagoId = medioPagoId,
+                CategoriaGastoId = categoriaGastoId,
+                TurnoCajaId = turnoCajaId,
+                UsuarioId = usuarioId,
+                Tipo = tipo,
+                Direccion = direccion,
+                FechaDesde = fechaDesde,
+                FechaHasta = fechaHasta,
+                EmpresaId = empresaId
+            };
+
+            if (fechaDesde.HasValue && fechaHasta.HasValue && fechaHasta.Value.Date < fechaDesde.Value.Date)
+            {
+                ModelState.AddModelError(nameof(vm.FechaHasta), "La fecha Hasta no puede ser anterior a la fecha Desde.");
+                ViewBag.PaginaActual = 1;
+                ViewBag.TotalPaginas = 0;
+                ViewBag.TotalRegistros = 0;
+                await CargarOpcionesIndex(vm, esSuperAdmin, usuario.EmpresaId);
+                return View(vm);
+            }
+
             IQueryable<MovimientoCaja> consulta =
                 _context.MovimientosCaja
                     .AsNoTracking()
@@ -66,8 +95,6 @@ namespace saas.Controllers
             {
                 consulta = consulta.Where(m =>
                     m.EmpresaId == usuario.EmpresaId);
-
-                empresaId = null;
             }
             else if (empresaId.HasValue)
             {
@@ -192,25 +219,9 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
-            var vm = new MovimientoCajaIndexVM
-            {
-                Movimientos = movimientos,
-
-                CajaId = cajaId,
-                MedioPagoId = medioPagoId,
-                CategoriaGastoId = categoriaGastoId,
-                TurnoCajaId = turnoCajaId,
-                UsuarioId = usuarioId,
-                Tipo = tipo,
-                Direccion = direccion,
-                FechaDesde = fechaDesde,
-                FechaHasta = fechaHasta,
-                EmpresaId =
-                    esSuperAdmin ? empresaId : null,
-
-                TotalIngresos = totalIngresos,
-                TotalEgresos = totalEgresos
-            };
+            vm.Movimientos = movimientos;
+            vm.TotalIngresos = totalIngresos;
+            vm.TotalEgresos = totalEgresos;
 
             vm.NetoPeriodo =
                 vm.TotalIngresos -

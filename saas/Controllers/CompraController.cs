@@ -40,6 +40,21 @@ namespace saas.Controllers
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
+            if (!esSuperAdmin)
+            {
+                compraVM.EmpresaId = null;
+            }
+
+            if (compraVM.FechaDesde.HasValue && compraVM.FechaHasta.HasValue && compraVM.FechaHasta.Value.Date < compraVM.FechaDesde.Value.Date)
+            {
+                ModelState.AddModelError(nameof(compraVM.FechaHasta), "La fecha Hasta no puede ser anterior a la fecha Desde.");
+                await CargarFiltrosIndexAsync(compraVM, usuario, esSuperAdmin);
+                ViewBag.PaginaActual = 1;
+                ViewBag.TotalPaginas = 0;
+                ViewBag.TotalRegistros = 0;
+                return View(compraVM);
+            }
+
             IQueryable<Compra> consulta = _context.Compras
                 .AsNoTracking()
                 .Include(c => c.Empresa)
@@ -48,7 +63,6 @@ namespace saas.Controllers
             if (!esSuperAdmin)
             {
                 consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
-                compraVM.EmpresaId = null;
             }
             else if (compraVM.EmpresaId.HasValue)
             {
@@ -140,46 +154,41 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
-            if (esSuperAdmin)
-            {
-                compraVM.Empresas = await _context.Empresas
-                    .AsNoTracking()
-                    .Where(e => e.Estado)
-                    .OrderBy(e => e.Nombre)
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.Id.ToString(),
-                        Text = e.Nombre
-                    })
-                    .ToListAsync();
-            }
-
-            IQueryable<Proveedor> proveedoresConsulta = _context.Proveedores
-                .AsNoTracking()
-                .Where(p => p.Estado);
-
-            if (!esSuperAdmin)
-            {
-                proveedoresConsulta = proveedoresConsulta.Where(p =>
-                    p.EmpresaId == usuario.EmpresaId);
-            }
-            else if (compraVM.EmpresaId.HasValue)
-            {
-                proveedoresConsulta = proveedoresConsulta.Where(p =>
-                    p.EmpresaId == compraVM.EmpresaId.Value);
-            }
-
-            compraVM.Proveedores = await proveedoresConsulta
-                .OrderBy(p => p.RazonSocial)
-                .Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = p.RazonSocial
-                })
-                .ToListAsync();
+            await CargarFiltrosIndexAsync(compraVM, usuario, esSuperAdmin);
 
             return View(compraVM);
         }
+
+        // Conserva empresas y proveedores disponibles cuando el rango de fechas no es válido.
+        private async Task CargarFiltrosIndexAsync(CompraIndexVM compraVM, Usuario usuario, bool esSuperAdmin)
+        {
+            if (esSuperAdmin)
+            {
+                compraVM.Empresas = await _context.Empresas.AsNoTracking().Where(e => e.Estado).OrderBy(e => e.Nombre).Select(e => new SelectListItem
+                {
+                    Value = e.Id.ToString(),
+                    Text = e.Nombre
+                }).ToListAsync();
+            }
+
+            IQueryable<Proveedor> proveedoresConsulta = _context.Proveedores.AsNoTracking().Where(p => p.Estado);
+
+            if (!esSuperAdmin)
+            {
+                proveedoresConsulta = proveedoresConsulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+            }
+            else if (compraVM.EmpresaId.HasValue)
+            {
+                proveedoresConsulta = proveedoresConsulta.Where(p => p.EmpresaId == compraVM.EmpresaId.Value);
+            }
+
+            compraVM.Proveedores = await proveedoresConsulta.OrderBy(p => p.RazonSocial).Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = p.RazonSocial
+            }).ToListAsync();
+        }
+
         // GET: Compra/Create
         [HttpGet]
         public async Task<IActionResult> Create(int? empresaId = null)
