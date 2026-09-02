@@ -113,6 +113,7 @@
 
     <div class="card bg-white mb-4">
         <div class="card-body p-3">
+            <span asp-validation-for="FechaHasta" class="filter-validation-message text-danger small"></span>
             <form asp-action="Historial" method="get" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label asp-for="ProductoId" class="form-label fw-semibold">Producto</label>
@@ -139,7 +140,7 @@
 
                 <div class="col-md-2">
                     <label asp-for="FechaHasta" class="form-label fw-semibold">Hasta</label>
-                    <input asp-for="FechaHasta" type="date" cla ss="form-control" />
+                    <input asp-for="FechaHasta" type="date" class="form-control" />
                 </div>
 
                 @if (User.IsInRole("SuperAdmin"))
