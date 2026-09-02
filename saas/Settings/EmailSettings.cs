@@ -19,6 +19,9 @@
         public string FromName { get; set; } =
             string.Empty;
 
+        public string NotificationEmail { get; set; } =
+            string.Empty;
+
         public bool UseSsl { get; set; }
     }
 }
