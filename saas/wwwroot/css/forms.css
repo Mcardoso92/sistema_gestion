@@ -114,6 +114,12 @@
     row-gap: 1rem;
 }
 
+/* Muestra errores generales del filtro sin alterar la alineación interna de la grilla. */
+.app-body .filter-validation-message.field-validation-error {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
 .app-body .search-input-wrapper {
     position: relative;
 }

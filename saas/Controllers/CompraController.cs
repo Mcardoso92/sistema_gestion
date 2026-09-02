@@ -40,6 +40,21 @@ namespace saas.Controllers
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
+            if (!esSuperAdmin)
+            {
+                compraVM.EmpresaId = null;
+            }
+
+            if (compraVM.FechaDesde.HasValue && compraVM.FechaHasta.HasValue && compraVM.FechaHasta.Value.Date < compraVM.FechaDesde.Value.Date)
+            {
+                ModelState.AddModelError(nameof(compraVM.FechaHasta), "La fecha Hasta no puede ser anterior a la fecha Desde.");
+                await CargarFiltrosIndexAsync(compraVM, usuario, esSuperAdmin);
+                ViewBag.PaginaActual = 1;
+                ViewBag.TotalPaginas = 0;
+                ViewBag.TotalRegistros = 0;
+                return View(compraVM);
+            }
+
             IQueryable<Compra> consulta = _context.Compras
                 .AsNoTracking()
                 .Include(c => c.Empresa)
@@ -48,7 +63,6 @@ namespace saas.Controllers
             if (!esSuperAdmin)
             {
                 consulta = consulta.Where(c => c.EmpresaId == usuario.EmpresaId);
-                compraVM.EmpresaId = null;
             }
             else if (compraVM.EmpresaId.HasValue)
             {
@@ -140,46 +154,41 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
-            if (esSuperAdmin)
-            {
-                compraVM.Empresas = await _context.Empresas
-                    .AsNoTracking()
-                    .Where(e => e.Estado)
-                    .OrderBy(e => e.Nombre)
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.Id.ToString(),
-                        Text = e.Nombre
-                    })
-                    .ToListAsync();
-            }
-
-            IQueryable<Proveedor> proveedoresConsulta = _context.Proveedores
-                .AsNoTracking()
-                .Where(p => p.Estado);
-
-            if (!esSuperAdmin)
-            {
-                proveedoresConsulta = proveedoresConsulta.Where(p =>
-                    p.EmpresaId == usuario.EmpresaId);
-            }
-            else if (compraVM.EmpresaId.HasValue)
-            {
-                proveedoresConsulta = proveedoresConsulta.Where(p =>
-                    p.EmpresaId == compraVM.EmpresaId.Value);
-            }
-
-            compraVM.Proveedores = await proveedoresConsulta
-                .OrderBy(p => p.RazonSocial)
-                .Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = p.RazonSocial
-                })
-                .ToListAsync();
+            await CargarFiltrosIndexAsync(compraVM, usuario, esSuperAdmin);
 
             return View(compraVM);
         }
+
+        // Conserva empresas y proveedores disponibles cuando el rango de fechas no es válido.
+        private async Task CargarFiltrosIndexAsync(CompraIndexVM compraVM, Usuario usuario, bool esSuperAdmin)
+        {
+            if (esSuperAdmin)
+            {
+                compraVM.Empresas = await _context.Empresas.AsNoTracking().Where(e => e.Estado).OrderBy(e => e.Nombre).Select(e => new SelectListItem
+                {
+                    Value = e.Id.ToString(),
+                    Text = e.Nombre
+                }).ToListAsync();
+            }
+
+            IQueryable<Proveedor> proveedoresConsulta = _context.Proveedores.AsNoTracking().Where(p => p.Estado);
+
+            if (!esSuperAdmin)
+            {
+                proveedoresConsulta = proveedoresConsulta.Where(p => p.EmpresaId == usuario.EmpresaId);
+            }
+            else if (compraVM.EmpresaId.HasValue)
+            {
+                proveedoresConsulta = proveedoresConsulta.Where(p => p.EmpresaId == compraVM.EmpresaId.Value);
+            }
+
+            compraVM.Proveedores = await proveedoresConsulta.OrderBy(p => p.RazonSocial).Select(p => new SelectListItem
+            {
+                Value = p.Id.ToString(),
+                Text = p.RazonSocial
+            }).ToListAsync();
+        }
+
         // GET: Compra/Create
         [HttpGet]
         public async Task<IActionResult> Create(int? empresaId = null)
@@ -294,6 +303,38 @@ namespace saas.Controllers
                 producto.PrecioVenta
             });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ObtenerCategoriasProducto(int? empresaId = null)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            int? empresaCompraId = await ResolverEmpresaCompraAsync(usuario, empresaId);
+
+            if (!empresaCompraId.HasValue)
+            {
+                return BadRequest();
+            }
+
+            var categorias = await _context.Categorias
+                .AsNoTracking()
+                .Where(c => c.EmpresaId == empresaCompraId.Value && c.Estado)
+                .OrderBy(c => c.Nombre)
+                .Select(c => new
+                {
+                    c.Id,
+                    c.Nombre
+                })
+                .ToListAsync();
+
+            return Json(categorias);
+        }
+
         // POST: Compra/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -355,12 +396,25 @@ namespace saas.Controllers
                     "Debe agregar al menos un producto a la compra.");
             }
 
+            compraVM.Detalles ??= new List<DetalleCompraCreateVM>();
+
+            foreach (var detalleNuevo in compraVM.Detalles.Where(d => d.EsProductoNuevo))
+            {
+                detalleNuevo.ProductoNuevoNombre = detalleNuevo.ProductoNuevoNombre?.Trim();
+                detalleNuevo.ProductoNuevoCodigoBarra = NormalizarTextoOpcional(detalleNuevo.ProductoNuevoCodigoBarra);
+            }
+
             if (compraVM.Detalles != null &&
                 compraVM.Detalles.Any(d =>
-                    d.ProductoId <= 0 ||
+                    (!d.EsProductoNuevo && d.ProductoId <= 0) ||
                     d.Cantidad <= 0 ||
                     d.PrecioUnitario < 0 ||
-                    (d.NuevoPrecioVenta.HasValue && d.NuevoPrecioVenta.Value < 0)))
+                    (d.NuevoPrecioVenta.HasValue && d.NuevoPrecioVenta.Value < 0) ||
+                    (d.EsProductoNuevo &&
+                        (string.IsNullOrWhiteSpace(d.ProductoNuevoNombre) ||
+                         !d.ProductoNuevoCategoriaId.HasValue ||
+                         d.ProductoNuevoCategoriaId <= 0 ||
+                         !d.NuevoPrecioVenta.HasValue))))
             {
                 ModelState.AddModelError(
                     nameof(compraVM.Detalles),
@@ -377,7 +431,8 @@ namespace saas.Controllers
                 return View(compraVM);
             }
 
-            bool hayProductosRepetidos = compraVM.Detalles
+            bool hayProductosRepetidos = compraVM.Detalles!
+                .Where(d => !d.EsProductoNuevo)
                 .GroupBy(d => d.ProductoId)
                 .Any(g => g.Count() > 1);
 
@@ -392,6 +447,55 @@ namespace saas.Controllers
                     empresaCompraId,
                     esSuperAdmin);
 
+                return View(compraVM);
+            }
+
+            var productosNuevos = compraVM.Detalles
+                .Where(d => d.EsProductoNuevo)
+                .ToList();
+
+            bool hayNombresNuevosRepetidos = productosNuevos
+                .GroupBy(d => d.ProductoNuevoNombre!, StringComparer.OrdinalIgnoreCase)
+                .Any(g => g.Count() > 1);
+
+            bool hayCodigosNuevosRepetidos = productosNuevos
+                .Where(d => d.ProductoNuevoCodigoBarra != null)
+                .GroupBy(d => d.ProductoNuevoCodigoBarra!, StringComparer.OrdinalIgnoreCase)
+                .Any(g => g.Count() > 1);
+
+            var categoriasNuevasIds = productosNuevos
+                .Select(d => d.ProductoNuevoCategoriaId!.Value)
+                .Distinct()
+                .ToList();
+
+            int categoriasNuevasValidas = await _context.Categorias.CountAsync(c =>
+                categoriasNuevasIds.Contains(c.Id) &&
+                c.EmpresaId == empresaCompraId &&
+                c.Estado);
+
+            var nombresNuevos = productosNuevos
+                .Select(d => d.ProductoNuevoNombre!.ToLower())
+                .ToList();
+
+            var codigosNuevos = productosNuevos
+                .Where(d => d.ProductoNuevoCodigoBarra != null)
+                .Select(d => d.ProductoNuevoCodigoBarra!.ToLower())
+                .ToList();
+
+            bool productoNuevoYaExiste = productosNuevos.Count > 0 &&
+                await _context.Productos.AnyAsync(p =>
+                    p.EmpresaId == empresaCompraId &&
+                    (nombresNuevos.Contains(p.Nombre.ToLower()) ||
+                     (p.CodigoBarra != null && codigosNuevos.Contains(p.CodigoBarra.ToLower()))));
+
+            if (hayNombresNuevosRepetidos || hayCodigosNuevosRepetidos ||
+                categoriasNuevasValidas != categoriasNuevasIds.Count || productoNuevoYaExiste)
+            {
+                ModelState.AddModelError(
+                    nameof(compraVM.Detalles),
+                    "Uno de los productos nuevos está repetido, ya existe o tiene una categoría inválida.");
+
+                await PrepararCompraParaVista(compraVM, empresaCompraId, esSuperAdmin);
                 return View(compraVM);
             }
 
@@ -449,6 +553,28 @@ namespace saas.Controllers
 
                         return View(compraVM);
                     }
+                }
+
+                // Los productos preparados en el modal se insertan dentro de la misma transacción que la compra.
+                foreach (var detalleNuevo in productosNuevos)
+                {
+                    var productoNuevo = new Producto
+                    {
+                        Nombre = detalleNuevo.ProductoNuevoNombre!,
+                        CodigoBarra = detalleNuevo.ProductoNuevoCodigoBarra,
+                        CategoriaId = detalleNuevo.ProductoNuevoCategoriaId!.Value,
+                        PuntoReposicion = detalleNuevo.ProductoNuevoPuntoReposicion,
+                        PrecioCosto = 0,
+                        PrecioVenta = 0,
+                        Stock = 0,
+                        Estado = true,
+                        FechaAlta = DateTime.Now,
+                        EmpresaId = empresaCompraId
+                    };
+
+                    _context.Productos.Add(productoNuevo);
+                    await _context.SaveChangesAsync();
+                    detalleNuevo.ProductoId = productoNuevo.Id;
                 }
 
                 var productosIds = compraVM.Detalles
@@ -1074,6 +1200,17 @@ namespace saas.Controllers
                     Text = e.Nombre
                 })
                 .ToListAsync();
+        }
+
+        private async Task<int?> ResolverEmpresaCompraAsync(Usuario usuario, int? empresaId)
+        {
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+            int empresaCompraId = esSuperAdmin ? empresaId ?? 0 : usuario.EmpresaId;
+
+            bool empresaValida = empresaCompraId > 0 &&
+                await _context.Empresas.AnyAsync(e => e.Id == empresaCompraId && e.Estado);
+
+            return empresaValida ? empresaCompraId : null;
         }
 
         private static string? NormalizarTextoOpcional(string? valor)

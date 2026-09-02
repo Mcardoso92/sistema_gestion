@@ -6,7 +6,7 @@ namespace saas.Models
     public class Producto
     {
         public int Id { get; set; }
-        [StringLength(100)]
+        [StringLength(100, ErrorMessage = "El código de barras no puede superar los 100 caracteres.")]
         public string? CodigoBarra { get; set; }
         [Required(ErrorMessage = "El nombre es obligatorio.")]
         [StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]

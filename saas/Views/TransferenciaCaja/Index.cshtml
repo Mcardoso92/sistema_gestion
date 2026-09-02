@@ -47,6 +47,8 @@
 
         <div class="card-body p-4">
 
+            @Html.ValidationMessage("fechaHasta", null, new { @class = "filter-validation-message text-danger small" })
+
             <form asp-action="Index"
                   method="get">
 

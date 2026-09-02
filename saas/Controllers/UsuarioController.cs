@@ -6,10 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Services;
+using saas.Settings;
 using saas.ViewModel;
 using saas.ViewModel.Autenticacion;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 
 namespace saas.Controllers
 {
@@ -23,6 +25,8 @@ namespace saas.Controllers
         private readonly IEmailService _emailService;
         private readonly IImagenService _imagenService;
         private readonly EmpresaInicializacionService _empresaInicializacionService;
+        private readonly EmailSettings _emailSettings;
+        private readonly ILogger<UsuarioController> _logger;
         public UsuarioController(
             UserManager<Usuario> userManager,
             SignInManager<Usuario> signInManager,
@@ -30,7 +34,9 @@ namespace saas.Controllers
             SaasDbContext context,
             IEmailService emailService,
             IImagenService imagenService,
-            EmpresaInicializacionService empresaInicializacionService)
+            EmpresaInicializacionService empresaInicializacionService,
+            IOptions<EmailSettings> emailOptions,
+            ILogger<UsuarioController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -39,6 +45,8 @@ namespace saas.Controllers
             _emailService = emailService;
             _imagenService = imagenService;
             _empresaInicializacionService = empresaInicializacionService;
+            _emailSettings = emailOptions.Value;
+            _logger = logger;
         }
         // GET: Usuario
         public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null, int pagina = 1)
@@ -1002,6 +1010,34 @@ namespace saas.Controllers
                 await transaction.RollbackAsync();
                 ModelState.AddModelError("", "Ocurrió un error al crear la cuenta. Intentá nuevamente.");
                 return View(model);
+            }
+
+            // La notificación es secundaria: un problema de correo no debe deshacer un registro confirmado.
+            try
+            {
+                string empresaSegura = HtmlEncoder.Default.Encode(model.EmpresaNombre);
+                string administradorSeguro = HtmlEncoder.Default.Encode($"{model.Nombre} {model.Apellido}");
+                string emailSeguro = HtmlEncoder.Default.Encode(model.Email);
+
+                var contenidoHtml = $"""
+                    <h2>Nueva empresa registrada en Veltika</h2>
+                    <p>Se completó un nuevo registro desde la aplicación.</p>
+                    <ul>
+                        <li><strong>Empresa:</strong> {empresaSegura}</li>
+                        <li><strong>Administrador:</strong> {administradorSeguro}</li>
+                        <li><strong>Correo:</strong> {emailSeguro}</li>
+                        <li><strong>Fecha:</strong> {usuarioCreado!.FechaAlta:dd/MM/yyyy HH:mm}</li>
+                    </ul>
+                    """;
+
+                await _emailService.EnviarAsync(
+                    _emailSettings.NotificationEmail,
+                    $"Nueva empresa registrada: {model.EmpresaNombre}",
+                    contenidoHtml);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "No fue posible enviar la notificación del registro de la empresa {EmpresaId}.", usuarioCreado!.EmpresaId);
             }
 
             await _signInManager.SignInAsync(usuarioCreado, isPersistent: false);

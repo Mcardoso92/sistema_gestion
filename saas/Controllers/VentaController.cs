@@ -40,6 +40,16 @@ namespace saas.Controllers
                 usuario,
                 "SuperAdmin");
 
+            if (ventaVM.FechaDesde.HasValue && ventaVM.FechaHasta.HasValue && ventaVM.FechaHasta.Value.Date < ventaVM.FechaDesde.Value.Date)
+            {
+                ModelState.AddModelError(nameof(ventaVM.FechaHasta), "La fecha Hasta no puede ser anterior a la fecha Desde.");
+                await CargarFiltrosIndexAsync(ventaVM, usuario, esSuperAdmin);
+                ViewBag.PaginaActual = 1;
+                ViewBag.TotalPaginas = 0;
+                ViewBag.TotalRegistros = 0;
+                return View(ventaVM);
+            }
+
             IQueryable<Venta> consulta = _context.Ventas
                 .AsNoTracking()
                 .Include(v => v.Empresa)
@@ -242,48 +252,41 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
-            if (esSuperAdmin)
-            {
-                ventaVM.Empresas = await _context.Empresas
-                    .AsNoTracking()
-                    .Where(e => e.Estado)
-                    .OrderBy(e => e.Nombre)
-                    .Select(e => new SelectListItem
-                    {
-                        Value = e.Id.ToString(),
-                        Text = e.Nombre
-                    })
-                    .ToListAsync();
-            }
-
-            IQueryable<Usuario> usuariosConsulta =
-                _userManager.Users
-                    .AsNoTracking()
-                    .Where(u => u.Estado);
-
-            if (!esSuperAdmin)
-            {
-                usuariosConsulta = usuariosConsulta.Where(u =>
-                    u.EmpresaId == usuario.EmpresaId);
-            }
-            else if (ventaVM.EmpresaId.HasValue)
-            {
-                usuariosConsulta = usuariosConsulta.Where(u =>
-                    u.EmpresaId == ventaVM.EmpresaId.Value);
-            }
-
-            ventaVM.Usuarios = await usuariosConsulta
-                .OrderBy(u => u.Nombre)
-                .ThenBy(u => u.Apellido)
-                .Select(u => new SelectListItem
-                {
-                    Value = u.Id,
-                    Text = u.Nombre + " " + u.Apellido
-                })
-                .ToListAsync();
+            await CargarFiltrosIndexAsync(ventaVM, usuario, esSuperAdmin);
 
             return View(ventaVM);
         }
+
+        // Conserva las opciones de los filtros cuando el rango de fechas no es válido.
+        private async Task CargarFiltrosIndexAsync(VentaIndexVM ventaVM, Usuario usuario, bool esSuperAdmin)
+        {
+            if (esSuperAdmin)
+            {
+                ventaVM.Empresas = await _context.Empresas.AsNoTracking().Where(e => e.Estado).OrderBy(e => e.Nombre).Select(e => new SelectListItem
+                {
+                    Value = e.Id.ToString(),
+                    Text = e.Nombre
+                }).ToListAsync();
+            }
+
+            IQueryable<Usuario> usuariosConsulta = _userManager.Users.AsNoTracking().Where(u => u.Estado);
+
+            if (!esSuperAdmin)
+            {
+                usuariosConsulta = usuariosConsulta.Where(u => u.EmpresaId == usuario.EmpresaId);
+            }
+            else if (ventaVM.EmpresaId.HasValue)
+            {
+                usuariosConsulta = usuariosConsulta.Where(u => u.EmpresaId == ventaVM.EmpresaId.Value);
+            }
+
+            ventaVM.Usuarios = await usuariosConsulta.OrderBy(u => u.Nombre).ThenBy(u => u.Apellido).Select(u => new SelectListItem
+            {
+                Value = u.Id,
+                Text = u.Nombre + " " + u.Apellido
+            }).ToListAsync();
+        }
+
         // GET: Venta/Create
         [HttpGet]
         public async Task<IActionResult> Create(int? empresaId = null)

@@ -78,6 +78,7 @@
     </footer>
 
     @* Agrega una versión al enlace para renovar automáticamente los archivos almacenados en caché. *@
+    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)

@@ -50,6 +50,21 @@ namespace saas.Controllers
                     usuario,
                     "SuperAdmin");
 
+            if (!esSuperAdmin)
+            {
+                empresaId = null;
+            }
+
+            if (fechaDesde.HasValue && fechaHasta.HasValue && fechaHasta.Value.Date < fechaDesde.Value.Date)
+            {
+                ModelState.AddModelError("fechaHasta", "La fecha Hasta no puede ser anterior a la fecha Desde.");
+                ViewBag.PaginaActual = 1;
+                ViewBag.TotalPaginas = 0;
+                ViewBag.TotalRegistros = 0;
+                await CargarFiltrosIndexAsync(cajaOrigenId, cajaDestinoId, estado, fechaDesde, fechaHasta, empresaId, usuario, esSuperAdmin);
+                return View(new List<TransferenciaCajaResumenVM>());
+            }
+
             IQueryable<TransferenciaCaja> consulta =
                 _context.TransferenciasCaja
                     .AsNoTracking()
@@ -62,8 +77,6 @@ namespace saas.Controllers
             {
                 consulta = consulta.Where(t =>
                     t.EmpresaId == usuario.EmpresaId);
-
-                empresaId = null;
             }
             else if (empresaId.HasValue)
             {
@@ -150,13 +163,20 @@ namespace saas.Controllers
                     })
                     .ToListAsync();
 
+            await CargarFiltrosIndexAsync(cajaOrigenId, cajaDestinoId, estado, fechaDesde, fechaHasta, empresaId, usuario, esSuperAdmin);
+
+            return View(transferencias);
+        }
+
+        // Conserva cajas, empresas y valores seleccionados cuando el rango de fechas no es válido.
+        private async Task CargarFiltrosIndexAsync(int? cajaOrigenId, int? cajaDestinoId, EstadoTransferenciaCaja? estado, DateTime? fechaDesde, DateTime? fechaHasta, int? empresaId, Usuario usuario, bool esSuperAdmin)
+        {
             ViewBag.CajaOrigenId = cajaOrigenId;
             ViewBag.CajaDestinoId = cajaDestinoId;
             ViewBag.Estado = estado;
             ViewBag.FechaDesde = fechaDesde;
             ViewBag.FechaHasta = fechaHasta;
-            ViewBag.EmpresaId =
-                esSuperAdmin ? empresaId : null;
+            ViewBag.EmpresaId = empresaId;
 
             int? empresaFiltro =
                 esSuperAdmin
@@ -183,8 +203,6 @@ namespace saas.Controllers
                         .OrderBy(e => e.Nombre)
                         .ToListAsync();
             }
-
-            return View(transferencias);
         }
 
         // GET: TransferenciaCaja/Create
