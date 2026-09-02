@@ -262,6 +262,17 @@ namespace saas.Controllers
                     return View(producto);
                 }
 
+                // El código de barras es opcional, pero debe ser único dentro de cada empresa cuando se informa.
+                bool existeCodigoBarra = !string.IsNullOrWhiteSpace(producto.CodigoBarra) &&
+                    await _context.Productos.AnyAsync(p => p.EmpresaId == producto.EmpresaId && p.CodigoBarra == producto.CodigoBarra);
+
+                if (existeCodigoBarra)
+                {
+                    ModelState.AddModelError("CodigoBarra", "Este código de barras ya está registrado.");
+                    CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+                    return View(producto);
+                }
+
                 DateTime fecha = DateTime.Now;
 
                 producto.FechaAlta = fecha;
@@ -448,6 +459,17 @@ namespace saas.Controllers
             if (existeProducto)
             {
                 ModelState.AddModelError("Nombre", "Ya existe un producto con ese nombre para esta empresa.");
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+                return View(producto);
+            }
+
+            // Excluye el producto actual para permitir conservar su propio código durante la edición.
+            bool existeCodigoBarra = !string.IsNullOrWhiteSpace(producto.CodigoBarra) &&
+                await _context.Productos.AnyAsync(p => p.Id != producto.Id && p.EmpresaId == producto.EmpresaId && p.CodigoBarra == producto.CodigoBarra);
+
+            if (existeCodigoBarra)
+            {
+                ModelState.AddModelError("CodigoBarra", "Este código de barras ya está registrado.");
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
                 return View(producto);
             }
