@@ -212,6 +212,8 @@ namespace saas.Controllers
                     producto.EmpresaId = usuario.EmpresaId;
                 }
 
+                producto.CodigoBarra = NormalizarCodigoBarra(producto.CodigoBarra);
+
                 if (!ModelState.IsValid)
                 {
                     CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
@@ -416,6 +418,8 @@ namespace saas.Controllers
                 producto.EmpresaId = usuario.EmpresaId;
             }
 
+            producto.CodigoBarra = NormalizarCodigoBarra(producto.CodigoBarra);
+
             if (!ModelState.IsValid)
             {
                 CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
@@ -531,6 +535,13 @@ namespace saas.Controllers
 
                 return View(producto);
             }
+        }
+
+        // Conserva el código como texto para no perder ceros iniciales y evita diferencias por espacios accidentales.
+        private static string? NormalizarCodigoBarra(string? codigoBarra)
+        {
+            string? codigoNormalizado = codigoBarra?.Trim();
+            return string.IsNullOrEmpty(codigoNormalizado) ? null : codigoNormalizado;
         }
 
         // GET: Producto/Delete/5

@@ -22,9 +22,10 @@
                             <span asp-validation-for="Nombre" class="text-danger"></span>
                         </div>
                         <div class="col-md-4">
-                            <label asp-for="CodigoBarra" class="form-label">Codigo de Barras</label>
-                            <input asp-for="CodigoBarra" class="form-control" type="text" />
+                            <label asp-for="CodigoBarra" class="form-label">Código de Barras</label>
+                            <input asp-for="CodigoBarra" class="form-control" type="text" autocomplete="off" />
                             <span asp-validation-for="CodigoBarra" class="text-danger"></span>
+                            <div class="form-text">Opcional. Admite el código del fabricante o un código interno, incluso con letras.</div>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="CategoriaId" class="form-label">Categoría</label>
