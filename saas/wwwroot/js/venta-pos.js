@@ -1572,27 +1572,32 @@
         quitarCliente
     );
 
+    // Descarta todos los datos temporales y deja el punto de venta listo para una nueva operación.
     btnCancelarVenta.addEventListener("click", () => {
-        if (carrito.length === 0) {
-            quitarCliente();
+        const tieneCliente = inputClienteId.value.trim() !== "";
+        const tienePagos = pagosContainer.querySelectorAll(".pago-item").length > 0;
+
+        if (carrito.length === 0 && !tieneCliente && !tienePagos) {
+            mostrarMensaje("No hay una venta en curso para cancelar.", "info");
             inputBuscarProducto.focus();
             return;
         }
 
-        const confirmar = window.confirm(
-            "¿Está seguro de que desea cancelar la venta actual?"
-        );
+        const confirmar = window.confirm("¿Está seguro de que desea cancelar la venta actual? Se descartarán los datos cargados.");
 
         if (!confirmar) {
             return;
         }
 
         carrito.splice(0, carrito.length);
+        pagosContainer.innerHTML = "";
         quitarCliente();
         ocultarResultadosProductos();
         ocultarResultadosClientes();
         renderizarCarrito();
         inputBuscarProducto.value = "";
+        inputBuscarCliente.value = "";
+        mostrarMensaje("La venta actual fue cancelada.", "success");
         inputBuscarProducto.focus();
     });
 
