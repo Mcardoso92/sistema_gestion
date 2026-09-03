@@ -6,13 +6,14 @@
             data-bs-toggle="dropdown"
             data-bs-auto-close="outside"
             aria-expanded="false"
+            aria-label="Abrir notificaciones"
             title="Notificaciones">
 
         <span class="material-symbols-outlined">notifications</span>
 
         @if (Model.CantidadTotal > 0)
         {
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" aria-label="@Model.CantidadTotal notificaciones pendientes">
                 @(Model.CantidadTotal > 99 ? "99+" : Model.CantidadTotal)
             </span>
         }

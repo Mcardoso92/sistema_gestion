@@ -250,6 +250,7 @@
                                        class="form-control"
                                        type="number"
                                        min="0"
+                                       max="@Model.EfectivoContado"
                                        step="0.01"
                                        id="importeRendido" />
 
@@ -267,7 +268,8 @@
                                 </label>
 
                                 <select asp-for="CajaDestinoId"
-                                        class="form-select">
+                                        class="form-select"
+                                        id="cajaDestino">
 
                                     <option value="">
                                         Seleccionar caja destino
@@ -339,6 +341,7 @@
             </a>
 
             <button type="submit"
+                    id="btnConfirmarCierre"
                     class="btn btn-primary">
                 Confirmar cierre
             </button>
@@ -382,6 +385,12 @@
         const cajaDestinoContainer =
             document.getElementById("cajaDestinoContainer");
 
+        const cajaDestino =
+            document.getElementById("cajaDestino");
+
+        const btnConfirmarCierre =
+            document.getElementById("btnConfirmarCierre");
+
         const formatoMoneda =
             new Intl.NumberFormat(
                 "es-AR",
@@ -400,10 +409,19 @@
                 : 0;
         }
 
+        function obtenerNumeroValido(elemento) {
+            const valor = obtenerNumero(elemento);
+            return valor >= 0 ? valor : null;
+        }
+
         function actualizarArqueo() {
 
             const contado =
-                obtenerNumero(efectivoContado);
+                obtenerNumeroValido(efectivoContado);
+
+            if (contado === null) {
+                return;
+            }
 
             const diferencia =
                 contado - efectivoEsperado;
@@ -447,6 +465,9 @@
 
             importeSugeridoVisual.textContent =
                 formatoMoneda.format(sugerido);
+
+            importeRendido.max = contado.toString();
+            actualizarEstadoCierre();
         }
 
         function actualizarCajaDestino() {
@@ -465,6 +486,27 @@
                 cajaDestinoContainer.style.display =
                     "none";
             }
+
+            actualizarEstadoCierre();
+        }
+
+        function actualizarEstadoCierre() {
+            const contado = obtenerNumeroValido(efectivoContado);
+            const rendido = obtenerNumeroValido(importeRendido);
+            const requiereDestino = rendido !== null && rendido > 0;
+            const destinoValido =
+                !requiereDestino || cajaDestino.value !== "";
+
+            btnConfirmarCierre.disabled =
+                contado === null ||
+                rendido === null ||
+                rendido > contado ||
+                !destinoValido;
+
+            importeRendido.classList.toggle(
+                "is-invalid",
+                rendido === null ||
+                (contado !== null && rendido > contado));
         }
 
         efectivoContado.addEventListener(
@@ -474,6 +516,10 @@
         importeRendido.addEventListener(
             "input",
             actualizarCajaDestino);
+
+        cajaDestino.addEventListener(
+            "change",
+            actualizarEstadoCierre);
 
         actualizarArqueo();
         actualizarCajaDestino();

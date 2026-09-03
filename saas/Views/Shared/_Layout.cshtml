@@ -15,6 +15,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Veltika</title>
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <script type="importmap"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/design-tokens.css" asp-append-version="true" />
@@ -232,7 +233,7 @@
                         </a>
 
                         <div class="dropdown">
-                            <button class="app-nav-more @(navegacionCajaActiva ? "active" : "")" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="app-nav-more @(navegacionCajaActiva ? "active" : "")" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menú de caja">
                                 <span class="material-symbols-outlined">account_balance</span>
                                 Caja
                                 <span class="material-symbols-outlined app-nav-chevron">expand_more</span>
@@ -273,7 +274,7 @@
                         </div>
 
                         <div class="dropdown">
-                            <button class="app-nav-more @(controllerActual == "Reporte" ? "active" : "")" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="app-nav-more @(controllerActual == "Reporte" ? "active" : "")" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menú de reportes">
                                 <span class="material-symbols-outlined">monitoring</span>
                                 Reportes
                                 <span class="material-symbols-outlined app-nav-chevron">expand_more</span>
@@ -308,7 +309,7 @@
                         </div>
 
                         <div class="dropdown">
-                            <button class="app-nav-more @(navegacionAdministracionActiva ? "active" : "")" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="app-nav-more @(navegacionAdministracionActiva ? "active" : "")" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menú de administración">
                                 <span class="material-symbols-outlined">more_horiz</span>
                                 Más
                                 <span class="material-symbols-outlined app-nav-chevron">expand_more</span>
@@ -360,7 +361,7 @@
                     @if (usuario != null)
                     {
                         <div class="dropdown">
-                            <button class="app-user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="app-user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Abrir menú de usuario">
                                 @if (!string.IsNullOrWhiteSpace(usuario.ImagenPerfil))
                                 {
                                     <img src="@usuario.ImagenPerfil" alt="Imagen de perfil" class="app-avatar" style="object-fit: cover;" />
@@ -432,7 +433,7 @@
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     @TempData["Success"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar mensaje"></button>
                 </div>
             }
 
@@ -440,7 +441,7 @@
             {
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     @TempData["Error"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar mensaje"></button>
                 </div>
             }
 

@@ -9,7 +9,7 @@ using saas.Models;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class CategoriaController : Controller
+    public class CategoriaController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;

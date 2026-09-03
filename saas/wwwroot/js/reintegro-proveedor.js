@@ -9,6 +9,9 @@
     const cajaSelect =
         document.getElementById("cajaSelect");
 
+    const botonConfirmar =
+        document.getElementById("btnConfirmarReintegroProveedor");
+
     if (!form ||
         !medioPagoSelect ||
         !cajaSelect) {
@@ -107,4 +110,11 @@
     if (medioPagoSelect.value) {
         cargarCajas();
     }
+
+    form.addEventListener("submit", () => {
+        if (botonConfirmar) {
+            botonConfirmar.disabled = true;
+            botonConfirmar.textContent = "Procesando...";
+        }
+    });
 });

@@ -11,7 +11,7 @@ using saas.ViewModel;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class ClienteController : Controller
+    public class ClienteController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;

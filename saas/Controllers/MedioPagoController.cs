@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.ViewModel;
 
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class MedioPagoController : Controller
+    public class MedioPagoController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
@@ -411,7 +412,9 @@ namespace saas.Controllers
                 Descripcion = medioPago.Descripcion,
                 Tipo = medioPago.Tipo,
                 Estado = medioPago.Estado,
-                EmpresaId = medioPago.EmpresaId
+                EmpresaId = medioPago.EmpresaId,
+                TieneTurnoAbiertoAsociado =
+                    await TieneTurnoAbiertoAsociado(medioPago.Id)
             };
 
             return View(medioPagoVM);
@@ -492,12 +495,52 @@ namespace saas.Controllers
                 return View(medioPagoVM);
             }
 
+            medioPagoVM.TieneTurnoAbiertoAsociado =
+                await TieneTurnoAbiertoAsociado(medioPago.Id);
+
+            if (medioPago.Estado &&
+                !medioPagoVM.Estado &&
+                medioPagoVM.TieneTurnoAbiertoAsociado)
+            {
+                ModelState.AddModelError(
+                    nameof(medioPagoVM.Estado),
+                    "No puede desactivar un medio de pago asociado a una caja con turno abierto.");
+
+                return View(medioPagoVM);
+            }
+
+            if (medioPago.Tipo != medioPagoVM.Tipo)
+            {
+                var cajasAsociadas = await _context.CajaMediosPago
+                    .AsNoTracking()
+                    .Where(cm => cm.MedioPagoId == medioPago.Id)
+                    .Select(cm => new
+                    {
+                        cm.Caja.Nombre,
+                        cm.Caja.Tipo
+                    })
+                    .ToListAsync();
+
+                var cajasIncompatibles = cajasAsociadas
+                    .Where(caja =>
+                        !CompatibilidadFinanciera.EsCompatible(
+                            caja.Tipo,
+                            medioPagoVM.Tipo))
+                    .Select(caja => caja.Nombre)
+                    .ToList();
+
+                if (cajasIncompatibles.Count > 0)
+                {
+                    ModelState.AddModelError(
+                        nameof(medioPagoVM.Tipo),
+                        $"El nuevo tipo no es compatible con las cajas asociadas: {string.Join(", ", cajasIncompatibles)}.");
+
+                    return View(medioPagoVM);
+                }
+            }
+
             try
             {
-                medioPago.Nombre = medioPagoVM.Nombre;
-                medioPago.Descripcion = medioPagoVM.Descripcion;
-                medioPago.Estado = medioPagoVM.Estado;
-
                 bool tieneMovimientos = await _context.MovimientosCaja
                     .AsNoTracking()
                     .AnyAsync(m => m.MedioPagoId == medioPago.Id);
@@ -512,6 +555,9 @@ namespace saas.Controllers
                     return View(medioPagoVM);
                 }
 
+                medioPago.Nombre = medioPagoVM.Nombre;
+                medioPago.Descripcion = medioPagoVM.Descripcion;
+                medioPago.Estado = medioPagoVM.Estado;
                 medioPago.Tipo = medioPagoVM.Tipo;
 
                 await _context.SaveChangesAsync();
@@ -592,7 +638,9 @@ namespace saas.Controllers
                 Estado = medioPago.Estado,
                 FechaAlta = medioPago.FechaAlta,
                 EmpresaNombre = medioPago.Empresa.Nombre,
-                CajasAsociadas = cajasAsociadas
+                CajasAsociadas = cajasAsociadas,
+                TieneTurnoAbiertoAsociado =
+                    await TieneTurnoAbiertoAsociado(medioPago.Id)
             };
 
             return View(medioPagoVM);
@@ -636,6 +684,14 @@ namespace saas.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            if (await TieneTurnoAbiertoAsociado(medioPago.Id))
+            {
+                TempData["Error"] =
+                    "No puede desactivar un medio de pago asociado a una caja con turno abierto.";
+
+                return RedirectToAction(nameof(Index));
+            }
+
             try
             {
                 medioPago.Estado = false;
@@ -667,6 +723,18 @@ namespace saas.Controllers
                 "Id",
                 "Nombre",
                 empresaId);
+        }
+
+        private async Task<bool> TieneTurnoAbiertoAsociado(
+            int medioPagoId)
+        {
+            return await _context.CajaMediosPago
+                .AsNoTracking()
+                .AnyAsync(cm =>
+                    cm.MedioPagoId == medioPagoId &&
+                    cm.Caja.Estado &&
+                    cm.Caja.TurnosCaja.Any(t =>
+                        t.Estado == Models.Enums.EstadoTurnoCaja.Abierto));
         }
     }
 }

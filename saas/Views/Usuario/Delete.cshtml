@@ -6,8 +6,8 @@
         <div class="col-12">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb small">
-                    <li class="breadcrumb-item"><a class="text-decoration-none text-muted" href="#">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a class="text-decoration-none text-muted" href="#">Usuarios</a></li>
+                    <li class="breadcrumb-item"><a class="text-decoration-none text-muted" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a class="text-decoration-none text-muted" asp-action="Index">Usuarios</a></li>
                     <li aria-current="page" class="breadcrumb-item active fw-semibold">Desactivar Usuario</li>
                 </ol>
             </nav>
@@ -26,7 +26,18 @@
                         <a asp-action="Index" class="btn btn-v-outline">Volver</a>
                         <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
                             <input asp-for="Id" type="hidden" />
-                            <button type="submit" class="btn btn-danger">Desactivar</button>
+                            @if (Model.PuedeDesactivar)
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    Desactivar
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger" disabled>
+                                    Desactivar
+                                </button>
+                            }
                         </form>
                     </div>
                 </div>
@@ -58,6 +69,12 @@
                         </div>
                     </div>
                 </div>
+                @if (!string.IsNullOrWhiteSpace(Model.MotivoBloqueoDesactivacion))
+                {
+                    <div class="alert alert-warning mt-4 mb-0">
+                        @Model.MotivoBloqueoDesactivacion
+                    </div>
+                }
                 <div class="card mt-4 border-0 bg-info bg-opacity-10 shadow-none">
                     <div class="card-body p-3">
                         <div class="d-flex align-items-center mb-1">

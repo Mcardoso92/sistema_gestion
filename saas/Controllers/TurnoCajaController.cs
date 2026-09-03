@@ -11,7 +11,7 @@ using System.Data;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class TurnoCajaController : Controller
+    public class TurnoCajaController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;

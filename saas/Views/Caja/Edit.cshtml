@@ -61,11 +61,23 @@
                                     Tipo
                                 </label>
 
-                                <select asp-for="Tipo"
-                                        asp-items="Html.GetEnumSelectList<saas.Models.Enums.TipoCaja>()"
-                                        class="form-select"
-                                        id="tipoCajaSelect">
-                                </select>
+                                @if (Model.TieneTurnoAbierto)
+                                {
+                                    <input asp-for="Tipo" type="hidden" />
+                                    <select class="form-select"
+                                            id="tipoCajaSelect"
+                                            disabled>
+                                        <option selected>@Model.Tipo</option>
+                                    </select>
+                                }
+                                else
+                                {
+                                    <select asp-for="Tipo"
+                                            asp-items="Html.GetEnumSelectList<saas.Models.Enums.TipoCaja>()"
+                                            class="form-select"
+                                            id="tipoCajaSelect">
+                                    </select>
+                                }
                             </div>
 
                             <div class="col-md-6">
@@ -88,8 +100,15 @@
 
                                 <div class="form-check form-switch mb-3">
 
-                                    <input asp-for="PermiteTurnos"
-                                           class="form-check-input" />
+                                    @if (Model.TieneTurnoAbierto)
+                                    {
+                                        <input asp-for="PermiteTurnos" type="hidden" />
+                                        <input class="form-check-input" type="checkbox" checked="@(Model.PermiteTurnos ? "checked" : null)" disabled />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="PermiteTurnos" class="form-check-input" id="permiteTurnos" />
+                                    }
 
                                     <label asp-for="PermiteTurnos"
                                            class="form-check-label fw-semibold">
@@ -103,8 +122,15 @@
 
                                 <div class="form-check form-switch">
 
-                                    <input asp-for="Estado"
-                                           class="form-check-input" />
+                                    @if (Model.TieneTurnoAbierto)
+                                    {
+                                        <input asp-for="Estado" type="hidden" />
+                                        <input class="form-check-input" type="checkbox" checked="@(Model.Estado ? "checked" : null)" disabled />
+                                    }
+                                    else
+                                    {
+                                        <input asp-for="Estado" class="form-check-input" />
+                                    }
 
                                     <label asp-for="Estado"
                                            class="form-check-label fw-semibold">
@@ -152,7 +178,15 @@
                                            name="MediosPagoSeleccionadosIds"
                                            value="@medio.Id"
                                            id="medio-@medio.Id"
-                                           @(medio.Seleccionado ? "checked" : null) />
+                                           @(medio.Seleccionado ? "checked" : null)
+                                           disabled="@(Model.TieneTurnoAbierto ? "disabled" : null)" />
+
+                                    @if (Model.TieneTurnoAbierto && medio.Seleccionado)
+                                    {
+                                        <input type="hidden"
+                                               name="MediosPagoSeleccionadosIds"
+                                               value="@medio.Id" />
+                                    }
 
                                     <label class="form-check-label"
                                            for="medio-@medio.Id">
@@ -166,6 +200,13 @@
 
                         <span asp-validation-for="MediosPagoSeleccionadosIds"
                               class="text-danger"></span>
+
+                        @if (Model.TieneTurnoAbierto)
+                        {
+                            <div class="form-text text-warning-emphasis">
+                                Con un turno abierto solo puede modificar el nombre y el fondo fijo.
+                            </div>
+                        }
 
                     </div>
                 </div>
@@ -204,6 +245,9 @@
             const container =
                 document.getElementById("mediosPagoContainer");
 
+            const permiteTurnos =
+                document.getElementById("permiteTurnos");
+
             const empresaId = "@Model.EmpresaId";
 
             if (!tipoCajaSelect || !container) {
@@ -213,6 +257,19 @@
             const seleccionadosIniciales = [
                 @string.Join(",", Model.MediosPagoSeleccionadosIds)
             ];
+
+            function actualizarPermiteTurnos() {
+                if (!permiteTurnos) {
+                    return;
+                }
+
+                const esEfectivo = tipoCajaSelect.value === "1";
+                permiteTurnos.disabled = !esEfectivo;
+
+                if (!esEfectivo) {
+                    permiteTurnos.checked = false;
+                }
+            }
 
             async function cargarMediosPago(
                 conservarSeleccionInicial = false) {
@@ -318,11 +375,13 @@
             tipoCajaSelect.addEventListener(
                 "change",
                 function () {
+                    actualizarPermiteTurnos();
                     cargarMediosPago(false);
                 });
 
             // Estado inicial de Edit:
             // conserva marcados los medios ya asociados.
+            actualizarPermiteTurnos();
             cargarMediosPago(true);
         });
     </script>

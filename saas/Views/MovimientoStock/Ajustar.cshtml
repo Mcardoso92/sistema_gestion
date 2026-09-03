@@ -84,6 +84,9 @@
                             <div class="col-md-4">
                                 <label class="form-label">Stock Resultante</label>
                                 <div class="ajuste-resultado-box" id="stockResultante">@Model.StockActual</div>
+                                <div class="text-danger small d-none" id="stockResultanteError">
+                                    La salida no puede superar el stock disponible.
+                                </div>
                             </div>
                         </div>
 
@@ -100,7 +103,7 @@
 
                         <div class="d-flex justify-content-end gap-2">
                             <a asp-action="Index" class="btn btn-outline-secondary px-4 fw-medium">CANCELAR</a>
-                            <button class="btn btn-corporate px-4 d-flex align-items-center gap-2" type="submit">
+                            <button class="btn btn-corporate px-4 d-flex align-items-center gap-2" id="btnGuardarAjuste" type="submit">
                                 <span class="material-symbols-outlined fs-5">save</span>GUARDAR AJUSTE
                             </button>
                         </div>
@@ -148,6 +151,4 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/stock-ajustar.js" asp-append-version="true"></script>
-}
-
 }

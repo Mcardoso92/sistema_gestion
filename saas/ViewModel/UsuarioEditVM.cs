@@ -29,6 +29,8 @@ namespace saas.ViewModel
         [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una empresa.")]
         public int EmpresaId { get; set; }
         public bool EsUsuarioLogueado { get; set; }
+        public bool PuedeDesactivar { get; set; } = true;
+        public string? MotivoBloqueoDesactivacion { get; set; }
         public string? ImagenActual { get; set; }
         public IFormFile? ImagenArchivo { get; set; }
         public bool EliminarImagen { get; set; }

@@ -5,8 +5,10 @@
     const motivo = document.getElementById("motivo");
     const motivoContador = document.getElementById("motivoContador");
     const stockActualElement = document.getElementById("stockActual");
+    const stockResultanteError = document.getElementById("stockResultanteError");
+    const btnGuardarAjuste = document.getElementById("btnGuardarAjuste");
 
-    if (!tipoAjuste || !cantidadAjuste || !stockResultante || !motivo || !motivoContador || !stockActualElement) {
+    if (!tipoAjuste || !cantidadAjuste || !stockResultante || !motivo || !motivoContador || !stockActualElement || !stockResultanteError || !btnGuardarAjuste) {
         return;
     }
 
@@ -25,8 +27,14 @@
             resultado = stockActual - cantidad;
         }
 
-        stockResultante.textContent = resultado;
-        stockResultante.classList.toggle("ajuste-resultado-negativo", resultado < 0);
+        const salidaInvalida =
+            tipo === tipoSalida && cantidad > stockActual;
+
+        stockResultante.textContent = salidaInvalida ? "—" : resultado;
+        stockResultante.classList.toggle("ajuste-resultado-negativo", salidaInvalida);
+        stockResultanteError.classList.toggle("d-none", !salidaInvalida);
+        cantidadAjuste.classList.toggle("is-invalid", salidaInvalida);
+        btnGuardarAjuste.disabled = salidaInvalida;
     }
 
     function actualizarContador() {

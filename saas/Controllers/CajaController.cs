@@ -11,7 +11,7 @@ using saas.Helpers;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class CajaController : Controller
+    public class CajaController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
@@ -534,6 +534,12 @@ namespace saas.Controllers
                 .Select(cm => cm.MedioPagoId)
                 .ToListAsync();
 
+            bool tieneTurnoAbierto = await _context.TurnosCaja
+                .AsNoTracking()
+                .AnyAsync(t =>
+                    t.CajaId == caja.Id &&
+                    t.Estado == Models.Enums.EstadoTurnoCaja.Abierto);
+
             var cajaVM = new CajaEditVM
             {
                 Id = caja.Id,
@@ -543,7 +549,8 @@ namespace saas.Controllers
                 FondoFijo = caja.FondoFijo,
                 Estado = caja.Estado,
                 EmpresaId = caja.EmpresaId,
-                MediosPagoSeleccionadosIds = mediosSeleccionados
+                MediosPagoSeleccionadosIds = mediosSeleccionados,
+                TieneTurnoAbierto = tieneTurnoAbierto
             };
 
             await CargarMediosPago(cajaVM, caja.EmpresaId);
@@ -639,15 +646,32 @@ namespace saas.Controllers
                     t.CajaId == caja.Id &&
                     t.Estado == Models.Enums.EstadoTurnoCaja.Abierto);
 
+            cajaVM.TieneTurnoAbierto = tieneTurnoAbierto;
+
+            var mediosActualesIds = await _context.CajaMediosPago
+                .AsNoTracking()
+                .Where(cm => cm.CajaId == caja.Id)
+                .Select(cm => cm.MedioPagoId)
+                .ToListAsync();
+
+            var mediosSolicitadosIds = cajaVM.MediosPagoSeleccionadosIds
+                .Distinct()
+                .ToHashSet();
+
+            bool cambiaMediosPago =
+                !mediosSolicitadosIds.SetEquals(mediosActualesIds);
+
             // No permitimos quitar capacidad de turnos
             // mientras exista uno abierto.
             if (tieneTurnoAbierto &&
-                (!cajaVM.PermiteTurnos ||
-                 cajaVM.Tipo != Models.Enums.TipoCaja.Efectivo))
+                (cajaVM.PermiteTurnos != caja.PermiteTurnos ||
+                 cajaVM.Tipo != caja.Tipo ||
+                 cajaVM.Estado != caja.Estado ||
+                 cambiaMediosPago))
             {
                 ModelState.AddModelError(
                     nameof(cajaVM.PermiteTurnos),
-                    "No puede modificar esta configuración mientras la caja tenga un turno abierto.");
+                    "No puede cambiar el tipo, el uso de turnos, el estado ni los medios de pago mientras la caja tenga un turno abierto.");
 
                 await CargarMediosPago(cajaVM, caja.EmpresaId);
                 return View(cajaVM);

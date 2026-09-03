@@ -12,7 +12,7 @@ using saas.ViewModel.Enums;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class MovimientoStockController : Controller
+    public class MovimientoStockController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
@@ -217,43 +217,57 @@ namespace saas.Controllers
                 return View(ajusteVM);
             }
 
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    System.Data.IsolationLevel.Serializable);
+
             int stockAnterior = producto.Stock;
-            int stockPosterior;
-            TipoMovimientoStock tipoMovimiento;
-
-            switch (ajusteVM.Tipo)
-            {
-                case TipoAjusteStockVM.Entrada:
-                    stockPosterior = stockAnterior + ajusteVM.Cantidad;
-                    tipoMovimiento = TipoMovimientoStock.AjusteEntrada;
-                    break;
-
-                case TipoAjusteStockVM.Salida:
-                    if (ajusteVM.Cantidad > stockAnterior)
-                    {
-                        ModelState.AddModelError(
-                            "Cantidad",
-                            "La cantidad a retirar no puede superar el stock disponible.");
-
-                        return View(ajusteVM);
-                    }
-
-                    stockPosterior = stockAnterior - ajusteVM.Cantidad;
-                    tipoMovimiento = TipoMovimientoStock.AjusteSalida;
-                    break;
-
-                default:
-                    ModelState.AddModelError(
-                        "Tipo",
-                        "El tipo de ajuste seleccionado no es válido.");
-
-                    return View(ajusteVM);
-            }
-
-            await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try
             {
+                // El stock se vuelve a leer dentro de la transacción para que
+                // dos operaciones simultáneas no validen la misma existencia.
+                await _context.Entry(producto).ReloadAsync();
+
+                stockAnterior = producto.Stock;
+                int stockPosterior;
+                TipoMovimientoStock tipoMovimiento;
+
+                switch (ajusteVM.Tipo)
+                {
+                    case TipoAjusteStockVM.Entrada:
+                        stockPosterior = checked(
+                            stockAnterior + ajusteVM.Cantidad);
+                        tipoMovimiento = TipoMovimientoStock.AjusteEntrada;
+                        break;
+
+                    case TipoAjusteStockVM.Salida:
+                        if (ajusteVM.Cantidad > stockAnterior)
+                        {
+                            await transaction.RollbackAsync();
+
+                            ajusteVM.StockActual = stockAnterior;
+                            ModelState.AddModelError(
+                                nameof(ajusteVM.Cantidad),
+                                "La cantidad a retirar no puede superar el stock disponible.");
+
+                            return View(ajusteVM);
+                        }
+
+                        stockPosterior = stockAnterior - ajusteVM.Cantidad;
+                        tipoMovimiento = TipoMovimientoStock.AjusteSalida;
+                        break;
+
+                    default:
+                        await transaction.RollbackAsync();
+
+                        ModelState.AddModelError(
+                            nameof(ajusteVM.Tipo),
+                            "El tipo de ajuste seleccionado no es válido.");
+
+                        return View(ajusteVM);
+                }
+
                 DateTime fecha = DateTime.Now;
 
                 producto.Stock = stockPosterior;

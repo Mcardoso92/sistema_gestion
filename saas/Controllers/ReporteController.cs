@@ -12,7 +12,7 @@ using saas.ViewModel.Reportes;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class ReporteController : Controller
+    public class ReporteController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;

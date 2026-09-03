@@ -41,7 +41,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <label asp-for="Stock" class="form-label">Stock Inicial</label>
+                            <label asp-for="Stock" class="form-label">Stock actual</label>
                             <input asp-for="Stock" class="form-control" placeholder="0" type="number" readonly />
                         </div>
                         <div class="col-md-3">
@@ -74,6 +74,62 @@
                             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary"> Editar </a>
                         </div>
                     </div>
+                </div>
+            </div>
+            @{
+                var cambiosCosto =
+                    ViewBag.CambiosCosto as List<saas.Models.CambioCostoProducto>
+                    ?? new List<saas.Models.CambioCostoProducto>();
+            }
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header">
+                    Historial de costo
+                </div>
+                <div class="card-body p-0">
+                    @if (cambiosCosto.Count == 0)
+                    {
+                        <p class="text-muted p-4 mb-0">
+                            Todavía no hay cambios de costo registrados.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table mb-0 align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Origen</th>
+                                        <th>Usuario</th>
+                                        <th class="text-end">Anterior</th>
+                                        <th class="text-end">Nuevo</th>
+                                        <th>Motivo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var cambio in cambiosCosto)
+                                    {
+                                        string origen = cambio.Origen switch
+                                        {
+                                            saas.Models.Enums.OrigenCambioCostoProducto.Compra => "Compra",
+                                            saas.Models.Enums.OrigenCambioCostoProducto.EdicionManual => "Edición manual",
+                                            saas.Models.Enums.OrigenCambioCostoProducto.AnulacionCompra => "Anulación de compra",
+                                            _ => "Cambio de costo"
+                                        };
+
+                                        <tr>
+                                            <td>@cambio.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@origen</td>
+                                            <td>@cambio.Usuario.Nombre @cambio.Usuario.Apellido</td>
+                                            <td class="text-end">@cambio.CostoAnterior.ToString("C")</td>
+                                            <td class="text-end">@cambio.CostoNuevo.ToString("C")</td>
+                                            <td>@(cambio.Motivo ?? "Automático")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

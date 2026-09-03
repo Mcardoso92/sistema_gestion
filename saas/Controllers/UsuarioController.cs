@@ -16,7 +16,7 @@ using Microsoft.Extensions.Options;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class UsuarioController : Controller
+    public class UsuarioController : VeltikaController
     {
         private readonly UserManager<Usuario> _userManager;
         private readonly SignInManager<Usuario> _signInManager;
@@ -375,7 +375,14 @@ namespace saas.Controllers
                 {
                     foreach (var error in resultado.Errors)
                     {
-                        ModelState.AddModelError("", error.Description);
+                        string campo = error.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)
+                            ? nameof(usuario.Password)
+                            : error.Code.Contains("Email", StringComparison.OrdinalIgnoreCase) ||
+                              error.Code.Contains("UserName", StringComparison.OrdinalIgnoreCase)
+                                ? nameof(usuario.Email)
+                                : string.Empty;
+
+                        ModelState.AddModelError(campo, error.Description);
                     }
 
                     await CargarCombos(usuario, esSuperAdmin);
@@ -511,6 +518,16 @@ namespace saas.Controllers
             // Obtengo el rol actual del usuario a editar
             viewModel.Rol = (await _userManager.GetRolesAsync(usuarioDb)).FirstOrDefault() ?? string.Empty;
 
+            viewModel.MotivoBloqueoDesactivacion =
+                await ObtenerMotivoBloqueoCambioAdministradorAsync(
+                    usuarioDb,
+                    usuarioLogueado,
+                    false,
+                    viewModel.Rol,
+                    usuarioDb.EmpresaId);
+            viewModel.PuedeDesactivar =
+                viewModel.MotivoBloqueoDesactivacion == null;
+
 
             // Cargo los combos
             await CargarCombos(viewModel, esSuperAdmin);
@@ -611,12 +628,23 @@ namespace saas.Controllers
                 return View(usuario);
             }
 
-            if (usuarioDb.Id == usuarioLogueado.Id &&
-                !usuario.Estado)
+            string? motivoBloqueo =
+                await ObtenerMotivoBloqueoCambioAdministradorAsync(
+                    usuarioDb,
+                    usuarioLogueado,
+                    usuario.Estado,
+                    usuario.Rol,
+                    usuario.EmpresaId);
+
+            if (motivoBloqueo != null)
             {
                 ModelState.AddModelError(
                     nameof(usuario.Estado),
-                    "No puede desactivar su propio usuario.");
+                    motivoBloqueo);
+
+                usuario.Estado = usuarioDb.Estado;
+                usuario.PuedeDesactivar = false;
+                usuario.MotivoBloqueoDesactivacion = motivoBloqueo;
 
                 await CargarCombos(usuario, esSuperAdmin);
 
@@ -838,6 +866,16 @@ namespace saas.Controllers
                 Estado = usuarioDb.Estado
             };
 
+            vm.MotivoBloqueoDesactivacion =
+                await ObtenerMotivoBloqueoCambioAdministradorAsync(
+                    usuarioDb,
+                    usuarioLogueado,
+                    false,
+                    rol ?? string.Empty,
+                    usuarioDb.EmpresaId);
+            vm.PuedeDesactivar =
+                vm.MotivoBloqueoDesactivacion == null;
+
             return View(vm);
         }
         // POST: Usuario/Delete/5
@@ -883,10 +921,18 @@ namespace saas.Controllers
                 return Forbid();
             }
 
-            // No permitir que un usuario se desactive a sí mismo.
-            if (usuarioDb.Id == usuarioLogueado.Id)
+            string? motivoBloqueo =
+                await ObtenerMotivoBloqueoCambioAdministradorAsync(
+                    usuarioDb,
+                    usuarioLogueado,
+                    false,
+                    (await _userManager.GetRolesAsync(usuarioDb)).FirstOrDefault()
+                        ?? string.Empty,
+                    usuarioDb.EmpresaId);
+
+            if (motivoBloqueo != null)
             {
-                TempData["Error"] = "No puede desactivar su propio usuario.";
+                TempData["Error"] = motivoBloqueo;
 
                 return RedirectToAction(nameof(Index));
             }           
@@ -1405,6 +1451,66 @@ namespace saas.Controllers
                 .ToDictionary(
                     grupo => grupo.Key,
                     grupo => grupo.First().Rol ?? "");
+        }
+
+        private async Task<string?> ObtenerMotivoBloqueoCambioAdministradorAsync(
+            Usuario usuarioDb,
+            Usuario usuarioLogueado,
+            bool nuevoEstado,
+            string nuevoRol,
+            int nuevaEmpresaId)
+        {
+            if (usuarioDb.Id == usuarioLogueado.Id &&
+                usuarioDb.Estado &&
+                !nuevoEstado)
+            {
+                return "No puede desactivar su propio usuario.";
+            }
+
+            bool esAdminEmpresaActual =
+                await _userManager.IsInRoleAsync(
+                    usuarioDb,
+                    "AdminEmpresa");
+
+            bool conservaAdministracion =
+                nuevoEstado &&
+                nuevaEmpresaId == usuarioDb.EmpresaId &&
+                string.Equals(
+                    nuevoRol,
+                    "AdminEmpresa",
+                    StringComparison.OrdinalIgnoreCase);
+
+            if (!usuarioDb.Estado ||
+                !esAdminEmpresaActual ||
+                conservaAdministracion)
+            {
+                return null;
+            }
+
+            var rolAdminEmpresa =
+                await _roleManager.FindByNameAsync(
+                    "AdminEmpresa");
+
+            if (rolAdminEmpresa == null)
+            {
+                return "No fue posible verificar los administradores de la empresa.";
+            }
+
+            bool existeOtroAdministradorActivo =
+                await (
+                    from otroUsuario in _context.Users
+                    join usuarioRol in _context.UserRoles
+                        on otroUsuario.Id equals usuarioRol.UserId
+                    where otroUsuario.Id != usuarioDb.Id &&
+                          otroUsuario.EmpresaId == usuarioDb.EmpresaId &&
+                          otroUsuario.Estado &&
+                          usuarioRol.RoleId == rolAdminEmpresa.Id
+                    select otroUsuario.Id)
+                    .AnyAsync();
+
+            return existeOtroAdministradorActivo
+                ? null
+                : "La empresa debe conservar al menos un administrador activo.";
         }
     }
 }

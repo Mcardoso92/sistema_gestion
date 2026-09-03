@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
@@ -11,7 +12,7 @@ using saas.Services;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class ProductoController : Controller
+    public class ProductoController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
@@ -155,6 +156,16 @@ namespace saas.Controllers
             {
                 return NotFound();
             }
+
+            ViewBag.CambiosCosto = await _context.CambiosCostoProducto
+                .AsNoTracking()
+                .Where(c =>
+                    c.ProductoId == producto.Id &&
+                    c.EmpresaId == producto.EmpresaId)
+                .Include(c => c.Usuario)
+                .OrderByDescending(c => c.Fecha)
+                .ThenByDescending(c => c.Id)
+                .ToListAsync();
 
             return View(producto);
         }
@@ -331,6 +342,13 @@ namespace saas.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
+            catch (DbUpdateException ex) when (EsCodigoBarraDuplicado(ex))
+            {
+                _imagenService.Eliminar(rutaImagenNueva);
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+                ModelState.AddModelError("CodigoBarra", "Este código de barras ya está registrado.");
+                return View(producto);
+            }
             catch
             {
                 _imagenService.Eliminar(rutaImagenNueva);
@@ -383,7 +401,7 @@ namespace saas.Controllers
         // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,PuntoReposicion,Estado,EmpresaId")] Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,PuntoReposicion,Estado,EmpresaId")] Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false, string? motivoCambioCosto = null)
         {
             if (id != producto.Id)
             {
@@ -419,6 +437,25 @@ namespace saas.Controllers
             }
 
             producto.CodigoBarra = NormalizarCodigoBarra(producto.CodigoBarra);
+
+            ViewBag.MotivoCambioCosto = motivoCambioCosto;
+
+            bool cambiaPrecioCosto =
+                producto.PrecioCosto != productoDb.PrecioCosto;
+
+            if (cambiaPrecioCosto &&
+                string.IsNullOrWhiteSpace(motivoCambioCosto))
+            {
+                ModelState.AddModelError(
+                    "motivoCambioCosto",
+                    "Debe indicar el motivo del cambio manual de costo.");
+            }
+            else if (motivoCambioCosto?.Length > 500)
+            {
+                ModelState.AddModelError(
+                    "motivoCambioCosto",
+                    "El motivo no puede superar los 500 caracteres.");
+            }
 
             if (!ModelState.IsValid)
             {
@@ -508,6 +545,23 @@ namespace saas.Controllers
                 productoDb.CodigoBarra = producto.CodigoBarra;
                 productoDb.Descripcion = producto.Descripcion;
                 productoDb.CategoriaId = producto.CategoriaId;
+
+                if (cambiaPrecioCosto)
+                {
+                    _context.CambiosCostoProducto.Add(
+                        new CambioCostoProducto
+                        {
+                            ProductoId = productoDb.Id,
+                            EmpresaId = productoDb.EmpresaId,
+                            UsuarioId = usuario.Id,
+                            CostoAnterior = productoDb.PrecioCosto,
+                            CostoNuevo = producto.PrecioCosto,
+                            Fecha = DateTime.Now,
+                            Origen = OrigenCambioCostoProducto.EdicionManual,
+                            Motivo = motivoCambioCosto!.Trim()
+                        });
+                }
+
                 productoDb.PrecioCosto = producto.PrecioCosto;
                 productoDb.PrecioVenta = producto.PrecioVenta;
                 productoDb.PuntoReposicion = producto.PuntoReposicion;
@@ -523,6 +577,14 @@ namespace saas.Controllers
 
                 TempData["Success"] = "Producto modificado correctamente.";
                 return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException ex) when (EsCodigoBarraDuplicado(ex))
+            {
+                _imagenService.Eliminar(rutaNueva);
+                producto.UrlImagen = rutaAnterior;
+                CargarCombos(producto.EmpresaId, producto.CategoriaId, usuario, esSuperAdmin);
+                ModelState.AddModelError("CodigoBarra", "Este código de barras ya está registrado.");
+                return View(producto);
             }
             catch
             {
@@ -542,6 +604,12 @@ namespace saas.Controllers
         {
             string? codigoNormalizado = codigoBarra?.Trim();
             return string.IsNullOrEmpty(codigoNormalizado) ? null : codigoNormalizado;
+        }
+
+        private static bool EsCodigoBarraDuplicado(DbUpdateException excepcion)
+        {
+            return excepcion.InnerException is SqlException sqlException &&
+                (sqlException.Number == 2601 || sqlException.Number == 2627);
         }
 
         // GET: Producto/Delete/5
