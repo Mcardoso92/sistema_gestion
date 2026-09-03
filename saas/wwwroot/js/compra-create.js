@@ -11,6 +11,8 @@
     const nuevoProductoForm = document.getElementById("nuevoProductoForm");
     const nuevoProductoCategoria = document.getElementById("nuevoProductoCategoria");
     const categoriasProductoUrl = compraForm?.dataset.categoriasProductoUrl;
+    const createUrl = compraForm?.dataset.createUrl;
+    const guardarCompraBtn = document.getElementById("guardarCompraBtn");
 
     if (!compraForm || !detalleBody || !detalleTemplate || !agregarProductoBtn) {
         return;
@@ -377,23 +379,30 @@
         bootstrap.Modal.getInstance(nuevoProductoModal)?.hide();
     });
 
+    let empresaAnterior = empresaSelect?.value || "";
+
     empresaSelect?.addEventListener("change", () => {
-        if (obtenerFilas().length === 0) {
-            return;
+        const empresaNueva = empresaSelect.value;
+
+        if (obtenerFilas().length > 0) {
+            const confirmar = confirm(
+                "Al cambiar de empresa se eliminarán los productos agregados. ¿Desea continuar?"
+            );
+
+            if (!confirmar) {
+                empresaSelect.value = empresaAnterior;
+                return;
+            }
         }
 
-        const confirmar = confirm(
-            "Al cambiar de empresa se eliminarán los productos agregados. ¿Desea continuar?"
-        );
+        empresaAnterior = empresaNueva;
+        const url = new URL(createUrl, window.location.origin);
 
-        if (!confirmar) {
-            return;
+        if (empresaNueva) {
+            url.searchParams.set("empresaId", empresaNueva);
         }
 
-        detalleBody.innerHTML = "";
-
-        recalcularTotal();
-        actualizarEstadoVacio();
+        window.location.assign(url);
     });
 
     compraForm.addEventListener("submit", event => {
@@ -437,6 +446,11 @@
         }
 
         renumerarFilas();
+
+        if (guardarCompraBtn) {
+            guardarCompraBtn.disabled = true;
+            guardarCompraBtn.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Guardando...';
+        }
     });
 
     obtenerFilas().forEach(fila => {

@@ -28,7 +28,8 @@
     </div>
 
     <form asp-action="Registrar"
-          method="post">
+          method="post"
+          id="formRegistrarDevolucion">
 
         @Html.AntiForgeryToken()
 
@@ -200,6 +201,7 @@
             </a>
 
             <button type="submit"
+                    id="btnConfirmarDevolucion"
                     class="btn btn-primary">
                 Confirmar devolución
             </button>
@@ -213,5 +215,15 @@
 @section Scripts {
 
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.getElementById("formRegistrarDevolucion")?.addEventListener("submit", () => {
+            const boton = document.getElementById("btnConfirmarDevolucion");
+            if (boton) {
+                boton.disabled = true;
+                boton.textContent = "Procesando...";
+            }
+        });
+    </script>
 
 }

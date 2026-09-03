@@ -5,12 +5,13 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel;
 
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class ProveedorController : Controller
+    public class ProveedorController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
@@ -65,7 +66,8 @@ namespace saas.Controllers
             if (!string.IsNullOrWhiteSpace(proveedorVM.Busqueda))
             {
                 string busqueda = proveedorVM.Busqueda.Trim();
-                string cuitBusqueda = NormalizarCuit(busqueda);
+                string cuitBusqueda =
+                    CuitValidator.Normalizar(busqueda) ?? string.Empty;
 
                 consulta = consulta.Where(p =>
                     p.RazonSocial.Contains(busqueda) ||
@@ -277,9 +279,9 @@ namespace saas.Controllers
 
             if (!string.IsNullOrWhiteSpace(proveedorVM.CUIT))
             {
-                cuitNormalizado = NormalizarCuit(proveedorVM.CUIT);
+                cuitNormalizado = CuitValidator.Normalizar(proveedorVM.CUIT)!;
 
-                if (!CuitValido(cuitNormalizado))
+                if (!CuitValidator.EsValido(cuitNormalizado))
                 {
                     ModelState.AddModelError(nameof(proveedorVM.CUIT), "El CUIT ingresado no es válido.");
 
@@ -440,9 +442,9 @@ namespace saas.Controllers
 
             if (!string.IsNullOrWhiteSpace(proveedorVM.CUIT))
             {
-                cuitNormalizado = NormalizarCuit(proveedorVM.CUIT);
+                cuitNormalizado = CuitValidator.Normalizar(proveedorVM.CUIT)!;
 
-                if (!CuitValido(cuitNormalizado))
+                if (!CuitValidator.EsValido(cuitNormalizado))
                 {
                     ModelState.AddModelError(nameof(proveedorVM.CUIT), "El CUIT ingresado no es válido.");
                     return View(proveedorVM);
@@ -586,44 +588,11 @@ namespace saas.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-        private static string NormalizarCuit(string cuit)
-        {
-            return new string(cuit.Where(char.IsDigit).ToArray());
-        }
         private static string? NormalizarTextoOpcional(string? valor)
         {
             return string.IsNullOrWhiteSpace(valor)
                 ? null
                 : valor.Trim();
-        }
-        private static bool CuitValido(string cuit)
-        {
-            if (cuit.Length != 11 || !cuit.All(char.IsDigit))
-            {
-                return false;
-            }
-
-            int[] multiplicadores = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
-            int suma = 0;
-
-            for (int i = 0; i < multiplicadores.Length; i++)
-            {
-                suma += (cuit[i] - '0') * multiplicadores[i];
-            }
-
-            int resto = suma % 11;
-            int digitoVerificador = 11 - resto;
-
-            if (digitoVerificador == 11)
-            {
-                digitoVerificador = 0;
-            }
-            else if (digitoVerificador == 10)
-            {
-                digitoVerificador = 9;
-            }
-
-            return digitoVerificador == cuit[10] - '0';
         }
         private async Task CargarEmpresas(ProveedorCreateVM proveedorVM)
         {

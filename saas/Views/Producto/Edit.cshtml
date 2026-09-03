@@ -42,6 +42,21 @@
                             </div>
                             <span asp-validation-for="PrecioCosto" class="text-danger"></span>
                         </div>
+                        <div class="col-md-6">
+                            <label for="motivoCambioCosto" class="form-label">
+                                Motivo del cambio de costo
+                            </label>
+                            <input id="motivoCambioCosto"
+                                   name="motivoCambioCosto"
+                                   value="@ViewBag.MotivoCambioCosto"
+                                   class="form-control"
+                                   maxlength="500"
+                                   placeholder="Obligatorio si modifica el precio de costo" />
+                            @Html.ValidationMessage("motivoCambioCosto", null, new { @class = "text-danger" })
+                            <div class="form-text">
+                                El precio de costo representa el costo de la última compra activa.
+                            </div>
+                        </div>
                         <div class="col-md-3">
                             <label asp-for="PrecioVenta" class="form-label">Precio de Venta</label>
                             <div class="input-group">

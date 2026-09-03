@@ -10,7 +10,7 @@ using saas.ViewModel;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class CategoriaGastoController : Controller
+    public class CategoriaGastoController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
@@ -260,7 +260,7 @@ namespace saas.Controllers
                 string mensaje =
                     existente.Estado
                         ? "Ya existe una categoría de gasto con ese nombre."
-                        : "Ya existe una categoría de gasto inactiva con ese nombre. Puede reactivarla desde Edit.";
+                        : "Ya existe una categoría de gasto inactiva con ese nombre. Puede reactivarla desde la edición.";
 
                 ModelState.AddModelError(
                     nameof(categoriaVM.Nombre),

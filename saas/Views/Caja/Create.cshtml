@@ -220,6 +220,19 @@
             const container =
                 document.getElementById("mediosPagoContainer");
 
+            const permiteTurnos =
+                document.getElementById("permiteTurnos");
+
+            function actualizarPermiteTurnos() {
+                const esEfectivo = tipoCajaSelect.value === "1";
+
+                permiteTurnos.disabled = !esEfectivo;
+
+                if (!esEfectivo) {
+                    permiteTurnos.checked = false;
+                }
+            }
+
             async function cargarMediosPago() {
 
                 const empresaId =
@@ -304,9 +317,13 @@
 
             tipoCajaSelect.addEventListener(
                 "change",
-                cargarMediosPago);
+                function () {
+                    actualizarPermiteTurnos();
+                    cargarMediosPago();
+                });
 
             // Carga inicial
+            actualizarPermiteTurnos();
             cargarMediosPago();
         });
     </script>

@@ -18,6 +18,13 @@
                 Los movimientos históricos no se modificarán.
             </div>
 
+            @if (Model.TieneTurnoAbiertoAsociado)
+            {
+                <div class="alert alert-danger">
+                    No puede desactivarlo mientras una caja asociada tenga un turno abierto.
+                </div>
+            }
+
             <dl class="row mb-4">
 
                 <dt class="col-sm-3">Nombre</dt>
@@ -58,10 +65,18 @@
                         Cancelar
                     </a>
 
-                    <button type="submit"
-                            class="btn btn-danger">
-                        Desactivar
-                    </button>
+                    @if (Model.TieneTurnoAbiertoAsociado)
+                    {
+                        <button type="button" class="btn btn-danger" disabled>
+                            Desactivar
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-danger">
+                            Desactivar
+                        </button>
+                    }
 
                 </div>
 

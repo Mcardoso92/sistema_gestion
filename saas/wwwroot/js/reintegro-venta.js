@@ -6,9 +6,12 @@
             document.querySelectorAll(
                 ".cantidad-reintegrar");
 
-        const totalVisual =
+    const totalVisual =
             document.getElementById(
                 "totalReintegro");
+
+        const formulario = document.getElementById("formReintegroVenta");
+        const botonConfirmar = document.getElementById("btnConfirmarReintegroVenta");
 
         function actualizarTotal() {
 
@@ -54,4 +57,11 @@
         });
 
         actualizarTotal();
+
+        formulario?.addEventListener("submit", () => {
+            if (botonConfirmar) {
+                botonConfirmar.disabled = true;
+                botonConfirmar.textContent = "Procesando...";
+            }
+        });
     });

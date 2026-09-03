@@ -34,6 +34,7 @@ namespace saas.Data
         public DbSet<ReintegroProveedor> ReintegrosProveedor { get; set; } = null!;
         public DbSet<TransferenciaCaja> TransferenciasCaja { get; set; } = null!;
         public DbSet<MovimientoCaja> MovimientosCaja { get; set; } = null!;
+        public DbSet<CambioCostoProducto> CambiosCostoProducto { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -188,6 +189,30 @@ namespace saas.Data
                 .HasOne(d => d.Compra)
                 .WithMany(c => c.Detalles)
                 .HasForeignKey(d => d.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CambioCostoProducto>()
+                .HasOne(c => c.Producto)
+                .WithMany()
+                .HasForeignKey(c => c.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CambioCostoProducto>()
+                .HasOne(c => c.Empresa)
+                .WithMany()
+                .HasForeignKey(c => c.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CambioCostoProducto>()
+                .HasOne(c => c.Usuario)
+                .WithMany()
+                .HasForeignKey(c => c.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CambioCostoProducto>()
+                .HasOne(c => c.Compra)
+                .WithMany()
+                .HasForeignKey(c => c.CompraId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DetalleCompra>()
@@ -941,6 +966,9 @@ namespace saas.Data
 
             modelBuilder.Entity<MovimientoCaja>()
                 .HasIndex(m => m.TransferenciaCajaId);
+
+            modelBuilder.Entity<CambioCostoProducto>()
+                .HasIndex(c => new { c.EmpresaId, c.ProductoId, c.Fecha });
         }
 
         private static void ConfigurarPropiedades(ModelBuilder modelBuilder)
@@ -996,6 +1024,14 @@ namespace saas.Data
 
             modelBuilder.Entity<DetalleCompra>()
                 .Property(d => d.PrecioVentaNuevo)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CambioCostoProducto>()
+                .Property(c => c.CostoAnterior)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<CambioCostoProducto>()
+                .Property(c => c.CostoNuevo)
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<DevolucionCompra>()

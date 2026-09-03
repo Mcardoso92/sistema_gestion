@@ -20,6 +20,8 @@ namespace saas.ViewModel
 
         public bool Estado { get; set; }
 
+        public bool TieneTurnoAbierto { get; set; }
+
         public int EmpresaId { get; set; }
 
         public List<int> MediosPagoSeleccionadosIds { get; set; }

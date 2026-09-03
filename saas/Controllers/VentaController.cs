@@ -558,22 +558,6 @@ namespace saas.Controllers
 
 
 
-                decimal totalPagado = pagos.Sum(p => p.Importe);
-
-                if (totalPagado > totalVenta)
-                {
-                    ModelState.AddModelError(
-                        nameof(ventaVM.Pagos),
-                        "El total pagado no puede superar el total de la venta.");
-                }
-
-                if (totalPagado < totalVenta && !ventaVM.ClienteId.HasValue)
-                {
-                    ModelState.AddModelError(
-                        nameof(ventaVM.ClienteId),
-                        "Debe seleccionar un cliente para dejar saldo pendiente.");
-                }
-
                 for (int i = 0; i < pagos.Count; i++)
                 {
                     var pago = pagos[i];
@@ -603,22 +587,38 @@ namespace saas.Controllers
                         continue;
                     }
 
-                    bool medioPagoValido =
+                    var medioPago =
                         await _context.CajaMediosPago
                             .AsNoTracking()
-                            .AnyAsync(cm =>
+                            .Where(cm =>
                                 cm.CajaId == pago.CajaId &&
                                 cm.MedioPagoId == pago.MedioPagoId &&
                                 cm.Caja.EmpresaId == empresaVentaId &&
                                 cm.Caja.Estado &&
                                 cm.MedioPago.EmpresaId == empresaVentaId &&
-                                cm.MedioPago.Estado);
+                                cm.MedioPago.Estado)
+                            .Select(cm => new
+                            {
+                                cm.MedioPago.Tipo
+                            })
+                            .FirstOrDefaultAsync();
 
-                    if (!medioPagoValido)
+                    if (medioPago == null)
                     {
                         ModelState.AddModelError(
                             $"Pagos[{i}].MedioPagoId",
                             "El medio de pago no es válido para la caja seleccionada.");
+
+                        continue;
+                    }
+
+                    if (medioPago.Tipo == TipoMedioPago.Efectivo &&
+                        (!pago.ImporteRecibido.HasValue ||
+                         pago.ImporteRecibido.Value < pago.Importe))
+                    {
+                        ModelState.AddModelError(
+                            $"Pagos[{i}].ImporteRecibido",
+                            "El importe recibido en efectivo debe ser igual o mayor al importe del pago.");
 
                         continue;
                     }
@@ -643,6 +643,29 @@ namespace saas.Controllers
 
                     turnosPorPago[i] =
                         turnoMovimientoCajaId;
+                }
+
+                /*
+                 * Los totales se evalúan después de validar cada línea. Así,
+                 * un pago incompleto nunca habilita una venta ni cubre saldo.
+                 */
+                decimal totalPagado = pagos.Sum(p => p.Importe);
+
+                if (ModelState.IsValid)
+                {
+                    if (totalPagado > totalVenta)
+                    {
+                        ModelState.AddModelError(
+                            nameof(ventaVM.Pagos),
+                            "El total pagado no puede superar el total de la venta.");
+                    }
+
+                    if (totalPagado < totalVenta && !ventaVM.ClienteId.HasValue)
+                    {
+                        ModelState.AddModelError(
+                            nameof(ventaVM.ClienteId),
+                            "Debe seleccionar un cliente para dejar saldo pendiente.");
+                    }
                 }
 
                 if (!ModelState.IsValid)

@@ -21,7 +21,14 @@ namespace saas.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult Terminos()
         {
             return View();
         }

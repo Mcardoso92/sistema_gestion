@@ -135,6 +135,17 @@ namespace saas.Controllers
                 }
             }
 
+            string? cuitNormalizado =
+                CuitValidator.Normalizar(vm.Cuit);
+
+            if (cuitNormalizado != null &&
+                !CuitValidator.EsValido(cuitNormalizado))
+            {
+                ModelState.AddModelError(
+                    nameof(vm.Cuit),
+                    "El CUIT ingresado no es válido.");
+            }
+
             if (!ModelState.IsValid)
             {
                 vm.EmpresaNombre = empresa?.Nombre ?? string.Empty;
@@ -180,7 +191,7 @@ namespace saas.Controllers
             }
 
             configuracion.RazonSocial = vm.RazonSocial.Trim();
-            configuracion.Cuit = LimpiarTexto(vm.Cuit);
+            configuracion.Cuit = cuitNormalizado;
             configuracion.Direccion = LimpiarTexto(vm.Direccion);
             configuracion.Telefono = LimpiarTexto(vm.Telefono);
             configuracion.Email = LimpiarTexto(vm.Email);

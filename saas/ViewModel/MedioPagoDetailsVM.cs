@@ -19,5 +19,7 @@ namespace saas.ViewModel
 
         public List<string> CajasAsociadas { get; set; }
             = new List<string>();
+
+        public bool TieneTurnoAbiertoAsociado { get; set; }
     }
 }

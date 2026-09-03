@@ -98,6 +98,9 @@
     const alertaClientePendiente =
         document.getElementById("alertaClientePendiente");
 
+    const alertaPagoInvalido =
+        document.getElementById("alertaPagoInvalido");
+
     const carrito = [];
 
     let temporizadorProductos;
@@ -129,19 +132,64 @@
 
         let total = 0;
 
-        document
-            .querySelectorAll(".pago-importe")
-            .forEach(input => {
-
-                const valor =
-                    parseFloat(input.value);
-
-                if (Number.isFinite(valor)) {
-                    total += valor;
+        pagosContainer
+            .querySelectorAll(".pago-item")
+            .forEach(pago => {
+                if (esPagoValido(pago)) {
+                    total += obtenerNumeroInput(
+                        pago.querySelector(".pago-importe"));
                 }
             });
 
         return total;
+    }
+
+    function obtenerNumeroInput(input) {
+        const valor = Number(input?.value);
+        return Number.isFinite(valor) ? valor : 0;
+    }
+
+    function esPagoValido(pago) {
+        const medioSelect = pago.querySelector(".medio-pago-select");
+        const cajaSelect = pago.querySelector(".caja-pago-select");
+        const importe = obtenerNumeroInput(
+            pago.querySelector(".pago-importe"));
+
+        if (!medioSelect?.value || !cajaSelect?.value || importe <= 0) {
+            return false;
+        }
+
+        if (!esMedioEfectivo(medioSelect)) {
+            return true;
+        }
+
+        const recibido = obtenerNumeroInput(
+            pago.querySelector(".efectivo-recibido"));
+
+        return recibido >= importe;
+    }
+
+    function actualizarEstadoConfirmacion() {
+        const stockValido = carrito.every(detalle =>
+            detalle.cantidad > 0 &&
+            detalle.cantidad <= detalle.stockDisponible);
+
+        const pagos = Array.from(
+            pagosContainer.querySelectorAll(".pago-item"));
+        const pagosValidos = pagos.every(esPagoValido);
+        const totalVentaActual = obtenerTotalVentaNumerico();
+        const totalPagadoActual = obtenerTotalPagado();
+        const saldoPendiente = Math.max(
+            0,
+            totalVentaActual - totalPagadoActual);
+        const clienteSeleccionado = inputClienteId.value.trim() !== "";
+
+        btnConfirmarVenta.disabled =
+            carrito.length === 0 ||
+            !stockValido ||
+            !pagosValidos ||
+            totalPagadoActual > totalVentaActual ||
+            (saldoPendiente > 0 && !clienteSeleccionado);
     }
     function obtenerSaldoRestante() {
 
@@ -188,8 +236,19 @@
         const clienteId =
             document.getElementById("clienteId")?.value;
 
+        const pagos = Array.from(
+            pagosContainer.querySelectorAll(".pago-item"));
+
+        const existePagoInvalido =
+            pagos.some(pago => !esPagoValido(pago));
+
+        alertaPagoInvalido.classList.toggle(
+            "d-none",
+            !existePagoInvalido);
+
         if (saldo > 0 &&
-            !clienteId) {
+            !clienteId &&
+            !existePagoInvalido) {
 
             alertaClientePendiente.classList.remove(
                 "d-none");
@@ -199,6 +258,8 @@
             alertaClientePendiente.classList.add(
                 "d-none");
         }
+
+        actualizarEstadoConfirmacion();
     }
 
     async function cargarCajasPorMedioPago(
@@ -252,11 +313,15 @@
                 cajaSelect.value =
                     cajas[0].id;
             }
+
+            actualizarResumenPagos();
         }
         catch {
 
             cajaSelect.innerHTML =
                 '<option value="">No disponible</option>';
+
+            actualizarResumenPagos();
         }
     }
 
@@ -283,6 +348,10 @@
                 pago.querySelector(
                     ".pago-importe");
 
+            const recibido =
+                pago.querySelector(
+                    ".efectivo-recibido");
+
             medio.name =
                 `Pagos[${index}].MedioPagoId`;
 
@@ -291,6 +360,11 @@
 
             importe.name =
                 `Pagos[${index}].Importe`;
+
+            if (recibido) {
+                recibido.name =
+                    `Pagos[${index}].ImporteRecibido`;
+            }
         });
     }
 
@@ -382,6 +456,7 @@
                         </label>
 
                         <input type="number"
+                               name="Pagos[${index}].ImporteRecibido"
                                min="0"
                                step="0.01"
                                class="form-control form-control-sm efectivo-recibido"
@@ -471,7 +546,13 @@
 
                 actualizarBloqueEfectivo(
                     pago);
+
+                actualizarResumenPagos();
             });
+
+        cajaSelect.addEventListener(
+            "change",
+            actualizarResumenPagos);
 
         importe.addEventListener(
             "input",
@@ -488,6 +569,7 @@
                 function () {
 
                     actualizarVuelto(pago);
+                    actualizarResumenPagos();
                 });
         }
 
@@ -547,9 +629,17 @@
             return 0;
         }
 
+        const texto = valor.toString().trim();
+
+        // Los valores reconstruidos pueden venir en formato invariante
+        // (1500.00) o es-AR (1.500,00). No se deben confundir los decimales
+        // invariantes con separadores de miles.
+        if (/^-?\d+(\.\d+)?$/.test(texto)) {
+            return Number(texto);
+        }
+
         return Number(
-            valor
-                .toString()
+            texto
                 .replace(/\./g, "")
                 .replace(",", ".")
         );
@@ -880,8 +970,7 @@
             return;
         }
 
-        detalle.cantidad++;
-        renderizarCarrito();
+        modificarCantidad(indice, detalle.cantidad + 1);
     }
 
     function disminuirCantidad(indice) {
@@ -896,8 +985,7 @@
             return;
         }
 
-        detalle.cantidad--;
-        renderizarCarrito();
+        modificarCantidad(indice, detalle.cantidad - 1);
     }
 
     function modificarCantidad(indice, nuevaCantidad) {
@@ -957,18 +1045,11 @@
             0
         );
 
-        const stockValido = carrito.every(
-            detalle =>
-                detalle.cantidad > 0 &&
-                detalle.cantidad <= detalle.stockDisponible
-        );
-
         totalLineas.textContent = cantidadLineas;
         totalUnidades.textContent = cantidadUnidades;
         totalVenta.textContent = formatoMoneda.format(importeTotal);
 
-        btnConfirmarVenta.disabled =
-            cantidadLineas === 0 || !stockValido;
+        actualizarEstadoConfirmacion();
     }
 
     async function buscarProductos(mostrarAdvertencia = false) {
@@ -1284,6 +1365,7 @@
         panelBusquedaCliente.classList.add("d-none");
         inputBuscarCliente.value = "";
         ocultarResultadosClientes();
+        actualizarResumenPagos();
         inputBuscarProducto.focus();
     }
 
@@ -1307,6 +1389,7 @@
         icono.textContent = "search";
 
         btnBuscarCliente.append(icono, " Buscar cliente");
+        actualizarResumenPagos();
     }
 
     function actualizarClienteVisible() {

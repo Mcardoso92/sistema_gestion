@@ -85,8 +85,15 @@
                     <div class="col-12">
                         <div class="form-check form-switch">
 
-                            <input asp-for="Estado"
-                                   class="form-check-input" />
+                            @if (Model.Estado && Model.TieneTurnoAbiertoAsociado)
+                            {
+                                <input asp-for="Estado" type="hidden" />
+                                <input class="form-check-input" type="checkbox" checked disabled />
+                            }
+                            else
+                            {
+                                <input asp-for="Estado" class="form-check-input" />
+                            }
 
                             <label asp-for="Estado"
                                    class="form-check-label fw-semibold">
@@ -101,6 +108,14 @@
                                 Activá esta opción para reactivar el medio de pago.
                             </div>
                         }
+                        else if (Model.TieneTurnoAbiertoAsociado)
+                        {
+                            <div class="form-text text-warning-emphasis">
+                                No puede desactivarlo mientras una caja asociada tenga un turno abierto.
+                            </div>
+                        }
+
+                        <span asp-validation-for="Estado" class="text-danger"></span>
                     </div>
 
                 </div>

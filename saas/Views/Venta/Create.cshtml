@@ -30,7 +30,7 @@
         <!-- Encabezado -->
         <div class="card-custom p-3 mb-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
             <div>
-                <a href="#" id="btnVolverVentas" class="d-inline-flex align-items-center gap-1 text-muted text-decoration-none small mb-2">
+                <a asp-action="Index" id="btnVolverVentas" class="d-inline-flex align-items-center gap-1 text-muted text-decoration-none small mb-2">
                     <span class="material-symbols-outlined" style="font-size: 18px;">arrow_back</span>
                     Volver a Ventas
                 </a>
@@ -457,6 +457,8 @@
                                                         </label>
 
                                                         <input type="number"
+                                                               name="Pagos[@i].ImporteRecibido"
+                                                               value="@Model.Pagos[i].ImporteRecibido"
                                                                min="0"
                                                                step="0.01"
                                                                class="form-control form-control-sm efectivo-recibido"
@@ -515,6 +517,11 @@
                                 <div id="alertaClientePendiente"
                                      class="alert alert-warning mt-2 mb-0 py-2 px-2 small d-none">
                                     Para dejar saldo pendiente debe seleccionar un cliente.
+                                </div>
+
+                                <div id="alertaPagoInvalido"
+                                     class="alert alert-warning mt-2 mb-0 py-2 px-2 small d-none">
+                                    Complete el medio, la caja y los importes del pago.
                                 </div>
 
                             </div>

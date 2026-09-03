@@ -22,6 +22,8 @@ namespace saas.ViewModel
             ErrorMessage = "El importe debe ser mayor a 0.")]
         public decimal Importe { get; set; }
 
+        public decimal? ImporteRecibido { get; set; }
+
         public string? MedioPagoNombre { get; set; }
 
         public string? CajaNombre { get; set; }

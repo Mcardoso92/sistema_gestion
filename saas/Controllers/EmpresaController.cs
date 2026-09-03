@@ -8,7 +8,7 @@ using saas.Services;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin")]
-    public class EmpresaController : Controller
+    public class EmpresaController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly EmpresaInicializacionService _empresaInicializacionService;

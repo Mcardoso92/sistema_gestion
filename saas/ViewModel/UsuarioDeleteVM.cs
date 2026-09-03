@@ -15,5 +15,9 @@
         public string Rol { get; set; } = null!;
 
         public bool Estado { get; set; }
+
+        public bool PuedeDesactivar { get; set; } = true;
+
+        public string? MotivoBloqueoDesactivacion { get; set; }
     }
 }

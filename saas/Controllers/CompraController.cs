@@ -15,7 +15,7 @@ using saas.ViewModel.ReintegroProveedor;
 namespace saas.Controllers
 {
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-    public class CompraController : Controller
+    public class CompraController : VeltikaController
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
@@ -657,8 +657,24 @@ namespace saas.Controllers
 
                     producto.Stock = stockPosterior;
 
-                    producto.PrecioCosto =
-                        detalleVM.PrecioUnitario;
+                    if (producto.PrecioCosto != detalleVM.PrecioUnitario)
+                    {
+                        _context.CambiosCostoProducto.Add(
+                            new CambioCostoProducto
+                            {
+                                Producto = producto,
+                                EmpresaId = empresaCompraId,
+                                UsuarioId = usuario.Id,
+                                Compra = compra,
+                                CostoAnterior = producto.PrecioCosto,
+                                CostoNuevo = detalleVM.PrecioUnitario,
+                                Fecha = fechaCompra,
+                                Origen = OrigenCambioCostoProducto.Compra
+                            });
+
+                        producto.PrecioCosto =
+                            detalleVM.PrecioUnitario;
+                    }
 
                     if (precioVentaNuevo.HasValue)
                     {
@@ -1046,6 +1062,20 @@ namespace saas.Controllers
                     if (!existeCompraCostoPosterior &&
                         producto.PrecioCosto == detalle.PrecioUnitario)
                     {
+                        _context.CambiosCostoProducto.Add(
+                            new CambioCostoProducto
+                            {
+                                ProductoId = producto.Id,
+                                EmpresaId = compra.EmpresaId,
+                                UsuarioId = usuario.Id,
+                                CompraId = compra.Id,
+                                CostoAnterior = producto.PrecioCosto,
+                                CostoNuevo = detalle.PrecioCostoAnterior,
+                                Fecha = fechaAnulacion,
+                                Origen = OrigenCambioCostoProducto.AnulacionCompra,
+                                Motivo = "Restauración automática por anulación de la compra."
+                            });
+
                         producto.PrecioCosto =
                             detalle.PrecioCostoAnterior;
                     }
