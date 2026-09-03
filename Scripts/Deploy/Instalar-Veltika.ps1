@@ -15,12 +15,12 @@ $ErrorActionPreference = "Stop"
 function Verificar-Administrador {
     $identidad = [Security.Principal.WindowsIdentity]::GetCurrent()
     $principal = [Security.Principal.WindowsPrincipal]::new($identidad)
-    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw "Ejecutá PowerShell como administrador." }
+    if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { throw "Ejecuta PowerShell como administrador." }
 }
 
 function Verificar-Variables {
-    # Si ASPNETCORE_ENVIRONMENT no está definido, ASP.NET Core utiliza Production,
-    # que es precisamente la configuración esperada en el servidor.
+    # Si ASPNETCORE_ENVIRONMENT no esta definido, ASP.NET Core utiliza Production,
+    # que es precisamente la configuracion esperada en el servidor.
     $requeridas = @("ConnectionStrings__SaasDbContext", "EmailSettings__Host", "EmailSettings__Port", "EmailSettings__UserName", "EmailSettings__Password", "EmailSettings__FromEmail", "EmailSettings__FromName", "EmailSettings__UseSsl")
     $faltantes = foreach ($nombre in $requeridas) {
         if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($nombre, "Machine"))) { $nombre }
@@ -30,12 +30,12 @@ function Verificar-Variables {
 
 Verificar-Administrador
 Verificar-Variables
-if (-not (Test-Path -LiteralPath $PaqueteZip)) { throw "No se encontró el paquete: $PaqueteZip" }
+if (-not (Test-Path -LiteralPath $PaqueteZip)) { throw "No se encontro el paquete: $PaqueteZip" }
 
 $hashReal = (Get-FileHash -LiteralPath $PaqueteZip -Algorithm SHA256).Hash
-if ($hashReal -ne $HashEsperado.Trim()) { throw "El SHA256 del paquete no coincide. No se realizará el deploy." }
+if ($hashReal -ne $HashEsperado.Trim()) { throw "El SHA256 del paquete no coincide. No se realizara el deploy." }
 
-$confirmacion = Read-Host "Escribí DESPLEGAR para continuar"
+$confirmacion = Read-Host "Escribi DESPLEGAR para continuar"
 if ($confirmacion -cne "DESPLEGAR") { throw "Deploy cancelado." }
 
 Import-Module WebAdministration
@@ -53,11 +53,11 @@ $scriptMigraciones = Join-Path $directorioTrabajo "Veltika-Migraciones.sql"
 
 if (-not (Test-Path (Join-Path $nuevaAplicacion "saas.dll"))) { throw "El paquete no contiene Aplicacion\saas.dll." }
 if (-not (Test-Path $scriptMigraciones)) { throw "El paquete no contiene Veltika-Migraciones.sql." }
-if (-not (Test-Path $scriptBackup)) { throw "No se encontró el script de backup: $scriptBackup" }
+if (-not (Test-Path $scriptBackup)) { throw "No se encontro el script de backup: $scriptBackup" }
 
 Write-Host "=== BACKUP PREVIO ==="
 & $scriptBackup
-if (-not $?) { throw "Falló el backup previo." }
+if (-not $?) { throw "Fallo el backup previo." }
 
 New-Item -ItemType Directory -Path $respaldoAplicacion -Force | Out-Null
 Copy-Item -LiteralPath $RutaAplicacion -Destination (Join-Path $respaldoAplicacion "Aplicacion") -Recurse
@@ -70,9 +70,9 @@ Stop-WebAppPool -Name $AppPool
 
 Write-Host "=== MIGRACIONES ==="
 & sqlcmd -S $InstanciaSql -d $BaseDatos -E -C -I -b -i $scriptMigraciones
-if ($LASTEXITCODE -ne 0) { throw "Fallaron las migraciones. La aplicación permanece detenida." }
+if ($LASTEXITCODE -ne 0) { throw "Fallaron las migraciones. La aplicacion permanece detenida." }
 
-Write-Host "=== REEMPLAZO DE APLICACIÓN ==="
+Write-Host "=== REEMPLAZO DE APLICACION ==="
 Move-Item -LiteralPath $RutaAplicacion -Destination $rutaAnterior
 Copy-Item -LiteralPath $nuevaAplicacion -Destination $RutaAplicacion -Recurse
 
@@ -92,14 +92,14 @@ iisreset | Out-Host
 Start-WebAppPool -Name $AppPool
 Start-WebSite -Name $Sitio
 $respuesta = Invoke-WebRequest "http://localhost" -Headers @{ Host = $HostPrueba } -UseBasicParsing
-if ($respuesta.StatusCode -ne 200) { throw "La prueba local devolvió HTTP $($respuesta.StatusCode)." }
+if ($respuesta.StatusCode -ne 200) { throw "La prueba local devolvio HTTP $($respuesta.StatusCode)." }
 
 Write-Host "=== BACKUP POSTERIOR ==="
 & $scriptBackup
-if (-not $?) { throw "La aplicación funciona, pero falló el backup posterior." }
+if (-not $?) { throw "La aplicacion funciona, pero fallo el backup posterior." }
 
 Write-Host ""
 Write-Host "Deploy finalizado correctamente."
-Write-Host "Publicación anterior: $rutaAnterior"
+Write-Host "Publicacion anterior: $rutaAnterior"
 Write-Host "Backup de archivos: $respaldoAplicacion"
 Write-Host "Backup de IIS: $backupIis"
