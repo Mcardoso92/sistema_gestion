@@ -19,7 +19,9 @@ function Verificar-Administrador {
 }
 
 function Verificar-Variables {
-    $requeridas = @("ASPNETCORE_ENVIRONMENT", "ConnectionStrings__SaasDbContext", "EmailSettings__Host", "EmailSettings__Port", "EmailSettings__UserName", "EmailSettings__Password", "EmailSettings__FromEmail", "EmailSettings__FromName", "EmailSettings__UseSsl")
+    # Si ASPNETCORE_ENVIRONMENT no está definido, ASP.NET Core utiliza Production,
+    # que es precisamente la configuración esperada en el servidor.
+    $requeridas = @("ConnectionStrings__SaasDbContext", "EmailSettings__Host", "EmailSettings__Port", "EmailSettings__UserName", "EmailSettings__Password", "EmailSettings__FromEmail", "EmailSettings__FromName", "EmailSettings__UseSsl")
     $faltantes = foreach ($nombre in $requeridas) {
         if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($nombre, "Machine"))) { $nombre }
     }
