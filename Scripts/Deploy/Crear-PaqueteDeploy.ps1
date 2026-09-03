@@ -33,10 +33,10 @@ try {
     New-Item -ItemType Directory -Path $directorioAplicacion -Force | Out-Null
 
     Write-Host "=== PRUEBAS AUTOMATIZADAS ==="
-    Ejecutar-Comando "dotnet" @("test", $proyectoTests, "-c", "Release", "--verbosity:minimal", "--artifacts-path", $artefactosTemporales)
+    Ejecutar-Comando -Comando "dotnet" -Argumentos @("test", $proyectoTests, "-c", "Release", "--verbosity:minimal", "--artifacts-path", $artefactosTemporales)
 
     Write-Host "=== PUBLICACIÓN RELEASE ==="
-    Ejecutar-Comando "dotnet" @("publish", $proyectoWeb, "-c", "Release", "--verbosity:minimal", "--output", $directorioAplicacion)
+    Ejecutar-Comando -Comando "dotnet" -Argumentos @("publish", $proyectoWeb, "-c", "Release", "--verbosity:minimal", "--output", $directorioAplicacion)
 
     # La configuración de desarrollo y las imágenes locales nunca forman parte del paquete.
     $configuracionDesarrollo = Join-Path $directorioAplicacion "appsettings.Development.json"
@@ -45,7 +45,7 @@ try {
     if (Test-Path $uploadsLocales) { Remove-Item -LiteralPath $uploadsLocales -Recurse -Force }
 
     Write-Host "=== SCRIPT DE MIGRACIONES ==="
-    Ejecutar-Comando "dotnet" @("ef", "migrations", "script", "--idempotent", "--project", $proyectoWeb, "--startup-project", $proyectoWeb, "--output", $scriptMigraciones)
+    Ejecutar-Comando -Comando "dotnet" -Argumentos @("ef", "migrations", "script", "--idempotent", "--project", $proyectoWeb, "--startup-project", $proyectoWeb, "--output", $scriptMigraciones)
 
     $obligatorios = @("saas.dll", "web.config", "appsettings.json", "appsettings.Production.json")
     foreach ($nombre in $obligatorios) {
