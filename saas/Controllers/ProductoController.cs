@@ -431,6 +431,11 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            // Estos valores no se envían desde el formulario porque no son editables.
+            // Se restauran desde la base para que un POST inválido no los muestre vacíos o en cero.
+            producto.Stock = productoDb.Stock;
+            producto.UrlImagen = productoDb.UrlImagen;
+
             if (!esSuperAdmin)
             {
                 producto.EmpresaId = usuario.EmpresaId;
