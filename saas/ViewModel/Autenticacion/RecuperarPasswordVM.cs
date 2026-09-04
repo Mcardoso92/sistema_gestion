@@ -10,6 +10,10 @@ namespace saas.ViewModel.Autenticacion
         [EmailAddress(
             ErrorMessage =
                 "Ingrese un correo electrónico válido.")]
+        [StringLength(
+            100,
+            ErrorMessage =
+                "El correo electrónico no puede superar los 100 caracteres.")]
         public string Email { get; set; } =
             string.Empty;
     }
