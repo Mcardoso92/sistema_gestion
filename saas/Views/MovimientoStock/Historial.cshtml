@@ -128,7 +128,7 @@
                         <option value="">Todos</option>
                         @foreach (TipoMovimientoStock tipo in Enum.GetValues<TipoMovimientoStock>())
                         {
-                            <option value="@tipo">@tipo</option>
+                            <option value="@tipo">@TextoPresentacion.ValorEnum(tipo)</option>
                         }
                     </select>
                 </div>
@@ -234,7 +234,7 @@
                                 <td>
                                     <span class="historial-badge @claseBadge">
                                         <span class="material-symbols-outlined">@icono</span>
-                                        @movimiento.Tipo
+                                        @TextoPresentacion.ValorEnum(movimiento.Tipo)
                                     </span>
                                 </td>
 

@@ -29,4 +29,15 @@ public class TextoPresentacionTests
     {
         Assert.Equal("Billetera virtual", TextoPresentacion.ValorEnum(TipoCaja.BilleteraVirtual));
     }
+
+    [Theory]
+    [InlineData(TipoMovimientoStock.StockInicial, "Stock inicial")]
+    [InlineData(TipoMovimientoStock.AjusteEntrada, "Ajuste de entrada")]
+    [InlineData(TipoMovimientoStock.AnulacionVenta, "Anulación de venta")]
+    [InlineData(TipoMovimientoStock.ReintegroVenta, "Reintegro de venta")]
+    [InlineData(TipoMovimientoStock.AnulacionDevolucionCompra, "Anulación de devolución de compra")]
+    public void ValorEnum_MovimientoStockDevuelveNombreAmigable(TipoMovimientoStock tipo, string esperado)
+    {
+        Assert.Equal(esperado, TextoPresentacion.ValorEnum(tipo));
+    }
 }
