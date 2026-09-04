@@ -5,13 +5,14 @@
 }
 
 <main class="container-fluid px-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-0 fw-bold">Nuevo Producto</h1>
+    </div>
+
     <div class="row">
         <!-- Form Column -->
         <div class="col-md-8">
             <div class="card border-0 shadow-sm">
-                <div class="card-header">
-                    Nuevo Producto
-                </div>
                 <div class="card-body p-4">
                     @if (User.IsInRole("SuperAdmin"))
                     {
