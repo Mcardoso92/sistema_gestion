@@ -6,10 +6,10 @@ $ErrorActionPreference = "Stop"
 function Ejecutar-Comando {
     param([string]$Comando, [string[]]$Argumentos)
     & $Comando @Argumentos
-    if ($LASTEXITCODE -ne 0) { throw "El comando '$Comando' finalizó con código $LASTEXITCODE." }
+    if ($LASTEXITCODE -ne 0) { throw "El comando '$Comando' finalizo con codigo $LASTEXITCODE." }
 }
 
-# El script vive en Scripts/Deploy y obtiene desde allí la raíz del repositorio.
+# El script vive en Scripts/Deploy y obtiene desde alli la raiz del repositorio.
 $raizRepositorio = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 $proyectoWeb = Join-Path $raizRepositorio "saas\saas.csproj"
 $proyectoTests = Join-Path $raizRepositorio "saas.Tests\saas.Tests.csproj"
@@ -35,11 +35,11 @@ try {
     Write-Host "=== PRUEBAS AUTOMATIZADAS ==="
     Ejecutar-Comando -Comando "dotnet" -Argumentos @("test", $proyectoTests, "-c", "Release", "--verbosity:minimal", "--artifacts-path", $artefactosTemporales)
 
-    Write-Host "=== PUBLICACIÓN RELEASE ==="
+    Write-Host "=== PUBLICACION RELEASE ==="
     & dotnet publish $proyectoWeb -c Release --verbosity:minimal --output $directorioAplicacion
-    if ($LASTEXITCODE -ne 0) { throw "La publicación Release falló con código $LASTEXITCODE." }
+    if ($LASTEXITCODE -ne 0) { throw "La publicacion Release fallo con codigo $LASTEXITCODE." }
 
-    # La configuración de desarrollo y las imágenes locales nunca forman parte del paquete.
+    # La configuracion de desarrollo y las imagenes locales nunca forman parte del paquete.
     $configuracionDesarrollo = Join-Path $directorioAplicacion "appsettings.Development.json"
     $uploadsLocales = Join-Path $directorioAplicacion "wwwroot\uploads"
     if (Test-Path $configuracionDesarrollo) { Remove-Item -LiteralPath $configuracionDesarrollo -Force }
@@ -47,16 +47,16 @@ try {
 
     Write-Host "=== SCRIPT DE MIGRACIONES ==="
     & dotnet ef migrations script --idempotent --project $proyectoWeb --startup-project $proyectoWeb --output $scriptMigraciones
-    if ($LASTEXITCODE -ne 0) { throw "La generación del script de migraciones falló con código $LASTEXITCODE." }
+    if ($LASTEXITCODE -ne 0) { throw "La generacion del script de migraciones fallo con codigo $LASTEXITCODE." }
 
     $obligatorios = @("saas.dll", "web.config", "appsettings.json", "appsettings.Production.json")
     foreach ($nombre in $obligatorios) {
         $archivo = Join-Path $directorioAplicacion $nombre
         if (-not (Test-Path $archivo)) { throw "Falta un archivo obligatorio: $archivo" }
     }
-    if (-not (Test-Path $scriptMigraciones)) { throw "No se generó el script de migraciones." }
+    if (-not (Test-Path $scriptMigraciones)) { throw "No se genero el script de migraciones." }
 
-    Write-Host "=== COMPRESIÓN ==="
+    Write-Host "=== COMPRESION ==="
     Compress-Archive -Path $directorioAplicacion, $scriptMigraciones -DestinationPath $archivoZip -Force
     $hash = Get-FileHash $archivoZip -Algorithm SHA256
     $hash.Hash | Set-Content -Path "$archivoZip.sha256.txt" -Encoding ascii
