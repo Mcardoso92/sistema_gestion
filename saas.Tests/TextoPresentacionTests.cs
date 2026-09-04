@@ -40,4 +40,15 @@ public class TextoPresentacionTests
     {
         Assert.Equal(esperado, TextoPresentacion.ValorEnum(tipo));
     }
+
+    [Theory]
+    [InlineData(TipoMovimientoCaja.CobroVenta, "Cobro de venta")]
+    [InlineData(TipoMovimientoCaja.PagoProveedor, "Pago a proveedor")]
+    [InlineData(TipoMovimientoCaja.TransferenciaSalida, "Transferencia de salida")]
+    [InlineData(TipoMovimientoCaja.ReversionIngresoManual, "Reversión de ingreso manual")]
+    [InlineData(TipoMovimientoCaja.ReversionTransferenciaEntrada, "Reversión de transferencia de entrada")]
+    public void ValorEnum_MovimientoCajaDevuelveNombreAmigable(TipoMovimientoCaja tipo, string esperado)
+    {
+        Assert.Equal(esperado, TextoPresentacion.ValorEnum(tipo));
+    }
 }
