@@ -17,6 +17,9 @@
 
     DateTime? fechaHasta =
         ViewBag.FechaHasta as DateTime?;
+
+    int? empresaActual =
+        ViewBag.EmpresaId as int?;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -195,10 +198,18 @@
 
                     <div class="col-12 d-flex justify-content-end gap-2">
 
-                        <a asp-action="Index"
-                           class="btn btn-outline-secondary">
-                            Limpiar
-                        </a>
+                        @if (cajaOrigenActual.HasValue
+                            || cajaDestinoActual.HasValue
+                            || estadoActual.HasValue
+                            || fechaDesde.HasValue
+                            || fechaHasta.HasValue
+                            || empresaActual.HasValue)
+                        {
+                            <a asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                Limpiar
+                            </a>
+                        }
 
                         <button type="submit"
                                 class="btn btn-outline-primary">
