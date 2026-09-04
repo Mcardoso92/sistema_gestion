@@ -62,6 +62,46 @@ public class ProductoControllerTests
         Assert.Equal(1, producto.EmpresaId);
     }
 
+    [Fact]
+    public async Task Edit_SinMotivoConservaStockRealYNoModificaElProducto()
+    {
+        await using var context = TestDbContextFactory.Crear();
+        Usuario usuario = await PrepararDatos(context);
+        Producto productoDb = await context.Productos.FindAsync(1) ?? throw new InvalidOperationException();
+        productoDb.Stock = 17;
+        productoDb.PrecioCosto = 100;
+        productoDb.UrlImagen = "/uploads/producto-a.webp";
+        await context.SaveChangesAsync();
+
+        using UserManager<Usuario> userManager = CrearUserManager(context);
+        ProductoController controller = CrearController(context, userManager, usuario);
+        var productoEnviado = new Producto
+        {
+            Id = 1,
+            Nombre = productoDb.Nombre,
+            CategoriaId = productoDb.CategoriaId,
+            EmpresaId = productoDb.EmpresaId,
+            Estado = productoDb.Estado,
+            PrecioCosto = 120,
+            PrecioVenta = productoDb.PrecioVenta,
+            PuntoReposicion = productoDb.PuntoReposicion
+        };
+
+        IActionResult resultado = await controller.Edit(1, productoEnviado, null, motivoCambioCosto: null);
+
+        ViewResult vista = Assert.IsType<ViewResult>(resultado);
+        Producto productoMostrado = Assert.IsType<Producto>(vista.Model);
+        Assert.Equal(17, productoMostrado.Stock);
+        Assert.Equal("/uploads/producto-a.webp", productoMostrado.UrlImagen);
+        Assert.True(controller.ModelState.ContainsKey("motivoCambioCosto"));
+
+        context.ChangeTracker.Clear();
+        Producto productoPersistido = await context.Productos.FindAsync(1) ?? throw new InvalidOperationException();
+        Assert.Equal(17, productoPersistido.Stock);
+        Assert.Equal(100, productoPersistido.PrecioCosto);
+        Assert.Empty(context.CambiosCostoProducto);
+    }
+
     private static async Task<Usuario> PrepararDatos(SaasDbContext context)
     {
         var empresaA = new Empresa { Id = 1, Nombre = "Empresa A", Estado = true };
