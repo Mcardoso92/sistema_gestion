@@ -10,8 +10,18 @@
         </div>
     </div>
 
-    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-        <i class="bi bi-house"></i>
-        Volver al inicio
-    </a>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-house"></i>
+            Volver al Dashboard
+        </a>
+    }
+    else
+    {
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-house"></i>
+            Volver al inicio
+        </a>
+    }
 </main>
