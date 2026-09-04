@@ -109,6 +109,11 @@ namespace saas.Controllers
                 })
                 .ToListAsync();
 
+            foreach (ProveedorIndexItemVM proveedor in proveedorVM.Proveedores)
+            {
+                proveedor.CUIT = CuitValidator.Formatear(proveedor.CUIT);
+            }
+
             if (esSuperAdmin)
             {
                 proveedorVM.Empresas = await _context.Empresas
@@ -164,7 +169,7 @@ namespace saas.Controllers
                 Id = proveedor.Id,
                 RazonSocial = proveedor.RazonSocial,
                 NombreFantasia = proveedor.NombreFantasia,
-                CUIT = proveedor.CUIT,
+                CUIT = CuitValidator.Formatear(proveedor.CUIT),
                 Email = proveedor.Email,
                 Telefono = proveedor.Telefono,
                 Direccion = proveedor.Direccion,
@@ -377,7 +382,7 @@ namespace saas.Controllers
                 Id = proveedor.Id,
                 RazonSocial = proveedor.RazonSocial,
                 NombreFantasia = proveedor.NombreFantasia,
-                CUIT = proveedor.CUIT,
+                CUIT = CuitValidator.Formatear(proveedor.CUIT),
                 Email = proveedor.Email,
                 Telefono = proveedor.Telefono,
                 Direccion = proveedor.Direccion,
@@ -531,7 +536,7 @@ namespace saas.Controllers
                 Id = proveedor.Id,
                 RazonSocial = proveedor.RazonSocial,
                 NombreFantasia = proveedor.NombreFantasia,
-                CUIT = proveedor.CUIT,
+                CUIT = CuitValidator.Formatear(proveedor.CUIT),
                 Email = proveedor.Email,
                 Telefono = proveedor.Telefono,
                 Direccion = proveedor.Direccion,
