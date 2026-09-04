@@ -269,14 +269,7 @@ namespace saas.Controllers
                 roles = roles.Where(r => r.Name != "SuperAdmin");
             }
 
-            model.Roles = await roles
-                .OrderBy(r => r.Name)
-                .Select(r => new SelectListItem
-                {
-                    Value = r.Name!,
-                    Text = r.Name!
-                })
-                .ToListAsync();
+            model.Roles = await ObtenerOpcionesRoles(roles);
 
             return View(model);
         }
@@ -1370,14 +1363,7 @@ namespace saas.Controllers
                 roles = roles.Where(r => r.Name != "SuperAdmin");
             }
 
-            model.Roles = await roles
-                .OrderBy(r => r.Name)
-                .Select(r => new SelectListItem
-                {
-                    Value = r.Name!,
-                    Text = r.Name
-                })
-                .ToListAsync();
+            model.Roles = await ObtenerOpcionesRoles(roles);
 
             if (esSuperAdmin)
             {
@@ -1401,14 +1387,7 @@ namespace saas.Controllers
                 roles = roles.Where(r => r.Name != "SuperAdmin");
             }
 
-            model.Roles = await roles
-                .OrderBy(r => r.Name)
-                .Select(r => new SelectListItem
-                {
-                    Value = r.Name!,
-                    Text = r.Name
-                })
-                .ToListAsync();
+            model.Roles = await ObtenerOpcionesRoles(roles);
 
             if (esSuperAdmin)
             {
@@ -1451,6 +1430,23 @@ namespace saas.Controllers
                 .ToDictionary(
                     grupo => grupo.Key,
                     grupo => grupo.First().Rol ?? "");
+        }
+
+        private static async Task<List<SelectListItem>> ObtenerOpcionesRoles(IQueryable<IdentityRole> roles)
+        {
+            List<string?> nombresRoles = await roles
+                .AsNoTracking()
+                .OrderBy(r => r.Name)
+                .Select(r => r.Name)
+                .ToListAsync();
+
+            return nombresRoles
+                .Select(rol => new SelectListItem
+                {
+                    Value = rol ?? string.Empty,
+                    Text = TextoPresentacion.Rol(rol)
+                })
+                .ToList();
         }
 
         private async Task<string?> ObtenerMotivoBloqueoCambioAdministradorAsync(

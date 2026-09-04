@@ -52,7 +52,7 @@
                         <option value="">Todos los roles</option>
                         @foreach (var rol in rolesDisponibles)
                         {
-                            <option value="@rol.Name" selected="@(rolSeleccionado == rol.Name)"> @rol.Name </option>
+                            <option value="@rol.Name" selected="@(rolSeleccionado == rol.Name)"> @TextoPresentacion.Rol(rol.Name) </option>
                         }
                     </select>
                 </div>
@@ -154,7 +154,7 @@
                                     </td>
                                 }
                                 <td>
-                                    @(rolesUsuarios.TryGetValue(usuario.Id, out var rolUsuario) ? rolUsuario : "")
+                                    @(rolesUsuarios.TryGetValue(usuario.Id, out var rolUsuario) ? TextoPresentacion.Rol(rolUsuario) : "")
                                 </td>
                                 <td>
                                     @if (usuario.Estado)
