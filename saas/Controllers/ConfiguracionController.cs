@@ -79,7 +79,7 @@ namespace saas.Controllers
 
             vm.EmpresaNombre = empresa.Nombre;
             vm.RazonSocial = configuracion?.RazonSocial ?? empresa.Nombre;
-            vm.Cuit = configuracion?.Cuit;
+            vm.Cuit = CuitValidator.Formatear(configuracion?.Cuit);
             vm.Direccion = configuracion?.Direccion;
             vm.Telefono = configuracion?.Telefono;
             vm.Email = configuracion?.Email;

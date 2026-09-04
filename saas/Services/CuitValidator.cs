@@ -42,5 +42,17 @@ namespace saas.Services
 
             return digitoVerificador == normalizado[10] - '0';
         }
+
+        public static string? Formatear(string? cuit)
+        {
+            string? normalizado = Normalizar(cuit);
+
+            if (normalizado?.Length != 11)
+            {
+                return cuit;
+            }
+
+            return $"{normalizado[..2]}-{normalizado.Substring(2, 8)}-{normalizado[10]}";
+        }
     }
 }
