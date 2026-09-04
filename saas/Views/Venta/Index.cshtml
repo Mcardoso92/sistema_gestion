@@ -241,22 +241,31 @@
                     </div>
                 }
 
-                <!-- Limpiar filtros -->
-                <div class="col-lg-2 col-md-4">
+                @if (!string.IsNullOrWhiteSpace(Model.Buscar)
+                    || Model.FechaDesde.HasValue
+                    || Model.FechaHasta.HasValue
+                    || Model.Estado.HasValue
+                    || Model.EstadoCobro.HasValue
+                    || !string.IsNullOrWhiteSpace(Model.UsuarioId)
+                    || Model.EmpresaId.HasValue)
+                {
+                    <!-- Limpiar filtros -->
+                    <div class="col-lg-2 col-md-4">
 
-                    <a asp-action="Index"
-                       class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
 
-                        <span class="material-symbols-outlined"
-                              style="font-size: 18px;">
-                            restart_alt
-                        </span>
+                            <span class="material-symbols-outlined"
+                                  style="font-size: 18px;">
+                                restart_alt
+                            </span>
 
-                        Limpiar
+                            Limpiar
 
-                    </a>
+                        </a>
 
-                </div>
+                    </div>
+                }
 
             </div>
 
