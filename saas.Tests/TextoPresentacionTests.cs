@@ -23,4 +23,10 @@ public class TextoPresentacionTests
     {
         Assert.Equal(esperado, TextoPresentacion.ValorEnum(tipo));
     }
+
+    [Fact]
+    public void ValorEnum_BilleteraVirtualDevuelveNombreAmigable()
+    {
+        Assert.Equal("Billetera virtual", TextoPresentacion.ValorEnum(TipoCaja.BilleteraVirtual));
+    }
 }
