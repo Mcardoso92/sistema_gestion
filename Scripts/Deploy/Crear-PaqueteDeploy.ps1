@@ -36,7 +36,8 @@ try {
     Ejecutar-Comando -Comando "dotnet" -Argumentos @("test", $proyectoTests, "-c", "Release", "--verbosity:minimal", "--artifacts-path", $artefactosTemporales)
 
     Write-Host "=== PUBLICACIÓN RELEASE ==="
-    Ejecutar-Comando -Comando "dotnet" -Argumentos @("publish", $proyectoWeb, "-c", "Release", "--verbosity:minimal", "--output", $directorioAplicacion)
+    & dotnet publish $proyectoWeb -c Release --verbosity:minimal --output $directorioAplicacion
+    if ($LASTEXITCODE -ne 0) { throw "La publicación Release falló con código $LASTEXITCODE." }
 
     # La configuración de desarrollo y las imágenes locales nunca forman parte del paquete.
     $configuracionDesarrollo = Join-Path $directorioAplicacion "appsettings.Development.json"
@@ -45,7 +46,8 @@ try {
     if (Test-Path $uploadsLocales) { Remove-Item -LiteralPath $uploadsLocales -Recurse -Force }
 
     Write-Host "=== SCRIPT DE MIGRACIONES ==="
-    Ejecutar-Comando -Comando "dotnet" -Argumentos @("ef", "migrations", "script", "--idempotent", "--project", $proyectoWeb, "--startup-project", $proyectoWeb, "--output", $scriptMigraciones)
+    & dotnet ef migrations script --idempotent --project $proyectoWeb --startup-project $proyectoWeb --output $scriptMigraciones
+    if ($LASTEXITCODE -ne 0) { throw "La generación del script de migraciones falló con código $LASTEXITCODE." }
 
     $obligatorios = @("saas.dll", "web.config", "appsettings.json", "appsettings.Production.json")
     foreach ($nombre in $obligatorios) {
