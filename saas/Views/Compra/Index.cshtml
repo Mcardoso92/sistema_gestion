@@ -84,10 +84,18 @@
                             Buscar
                         </button>
 
-                        <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                            <span class="material-symbols-outlined icon-sm">restart_alt</span>
-                            Limpiar
-                        </a>
+                        @if (!string.IsNullOrWhiteSpace(Model.Busqueda)
+                            || Model.Estado != "activas"
+                            || Model.ProveedorId.HasValue
+                            || Model.EmpresaId.HasValue
+                            || Model.FechaDesde.HasValue
+                            || Model.FechaHasta.HasValue)
+                        {
+                            <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                                <span class="material-symbols-outlined icon-sm">restart_alt</span>
+                                Limpiar
+                            </a>
+                        }
                     </div>
                 </div>
             </form>
