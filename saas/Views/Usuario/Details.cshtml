@@ -41,7 +41,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="info-label">Rol del Sistema</div>
-                        <div class="info-value">@ViewBag.Rol</div>
+                        <div class="info-value">@TextoPresentacion.Rol(ViewBag.Rol as string)</div>
                         <div class="info-label">Estado de Cuenta</div>
                         <div class="info-value">
                             @if (Model.Estado)
