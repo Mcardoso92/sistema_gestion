@@ -49,7 +49,7 @@ namespace saas.Services
                 {
                     Nombre = "Caja principal",
                     Tipo = TipoCaja.Efectivo,
-                    PermiteTurnos = true,
+                    PermiteTurnos = false,
                     FondoFijo = 0,
                     Estado = true,
                     FechaAlta = fechaAlta,
