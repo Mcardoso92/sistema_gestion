@@ -43,6 +43,21 @@ namespace saas.Services
             return digitoVerificador == normalizado[10] - '0';
         }
 
+        public static bool TieneFormatoCuit(string? valor)
+        {
+            if (string.IsNullOrWhiteSpace(valor))
+            {
+                return false;
+            }
+
+            string sinSeparadores = new string(valor
+                .Where(c => c != '-' && !char.IsWhiteSpace(c))
+                .ToArray());
+
+            return sinSeparadores.Length == 11 &&
+                   sinSeparadores.All(char.IsDigit);
+        }
+
         public static string? Formatear(string? cuit)
         {
             string? normalizado = Normalizar(cuit);
@@ -53,6 +68,13 @@ namespace saas.Services
             }
 
             return $"{normalizado[..2]}-{normalizado.Substring(2, 8)}-{normalizado[10]}";
+        }
+
+        public static string? FormatearSiEsCuit(string? valor)
+        {
+            return TieneFormatoCuit(valor) && EsValido(valor)
+                ? Formatear(valor)
+                : valor;
         }
     }
 }
