@@ -447,6 +447,12 @@
 
         renumerarFilas();
 
+        if (!compraForm.checkValidity()) {
+            event.preventDefault();
+            compraForm.reportValidity();
+            return;
+        }
+
         if (guardarCompraBtn) {
             guardarCompraBtn.disabled = true;
             guardarCompraBtn.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Guardando...';

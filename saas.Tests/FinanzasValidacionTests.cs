@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using saas.Models;
+using saas.ViewModel;
 
 namespace saas.Tests;
 
@@ -30,6 +31,39 @@ public class FinanzasValidacionTests
         var reintegro = new ReintegroProveedor { Importe = 0, UsuarioId = "usuario" };
 
         AssertImporteInvalido(reintegro, nameof(ReintegroProveedor.Importe));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void DetalleCompra_ConCostoNoPositivoEsInvalido(double costo)
+    {
+        // Impide registrar líneas sin costo aunque se omita la validación del navegador.
+        var detalle = new DetalleCompraCreateVM
+        {
+            ProductoId = 1,
+            Cantidad = 1,
+            PrecioUnitario = (decimal)costo
+        };
+
+        AssertImporteInvalido(detalle, nameof(DetalleCompraCreateVM.PrecioUnitario));
+    }
+
+    [Fact]
+    public void DetalleCompra_ConCostoPositivoEsValido()
+    {
+        var detalle = new DetalleCompraCreateVM
+        {
+            ProductoId = 1,
+            Cantidad = 1,
+            PrecioUnitario = 0.01m
+        };
+        var errores = new List<ValidationResult>();
+
+        Validator.TryValidateObject(detalle, new ValidationContext(detalle), errores, true);
+
+        Assert.DoesNotContain(errores, error =>
+            error.MemberNames.Contains(nameof(DetalleCompraCreateVM.PrecioUnitario)));
     }
 
     private static void AssertImporteInvalido(object modelo, string propiedad)
