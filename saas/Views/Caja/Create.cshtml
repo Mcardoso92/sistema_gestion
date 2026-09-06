@@ -223,6 +223,8 @@
             const permiteTurnos =
                 document.getElementById("permiteTurnos");
 
+            let solicitudMediosPagoActual = 0;
+
             function actualizarPermiteTurnos() {
                 const esEfectivo = tipoCajaSelect.value === "1";
 
@@ -234,6 +236,9 @@
             }
 
             async function cargarMediosPago() {
+
+                const solicitudId =
+                    ++solicitudMediosPagoActual;
 
                 const empresaId =
                     empresaSelect
@@ -263,6 +268,10 @@
                     }
 
                     const medios = await response.json();
+
+                    if (solicitudId !== solicitudMediosPagoActual) {
+                        return;
+                    }
 
                     if (medios.length === 0) {
 
@@ -301,6 +310,10 @@
 
                 }
                 catch {
+
+                    if (solicitudId !== solicitudMediosPagoActual) {
+                        return;
+                    }
 
                     container.innerHTML =
                         '<div class="text-danger small">'

@@ -250,6 +250,8 @@
 
             const empresaId = "@Model.EmpresaId";
 
+            let solicitudMediosPagoActual = 0;
+
             if (!tipoCajaSelect || !container) {
                 return;
             }
@@ -273,6 +275,9 @@
 
             async function cargarMediosPago(
                 conservarSeleccionInicial = false) {
+
+                const solicitudId =
+                    ++solicitudMediosPagoActual;
 
                 const tipoCaja =
                     tipoCajaSelect.value;
@@ -301,6 +306,10 @@
 
                     const medios =
                         await response.json();
+
+                    if (solicitudId !== solicitudMediosPagoActual) {
+                        return;
+                    }
 
                     if (medios.length === 0) {
                         container.innerHTML =
@@ -362,6 +371,10 @@
                     });
                 }
                 catch {
+                    if (solicitudId !== solicitudMediosPagoActual) {
+                        return;
+                    }
+
                     container.innerHTML =
                         '<div class="text-danger small">'
                         + 'No se pudieron cargar los medios de pago.'
