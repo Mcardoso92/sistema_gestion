@@ -16,7 +16,7 @@
 
         public string UsuarioNombre { get; set; } = null!;
 
-        public string ClienteNombre { get; set; } = "Cliente ocasional";
+        public string ClienteNombre { get; set; } = "Consumidor Final";
 
         public string? ClienteDocumento { get; set; }
 

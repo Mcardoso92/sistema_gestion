@@ -1371,10 +1371,10 @@
 
     function quitarCliente() {
         inputClienteId.value = "";
-        inputClienteNombre.value = "Cliente ocasional";
+        inputClienteNombre.value = "Consumidor Final";
 
         clienteNombreVisible.textContent =
-            "Cliente ocasional";
+            "Consumidor Final";
 
         clienteDetalleVisible.textContent =
             "Venta sin cliente registrado";

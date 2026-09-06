@@ -232,7 +232,7 @@ namespace saas.Controllers
                     Id = v.Id,
                     Fecha = v.Fecha,
                     ClienteNombre = v.Cliente == null
-                        ? "Cliente ocasional"
+                        ? "Consumidor Final"
                         : v.Cliente.Apellido == null
                             ? v.Cliente.Nombre
                             : v.Cliente.Nombre + " " + v.Cliente.Apellido,
@@ -332,7 +332,7 @@ namespace saas.Controllers
             var ventaVM = new VentaCreateVM
             {
                 ClienteId = null,
-                ClienteNombre = "Cliente ocasional",
+                ClienteNombre = "Consumidor Final",
                 Detalles = new List<VentaDetalleCreateVM>(),
                 Pagos = new List<VentaPagoCreateVM>()
             };
@@ -1027,7 +1027,7 @@ namespace saas.Controllers
 
                 ClienteNombre =
         venta.Cliente == null
-            ? "Cliente ocasional"
+            ? "Consumidor Final"
             : string.IsNullOrWhiteSpace(
                 venta.Cliente.Apellido)
                 ? venta.Cliente.Nombre
@@ -1563,13 +1563,13 @@ namespace saas.Controllers
                 {
                     ventaVM.ClienteId = null;
                     ventaVM.ClienteNombre =
-                        "Cliente ocasional";
+                        "Consumidor Final";
                 }
             }
             else
             {
                 ventaVM.ClienteNombre =
-                    "Cliente ocasional";
+                    "Consumidor Final";
             }
             ventaVM.CajasDisponibles =
                 await _context.Cajas
