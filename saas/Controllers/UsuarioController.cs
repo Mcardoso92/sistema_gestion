@@ -266,7 +266,9 @@ namespace saas.Controllers
 
             if (!esSuperAdmin)
             {
-                roles = roles.Where(r => r.Name != "SuperAdmin");
+                roles = roles.Where(r =>
+                    r.Name != "SuperAdmin" &&
+                    r.Name != "Empleado");
             }
 
             model.Roles = await ObtenerOpcionesRoles(roles);
@@ -332,6 +334,17 @@ namespace saas.Controllers
                     ModelState.AddModelError(
                         "Rol",
                         "No tiene permisos para asignar el rol SuperAdmin.");
+
+                    await CargarCombos(usuario, esSuperAdmin);
+
+                    return View(usuario);
+                }
+
+                if (!esSuperAdmin && string.Equals(usuario.Rol, "Empleado", StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(
+                        nameof(usuario.Rol),
+                        "El rol Empleado estará disponible cuando se implementen los permisos configurables.");
 
                     await CargarCombos(usuario, esSuperAdmin);
 
@@ -615,6 +628,17 @@ namespace saas.Controllers
                 ModelState.AddModelError(
                     nameof(usuario.Rol),
                     "No tiene permisos para asignar el rol SuperAdmin.");
+
+                await CargarCombos(usuario, esSuperAdmin);
+
+                return View(usuario);
+            }
+
+            if (!esSuperAdmin && string.Equals(usuario.Rol, "Empleado", StringComparison.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError(
+                    nameof(usuario.Rol),
+                    "El rol Empleado estará disponible cuando se implementen los permisos configurables.");
 
                 await CargarCombos(usuario, esSuperAdmin);
 
@@ -1360,7 +1384,9 @@ namespace saas.Controllers
 
             if (!esSuperAdmin)
             {
-                roles = roles.Where(r => r.Name != "SuperAdmin");
+                roles = roles.Where(r =>
+                    r.Name != "SuperAdmin" &&
+                    r.Name != "Empleado");
             }
 
             model.Roles = await ObtenerOpcionesRoles(roles);
@@ -1384,7 +1410,9 @@ namespace saas.Controllers
 
             if (!esSuperAdmin)
             {
-                roles = roles.Where(r => r.Name != "SuperAdmin");
+                roles = roles.Where(r =>
+                    r.Name != "SuperAdmin" &&
+                    r.Name != "Empleado");
             }
 
             model.Roles = await ObtenerOpcionesRoles(roles);
