@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel;
 
 
@@ -109,6 +110,11 @@ namespace saas.Controllers
                 .Take(tamanioPagina)
                 .ToListAsync();
 
+            foreach (var cliente in listaClientes)
+            {
+                cliente.Documento = CuitValidator.FormatearSiEsCuit(cliente.Documento);
+            }
+
             return View(listaClientes);
         }
 
@@ -144,6 +150,8 @@ namespace saas.Controllers
             {
                 return NotFound();
             }
+
+            cliente.Documento = CuitValidator.FormatearSiEsCuit(cliente.Documento);
 
             return View(cliente);
         }
@@ -236,6 +244,25 @@ namespace saas.Controllers
             clienteVM.Direccion = string.IsNullOrWhiteSpace(clienteVM.Direccion)
                 ? null
                 : clienteVM.Direccion.Trim();
+
+            if (CuitValidator.TieneFormatoCuit(clienteVM.Documento))
+            {
+                clienteVM.Documento = CuitValidator.Normalizar(clienteVM.Documento);
+
+                if (!CuitValidator.EsValido(clienteVM.Documento))
+                {
+                    ModelState.AddModelError(
+                        nameof(clienteVM.Documento),
+                        "El CUIT ingresado no es válido.");
+
+                    if (esSuperAdmin)
+                    {
+                        await CargarEmpresas(clienteVM);
+                    }
+
+                    return View(clienteVM);
+                }
+            }
 
             if (clienteVM.Documento != null)
             {
@@ -330,7 +357,7 @@ namespace saas.Controllers
                 Id = cliente.Id,
                 Nombre = cliente.Nombre,
                 Apellido = cliente.Apellido,
-                Documento = cliente.Documento,
+                Documento = CuitValidator.FormatearSiEsCuit(cliente.Documento),
                 Email = cliente.Email,
                 Telefono = cliente.Telefono,
                 Direccion = cliente.Direccion,
@@ -413,6 +440,25 @@ namespace saas.Controllers
             clienteVM.Direccion = string.IsNullOrWhiteSpace(clienteVM.Direccion)
                 ? null
                 : clienteVM.Direccion.Trim();
+
+            if (CuitValidator.TieneFormatoCuit(clienteVM.Documento))
+            {
+                clienteVM.Documento = CuitValidator.Normalizar(clienteVM.Documento);
+
+                if (!CuitValidator.EsValido(clienteVM.Documento))
+                {
+                    ModelState.AddModelError(
+                        nameof(clienteVM.Documento),
+                        "El CUIT ingresado no es válido.");
+
+                    if (esSuperAdmin)
+                    {
+                        await CargarEmpresas(clienteVM);
+                    }
+
+                    return View(clienteVM);
+                }
+            }
 
             if (clienteVM.Documento != null)
             {
@@ -522,7 +568,7 @@ namespace saas.Controllers
                 Id = cliente.Id,
                 Nombre = cliente.Nombre,
                 Apellido = cliente.Apellido,
-                Documento = cliente.Documento,
+                Documento = CuitValidator.FormatearSiEsCuit(cliente.Documento),
                 Email = cliente.Email,
                 Empresa = cliente.Empresa.Nombre,
                 Estado = cliente.Estado
