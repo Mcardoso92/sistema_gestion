@@ -10,7 +10,7 @@ namespace saas.ViewModel
         [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor a 0.")]
         public int Cantidad { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "El precio de costo no puede ser negativo.")]
+        [Range(0.01, 999999999.99, ErrorMessage = "El costo unitario debe ser mayor a 0.")]
         public decimal PrecioUnitario { get; set; }
 
         public decimal PrecioVentaActual { get; set; }

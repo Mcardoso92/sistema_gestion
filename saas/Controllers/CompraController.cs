@@ -408,7 +408,7 @@ namespace saas.Controllers
                 compraVM.Detalles.Any(d =>
                     (!d.EsProductoNuevo && d.ProductoId <= 0) ||
                     d.Cantidad <= 0 ||
-                    d.PrecioUnitario < 0 ||
+                    d.PrecioUnitario <= 0 ||
                     (d.NuevoPrecioVenta.HasValue && d.NuevoPrecioVenta.Value < 0) ||
                     (d.EsProductoNuevo &&
                         (string.IsNullOrWhiteSpace(d.ProductoNuevoNombre) ||
@@ -418,7 +418,7 @@ namespace saas.Controllers
             {
                 ModelState.AddModelError(
                     nameof(compraVM.Detalles),
-                    "La compra contiene productos, cantidades o precios inválidos.");
+                    "La compra contiene productos, cantidades o precios inválidos. El costo unitario debe ser mayor a 0.");
             }
 
             if (!ModelState.IsValid)
