@@ -294,6 +294,7 @@ namespace saas.Controllers
             }
 
             TurnoCaja? turnoOrigen = null;
+            TurnoCaja? turnoDestino = null;
 
             if (cajaOrigen != null &&
                 cajaOrigen.PermiteTurnos)
@@ -312,6 +313,17 @@ namespace saas.Controllers
                         nameof(vm.CajaOrigenId),
                         "Debe tener un turno abierto propio para transferir dinero desde esta caja.");
                 }
+            }
+
+            if (cajaDestino != null &&
+                cajaDestino.PermiteTurnos)
+            {
+                turnoDestino =
+                    await _context.TurnosCaja
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(t =>
+                            t.CajaId == cajaDestino.Id &&
+                            t.Estado == EstadoTurnoCaja.Abierto);
             }
 
             decimal saldoDisponible = 0;
@@ -498,9 +510,8 @@ namespace saas.Controllers
                         MedioPagoId =
                             null,
 
-                        // El turno pertenece solo al origen.
                         TurnoCajaId =
-                            null,
+                            turnoDestino?.Id,
 
                         CategoriaGastoId =
                             null,
@@ -1039,7 +1050,7 @@ namespace saas.Controllers
                             null,
 
                         TurnoCajaId =
-                            null,
+                            movimientoEntrada.TurnoCajaId,
 
                         CategoriaGastoId =
                             null,

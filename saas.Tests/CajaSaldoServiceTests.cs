@@ -50,8 +50,37 @@ public class CajaSaldoServiceTests
         Assert.Equal(0, resultado);
     }
 
-    private static MovimientoCaja CrearMovimiento(int id, int cajaId, decimal importe, DireccionMovimientoCaja direccion, int? turnoCajaId = null)
+    [Fact]
+    public async Task CalcularSaldoDisponible_RecuperaTransferenciaEntranteSinTurnoDuranteTurnoActual()
     {
-        return new MovimientoCaja { Id = id, CajaId = cajaId, Importe = importe, Direccion = direccion, TurnoCajaId = turnoCajaId, UsuarioId = "usuario" };
+        // Mantiene disponibles los fondos de transferencias históricas que no se asociaron al turno abierto.
+        await using var context = TestDbContextFactory.Crear();
+        DateTime apertura = new(2026, 9, 4, 10, 0, 0);
+        context.TurnosCaja.Add(new TurnoCaja { Id = 10, CajaId = 1, UsuarioAperturaId = "usuario-a", Estado = EstadoTurnoCaja.Abierto, FechaApertura = apertura });
+        context.MovimientosCaja.AddRange(
+            CrearMovimiento(1, 1, 100, DireccionMovimientoCaja.Ingreso, 10, TipoMovimientoCaja.IngresoManual, apertura.AddMinutes(1)),
+            CrearMovimiento(2, 1, 100, DireccionMovimientoCaja.Egreso, 10, TipoMovimientoCaja.TransferenciaSalida, apertura.AddMinutes(2)),
+            CrearMovimiento(3, 1, 100, DireccionMovimientoCaja.Ingreso, null, TipoMovimientoCaja.TransferenciaEntrada, apertura.AddMinutes(3)),
+            CrearMovimiento(4, 1, 500, DireccionMovimientoCaja.Ingreso, null, TipoMovimientoCaja.TransferenciaEntrada, apertura.AddMinutes(-1)));
+        await context.SaveChangesAsync();
+
+        var service = new CajaSaldoService(context);
+        var caja = new Caja { Id = 1, Nombre = "Mostrador", PermiteTurnos = true };
+
+        decimal resultado = await service.CalcularSaldoDisponible(caja, "usuario-a");
+
+        Assert.Equal(100, resultado);
+    }
+
+    private static MovimientoCaja CrearMovimiento(
+        int id,
+        int cajaId,
+        decimal importe,
+        DireccionMovimientoCaja direccion,
+        int? turnoCajaId = null,
+        TipoMovimientoCaja tipo = TipoMovimientoCaja.IngresoManual,
+        DateTime? fecha = null)
+    {
+        return new MovimientoCaja { Id = id, CajaId = cajaId, Importe = importe, Direccion = direccion, TurnoCajaId = turnoCajaId, Tipo = tipo, Fecha = fecha ?? DateTime.Now, UsuarioId = "usuario" };
     }
 }

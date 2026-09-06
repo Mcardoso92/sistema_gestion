@@ -38,7 +38,12 @@ namespace saas.Services
                     await _context.MovimientosCaja
                         .AsNoTracking()
                         .Where(m =>
-                            m.TurnoCajaId == turno.Id)
+                            m.TurnoCajaId == turno.Id ||
+                            (m.CajaId == caja.Id &&
+                             m.TurnoCajaId == null &&
+                             m.Fecha >= turno.FechaApertura &&
+                             (m.Tipo == TipoMovimientoCaja.TransferenciaEntrada ||
+                              m.Tipo == TipoMovimientoCaja.ReversionTransferenciaEntrada)))
                         .SumAsync(m =>
                             m.Direccion ==
                             DireccionMovimientoCaja.Ingreso
