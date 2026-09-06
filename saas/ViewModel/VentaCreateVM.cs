@@ -9,7 +9,7 @@ namespace saas.ViewModel
 
         [ValidateNever]
         public string ClienteNombre { get; set; }
-            = "Cliente ocasional";
+            = "Consumidor Final";
 
         [MinLength(
             1,
