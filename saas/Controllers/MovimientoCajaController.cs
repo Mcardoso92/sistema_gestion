@@ -163,7 +163,9 @@ namespace saas.Controllers
 
             IQueryable<MovimientoCaja> movimientosVigentesConsulta = consulta.Where(m =>
                 !m.MovimientoOrigenId.HasValue &&
-                !_context.MovimientosCaja.Any(r => r.MovimientoOrigenId == m.Id));
+                !_context.MovimientosCaja.Any(r => r.MovimientoOrigenId == m.Id) &&
+                m.Tipo != TipoMovimientoCaja.TransferenciaEntrada &&
+                m.Tipo != TipoMovimientoCaja.TransferenciaSalida);
 
             decimal totalIngresos = await movimientosVigentesConsulta
                 .Where(m => m.Direccion == DireccionMovimientoCaja.Ingreso)
