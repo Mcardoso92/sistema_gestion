@@ -304,14 +304,16 @@ namespace saas.Controllers
                         .AsNoTracking()
                         .FirstOrDefaultAsync(t =>
                             t.CajaId == cajaOrigen.Id &&
-                            t.UsuarioAperturaId == usuario.Id &&
                             t.Estado == EstadoTurnoCaja.Abierto);
 
-                if (turnoOrigen == null)
+                if (turnoOrigen != null &&
+                    turnoOrigen.UsuarioAperturaId != usuario.Id)
                 {
                     ModelState.AddModelError(
                         nameof(vm.CajaOrigenId),
-                        "Debe tener un turno abierto propio para transferir dinero desde esta caja.");
+                        "No puede transferir dinero porque esta caja tiene un turno abierto por otro usuario.");
+
+                    turnoOrigen = null;
                 }
             }
 

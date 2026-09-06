@@ -31,7 +31,19 @@ namespace saas.Services
 
                 if (turno == null)
                 {
-                    return 0;
+                    bool hayOtroTurnoAbierto =
+                        await _context.TurnosCaja
+                            .AsNoTracking()
+                            .AnyAsync(t =>
+                                t.CajaId == caja.Id &&
+                                t.Estado == EstadoTurnoCaja.Abierto);
+
+                    if (hayOtroTurnoAbierto)
+                    {
+                        return 0;
+                    }
+
+                    return await CalcularSaldoContable(caja.Id);
                 }
 
                 decimal netoTurno =
@@ -54,10 +66,15 @@ namespace saas.Services
                     + netoTurno;
             }
 
+            return await CalcularSaldoContable(caja.Id);
+        }
+
+        private async Task<decimal> CalcularSaldoContable(int cajaId)
+        {
             return await _context.MovimientosCaja
                 .AsNoTracking()
                 .Where(m =>
-                    m.CajaId == caja.Id)
+                    m.CajaId == cajaId)
                 .SumAsync(m =>
                     m.Direccion ==
                     DireccionMovimientoCaja.Ingreso
