@@ -51,6 +51,48 @@ public class CajaSaldoServiceTests
     }
 
     [Fact]
+    public async Task CalcularSaldoDisponible_SinTurnoAbiertoPermiteTransferirSaldoResidual()
+    {
+        // Permite vaciar administrativamente una caja cerrada antes de desactivarla.
+        await using var context = TestDbContextFactory.Crear();
+        context.MovimientosCaja.AddRange(
+            CrearMovimiento(1, 1, 500, DireccionMovimientoCaja.Ingreso),
+            CrearMovimiento(2, 1, 120, DireccionMovimientoCaja.Egreso));
+        await context.SaveChangesAsync();
+
+        var service = new CajaSaldoService(context);
+        var caja = new Caja { Id = 1, Nombre = "Principal", PermiteTurnos = true };
+
+        decimal resultado = await service.CalcularSaldoDisponible(caja, "administrador");
+
+        Assert.Equal(380, resultado);
+    }
+
+    [Fact]
+    public async Task CalcularSaldoDisponible_OtroUsuarioTieneTurnoAbiertoNoExponeSaldo()
+    {
+        // Un saldo residual no puede retirarse mientras otra persona opera la caja.
+        await using var context = TestDbContextFactory.Crear();
+        context.TurnosCaja.Add(new TurnoCaja
+        {
+            Id = 10,
+            CajaId = 1,
+            UsuarioAperturaId = "usuario-a",
+            Estado = EstadoTurnoCaja.Abierto
+        });
+        context.MovimientosCaja.Add(
+            CrearMovimiento(1, 1, 500, DireccionMovimientoCaja.Ingreso));
+        await context.SaveChangesAsync();
+
+        var service = new CajaSaldoService(context);
+        var caja = new Caja { Id = 1, Nombre = "Principal", PermiteTurnos = true };
+
+        decimal resultado = await service.CalcularSaldoDisponible(caja, "administrador");
+
+        Assert.Equal(0, resultado);
+    }
+
+    [Fact]
     public async Task CalcularSaldoDisponible_RecuperaTransferenciaEntranteSinTurnoDuranteTurnoActual()
     {
         // Mantiene disponibles los fondos de transferencias históricas que no se asociaron al turno abierto.
