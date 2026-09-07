@@ -15,6 +15,8 @@ namespace saas.Controllers
     [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
     public class VentaController : Controller
     {
+        private const int LongitudMaximaBusqueda = 100;
+
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly VentaSaldoService _ventaSaldoService;
@@ -39,6 +41,18 @@ namespace saas.Controllers
             bool esSuperAdmin = await _userManager.IsInRoleAsync(
                 usuario,
                 "SuperAdmin");
+
+            if (ventaVM.Buscar?.Length > LongitudMaximaBusqueda)
+            {
+                ModelState.AddModelError(
+                    nameof(ventaVM.Buscar),
+                    $"La búsqueda no puede superar los {LongitudMaximaBusqueda} caracteres.");
+                await CargarFiltrosIndexAsync(ventaVM, usuario, esSuperAdmin);
+                ViewBag.PaginaActual = 1;
+                ViewBag.TotalPaginas = 0;
+                ViewBag.TotalRegistros = 0;
+                return View(ventaVM);
+            }
 
             if (ventaVM.FechaDesde.HasValue && ventaVM.FechaHasta.HasValue && ventaVM.FechaHasta.Value.Date < ventaVM.FechaDesde.Value.Date)
             {
@@ -1209,6 +1223,14 @@ namespace saas.Controllers
                 return Unauthorized();
             }
 
+            if (termino?.Length > LongitudMaximaBusqueda)
+            {
+                return BadRequest(new
+                {
+                    mensaje = $"La búsqueda no puede superar los {LongitudMaximaBusqueda} caracteres."
+                });
+            }
+
             bool esSuperAdmin = await _userManager.IsInRoleAsync(
                 usuario,
                 "SuperAdmin");
@@ -1286,6 +1308,14 @@ namespace saas.Controllers
             if (usuario == null)
             {
                 return Unauthorized();
+            }
+
+            if (termino?.Length > LongitudMaximaBusqueda)
+            {
+                return BadRequest(new
+                {
+                    mensaje = $"La búsqueda no puede superar los {LongitudMaximaBusqueda} caracteres."
+                });
             }
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(
