@@ -4,6 +4,10 @@
     Layout = "_PublicLayout";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/public-pilot.css" asp-append-version="true" />
+}
+
 <section class="public-hero">
     <div class="container-xl">
         <div class="row align-items-center g-5">
@@ -395,19 +399,43 @@
     <div class="container-xl">
         <div class="section-heading">
             <span>PRECIOS SIMPLES</span>
-            <h2>Un plan para cada etapa de tu negocio</h2>
+            <h2>Probá Veltika gratis durante nuestra etapa piloto</h2>
             <p>
-                Estamos preparando los planes comerciales de Veltika.
+                Estamos preparando los planes comerciales de Veltika. Mientras tanto,
+                podés utilizar la plataforma sin costo hasta el 31 de diciembre de 2026.
             </p>
         </div>
 
-        <div class="pricing-placeholder">
-            <span class="material-symbols-outlined">sell</span>
-            <div>
-                <strong>Planes próximamente</strong>
-                <p>Queremos ofrecer una propuesta simple, transparente y sin costos ocultos.</p>
+        <div class="pilot-card">
+            <div class="pilot-card-header">
+                <span class="material-symbols-outlined pilot-card-icon" aria-hidden="true">rocket_launch</span>
+                <div>
+                    <span class="pilot-card-eyebrow">CUPOS ABIERTOS</span>
+                    <h3>Programa Piloto Veltika 2026</h3>
+                </div>
             </div>
+
+            <p class="pilot-card-description">
+                Accedé a Veltika sin costo durante nuestra etapa piloto y ayudanos a
+                seguir mejorando la plataforma con tu experiencia.
+            </p>
+
+            <ul class="pilot-benefits">
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Acceso gratuito hasta el 31/12/2026.</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Sin compromiso de contratación.</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Soporte y acompañamiento durante el piloto.</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span>Beneficios exclusivos para los participantes al finalizar esta etapa.</li>
+            </ul>
+
+            <a class="btn btn-primary pilot-card-button" asp-controller="Usuario" asp-action="Registro">
+                Probar Veltika gratis
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </a>
         </div>
+
+        <p class="pilot-notice">
+            Los planes comerciales de Veltika serán anunciados antes de finalizar el Programa Piloto.
+        </p>
     </div>
 </section>
 
@@ -430,9 +458,11 @@
                 </p>
 
                 <p class="about-text">
-                    Estamos construyendo una plataforma donde ventas, productos,
-                    stock, clientes, compras, proveedores y usuarios puedan
-                    gestionarse desde un mismo lugar.
+                    Veltika es una plataforma donde ventas, productos, stock,
+                    clientes, compras, proveedores y usuarios pueden gestionarse
+                    desde un mismo lugar. Actualmente nos encontramos en etapa piloto,
+                    trabajando junto a nuestros primeros usuarios para seguir mejorando
+                    la experiencia.
                 </p>
             </div>
         </div>
