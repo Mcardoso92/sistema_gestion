@@ -1,0 +1,105 @@
+.pilot-card {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px;
+    border: 1px solid #d8e2f0;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 10px 30px rgba(18, 63, 149, .08);
+}
+
+.pilot-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pilot-card-icon {
+    width: 46px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 46px;
+    border-radius: 10px;
+    background: #eaf1ff;
+    color: #123f95;
+}
+
+.pilot-card-eyebrow {
+    display: block;
+    margin-bottom: 3px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.pilot-card h3 {
+    margin: 0;
+    color: #101828;
+    font-size: 21px;
+    font-weight: 750;
+}
+
+.pilot-card-description {
+    margin: 20px 0 16px;
+    color: #475467;
+    line-height: 1.65;
+}
+
+.pilot-benefits {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 20px;
+    margin: 0 0 22px;
+    padding: 0;
+    list-style: none;
+}
+
+.pilot-benefits li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    color: #344054;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.pilot-benefits .material-symbols-outlined {
+    color: #16865c;
+    font-size: 20px;
+}
+
+.pilot-card-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pilot-card-button .material-symbols-outlined {
+    font-size: 19px;
+}
+
+.pilot-notice {
+    max-width: 760px;
+    margin: 14px auto 0;
+    color: #667085;
+    font-size: 13px;
+    text-align: center;
+}
+
+@media (max-width: 767px) {
+    .pilot-card {
+        padding: 22px 18px;
+    }
+
+    .pilot-benefits {
+        grid-template-columns: 1fr;
+    }
+
+    .pilot-card-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
