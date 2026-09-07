@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Gestión simple para tu negocio";
+    ViewData["MetaDescription"] = "Administrá ventas, compras, stock, clientes y proveedores de forma simple con Veltika.";
     Layout = "_PublicLayout";
 }
 
@@ -121,7 +122,7 @@
                     <div class="preview-content">
                         <div class="preview-heading">
                             <div>
-                                <h5>Dashboard</h5>
+                                <h5 aria-hidden="true">Dashboard</h5>
                                 <small>Resumen general de tu negocio</small>
                             </div>
 
@@ -447,7 +448,11 @@
 
             <div class="cta-content">
                 <h2>Empezá a gestionar tu negocio de otra manera</h2>
-                <p>Descubrí todo lo que Veltika puede hacer por tu negocio.</p>
+                <p>
+                    Descubrí todo lo que Veltika puede hacer por tu negocio.
+                    Si tenés dudas, escribinos a
+                    <a class="cta-contact-link" href="mailto:contacto@veltika.com.ar">contacto@veltika.com.ar</a>.
+                </p>
             </div>
 
             <a class="btn cta-button" asp-controller="Usuario" asp-action="Registro">
