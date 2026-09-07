@@ -36,9 +36,20 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="CategoriaId" class="form-label">Categoría</label>
-                            <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.CategoriaId">
-                                <option value="">-- Seleccione una categoría --</option>
-                            </select>
+                            <div class="d-flex gap-2">
+                                <select asp-for="CategoriaId" class="form-select" asp-items="ViewBag.CategoriaId">
+                                    <option value="">-- Seleccione una categoría --</option>
+                                </select>
+                                <button type="button"
+                                        id="btnNuevaCategoria"
+                                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                                        data-crear-url="@Url.Action("CrearRapida", "Categoria")"
+                                        aria-label="Crear una categoría"
+                                        title="Crear una categoría">
+                                    <span class="material-symbols-outlined"
+                                          aria-hidden="true">add</span>
+                                </button>
+                            </div>
                             <span asp-validation-for="CategoriaId" class="text-danger"></span>
                         </div>
                         <div class="col-md-3">
@@ -125,6 +136,55 @@
         </div>
     </div>
 </main>
+
+<div class="modal fade"
+     id="nuevaCategoriaModal"
+     tabindex="-1"
+     aria-labelledby="nuevaCategoriaModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="nuevaCategoriaForm">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="nuevaCategoriaModalLabel">
+                        Nueva categoría
+                    </h2>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="nuevaCategoriaNombre" class="form-label">
+                        Nombre
+                    </label>
+                    <input type="text"
+                           id="nuevaCategoriaNombre"
+                           name="nombre"
+                           class="form-control"
+                           maxlength="50"
+                           required />
+                    <div id="nuevaCategoriaError"
+                         class="text-danger small mt-2"
+                         aria-live="polite"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            id="btnGuardarCategoria"
+                            class="btn btn-primary">
+                        Crear categoría
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

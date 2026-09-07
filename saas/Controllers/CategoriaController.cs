@@ -185,34 +185,20 @@ namespace saas.Controllers
                     categoria.EmpresaId = usuario.EmpresaId;
                 }
 
-                bool empresaValida = await _context.Empresas.AnyAsync(e =>
-                    e.Id == categoria.EmpresaId &&
-                    e.Estado);
+                categoria.Nombre = categoria.Nombre.Trim();
 
-                if (!empresaValida)
+                var errorCategoria =
+                    await ValidarEmpresaYDuplicado(categoria);
+
+                if (errorCategoria.HasValue)
                 {
                     ModelState.AddModelError(
-                        nameof(categoria.EmpresaId),
-                        "La empresa seleccionada no es válida o se encuentra inactiva.");
+                        errorCategoria.Value.Campo,
+                        errorCategoria.Value.Mensaje);
 
                     if (esSuperAdmin)
                     {
                         CargarEmpresas(categoria.EmpresaId);
-                    }
-
-                    return View(categoria);
-                }
-
-                bool existeCategoria = await _context.Categorias.AnyAsync(c =>
-                        c.EmpresaId == categoria.EmpresaId &&
-                        c.Nombre.ToLower() == categoria.Nombre.ToLower());
-
-                if (existeCategoria)
-                {
-                    ModelState.AddModelError("Nombre", "Ya existe una categoría con ese nombre para esta empresa.");
-                    if (esSuperAdmin)
-                    {
-                        CargarEmpresas();
                     }
 
                     return View(categoria);
@@ -239,6 +225,69 @@ namespace saas.Controllers
 
                 return View(categoria);
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearRapida(
+            string? nombre,
+            int? empresaId)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            bool esSuperAdmin =
+                await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            var categoria = new Categoria
+            {
+                Nombre = nombre?.Trim() ?? string.Empty,
+                EmpresaId = esSuperAdmin
+                    ? empresaId ?? 0
+                    : usuario.EmpresaId,
+                Estado = true
+            };
+
+            var resultadosValidacion =
+                new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+            var contextoValidacion =
+                new System.ComponentModel.DataAnnotations.ValidationContext(categoria);
+
+            if (!System.ComponentModel.DataAnnotations.Validator.TryValidateObject(
+                    categoria,
+                    contextoValidacion,
+                    resultadosValidacion,
+                    validateAllProperties: true))
+            {
+                return BadRequest(new
+                {
+                    mensaje = resultadosValidacion.First().ErrorMessage
+                });
+            }
+
+            var errorCategoria =
+                await ValidarEmpresaYDuplicado(categoria);
+
+            if (errorCategoria.HasValue)
+            {
+                return BadRequest(new
+                {
+                    mensaje = errorCategoria.Value.Mensaje
+                });
+            }
+
+            _context.Categorias.Add(categoria);
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                id = categoria.Id,
+                nombre = categoria.Nombre
+            });
         }
 
         // GET: Categoria/Edit/5
@@ -481,6 +530,34 @@ namespace saas.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<(string Campo, string Mensaje)?>
+            ValidarEmpresaYDuplicado(Categoria categoria)
+        {
+            bool empresaValida = await _context.Empresas.AnyAsync(e =>
+                e.Id == categoria.EmpresaId &&
+                e.Estado);
+
+            if (!empresaValida)
+            {
+                return (
+                    nameof(categoria.EmpresaId),
+                    "La empresa seleccionada no es válida o se encuentra inactiva.");
+            }
+
+            bool existeCategoria = await _context.Categorias.AnyAsync(c =>
+                c.EmpresaId == categoria.EmpresaId &&
+                c.Nombre.ToLower() == categoria.Nombre.ToLower());
+
+            if (existeCategoria)
+            {
+                return (
+                    nameof(categoria.Nombre),
+                    "Ya existe una categoría con ese nombre para esta empresa.");
+            }
+
+            return null;
         }
 
         private void CargarEmpresas(int? empresaId = null)
