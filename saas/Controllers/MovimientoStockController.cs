@@ -308,7 +308,9 @@ namespace saas.Controllers
                 return View(ajusteVM);
             }
         }
-        public async Task<IActionResult> Historial(StockHistorialVM historialVM)
+        public async Task<IActionResult> Historial(
+            int? id,
+            StockHistorialVM historialVM)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -318,6 +320,11 @@ namespace saas.Controllers
             }
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            if (id.HasValue)
+            {
+                historialVM.ProductoId = id.Value;
+            }
 
             if (historialVM.ProductoId.HasValue)
             {
@@ -350,6 +357,44 @@ namespace saas.Controllers
                 historialVM.StockActual = producto.Stock;
                 historialVM.PuntoReposicion = producto.PuntoReposicion;
                 historialVM.ProductoActivo = producto.Estado;
+            }
+
+            bool fechaDesdeInvalida =
+                ModelState.TryGetValue(
+                    nameof(historialVM.FechaDesde),
+                    out var estadoFechaDesde) &&
+                estadoFechaDesde.Errors.Count > 0;
+
+            bool fechaHastaInvalida =
+                ModelState.TryGetValue(
+                    nameof(historialVM.FechaHasta),
+                    out var estadoFechaHasta) &&
+                estadoFechaHasta.Errors.Count > 0;
+
+            if (fechaDesdeInvalida || fechaHastaInvalida)
+            {
+                if (fechaDesdeInvalida)
+                {
+                    ModelState.Remove(nameof(historialVM.FechaDesde));
+                    ModelState.AddModelError(
+                        nameof(historialVM.FechaDesde),
+                        "La fecha Desde no es válida.");
+                }
+
+                if (fechaHastaInvalida)
+                {
+                    ModelState.Remove(nameof(historialVM.FechaHasta));
+                    ModelState.AddModelError(
+                        nameof(historialVM.FechaHasta),
+                        "La fecha Hasta no es válida.");
+                }
+
+                await CargarFiltrosHistorialAsync(
+                    historialVM,
+                    usuario,
+                    esSuperAdmin);
+
+                return View(historialVM);
             }
 
             if (historialVM.FechaDesde.HasValue && historialVM.FechaHasta.HasValue && historialVM.FechaHasta.Value.Date < historialVM.FechaDesde.Value.Date)

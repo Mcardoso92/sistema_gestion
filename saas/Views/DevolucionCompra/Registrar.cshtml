@@ -149,12 +149,15 @@
                                     <input asp-for="Detalles[i].CantidadDevolver"
                                            type="number"
                                            min="0"
-                                           max="@Model.Detalles[i].CantidadDisponible"
-                                           class="form-control text-center"
+                                           data-cantidad-disponible="@Model.Detalles[i].CantidadDisponible"
+                                           class="form-control text-center cantidad-devolver"
                                            style="max-width: 110px; margin-left: auto;" />
 
                                     <span asp-validation-for="Detalles[i].CantidadDevolver"
                                           class="text-danger"></span>
+
+                                    <div class="text-danger small cantidad-devolver-error"
+                                         aria-live="polite"></div>
 
                                 </td>
 
@@ -217,12 +220,73 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        document.getElementById("formRegistrarDevolucion")?.addEventListener("submit", () => {
-            const boton = document.getElementById("btnConfirmarDevolucion");
-            if (boton) {
+        document.addEventListener("DOMContentLoaded", function () {
+            const formulario =
+                document.getElementById("formRegistrarDevolucion");
+            const boton =
+                document.getElementById("btnConfirmarDevolucion");
+            const cantidades =
+                document.querySelectorAll(".cantidad-devolver");
+
+            if (!formulario || !boton) {
+                return;
+            }
+
+            function actualizarEstado() {
+                let hayCantidad = false;
+                let cantidadesValidas = true;
+
+                cantidades.forEach(input => {
+                    const cantidad = Number(input.value || 0);
+                    const disponible = Number(
+                        input.dataset.cantidadDisponible || 0);
+                    const error = input.parentElement?.querySelector(
+                        ".cantidad-devolver-error");
+                    let mensaje = "";
+
+                    if (!Number.isInteger(cantidad) || cantidad < 0) {
+                        mensaje = "Ingresá una cantidad entera mayor o igual a cero.";
+                    }
+                    else if (cantidad > disponible) {
+                        mensaje = `La cantidad no puede superar las ${disponible} unidades disponibles.`;
+                    }
+
+                    input.setCustomValidity(mensaje);
+                    input.classList.toggle("is-invalid", mensaje !== "");
+
+                    if (error) {
+                        error.textContent = mensaje;
+                    }
+
+                    hayCantidad = hayCantidad || cantidad > 0;
+                    cantidadesValidas = cantidadesValidas && mensaje === "";
+                });
+
+                boton.disabled = !hayCantidad || !cantidadesValidas;
+
+                if (!boton.disabled) {
+                    boton.textContent = "Confirmar devolución";
+                }
+            }
+
+            cantidades.forEach(input => {
+                input.addEventListener("input", actualizarEstado);
+            });
+
+            formulario.addEventListener("submit", function (evento) {
+                actualizarEstado();
+
+                if (!formulario.checkValidity()) {
+                    evento.preventDefault();
+                    return;
+                }
+
                 boton.disabled = true;
                 boton.textContent = "Procesando...";
-            }
+            });
+
+            window.addEventListener("pageshow", actualizarEstado);
+            actualizarEstado();
         });
     </script>
 

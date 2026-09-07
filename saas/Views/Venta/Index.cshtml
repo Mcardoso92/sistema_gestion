@@ -97,9 +97,13 @@
 
                         <input asp-for="Buscar"
                                class="form-control bg-light"
+                               maxlength="100"
                                placeholder="ID, cliente o documento..." />
 
                     </div>
+
+                    <span asp-validation-for="Buscar"
+                          class="text-danger small"></span>
 
                 </div>
 
