@@ -74,16 +74,11 @@
                 }
 
                 <div class="col-md-auto">
-                    <button type="submit"
-                            class="btn btn-outline-secondary d-flex align-items-center gap-2 px-3">
-
-                        <span class="material-symbols-outlined fs-5">
+                    <button type="submit" class="btn btn-filter-search">
+                        <span class="material-symbols-outlined">
                             search
                         </span>
-
-                        <span class="small fw-medium">
-                            Buscar
-                        </span>
+                        Buscar
                     </button>
                 </div>
 
@@ -92,8 +87,8 @@
                                 || Model.EmpresaId.HasValue)
                 {
                     <div class="col-md-auto">
-                        <a asp-action="Index"
-                           class="btn btn-outline-secondary">
+                        <a asp-action="Index" class="btn btn-filter-clear">
+                            <span class="material-symbols-outlined">restart_alt</span>
                             Limpiar
                         </a>
                     </div>
