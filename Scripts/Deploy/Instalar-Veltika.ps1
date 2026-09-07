@@ -28,6 +28,37 @@ function Verificar-Variables {
     if ($faltantes) { throw "Faltan variables de entorno: $($faltantes -join ', ')" }
 }
 
+function Detener-AplicacionIis {
+    param(
+        [Parameter(Mandatory)][string]$NombreSitio,
+        [Parameter(Mandatory)][string]$NombreAppPool
+    )
+
+    if ((Get-WebsiteState -Name $NombreSitio).Value -ne "Stopped") {
+        Stop-WebSite -Name $NombreSitio
+    }
+
+    if ((Get-WebAppPoolState -Name $NombreAppPool).Value -ne "Stopped") {
+        Stop-WebAppPool -Name $NombreAppPool
+    }
+
+    $appcmd = "$env:windir\System32\inetsrv\appcmd.exe"
+    $limite = (Get-Date).AddSeconds(30)
+
+    do {
+        $estadoAppPool = (Get-WebAppPoolState -Name $NombreAppPool).Value
+        $procesosActivos = @(& $appcmd list wp "/apppool.name:$NombreAppPool")
+
+        if ($estadoAppPool -eq "Stopped" -and $procesosActivos.Count -eq 0) {
+            return
+        }
+
+        Start-Sleep -Seconds 1
+    } while ((Get-Date) -lt $limite)
+
+    throw "IIS no libero los archivos de la aplicacion dentro de 30 segundos."
+}
+
 Verificar-Administrador
 Verificar-Variables
 if (-not (Test-Path -LiteralPath $PaqueteZip)) { throw "No se encontro el paquete: $PaqueteZip" }
@@ -65,8 +96,7 @@ Copy-Item -LiteralPath "$env:windir\System32\inetsrv\config\applicationHost.conf
 & "$env:windir\System32\inetsrv\appcmd.exe" add backup $backupIis
 
 Write-Host "=== INICIO DE MANTENIMIENTO ==="
-Stop-WebSite -Name $Sitio
-Stop-WebAppPool -Name $AppPool
+Detener-AplicacionIis -NombreSitio $Sitio -NombreAppPool $AppPool
 
 Write-Host "=== MIGRACIONES ==="
 & sqlcmd -S $InstanciaSql -d $BaseDatos -E -C -I -b -i $scriptMigraciones
