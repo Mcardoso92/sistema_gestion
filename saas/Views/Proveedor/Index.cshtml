@@ -94,9 +94,8 @@
 
                 <div class="col-12 col-md-auto">
                     <div class="d-flex gap-2">
-                        <button type="submit"
-                                class="btn btn-primary d-flex align-items-center gap-2">
-                            <span class="material-symbols-outlined icon-sm">
+                        <button type="submit" class="btn btn-filter-search">
+                            <span class="material-symbols-outlined">
                                 search
                             </span>
                             Buscar
@@ -106,9 +105,8 @@
                             || Model.Estado != "activos"
                             || Model.EmpresaId.HasValue)
                         {
-                            <a asp-action="Index"
-                               class="btn btn-outline-secondary d-flex align-items-center gap-2">
-                                <span class="material-symbols-outlined icon-sm">
+                            <a asp-action="Index" class="btn btn-filter-clear">
+                                <span class="material-symbols-outlined">
                                     restart_alt
                                 </span>
                                 Limpiar
