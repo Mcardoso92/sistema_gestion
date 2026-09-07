@@ -1,10 +1,29 @@
 ﻿<!DOCTYPE html>
+@inject IConfiguration Configuration
+
+@{
+    string metaDescription = ViewData["MetaDescription"]?.ToString()
+        ?? "Sistema de gestión para administrar ventas, compras, stock, clientes y proveedores desde un solo lugar.";
+    string metaTitle = $"{ViewData["Title"]} - Veltika";
+    string baseUrl = (Configuration["PublicSite:BaseUrl"] ?? "https://veltika.com.ar").TrimEnd('/');
+    string canonicalUrl = $"{baseUrl}{Context.Request.PathBase}{Context.Request.Path}";
+    string linkedinUrl = Configuration["PublicSite:LinkedInUrl"] ?? "";
+    string instagramUrl = Configuration["PublicSite:InstagramUrl"] ?? "";
+    string facebookUrl = Configuration["PublicSite:FacebookUrl"] ?? "";
+}
+
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Veltika</title>
-    <meta name="description" content="Sistema de gestión para administrar ventas, compras, stock, clientes y proveedores desde un solo lugar." />
+    <meta name="description" content="@metaDescription" />
+    <link rel="canonical" href="@canonicalUrl" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Veltika" />
+    <meta property="og:title" content="@metaTitle" />
+    <meta property="og:description" content="@metaDescription" />
+    <meta property="og:url" content="@canonicalUrl" />
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/design-tokens.css" asp-append-version="true" />
@@ -15,12 +34,14 @@
     <link rel="stylesheet" href="~/css/cards.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/typography.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/public-dashboard-preview.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/public-accessibility.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/whatsapp-support.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="public-body">
+    <a class="skip-to-content" href="#contenido-principal">Saltar al contenido</a>
     <header class="public-header">
         <div class="container-xl">
             <nav class="public-navbar">
@@ -51,7 +72,9 @@
         </div>
     </header>
 
-    @RenderBody()
+    <main id="contenido-principal" tabindex="-1">
+        @RenderBody()
+    </main>
 
     <footer class="public-footer">
         <div class="container-xl">
@@ -64,14 +87,48 @@
                     <p>Gestión simple para hacer crecer tu negocio.</p>
                 </div>
 
-                <div class="public-footer-links">
-                    <a href="@Url.Action("Index", "Home")#funcionalidades">Funcionalidades</a>
-                    <a href="@Url.Action("Index", "Home")#beneficios">Beneficios</a>
-                    <a href="@Url.Action("Index", "Home")#precios">Precios</a>
-                    <a href="@Url.Action("Index", "Home")#nosotros">Nosotros</a>
-                    <a href="mailto:contacto@veltika.com.ar">Contacto</a>
-                    <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
-                    <a asp-controller="Home" asp-action="Terminos">Términos</a>
+                <div class="public-footer-navigation">
+                    <div class="public-footer-links">
+                        <a href="@Url.Action("Index", "Home")#funcionalidades">Funcionalidades</a>
+                        <a href="@Url.Action("Index", "Home")#beneficios">Beneficios</a>
+                        <a href="@Url.Action("Index", "Home")#precios">Precios</a>
+                        <a href="@Url.Action("Index", "Home")#nosotros">Nosotros</a>
+                        <a href="mailto:contacto@veltika.com.ar">Contacto</a>
+                        <a asp-controller="Home" asp-action="Privacy">Privacidad</a>
+                        <a asp-controller="Home" asp-action="Terminos">Términos</a>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(linkedinUrl)
+                        || !string.IsNullOrWhiteSpace(instagramUrl)
+                        || !string.IsNullOrWhiteSpace(facebookUrl))
+                    {
+                        <div class="public-social-links" aria-label="Redes sociales de Veltika">
+                            @if (!string.IsNullOrWhiteSpace(linkedinUrl))
+                            {
+                                <a class="public-social-link public-social-link--linkedin" href="@linkedinUrl" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn de Veltika">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.34V8.98h3.42v1.57h.05c.47-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.29ZM5.32 7.41a2.07 2.07 0 1 1 0-4.13 2.07 2.07 0 0 1 0 4.13ZM7.1 20.45H3.54V8.98H7.1v11.47Z" />
+                                    </svg>
+                                </a>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(instagramUrl))
+                            {
+                                <a class="public-social-link public-social-link--instagram" href="@instagramUrl" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Veltika">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M7.8 2h8.4A5.81 5.81 0 0 1 22 7.8v8.4a5.81 5.81 0 0 1-5.8 5.8H7.8A5.81 5.81 0 0 1 2 16.2V7.8A5.81 5.81 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" />
+                                    </svg>
+                                </a>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(facebookUrl))
+                            {
+                                <a class="public-social-link public-social-link--facebook" href="@facebookUrl" target="_blank" rel="noopener noreferrer" aria-label="Facebook de Veltika">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                        <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.19 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.49-3.91 3.77-3.91 1.09 0 2.23.2 2.23.2v2.46h-1.25c-1.24 0-1.63.77-1.63 1.56v1.9h2.77l-.44 2.91h-2.33V22C18.34 21.25 22 17.08 22 12.06Z" />
+                                    </svg>
+                                </a>
+                            }
+                        </div>
+                    }
                 </div>
             </div>
 
