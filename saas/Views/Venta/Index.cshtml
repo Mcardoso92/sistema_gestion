@@ -185,23 +185,6 @@
 
                 </div>
 
-                <!-- Botón -->
-                <div class="col-lg-2 col-md-4">
-
-                    <button type="submit"
-                            class="btn btn-v-primary w-100 d-flex align-items-center justify-content-center gap-2">
-
-                        <span class="material-symbols-outlined"
-                              style="font-size: 18px;">
-                            filter_list
-                        </span>
-
-                        Filtrar
-
-                    </button>
-
-                </div>
-
                 <!-- Usuario -->
                 <div class="col-lg-4 col-md-6">
 
@@ -245,6 +228,21 @@
                     </div>
                 }
 
+                <!-- Botón -->
+                <div class="col-lg-2 col-md-4">
+
+                    <button type="submit" class="btn btn-filter-search">
+
+                        <span class="material-symbols-outlined">
+                            search
+                        </span>
+
+                        Buscar
+
+                    </button>
+
+                </div>
+
                 @if (!string.IsNullOrWhiteSpace(Model.Buscar)
                     || Model.FechaDesde.HasValue
                     || Model.FechaHasta.HasValue
@@ -256,11 +254,9 @@
                     <!-- Limpiar filtros -->
                     <div class="col-lg-2 col-md-4">
 
-                        <a asp-action="Index"
-                           class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2">
+                        <a asp-action="Index" class="btn btn-filter-clear">
 
-                            <span class="material-symbols-outlined"
-                                  style="font-size: 18px;">
+                            <span class="material-symbols-outlined">
                                 restart_alt
                             </span>
 
