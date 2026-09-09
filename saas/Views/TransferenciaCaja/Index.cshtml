@@ -205,15 +205,15 @@
                             || fechaHasta.HasValue
                             || empresaActual.HasValue)
                         {
-                            <a asp-action="Index"
-                               class="btn btn-outline-secondary">
+                            <a asp-action="Index" class="btn btn-filter-clear">
+                                <span class="material-symbols-outlined">restart_alt</span>
                                 Limpiar
                             </a>
                         }
 
-                        <button type="submit"
-                                class="btn btn-outline-primary">
-                            Filtrar
+                        <button type="submit" class="btn btn-filter-search">
+                            <span class="material-symbols-outlined">search</span>
+                            Buscar
                         </button>
 
                     </div>
