@@ -110,13 +110,24 @@
                         </div>
                     }
 
-                    <div class="col-lg-2 col-md-6">
+                    <div class="col-12 col-md-auto">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-filter-search">
+                                <span class="material-symbols-outlined">search</span>
+                                Buscar
+                            </button>
 
-                        <button type="submit" class="btn btn-filter-search">
-                            <span class="material-symbols-outlined">search</span>
-                            Buscar
-                        </button>
-
+                            @if (!string.IsNullOrWhiteSpace(Model.Busqueda)
+                                || Model.Estado != "activas"
+                                || Model.Tipo.HasValue
+                                || Model.EmpresaId.HasValue)
+                            {
+                                <a asp-action="Index" class="btn btn-filter-clear">
+                                    <span class="material-symbols-outlined">restart_alt</span>
+                                    Limpiar
+                                </a>
+                            }
+                        </div>
                     </div>
 
                 </div>
