@@ -92,11 +92,24 @@
                            placeholder="Nombre o código de barras" />
                 </div>
 
-                <div class="col-lg-2 col-md-4">
-                    <button type="submit" class="btn btn-v-primary w-100 d-flex align-items-center justify-content-center gap-2">
-                        <span class="material-symbols-outlined">filter_alt</span>
-                        Aplicar
-                    </button>
+                <div class="col-12 col-md-auto">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-filter-search">
+                            <span class="material-symbols-outlined">search</span>
+                            Buscar
+                        </button>
+
+                        @if (Model.CategoriaId.HasValue
+                            || Model.Estado != "activos"
+                            || !string.IsNullOrWhiteSpace(Model.Busqueda)
+                            || (ViewBag.EsSuperAdmin is true && Model.EmpresaId.HasValue))
+                        {
+                            <a asp-action="Productos" class="btn btn-filter-clear">
+                                <span class="material-symbols-outlined">restart_alt</span>
+                                Limpiar
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
         </form>
