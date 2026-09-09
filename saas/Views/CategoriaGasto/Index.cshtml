@@ -117,12 +117,24 @@
                         </div>
                     }
 
-                    <div class="col-lg-2 col-md-6">
+                    <div class="col-12 col-md-auto">
 
-                        <button type="submit" class="btn btn-filter-search">
-                            <span class="material-symbols-outlined">search</span>
-                            Buscar
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-filter-search">
+                                <span class="material-symbols-outlined">search</span>
+                                Buscar
+                            </button>
+
+                            @if (estadoActual != "activos"
+                                || !string.IsNullOrWhiteSpace(busquedaActual)
+                                || empresaIdActual.HasValue)
+                            {
+                                <a asp-action="Index" class="btn btn-filter-clear">
+                                    <span class="material-symbols-outlined">restart_alt</span>
+                                    Limpiar
+                                </a>
+                            }
+                        </div>
 
                     </div>
 
