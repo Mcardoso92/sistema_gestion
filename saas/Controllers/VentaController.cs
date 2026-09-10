@@ -781,7 +781,9 @@ namespace saas.Controllers
                             MedioPagoId =
                                 pago.MedioPagoId,
 
-                            TurnoCajaId = turnosPorPago[i],
+                            // El cobro pertenece al turno operativo aunque su
+                            // medio de pago no afecte el efectivo del arqueo.
+                            TurnoCajaId = turnoOperativo?.Id,
 
                             UsuarioId =
                                 usuario.Id,

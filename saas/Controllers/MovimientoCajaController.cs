@@ -728,7 +728,8 @@ namespace saas.Controllers
                     .Include(m => m.Caja)
                     .Include(m => m.Usuario)
                     .Include(m => m.MedioPago)
-                    .Include(m => m.CategoriaGasto);
+                    .Include(m => m.CategoriaGasto)
+                    .Include(m => m.CobroVenta);
 
             if (!esSuperAdmin)
             {
@@ -804,7 +805,8 @@ namespace saas.Controllers
                     movimiento.MedioPago?.Nombre,
 
                 TurnoCajaId =
-                    movimiento.TurnoCajaId,
+                    movimiento.TurnoCajaId ??
+                    movimiento.CobroVenta?.TurnoCajaId,
 
                 CategoriaGastoNombre =
                     movimiento.CategoriaGasto?.Nombre,
