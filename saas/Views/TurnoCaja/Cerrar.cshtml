@@ -99,7 +99,7 @@
                             </div>
 
                             <div>
-                                @Model.FechaApertura.ToString("dd/MM/yyyy HH:mm")
+                                @FechaHora.ConvertirAHoraLocal(Model.FechaApertura).ToString("dd/MM/yyyy HH:mm")
                             </div>
 
                         </div>

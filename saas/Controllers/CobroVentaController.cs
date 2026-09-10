@@ -18,16 +18,19 @@ namespace saas.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly VentaSaldoService _ventaSaldoService;
         private readonly CajaSaldoService _cajaSaldoService;
+        private readonly IFechaHoraService _fechaHora;
         public CobroVentaController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
             VentaSaldoService ventaSaldoService,
-            CajaSaldoService cajaSaldoService)
+            CajaSaldoService cajaSaldoService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _ventaSaldoService = ventaSaldoService;
             _cajaSaldoService = cajaSaldoService;
+            _fechaHora = fechaHora;
         }
 
         // GET: CobroVenta/Registrar/5
@@ -331,7 +334,7 @@ namespace saas.Controllers
                             usuario.Id,
 
                         Fecha =
-                            DateTime.Now,
+                            _fechaHora.UtcAhora,
 
                         Importe =
                             vm.Importe,
@@ -722,7 +725,7 @@ namespace saas.Controllers
                     EstadoCobro.Anulado;
 
                 cobro.FechaAnulacion =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 cobro.UsuarioAnulacionId =
                     usuario.Id;
@@ -749,7 +752,7 @@ namespace saas.Controllers
                             movimiento.Importe,
 
                         Fecha =
-                            DateTime.Now,
+                            _fechaHora.UtcAhora,
 
                         UsuarioId =
                             usuario.Id,

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel.Reportes;
 
 
@@ -16,13 +17,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
         public ReporteController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         [HttpGet]
@@ -45,7 +49,7 @@ namespace saas.Controllers
 
             ViewBag.EsSuperAdmin = esSuperAdmin;
 
-            DateTime hoy = DateTime.Today;
+            DateTime hoy = _fechaHora.FechaLocalHoy;
             DateTime desde = fechaDesde?.Date
                 ?? new DateTime(hoy.Year, hoy.Month, 1);
             DateTime hasta = fechaHasta?.Date
@@ -100,14 +104,15 @@ namespace saas.Controllers
                 }
             }
 
-            DateTime hastaExclusivo = hasta.AddDays(1);
+            DateTime desdeUtc = _fechaHora.ConvertirAUtc(desde);
+            DateTime hastaExclusivoUtc = _fechaHora.ConvertirAUtc(hasta.AddDays(1));
 
             IQueryable<Venta> consulta = _context.Ventas
                 .AsNoTracking()
                 .Where(v =>
                     v.Estado &&
-                    v.Fecha >= desde &&
-                    v.Fecha < hastaExclusivo);
+                    v.Fecha >= desdeUtc &&
+                    v.Fecha < hastaExclusivoUtc);
 
             if (esSuperAdmin)
             {
@@ -174,7 +179,7 @@ namespace saas.Controllers
             }
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
-            DateTime hoy = DateTime.Today;
+            DateTime hoy = _fechaHora.FechaLocalHoy;
             DateTime desde = fechaDesde?.Date ?? new DateTime(hoy.Year, hoy.Month, 1);
             DateTime hasta = fechaHasta?.Date ?? hoy;
 
@@ -183,11 +188,12 @@ namespace saas.Controllers
                 return BadRequest("La fecha hasta no puede ser anterior a la fecha desde.");
             }
 
-            DateTime hastaExclusivo = hasta.AddDays(1);
+            DateTime desdeUtc = _fechaHora.ConvertirAUtc(desde);
+            DateTime hastaExclusivoUtc = _fechaHora.ConvertirAUtc(hasta.AddDays(1));
 
             IQueryable<Venta> consulta = _context.Ventas
                 .AsNoTracking()
-                .Where(v => v.Estado && v.Fecha >= desde && v.Fecha < hastaExclusivo);
+                .Where(v => v.Estado && v.Fecha >= desdeUtc && v.Fecha < hastaExclusivoUtc);
 
             if (esSuperAdmin)
             {
@@ -236,7 +242,7 @@ namespace saas.Controllers
             {
                 int fila = i + 2;
                 hoja.Cell(fila, 1).Value = ventas[i].VentaId;
-                hoja.Cell(fila, 2).Value = ventas[i].Fecha;
+                hoja.Cell(fila, 2).Value = _fechaHora.ConvertirAHoraLocal(ventas[i].Fecha);
                 hoja.Cell(fila, 3).Value = ventas[i].Cliente;
                 hoja.Cell(fila, 4).Value = ventas[i].Usuario;
                 hoja.Cell(fila, 5).Value = ventas[i].CantidadProductos;
@@ -518,7 +524,7 @@ namespace saas.Controllers
             using var memoria = new MemoryStream();
             workbook.SaveAs(memoria);
 
-            string nombreArchivo = $"reporte-stock-{DateTime.Now:yyyyMMdd-HHmm}.xlsx";
+            string nombreArchivo = $"reporte-stock-{_fechaHora.HoraLocalAhora:yyyyMMdd-HHmm}.xlsx";
 
             return File(
                 memoria.ToArray(),
@@ -784,7 +790,7 @@ namespace saas.Controllers
             using var memoria = new MemoryStream();
             workbook.SaveAs(memoria);
 
-            string nombreArchivo = $"reporte-productos-{DateTime.Now:yyyyMMdd-HHmm}.xlsx";
+            string nombreArchivo = $"reporte-productos-{_fechaHora.HoraLocalAhora:yyyyMMdd-HHmm}.xlsx";
 
             return File(
                 memoria.ToArray(),
@@ -1067,7 +1073,8 @@ namespace saas.Controllers
 
                 if (clientes[i].UltimaCompra.HasValue)
                 {
-                    hoja.Cell(fila, 8).Value = clientes[i].UltimaCompra.GetValueOrDefault();
+                    hoja.Cell(fila, 8).Value = _fechaHora.ConvertirAHoraLocal(
+                        clientes[i].UltimaCompra.GetValueOrDefault());
                 }
                 else
                 {
@@ -1090,7 +1097,7 @@ namespace saas.Controllers
             using var memoria = new MemoryStream();
             workbook.SaveAs(memoria);
 
-            string nombreArchivo = $"reporte-clientes-{DateTime.Now:yyyyMMdd-HHmm}.xlsx";
+            string nombreArchivo = $"reporte-clientes-{_fechaHora.HoraLocalAhora:yyyyMMdd-HHmm}.xlsx";
 
             return File(
                 memoria.ToArray(),

@@ -118,7 +118,7 @@
                                         };
 
                                         <tr>
-                                            <td>@cambio.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@FechaHora.ConvertirAHoraLocal(cambio.Fecha).ToString("dd/MM/yyyy HH:mm")</td>
                                             <td>@origen</td>
                                             <td>@cambio.Usuario.Nombre @cambio.Usuario.Apellido</td>
                                             <td class="text-end">@cambio.CostoAnterior.ToString("C")</td>

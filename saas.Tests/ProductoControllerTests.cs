@@ -129,7 +129,11 @@ public class ProductoControllerTests
     private static ProductoController CrearController(SaasDbContext context, UserManager<Usuario> userManager, Usuario usuario)
     {
         var identity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, usuario.Id)], "Prueba");
-        var controller = new ProductoController(context, userManager, new ImagenServicePrueba());
+        var controller = new ProductoController(
+            context,
+            userManager,
+            new ImagenServicePrueba(),
+            new FechaHoraServicePrueba());
         controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
         return controller;
     }

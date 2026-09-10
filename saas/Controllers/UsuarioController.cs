@@ -27,6 +27,7 @@ namespace saas.Controllers
         private readonly EmpresaInicializacionService _empresaInicializacionService;
         private readonly EmailSettings _emailSettings;
         private readonly ILogger<UsuarioController> _logger;
+        private readonly IFechaHoraService _fechaHora;
         public UsuarioController(
             UserManager<Usuario> userManager,
             SignInManager<Usuario> signInManager,
@@ -36,7 +37,8 @@ namespace saas.Controllers
             IImagenService imagenService,
             EmpresaInicializacionService empresaInicializacionService,
             IOptions<EmailSettings> emailOptions,
-            ILogger<UsuarioController> logger)
+            ILogger<UsuarioController> logger,
+            IFechaHoraService fechaHora)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -47,6 +49,7 @@ namespace saas.Controllers
             _empresaInicializacionService = empresaInicializacionService;
             _emailSettings = emailOptions.Value;
             _logger = logger;
+            _fechaHora = fechaHora;
         }
         // GET: Usuario
         public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null, int pagina = 1)
@@ -372,7 +375,7 @@ namespace saas.Controllers
                     Apellido = usuario.Apellido,
                     EmpresaId = usuario.EmpresaId,
                     Estado = usuario.Estado,
-                    FechaAlta = DateTime.Now
+                    FechaAlta = _fechaHora.UtcAhora
                 };
 
                 var resultado = await _userManager.CreateAsync(usuarioDb, usuario.Password);
@@ -1023,7 +1026,7 @@ namespace saas.Controllers
 
             try
             {
-                DateTime fechaAlta = DateTime.Now;
+                DateTime fechaAlta = _fechaHora.UtcAhora;
 
                 var empresa = new Empresa
                 {
@@ -1081,6 +1084,9 @@ namespace saas.Controllers
                 string empresaSegura = HtmlEncoder.Default.Encode(model.EmpresaNombre);
                 string administradorSeguro = HtmlEncoder.Default.Encode($"{model.Nombre} {model.Apellido}");
                 string emailSeguro = HtmlEncoder.Default.Encode(model.Email);
+                string fechaAltaLocal = _fechaHora
+                    .ConvertirAHoraLocal(usuarioCreado!.FechaAlta)
+                    .ToString("dd/MM/yyyy HH:mm");
 
                 var contenidoHtml = $"""
                     <h2>Nueva empresa registrada en Veltika</h2>
@@ -1089,7 +1095,7 @@ namespace saas.Controllers
                         <li><strong>Empresa:</strong> {empresaSegura}</li>
                         <li><strong>Administrador:</strong> {administradorSeguro}</li>
                         <li><strong>Correo:</strong> {emailSeguro}</li>
-                        <li><strong>Fecha:</strong> {usuarioCreado!.FechaAlta:dd/MM/yyyy HH:mm}</li>
+                        <li><strong>Fecha:</strong> {fechaAltaLocal}</li>
                     </ul>
                     """;
 

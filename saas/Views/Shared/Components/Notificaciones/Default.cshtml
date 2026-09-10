@@ -105,7 +105,7 @@
                                     }
 
                                     <div class="small text-muted">
-                                        Venta #@venta.VentaId · @venta.Fecha.ToString("HH:mm")
+                                        Venta #@venta.VentaId · @FechaHora.ConvertirAHoraLocal(venta.Fecha).ToString("HH:mm")
                                     </div>
                                 </div>
                             </div>

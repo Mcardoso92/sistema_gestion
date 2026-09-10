@@ -273,7 +273,7 @@
                                     <tr>
 
                                         <td class="ps-4 py-3 small">
-                                            @cobro.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                            @FechaHora.ConvertirAHoraLocal(cobro.Fecha).ToString("dd/MM/yyyy HH:mm")
                                         </td>
 
                                         <td class="py-3">
@@ -441,7 +441,7 @@
                                     <tr>
 
                                         <td class="ps-4 py-3 small">
-                                            @reintegro.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                            @FechaHora.ConvertirAHoraLocal(reintegro.Fecha).ToString("dd/MM/yyyy HH:mm")
                                         </td>
 
                                         <td class="py-3">
@@ -707,11 +707,11 @@
                         </div>
 
                         <div class="small text-dark text-end">
-                            @Model.Fecha.ToString("dd/MM/yyyy")
+                            @FechaHora.ConvertirAHoraLocal(Model.Fecha).ToString("dd/MM/yyyy")
                             <br />
 
                             <span class="text-muted">
-                                @Model.Fecha.ToString("HH:mm:ss")
+                                @FechaHora.ConvertirAHoraLocal(Model.Fecha).ToString("HH:mm:ss")
                             </span>
                         </div>
 

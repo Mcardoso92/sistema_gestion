@@ -18,7 +18,11 @@ builder.Services.AddScoped<VentaSaldoService>();
 builder.Services.AddScoped<CompraSaldoService>();
 builder.Services.AddScoped<EmpresaInicializacionService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
-// Mantiene la vista previa de cada importación fuera del navegador hasta que el usuario la confirme.
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.Configure<ZonaHorariaSettings>(
+    builder.Configuration.GetSection(ZonaHorariaSettings.Seccion));
+builder.Services.AddSingleton<IFechaHoraService, FechaHoraService>();
+// Mantiene la vista previa de cada importaciÃ³n fuera del navegador hasta que el usuario la confirme.
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IProductoImportacionService, ProductoImportacionService>();
 builder.Services.Configure<EmailSettings>(
@@ -42,7 +46,7 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 8;
 
-    //Bloquear usuarios después de varios intentos fallidos
+    //Bloquear usuarios despuÃ©s de varios intentos fallidos
     options.Lockout.MaxFailedAccessAttempts = 3;
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
     options.Lockout.AllowedForNewUsers = true;
@@ -114,8 +118,8 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Guarda los archivos estáticos en la caché del navegador durante 7 días.
-// No afecta datos dinámicos como ventas, stock, caja o usuarios.
+// Guarda los archivos estÃ¡ticos en la cachÃ© del navegador durante 7 dÃ­as.
+// No afecta datos dinÃ¡micos como ventas, stock, caja o usuarios.
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = context =>

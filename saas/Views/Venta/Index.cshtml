@@ -431,12 +431,12 @@
                                 <td>
 
                                     <div class="small fw-medium text-dark">
-                                        @venta.Fecha.ToString("dd/MM/yyyy")
+                                        @FechaHora.ConvertirAHoraLocal(venta.Fecha).ToString("dd/MM/yyyy")
                                     </div>
 
                                     <div class="text-muted"
                                          style="font-size: 0.75rem;">
-                                        @venta.Fecha.ToString("HH:mm:ss")
+                                        @FechaHora.ConvertirAHoraLocal(venta.Fecha).ToString("HH:mm:ss")
                                     </div>
 
                                 </td>

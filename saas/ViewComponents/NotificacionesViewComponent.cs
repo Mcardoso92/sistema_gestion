@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel.Notificaciones;
 
 namespace saas.ViewComponents
@@ -11,11 +12,16 @@ namespace saas.ViewComponents
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
-        public NotificacionesViewComponent(SaasDbContext context, UserManager<Usuario> userManager)
+        public NotificacionesViewComponent(
+            SaasDbContext context,
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
@@ -63,8 +69,8 @@ namespace saas.ViewComponents
                 })
                 .ToListAsync();
 
-            DateTime inicioDia = DateTime.Today;
-            DateTime finDia = inicioDia.AddDays(1);
+            DateTime inicioDia = _fechaHora.ConvertirAUtc(_fechaHora.FechaLocalHoy);
+            DateTime finDia = _fechaHora.ConvertirAUtc(_fechaHora.FechaLocalHoy.AddDays(1));
 
             var consultaVentas = _context.Ventas
                 .AsNoTracking()

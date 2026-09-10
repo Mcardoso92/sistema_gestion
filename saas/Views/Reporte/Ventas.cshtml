@@ -89,8 +89,8 @@
                             Buscar
                         </button>
 
-                        @if (Model.FechaDesde.Date != new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1)
-                            || Model.FechaHasta.Date != DateTime.Today
+                        @if (Model.FechaDesde.Date != new DateTime(FechaHora.FechaLocalHoy.Year, FechaHora.FechaLocalHoy.Month, 1)
+                            || Model.FechaHasta.Date != FechaHora.FechaLocalHoy
                             || Model.ClienteId.HasValue
                             || (ViewBag.EsSuperAdmin is true && Model.EmpresaId.HasValue))
                         {
@@ -190,7 +190,7 @@
                         {
                             <tr>
                                 <td class="ps-4 text-nowrap">
-                                    @venta.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                    @FechaHora.ConvertirAHoraLocal(venta.Fecha).ToString("dd/MM/yyyy HH:mm")
                                 </td>
 
                                 <td>

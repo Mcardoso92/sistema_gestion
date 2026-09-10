@@ -14,11 +14,16 @@ namespace saas.Services
         private static readonly TimeSpan DuracionVistaPrevia = TimeSpan.FromMinutes(30);
         private readonly SaasDbContext _context;
         private readonly IMemoryCache _cache;
+        private readonly IFechaHoraService _fechaHora;
 
-        public ProductoImportacionService(SaasDbContext context, IMemoryCache cache)
+        public ProductoImportacionService(
+            SaasDbContext context,
+            IMemoryCache cache,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _cache = cache;
+            _fechaHora = fechaHora;
         }
 
         public byte[] GenerarPlantilla()
@@ -121,7 +126,7 @@ namespace saas.Services
                 throw new InvalidOperationException("Una o más categorías dejaron de estar disponibles. Analice nuevamente el archivo.");
             }
 
-            DateTime fecha = DateTime.Now;
+            DateTime fecha = _fechaHora.UtcAhora;
             await using var transaction = await _context.Database.BeginTransactionAsync();
 
             try

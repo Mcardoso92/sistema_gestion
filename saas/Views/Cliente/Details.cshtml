@@ -82,7 +82,7 @@
                         <div class="col-md-6">
                             <label asp-for="FechaAlta" class="form-label">Fecha de alta</label>
                             <input class="form-control"
-                                   value="@Model.FechaAlta.ToString("dd/MM/yyyy")"
+                                   value="@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")"
                                    readonly />
                         </div>
 

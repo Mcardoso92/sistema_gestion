@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel.Dashboard;
 
 namespace saas.Controllers
@@ -13,13 +14,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
         public DashboardController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         public async Task<IActionResult> Index()
@@ -35,10 +39,13 @@ namespace saas.Controllers
                 usuario,
                 "SuperAdmin");
 
-            DateTime hoy = DateTime.Today;
-            DateTime manana = hoy.AddDays(1);
-            DateTime inicioMes = new DateTime(hoy.Year, hoy.Month, 1);
-            DateTime inicioGrafico = hoy.AddDays(-6);
+            DateTime hoy = _fechaHora.FechaLocalHoy;
+            DateTime inicioMesLocal = new(hoy.Year, hoy.Month, 1);
+            DateTime inicioGraficoLocal = hoy.AddDays(-6);
+            DateTime inicioHoyUtc = _fechaHora.ConvertirAUtc(hoy);
+            DateTime mananaUtc = _fechaHora.ConvertirAUtc(hoy.AddDays(1));
+            DateTime inicioMesUtc = _fechaHora.ConvertirAUtc(inicioMesLocal);
+            DateTime inicioGraficoUtc = _fechaHora.ConvertirAUtc(inicioGraficoLocal);
 
             IQueryable<Venta> ventas = _context.Ventas
                 .AsNoTracking()
@@ -65,12 +72,12 @@ namespace saas.Controllers
             }
 
             IQueryable<Venta> ventasDia = ventas.Where(v =>
-                v.Fecha >= hoy &&
-                v.Fecha < manana);
+                v.Fecha >= inicioHoyUtc &&
+                v.Fecha < mananaUtc);
 
             IQueryable<Venta> ventasMes = ventas.Where(v =>
-                v.Fecha >= inicioMes &&
-                v.Fecha < manana);
+                v.Fecha >= inicioMesUtc &&
+                v.Fecha < mananaUtc);
 
             decimal totalVentasDia = await ventasDia
                 .SumAsync(v => (decimal?)v.Total)
@@ -152,23 +159,31 @@ namespace saas.Controllers
                 })
                 .ToList();
 
-            var ventasAgrupadas = await ventas
+            var ventasPeriodo = await ventas
                 .Where(v =>
-                    v.Fecha >= inicioGrafico &&
-                    v.Fecha < manana)
-                .GroupBy(v => v.Fecha.Date)
+                    v.Fecha >= inicioGraficoUtc &&
+                    v.Fecha < mananaUtc)
+                .Select(g => new
+                {
+                    g.Fecha,
+                    g.Total
+                })
+                .ToListAsync();
+
+            var ventasAgrupadas = ventasPeriodo
+                .GroupBy(v => _fechaHora.ConvertirAHoraLocal(v.Fecha).Date)
                 .Select(g => new
                 {
                     Fecha = g.Key,
                     Total = g.Sum(v => v.Total)
                 })
-                .ToListAsync();
+                .ToList();
 
             var ventasUltimosDias = Enumerable
                 .Range(0, 7)
                 .Select(indice =>
                 {
-                    DateTime fecha = inicioGrafico.AddDays(indice);
+                    DateTime fecha = inicioGraficoLocal.AddDays(indice);
 
                     decimal total = ventasAgrupadas
                         .FirstOrDefault(v => v.Fecha == fecha)

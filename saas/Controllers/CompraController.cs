@@ -20,12 +20,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly CompraSaldoService _compraSaldoService;
+        private readonly IFechaHoraService _fechaHora;
 
-        public CompraController(SaasDbContext context, UserManager<Usuario> userManager, CompraSaldoService compraSaldoService)
+        public CompraController(
+            SaasDbContext context,
+            UserManager<Usuario> userManager,
+            CompraSaldoService compraSaldoService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _compraSaldoService = compraSaldoService;
+            _fechaHora = fechaHora;
         }
 
         // GET: Compra
@@ -91,14 +97,16 @@ namespace saas.Controllers
 
             if (compraVM.FechaDesde.HasValue)
             {
-                DateTime fechaDesde = compraVM.FechaDesde.Value.Date;
+                DateTime fechaDesde = _fechaHora.ConvertirAUtc(
+                    compraVM.FechaDesde.Value.Date);
 
                 consulta = consulta.Where(c => c.Fecha >= fechaDesde);
             }
 
             if (compraVM.FechaHasta.HasValue)
             {
-                DateTime fechaHasta = compraVM.FechaHasta.Value.Date.AddDays(1);
+                DateTime fechaHasta = _fechaHora.ConvertirAUtc(
+                    compraVM.FechaHasta.Value.Date.AddDays(1));
 
                 consulta = consulta.Where(c => c.Fecha < fechaHasta);
             }
@@ -568,7 +576,7 @@ namespace saas.Controllers
                         PrecioVenta = 0,
                         Stock = 0,
                         Estado = true,
-                        FechaAlta = DateTime.Now,
+                        FechaAlta = _fechaHora.UtcAhora,
                         EmpresaId = empresaCompraId
                     };
 
@@ -607,7 +615,7 @@ namespace saas.Controllers
                 var productosPorId = productos
                     .ToDictionary(p => p.Id);
 
-                DateTime fechaCompra = DateTime.Now;
+                DateTime fechaCompra = _fechaHora.UtcAhora;
                 decimal totalCompra = 0;
 
                 var compra = new Compra
@@ -1035,7 +1043,7 @@ namespace saas.Controllers
                     }
                 }
 
-                DateTime fechaAnulacion = DateTime.Now;
+                DateTime fechaAnulacion = _fechaHora.UtcAhora;
 
                 foreach (var detalle in compra.Detalles)
                 {

@@ -12,11 +12,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly EmpresaInicializacionService _empresaInicializacionService;
+        private readonly IFechaHoraService _fechaHora;
 
-        public EmpresaController(SaasDbContext context, EmpresaInicializacionService empresaInicializacionService)
+        public EmpresaController(
+            SaasDbContext context,
+            EmpresaInicializacionService empresaInicializacionService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _empresaInicializacionService = empresaInicializacionService;
+            _fechaHora = fechaHora;
         }
 
         // GET: Empresa
@@ -126,7 +131,7 @@ namespace saas.Controllers
 
                 try
                 {
-                    var fechaAlta = DateTime.Now;
+                    var fechaAlta = _fechaHora.UtcAhora;
 
                     empresa.FechaAlta = fechaAlta;
                     empresa.Estado = true;

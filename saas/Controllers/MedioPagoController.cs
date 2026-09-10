@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Helpers;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel;
 
 namespace saas.Controllers
@@ -15,13 +16,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
         public MedioPagoController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         // GET: MedioPago
@@ -284,7 +288,7 @@ namespace saas.Controllers
                     Descripcion = medioPagoVM.Descripcion,
                     Tipo = medioPagoVM.Tipo,
                     Estado = true,
-                    FechaAlta = DateTime.Now,
+                    FechaAlta = _fechaHora.UtcAhora,
                     EmpresaId = empresaId
                 };
 

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel;
 using saas.ViewModel.Enums;
 
@@ -16,11 +17,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
-        public MovimientoStockController(SaasDbContext context, UserManager<Usuario> userManager)
+        public MovimientoStockController(
+            SaasDbContext context,
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         // GET: MovimientoStock
@@ -268,7 +274,7 @@ namespace saas.Controllers
                         return View(ajusteVM);
                 }
 
-                DateTime fecha = DateTime.Now;
+                DateTime fecha = _fechaHora.UtcAhora;
 
                 producto.Stock = stockPosterior;
 
@@ -431,13 +437,15 @@ namespace saas.Controllers
 
             if (historialVM.FechaDesde.HasValue)
             {
-                DateTime fechaDesde = historialVM.FechaDesde.Value.Date;
+                DateTime fechaDesde = _fechaHora.ConvertirAUtc(
+                    historialVM.FechaDesde.Value.Date);
                 consulta = consulta.Where(m => m.Fecha >= fechaDesde);
             }
 
             if (historialVM.FechaHasta.HasValue)
             {
-                DateTime fechaHasta = historialVM.FechaHasta.Value.Date.AddDays(1);
+                DateTime fechaHasta = _fechaHora.ConvertirAUtc(
+                    historialVM.FechaHasta.Value.Date.AddDays(1));
                 consulta = consulta.Where(m => m.Fecha < fechaHasta);
             }
 

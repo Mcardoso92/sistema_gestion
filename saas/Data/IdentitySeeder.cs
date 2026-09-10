@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using saas.Models;
+using saas.Services;
 
 namespace saas.Data.Seed
 {
@@ -11,6 +12,7 @@ namespace saas.Data.Seed
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = services.GetRequiredService<UserManager<Usuario>>();
             var context = services.GetRequiredService<SaasDbContext>();
+            var fechaHora = services.GetRequiredService<IFechaHoraService>();
 
             // ==========================
             // EMPRESAS
@@ -24,7 +26,7 @@ namespace saas.Data.Seed
                 {
                     Nombre = "Veltika Demo",
                     Estado = true,
-                    FechaAlta = DateTime.Now
+                    FechaAlta = fechaHora.UtcAhora
                 };
 
                 context.Empresas.Add(empresaVeltika);
@@ -38,7 +40,7 @@ namespace saas.Data.Seed
                 {
                     Nombre = "Kiosko Don José",
                     Estado = true,
-                    FechaAlta = DateTime.Now
+                    FechaAlta = fechaHora.UtcAhora
                 };
 
                 context.Empresas.Add(empresaKiosko);
@@ -52,7 +54,7 @@ namespace saas.Data.Seed
                 {
                     Nombre = "Ferretería Central",
                     Estado = true,
-                    FechaAlta = DateTime.Now
+                    FechaAlta = fechaHora.UtcAhora
                 };
 
                 context.Empresas.Add(empresaFerreteria);
@@ -98,7 +100,7 @@ namespace saas.Data.Seed
                     EmpresaId = empresaVeltika.Id,
 
                     Estado = true,
-                    FechaAlta = DateTime.Now,
+                    FechaAlta = fechaHora.UtcAhora,
                     ImagenPerfil = ""
                 };
 
@@ -129,7 +131,7 @@ namespace saas.Data.Seed
                     EmpresaId = empresaKiosko.Id,
 
                     Estado = true,
-                    FechaAlta = DateTime.Now,
+                    FechaAlta = fechaHora.UtcAhora,
                     ImagenPerfil = ""
                 };
 
@@ -160,7 +162,7 @@ namespace saas.Data.Seed
                     EmpresaId = empresaFerreteria.Id,
 
                     Estado = true,
-                    FechaAlta = DateTime.Now,
+                    FechaAlta = fechaHora.UtcAhora,
                     ImagenPerfil = ""
                 };
 

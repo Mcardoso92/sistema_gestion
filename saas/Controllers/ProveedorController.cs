@@ -15,11 +15,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
-        public ProveedorController(SaasDbContext context, UserManager<Usuario> userManager)
+        public ProveedorController(
+            SaasDbContext context,
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         // GET: Proveedor
@@ -333,7 +338,7 @@ namespace saas.Controllers
                 CodigoPostal = proveedorVM.CodigoPostal,
                 Observaciones = proveedorVM.Observaciones,
                 Estado = true,
-                FechaAlta = DateTime.Now,
+                FechaAlta = _fechaHora.UtcAhora,
                 EmpresaId = proveedorVM.EmpresaId.Value
             };
 

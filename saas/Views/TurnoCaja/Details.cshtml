@@ -123,7 +123,7 @@
                             </div>
 
                             <div>
-                                @Model.FechaApertura.ToString("dd/MM/yyyy HH:mm")
+                                @FechaHora.ConvertirAHoraLocal(Model.FechaApertura).ToString("dd/MM/yyyy HH:mm")
                             </div>
 
                         </div>
@@ -150,7 +150,7 @@
 
                                 <div>
                                     @(Model.FechaCierre.HasValue
-                                                                    ? Model.FechaCierre.Value.ToString("dd/MM/yyyy HH:mm")
+                                                                    ? FechaHora.ConvertirAHoraLocal(Model.FechaCierre.Value).ToString("dd/MM/yyyy HH:mm")
                                                                     : "-")
                                                                       </div>
 
@@ -475,7 +475,7 @@
                                     <td class="ps-4">
 
                                         <div>
-                                            @movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                            @FechaHora.ConvertirAHoraLocal(movimiento.Fecha).ToString("dd/MM/yyyy HH:mm")
                                         </div>
 
                                         @if (esPosteriorAlCierre)
@@ -576,7 +576,7 @@
 
                         <div>
                             Fecha:
-                            @(Model.Regularizacion.FechaRegularizacion?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+                            @(FechaHora.ConvertirAHoraLocal(Model.Regularizacion.FechaRegularizacion)?.ToString("dd/MM/yyyy HH:mm") ?? "-")
                         </div>
 
                         <div>

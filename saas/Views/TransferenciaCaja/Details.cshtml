@@ -106,7 +106,7 @@
                             </div>
 
                             <div>
-                                @Model.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                @FechaHora.ConvertirAHoraLocal(Model.Fecha).ToString("dd/MM/yyyy HH:mm")
                             </div>
 
                         </div>
@@ -206,7 +206,7 @@
 
                         <div>
                             @(Model.FechaAnulacion.HasValue
-                                                    ? Model.FechaAnulacion.Value.ToString("dd/MM/yyyy HH:mm")
+                                                    ? FechaHora.ConvertirAHoraLocal(Model.FechaAnulacion.Value).ToString("dd/MM/yyyy HH:mm")
                                                     : "-")
                     </div>
 
