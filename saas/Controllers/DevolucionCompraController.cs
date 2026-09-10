@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel.DevolucionCompra;
 using saas.ViewModels.DevolucionCompra;
 using System.Data;
@@ -16,13 +17,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
         public DevolucionCompraController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         // GET: DevolucionCompra/Registrar?compraId=5
@@ -362,7 +366,7 @@ namespace saas.Controllers
                 decimal totalDevolucion = 0;
 
                 DateTime fechaDevolucion =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 var devolucion =
                     new DevolucionCompra
@@ -773,7 +777,7 @@ namespace saas.Controllers
                 }
 
                 DateTime fechaAnulacion =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 foreach (var detalle
                     in devolucionActual.Detalles)

@@ -17,12 +17,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly IImagenService _imagenService;
+        private readonly IFechaHoraService _fechaHora;
 
-        public ProductoController(SaasDbContext context, UserManager<Usuario> userManager, IImagenService imagenService)
+        public ProductoController(
+            SaasDbContext context,
+            UserManager<Usuario> userManager,
+            IImagenService imagenService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _imagenService = imagenService;
+            _fechaHora = fechaHora;
         }
 
         // GET: Producto
@@ -286,7 +292,7 @@ namespace saas.Controllers
                     return View(producto);
                 }
 
-                DateTime fecha = DateTime.Now;
+                DateTime fecha = _fechaHora.UtcAhora;
 
                 producto.FechaAlta = fecha;
                 producto.Estado = true;
@@ -561,7 +567,7 @@ namespace saas.Controllers
                             UsuarioId = usuario.Id,
                             CostoAnterior = productoDb.PrecioCosto,
                             CostoNuevo = producto.PrecioCosto,
-                            Fecha = DateTime.Now,
+                            Fecha = _fechaHora.UtcAhora,
                             Origen = OrigenCambioCostoProducto.EdicionManual,
                             Motivo = motivoCambioCosto!.Trim()
                         });

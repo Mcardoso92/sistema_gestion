@@ -17,15 +17,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly CajaSaldoService _cajaSaldoService;
+        private readonly IFechaHoraService _fechaHora;
 
         public TransferenciaCajaController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            CajaSaldoService cajaSaldoService)
+            CajaSaldoService cajaSaldoService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _cajaSaldoService = cajaSaldoService;
+            _fechaHora = fechaHora;
         }
 
         // GET: TransferenciaCaja
@@ -105,13 +108,13 @@ namespace saas.Controllers
             if (fechaDesde.HasValue)
             {
                 consulta = consulta.Where(t =>
-                    t.Fecha >= fechaDesde.Value.Date);
+                    t.Fecha >= _fechaHora.ConvertirAUtc(fechaDesde.Value.Date));
             }
 
             if (fechaHasta.HasValue)
             {
                 var hastaExclusivo =
-                    fechaHasta.Value.Date.AddDays(1);
+                    _fechaHora.ConvertirAUtc(fechaHasta.Value.Date.AddDays(1));
 
                 consulta = consulta.Where(t =>
                     t.Fecha < hastaExclusivo);
@@ -395,7 +398,7 @@ namespace saas.Controllers
                 }
 
                 var fecha =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 var transferencia =
                     new TransferenciaCaja
@@ -970,7 +973,7 @@ namespace saas.Controllers
                 }
 
                 DateTime fecha =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 // Revierte la salida original:
                 // el dinero vuelve a Caja Origen.

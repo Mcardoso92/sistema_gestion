@@ -7,6 +7,7 @@ using saas.Data;
 using saas.Models;
 using saas.ViewModel;
 using saas.Helpers;
+using saas.Services;
 
 namespace saas.Controllers
 {
@@ -15,13 +16,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
         public CajaController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         // GET: Caja
@@ -333,7 +337,7 @@ namespace saas.Controllers
                     PermiteTurnos = cajaVM.PermiteTurnos,
                     FondoFijo = cajaVM.FondoFijo,
                     Estado = true,
-                    FechaAlta = DateTime.Now,
+                    FechaAlta = _fechaHora.UtcAhora,
                     EmpresaId = empresaId
                 };
 

@@ -80,7 +80,7 @@
                                     Fecha de Alta
                                 </label>
 
-                                <input value="@Model.FechaAlta.ToString("dd/MM/yyyy")"
+                                <input value="@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")"
                                        class="form-control"
                                        readonly />
                             </div>

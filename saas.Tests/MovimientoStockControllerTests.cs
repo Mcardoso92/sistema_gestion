@@ -105,7 +105,10 @@ public class MovimientoStockControllerTests
         var identity = new ClaimsIdentity(
             [new Claim(ClaimTypes.NameIdentifier, usuario.Id)],
             "Prueba");
-        var controller = new MovimientoStockController(context, userManager);
+        var controller = new MovimientoStockController(
+            context,
+            userManager,
+            new FechaHoraServicePrueba());
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext

@@ -51,7 +51,7 @@
                         </div>
 
                         <div class="fw-semibold">
-                            @Model.FechaCompra.ToString("dd/MM/yyyy HH:mm")
+                            @FechaHora.ConvertirAHoraLocal(Model.FechaCompra).ToString("dd/MM/yyyy HH:mm")
                         </div>
                     </div>
 

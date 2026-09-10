@@ -219,7 +219,7 @@
                             string icono = esEntrada ? "arrow_downward" : "arrow_upward";
 
                             <tr>
-                                <td class="ps-4 text-nowrap">@movimiento.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="ps-4 text-nowrap">@FechaHora.ConvertirAHoraLocal(movimiento.Fecha).ToString("dd/MM/yyyy HH:mm")</td>
 
                                 <td>
                                     <div class="fw-semibold">@movimiento.ProductoNombre</div>

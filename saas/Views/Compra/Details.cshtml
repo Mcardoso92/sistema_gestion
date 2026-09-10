@@ -80,7 +80,7 @@
 
                         <div class="col-md-4">
                             <span class="compra-detail-label">Fecha</span>
-                            <p class="compra-detail-value">@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p class="compra-detail-value">@FechaHora.ConvertirAHoraLocal(Model.Fecha).ToString("dd/MM/yyyy HH:mm")</p>
                         </div>
 
                         <div class="col-md-4">
@@ -223,7 +223,7 @@
                                     {
                                         <tr>
                                             <td class="ps-4">
-                                                @pago.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                                @FechaHora.ConvertirAHoraLocal(pago.Fecha).ToString("dd/MM/yyyy HH:mm")
                                             </td>
 
                                             <td>
@@ -279,7 +279,7 @@
                                                 <td colspan="7" class="bg-light ps-4 py-3">
                                                     <div class="text-sm text-muted-custom">
                                                         <strong>Anulado:</strong>
-                                                        @(pago.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                                        @(FechaHora.ConvertirAHoraLocal(pago.FechaAnulacion)?.ToString("dd/MM/yyyy HH:mm") ?? "—")
 
                                                         @if (!string.IsNullOrWhiteSpace(pago.UsuarioAnulacionNombre))
                                                         {
@@ -352,7 +352,7 @@
                                             </div>
 
                                             <div class="text-sm text-muted-custom">
-                                                @devolucion.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                                @FechaHora.ConvertirAHoraLocal(devolucion.Fecha).ToString("dd/MM/yyyy HH:mm")
                                                 · @devolucion.UsuarioNombre
                                             </div>
                                         </div>
@@ -436,7 +436,7 @@
                                         <div class="mt-3 p-3 bg-light rounded">
                                             <div class="text-sm text-muted-custom">
                                                 <strong>Anulada:</strong>
-                                                @(devolucion.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                                        @(FechaHora.ConvertirAHoraLocal(devolucion.FechaAnulacion)?.ToString("dd/MM/yyyy HH:mm") ?? "—")
 
                                                 @if (!string.IsNullOrWhiteSpace(devolucion.UsuarioAnulacionNombre))
                                                 {
@@ -516,7 +516,7 @@
                                     {
                                         <tr>
                                             <td class="ps-4">
-                                                @reintegro.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                                @FechaHora.ConvertirAHoraLocal(reintegro.Fecha).ToString("dd/MM/yyyy HH:mm")
                                             </td>
 
                                             <td>
@@ -573,7 +573,7 @@
                                                 <td colspan="7" class="bg-light ps-4 py-3">
                                                     <div class="text-sm text-muted-custom">
                                                         <strong>Anulado:</strong>
-                                                        @(reintegro.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                                        @(FechaHora.ConvertirAHoraLocal(reintegro.FechaAnulacion)?.ToString("dd/MM/yyyy HH:mm") ?? "—")
 
                                                         @if (!string.IsNullOrWhiteSpace(reintegro.UsuarioAnulacionNombre))
                                                         {
@@ -683,7 +683,7 @@
                         <div class="mb-3">
                             <span class="compra-detail-label">Fecha de anulación</span>
                             <p class="compra-detail-value">
-                                @(Model.FechaAnulacion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                @(FechaHora.ConvertirAHoraLocal(Model.FechaAnulacion)?.ToString("dd/MM/yyyy HH:mm") ?? "—")
                             </p>
                         </div>
 

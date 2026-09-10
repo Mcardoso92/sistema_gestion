@@ -18,17 +18,20 @@ namespace saas.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly CajaSaldoService _cajaSaldoService;
         private readonly VentaSaldoService _ventaSaldoService;
+        private readonly IFechaHoraService _fechaHora;
 
         public ReintegroVentaController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
             CajaSaldoService cajaSaldoService,
-            VentaSaldoService ventaSaldoService)
+            VentaSaldoService ventaSaldoService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _cajaSaldoService = cajaSaldoService;
             _ventaSaldoService = ventaSaldoService;
+            _fechaHora = fechaHora;
         }
 
         // GET: ReintegroVenta/Registrar?ventaId=5
@@ -569,7 +572,7 @@ namespace saas.Controllers
                 }
 
                 var fecha =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 var reintegro =
                     new ReintegroVenta
@@ -1030,7 +1033,7 @@ namespace saas.Controllers
                 }
 
                 var fecha =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 reintegro.Estado =
                     EstadoReintegro.Anulado;

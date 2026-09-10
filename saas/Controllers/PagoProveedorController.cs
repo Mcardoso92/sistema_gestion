@@ -18,17 +18,20 @@ namespace saas.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly CompraSaldoService _compraSaldoService;
         private readonly CajaSaldoService _cajaSaldoService;
+        private readonly IFechaHoraService _fechaHora;
 
         public PagoProveedorController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
             CompraSaldoService compraSaldoService,
-            CajaSaldoService cajaSaldoService)
+            CajaSaldoService cajaSaldoService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _compraSaldoService = compraSaldoService;
             _cajaSaldoService = cajaSaldoService;
+            _fechaHora = fechaHora;
         }
 
         // GET: PagoProveedor/Registrar/5
@@ -449,7 +452,7 @@ namespace saas.Controllers
                         usuario.Id,
 
                     Fecha =
-                        DateTime.Now,
+                        _fechaHora.UtcAhora,
 
                     Importe =
                         vm.Importe,
@@ -932,7 +935,7 @@ namespace saas.Controllers
                     EstadoPago.Anulado;
 
                 pagoActual.FechaAnulacion =
-                    DateTime.Now;
+                    _fechaHora.UtcAhora;
 
                 pagoActual.UsuarioAnulacionId =
                     usuario.Id;
@@ -959,7 +962,7 @@ namespace saas.Controllers
                             movimientoActual.Importe,
 
                         Fecha =
-                            DateTime.Now,
+                            _fechaHora.UtcAhora,
 
                         UsuarioId =
                             usuario.Id,

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Models;
 using saas.Models.Enums;
+using saas.Services;
 using saas.ViewModel;
 using System.Data;
 
@@ -15,13 +16,16 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly IFechaHoraService _fechaHora;
 
         public TurnoCajaController(
             SaasDbContext context,
-            UserManager<Usuario> userManager)
+            UserManager<Usuario> userManager,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _fechaHora = fechaHora;
         }
 
         // GET: TurnoCaja
@@ -377,7 +381,7 @@ namespace saas.Controllers
                     EmpresaId = caja.EmpresaId,
                     CajaId = caja.Id,
                     UsuarioAperturaId = usuario.Id,
-                    FechaApertura = DateTime.Now,
+                    FechaApertura = _fechaHora.UtcAhora,
                     Estado = EstadoTurnoCaja.Abierto,
 
                     FondoFijoAplicado = caja.FondoFijo,
@@ -925,7 +929,7 @@ namespace saas.Controllers
                     vm.EfectivoContado -
                     efectivoEsperadoActual;
 
-                turno.FechaCierre = DateTime.Now;
+                turno.FechaCierre = _fechaHora.UtcAhora;
                 turno.UsuarioCierreId = usuario.Id;
                 turno.Estado = EstadoTurnoCaja.Cerrado;
                 turno.CierreForzado = cierreForzado;
@@ -945,7 +949,7 @@ namespace saas.Controllers
                         CajaDestinoId = vm.CajaDestinoId.Value,
                         UsuarioId = usuario.Id,
                         TurnoCajaId = turno.Id,
-                        Fecha = DateTime.Now,
+                        Fecha = _fechaHora.UtcAhora,
                         Importe = vm.ImporteRendido,
                         Motivo = $"Rendición de turno #{turno.Id}",
                         Estado = EstadoTransferenciaCaja.Activa
@@ -1291,7 +1295,7 @@ namespace saas.Controllers
                             importe,
 
                         Fecha =
-                            DateTime.Now,
+                            _fechaHora.UtcAhora,
 
                         UsuarioId =
                             usuario.Id,

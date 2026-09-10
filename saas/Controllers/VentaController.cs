@@ -20,12 +20,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly VentaSaldoService _ventaSaldoService;
+        private readonly IFechaHoraService _fechaHora;
 
-        public VentaController(SaasDbContext context, UserManager<Usuario> userManager, VentaSaldoService ventaSaldoService)
+        public VentaController(
+            SaasDbContext context,
+            UserManager<Usuario> userManager,
+            VentaSaldoService ventaSaldoService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _ventaSaldoService = ventaSaldoService;
+            _fechaHora = fechaHora;
         }
 
         // GET: Venta
@@ -117,7 +123,8 @@ namespace saas.Controllers
 
             if (ventaVM.FechaDesde.HasValue)
             {
-                DateTime fechaDesde = ventaVM.FechaDesde.Value.Date;
+                DateTime fechaDesde = _fechaHora.ConvertirAUtc(
+                    ventaVM.FechaDesde.Value.Date);
 
                 consulta = consulta.Where(v =>
                     v.Fecha >= fechaDesde);
@@ -125,8 +132,8 @@ namespace saas.Controllers
 
             if (ventaVM.FechaHasta.HasValue)
             {
-                DateTime fechaHasta =
-                    ventaVM.FechaHasta.Value.Date.AddDays(1);
+                DateTime fechaHasta = _fechaHora.ConvertirAUtc(
+                    ventaVM.FechaHasta.Value.Date.AddDays(1));
 
                 consulta = consulta.Where(v =>
                     v.Fecha < fechaHasta);
@@ -695,7 +702,7 @@ namespace saas.Controllers
 
                 var venta = new Venta
                 {
-                    Fecha = DateTime.Now,
+                    Fecha = _fechaHora.UtcAhora,
                     Total = totalVenta,
                     Estado = true,
                     EmpresaId = empresaVentaId,
@@ -1166,7 +1173,7 @@ namespace saas.Controllers
                     return RedirectToAction(nameof(Details), new { id });
                 }
 
-                DateTime fechaAnulacion = DateTime.Now;
+                DateTime fechaAnulacion = _fechaHora.UtcAhora;
 
                 foreach (var detalle in venta.Detalles)
                 {

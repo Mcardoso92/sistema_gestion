@@ -91,7 +91,7 @@
 
                         <div class="col-md-6">
                             <div class="proveedor-detail-label">Fecha de Alta</div>
-                            <div class="proveedor-detail-value">@Model.FechaAlta.ToString("dd/MM/yyyy HH:mm")</div>
+                            <div class="proveedor-detail-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy HH:mm")</div>
                         </div>
                     </div>
                 </div>

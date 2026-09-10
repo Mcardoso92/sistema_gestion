@@ -173,7 +173,7 @@
                                         </span>
                                     }
                                 </td>
-                                <td class="text-muted">@usuario.FechaAlta.ToString("dd/MM/yyyy")</td>
+                                <td class="text-muted">@FechaHora.ConvertirAHoraLocal(usuario.FechaAlta).ToString("dd/MM/yyyy")</td>
                                 <td class="pe-4 text-end">
                                     <div class="table-actions">
                                     <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>

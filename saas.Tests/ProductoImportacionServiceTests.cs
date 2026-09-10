@@ -17,7 +17,7 @@ public class ProductoImportacionServiceTests
         // Protege el contrato de columnas que necesitan el lector y los archivos completados por los usuarios.
         using SaasDbContext context = TestDbContextFactory.Crear();
         using var cache = new MemoryCache(new MemoryCacheOptions());
-        var service = new ProductoImportacionService(context, cache);
+        var service = new ProductoImportacionService(context, cache, new FechaHoraServicePrueba());
 
         byte[] archivo = service.GenerarPlantilla();
 
@@ -34,7 +34,7 @@ public class ProductoImportacionServiceTests
         await using SaasDbContext context = TestDbContextFactory.Crear();
         await PrepararEmpresa(context);
         using var cache = new MemoryCache(new MemoryCacheOptions());
-        var service = new ProductoImportacionService(context, cache);
+        var service = new ProductoImportacionService(context, cache, new FechaHoraServicePrueba());
         IFormFile archivo = CrearArchivo(service, new object?[][]
         {
             new object?[] { "Producto válido", "COD-001", null, 100m, 150m, 10, 3, null },
@@ -57,7 +57,7 @@ public class ProductoImportacionServiceTests
         await using SaasDbContext context = TestDbContextFactory.Crear();
         await PrepararEmpresa(context);
         using var cache = new MemoryCache(new MemoryCacheOptions());
-        var service = new ProductoImportacionService(context, cache);
+        var service = new ProductoImportacionService(context, cache, new FechaHoraServicePrueba());
         IFormFile archivo = CrearArchivo(service, new object?[][]
         {
             new object?[] { "Producto importado", "COD-100", null, 100m, 150m, 10, 3, "Prueba automatizada" }

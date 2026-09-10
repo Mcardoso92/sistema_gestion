@@ -269,7 +269,7 @@
 
                             <td class="text-end text-nowrap">
                                 @(cliente.UltimaCompra.HasValue
-                                                            ? cliente.UltimaCompra.Value.ToString("dd/MM/yyyy")
+                                                            ? FechaHora.ConvertirAHoraLocal(cliente.UltimaCompra.Value).ToString("dd/MM/yyyy")
                                                             : "-")
                         </td>
 

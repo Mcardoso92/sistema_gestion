@@ -92,7 +92,7 @@
                                 Fecha de alta
                             </div>
                             <div>
-                                @Model.FechaAlta.ToString("dd/MM/yyyy")
+                                @FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")
                             </div>
                         </div>
 

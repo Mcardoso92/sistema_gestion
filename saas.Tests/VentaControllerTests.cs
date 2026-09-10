@@ -111,7 +111,8 @@ public class VentaControllerTests
         var controller = new VentaController(
             context,
             userManager,
-            new VentaSaldoService(context));
+            new VentaSaldoService(context),
+            new FechaHoraServicePrueba());
         controller.ControllerContext = new ControllerContext
         {
             HttpContext = new DefaultHttpContext

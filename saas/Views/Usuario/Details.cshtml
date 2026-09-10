@@ -54,7 +54,7 @@
                             }
                         </div>
                         <div class="info-label">Fecha de alta</div>
-                        <div class="info-value">@Model.FechaAlta.ToString("dd/MM/yyyy")</div>
+                        <div class="info-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")</div>
                     </div>
                 </div>
                 <div class="card mt-4 border-0 bg-info bg-opacity-10 shadow-none">

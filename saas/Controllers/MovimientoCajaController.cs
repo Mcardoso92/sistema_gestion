@@ -17,15 +17,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly CajaSaldoService _cajaSaldoService;
+        private readonly IFechaHoraService _fechaHora;
 
         public MovimientoCajaController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            CajaSaldoService cajaSaldoService)
+            CajaSaldoService cajaSaldoService,
+            IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _cajaSaldoService = cajaSaldoService;   
+            _fechaHora = fechaHora;
         }
 
         // GET: MovimientoCaja
@@ -149,13 +152,13 @@ namespace saas.Controllers
             if (fechaDesde.HasValue)
             {
                 consulta = consulta.Where(m =>
-                    m.Fecha >= fechaDesde.Value.Date);
+                    m.Fecha >= _fechaHora.ConvertirAUtc(fechaDesde.Value.Date));
             }
 
             if (fechaHasta.HasValue)
             {
                 var hastaExclusivo =
-                    fechaHasta.Value.Date.AddDays(1);
+                    _fechaHora.ConvertirAUtc(fechaHasta.Value.Date.AddDays(1));
 
                 consulta = consulta.Where(m =>
                     m.Fecha < hastaExclusivo);
@@ -385,7 +388,7 @@ namespace saas.Controllers
                             vm.Importe,
 
                         Fecha =
-                            DateTime.Now,
+                            _fechaHora.UtcAhora,
 
                         UsuarioId =
                             usuario.Id,
@@ -647,7 +650,7 @@ namespace saas.Controllers
                             vm.Importe,
 
                         Fecha =
-                            DateTime.Now,
+                            _fechaHora.UtcAhora,
 
                         UsuarioId =
                             usuario.Id,
@@ -1222,7 +1225,7 @@ namespace saas.Controllers
                             movimiento.Importe,
 
                         Fecha =
-                            DateTime.Now,
+                            _fechaHora.UtcAhora,
 
                         UsuarioId =
                             usuario.Id,
