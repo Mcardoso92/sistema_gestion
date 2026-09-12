@@ -26,6 +26,7 @@ builder.Services.AddSingleton<IFechaHoraService, FechaHoraService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IProductoImportacionService, ProductoImportacionService>();
 builder.Services.AddScoped<IRevisionNotificacionService, RevisionNotificacionService>();
+builder.Services.AddScoped<NotificacionNovedadService>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection(
         "EmailSettings"));

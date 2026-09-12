@@ -33,6 +33,29 @@ namespace saas.Services
                 .SingleOrDefaultAsync();
         }
 
+        public async Task<IReadOnlyDictionary<int, DateTime>> ObtenerUltimasRevisionesAsync(
+            Usuario usuario,
+            IEnumerable<int> empresaIds,
+            bool esSuperAdmin)
+        {
+            int[] empresas = empresaIds.Distinct().ToArray();
+
+            if (!esSuperAdmin && empresas.Any(id => id != usuario.EmpresaId))
+            {
+                throw new UnauthorizedAccessException(
+                    "El usuario no puede acceder a las notificaciones de otra empresa.");
+            }
+
+            return await _context.RevisionesNotificacion
+                .AsNoTracking()
+                .Where(r =>
+                    r.UsuarioId == usuario.Id &&
+                    empresas.Contains(r.EmpresaId))
+                .ToDictionaryAsync(
+                    r => r.EmpresaId,
+                    r => r.FechaUltimaRevision);
+        }
+
         public async Task RegistrarRevisionAsync(
             Usuario usuario,
             int empresaId,

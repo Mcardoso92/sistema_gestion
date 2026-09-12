@@ -13,15 +13,21 @@ namespace saas.ViewComponents
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly IFechaHoraService _fechaHora;
+        private readonly IRevisionNotificacionService _revisionNotificacionService;
+        private readonly NotificacionNovedadService _notificacionNovedadService;
 
         public NotificacionesViewComponent(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            IFechaHoraService fechaHora)
+            IFechaHoraService fechaHora,
+            IRevisionNotificacionService revisionNotificacionService,
+            NotificacionNovedadService notificacionNovedadService)
         {
             _context = context;
             _userManager = userManager;
             _fechaHora = fechaHora;
+            _revisionNotificacionService = revisionNotificacionService;
+            _notificacionNovedadService = notificacionNovedadService;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
@@ -58,14 +64,17 @@ namespace saas.ViewComponents
             vm.Productos = await consulta
                 .OrderBy(p => p.Stock)
                 .ThenBy(p => p.Nombre)
-                .Take(6)
                 .Select(p => new NotificacionStockItemVM
                 {
                     ProductoId = p.Id,
+                    EmpresaId = p.EmpresaId,
                     Producto = p.Nombre,
                     Empresa = p.Empresa.Nombre,
                     Stock = p.Stock,
-                    PuntoReposicion = p.PuntoReposicion
+                    PuntoReposicion = p.PuntoReposicion,
+                    FechaOrigen = p.MovimientosStock
+                        .Select(m => (DateTime?)m.Fecha)
+                        .Max() ?? p.FechaAlta
                 })
                 .ToListAsync();
 
@@ -101,10 +110,10 @@ namespace saas.ViewComponents
             vm.Ventas = await consultaVentas
                 .OrderByDescending(x => x.Venta.Fecha)
                 .ThenByDescending(x => x.Venta.Id)
-                .Take(5)
                 .Select(x => new NotificacionVentaItemVM
                 {
                     VentaId = x.Venta.Id,
+                    EmpresaId = x.Venta.EmpresaId,
                     Fecha = x.Venta.Fecha,
                     Cliente = x.Venta.Cliente == null
                         ? "Consumidor final"
@@ -114,6 +123,26 @@ namespace saas.ViewComponents
                     Total = x.Venta.Total
                 })
                 .ToListAsync();
+
+            List<OrigenNotificacion> origenes = vm.Productos
+                .Select(p => new OrigenNotificacion(p.EmpresaId, p.FechaOrigen))
+                .Concat(vm.Ventas.Select(v =>
+                    new OrigenNotificacion(v.EmpresaId, v.Fecha)))
+                .ToList();
+
+            int[] empresaIds = origenes
+                .Select(x => x.EmpresaId)
+                .Distinct()
+                .ToArray();
+
+            IReadOnlyDictionary<int, DateTime> revisiones =
+                await _revisionNotificacionService.ObtenerUltimasRevisionesAsync(
+                    usuario,
+                    empresaIds,
+                    esSuperAdmin);
+
+            vm.CantidadNuevas =
+                _notificacionNovedadService.CalcularCantidad(origenes, revisiones);
 
             return View(vm);
         }
