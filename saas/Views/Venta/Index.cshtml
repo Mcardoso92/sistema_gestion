@@ -39,28 +39,18 @@
                 {
                     <a asp-action="Create"
                        asp-route-empresaId="@Model.EmpresaId"
-                       class="btn btn-v-primary d-flex align-items-center gap-2 px-3 py-2">
-
-                        <span class="material-symbols-outlined"
-                              style="font-size: 18px;">
-                            add
-                        </span>
-
-                        Nueva Venta
+                       class="btn btn-create-action">
+                        <span class="material-symbols-outlined">point_of_sale</span>
+                        <span>Nueva venta</span>
                     </a>
                 }
             }
             else
             {
                 <a asp-action="Create"
-                   class="btn btn-v-primary d-flex align-items-center gap-2 px-3 py-2">
-
-                    <span class="material-symbols-outlined"
-                          style="font-size: 18px;">
-                        add
-                    </span>
-
-                    Nueva Venta
+                   class="btn btn-create-action">
+                    <span class="material-symbols-outlined">point_of_sale</span>
+                    <span>Nueva venta</span>
                 </a>
             }
         </div>

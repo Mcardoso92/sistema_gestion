@@ -39,8 +39,9 @@
         @if (!User.IsInRole("SuperAdmin"))
         {
             <a asp-action="Create"
-               class="btn btn-primary">
-                Nueva transferencia
+               class="btn btn-create-action">
+                <span class="material-symbols-outlined">swap_horiz</span>
+                <span>Nueva transferencia</span>
             </a>
         }
 
@@ -336,8 +337,9 @@
                     @if (!User.IsInRole("SuperAdmin"))
                     {
                         <a asp-action="Create"
-                           class="btn btn-primary">
-                            Nueva transferencia
+                           class="btn btn-create-action">
+                            <span class="material-symbols-outlined">swap_horiz</span>
+                            <span>Nueva transferencia</span>
                         </a>
                     }
 
