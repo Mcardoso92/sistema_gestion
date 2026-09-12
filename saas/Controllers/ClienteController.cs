@@ -17,15 +17,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly IFechaHoraService _fechaHora;
+        private readonly ClienteAltaService _clienteAltaService;
 
         public ClienteController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            IFechaHoraService fechaHora)
+            IFechaHoraService fechaHora,
+            ClienteAltaService clienteAltaService)
         {
             _context = context;
             _userManager = userManager;
             _fechaHora = fechaHora;
+            _clienteAltaService = clienteAltaService;
         }
 
         // GET: Cliente
@@ -217,13 +220,16 @@ namespace saas.Controllers
                 return View(clienteVM);
             }
 
-            bool empresaValida = await _context.Empresas.AnyAsync(e =>
-                e.Id == clienteVM.EmpresaId &&
-                e.Estado);
+            var resultado = await _clienteAltaService.CrearAsync(
+                clienteVM,
+                clienteVM.EmpresaId);
 
-            if (!empresaValida)
+            if (!resultado.Exitoso)
             {
-                ModelState.AddModelError("EmpresaId", "La empresa seleccionada no es válida.");
+                foreach (var error in resultado.Errores)
+                {
+                    ModelState.AddModelError(error.Key, error.Value);
+                }
 
                 if (esSuperAdmin)
                 {
@@ -233,96 +239,94 @@ namespace saas.Controllers
                 return View(clienteVM);
             }
 
-            clienteVM.Nombre = clienteVM.Nombre.Trim();
-            clienteVM.Apellido = string.IsNullOrWhiteSpace(clienteVM.Apellido)
-                ? null
-                : clienteVM.Apellido.Trim();
-            clienteVM.Documento = string.IsNullOrWhiteSpace(clienteVM.Documento)
-                ? null
-                : clienteVM.Documento.Trim();
-            clienteVM.Email = string.IsNullOrWhiteSpace(clienteVM.Email)
-                ? null
-                : clienteVM.Email.Trim();
-            clienteVM.Telefono = string.IsNullOrWhiteSpace(clienteVM.Telefono)
-                ? null
-                : clienteVM.Telefono.Trim();
-            clienteVM.Direccion = string.IsNullOrWhiteSpace(clienteVM.Direccion)
-                ? null
-                : clienteVM.Direccion.Trim();
+            TempData["Success"] = "Cliente creado correctamente.";
+            return RedirectToAction(nameof(Index));
+        }
 
-            if (CuitValidator.TieneFormatoCuit(clienteVM.Documento))
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearRapido(
+            ClienteCreateVM clienteVM,
+            int? empresaId = null)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
             {
-                clienteVM.Documento = CuitValidator.Normalizar(clienteVM.Documento);
+                return Unauthorized();
+            }
 
-                if (!CuitValidator.EsValido(clienteVM.Documento))
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuario,
+                "SuperAdmin");
+
+            int empresaClienteId;
+
+            if (esSuperAdmin)
+            {
+                if (!empresaId.HasValue)
                 {
-                    ModelState.AddModelError(
-                        nameof(clienteVM.Documento),
-                        "El CUIT ingresado no es válido.");
-
-                    if (esSuperAdmin)
+                    return BadRequest(new
                     {
-                        await CargarEmpresas(clienteVM);
-                    }
-
-                    return View(clienteVM);
-                }
-            }
-
-            if (clienteVM.Documento != null)
-            {
-                bool existeDocumento = await _context.Clientes.AnyAsync(c =>
-                    c.EmpresaId == clienteVM.EmpresaId &&
-                    c.Documento == clienteVM.Documento);
-
-                if (existeDocumento)
-                {
-                    ModelState.AddModelError(
-                        "Documento",
-                        "Ya existe un cliente con ese documento para esta empresa.");
-
-                    if (esSuperAdmin)
-                    {
-                        await CargarEmpresas(clienteVM);
-                    }
-
-                    return View(clienteVM);
-                }
-            }
-
-            try
-            {
-                var cliente = new Cliente
-                {
-                    Nombre = clienteVM.Nombre,
-                    Apellido = clienteVM.Apellido,
-                    Documento = clienteVM.Documento,
-                    Email = clienteVM.Email,
-                    Telefono = clienteVM.Telefono,
-                    Direccion = clienteVM.Direccion,
-                    EmpresaId = clienteVM.EmpresaId,
-                    Estado = true,
-                    FechaAlta = _fechaHora.UtcAhora
-                };
-
-                _context.Clientes.Add(cliente);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Cliente creado correctamente.";
-
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                ModelState.AddModelError("", "Ocurrió un error al crear el cliente.");
-
-                if (esSuperAdmin)
-                {
-                    await CargarEmpresas(clienteVM);
+                        errores = new Dictionary<string, string[]>
+                        {
+                            [nameof(clienteVM.EmpresaId)] =
+                                ["Debe indicar una empresa."]
+                        }
+                    });
                 }
 
-                return View(clienteVM);
+                empresaClienteId = empresaId.Value;
             }
+            else
+            {
+                empresaClienteId = usuario.EmpresaId;
+            }
+
+            clienteVM.EmpresaId = empresaClienteId;
+            ModelState.Remove(nameof(clienteVM.EmpresaId));
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    errores = ModelState
+                        .Where(m => m.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            m => m.Key,
+                            m => m.Value!.Errors
+                                .Select(e => e.ErrorMessage)
+                                .ToArray())
+                });
+            }
+
+            var resultado = await _clienteAltaService.CrearAsync(
+                clienteVM,
+                empresaClienteId);
+
+            if (!resultado.Exitoso)
+            {
+                return BadRequest(new
+                {
+                    errores = resultado.Errores.ToDictionary(
+                        e => e.Key,
+                        e => new[] { e.Value })
+                });
+            }
+
+            var cliente = resultado.Cliente!;
+            string nombreCompleto = string.IsNullOrWhiteSpace(cliente.Apellido)
+                ? cliente.Nombre
+                : $"{cliente.Nombre} {cliente.Apellido}";
+
+            return Json(new
+            {
+                id = cliente.Id,
+                nombreCompleto,
+                documento = CuitValidator.FormatearSiEsCuit(cliente.Documento),
+                cliente.Email,
+                cliente.Telefono
+            });
         }
 
         // GET: Cliente/Edit/5
