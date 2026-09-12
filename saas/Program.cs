@@ -23,6 +23,7 @@ builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
 builder.Services.AddScoped<CompraSaldoService>();
 builder.Services.AddScoped<EmpresaInicializacionService>();
+builder.Services.AddScoped<ClienteAltaService>();
 builder.Services.AddScoped<IImagenService, ImagenService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.Configure<ZonaHorariaSettings>(

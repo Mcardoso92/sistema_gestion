@@ -12,6 +12,9 @@
     const buscarClientesUrl =
         puntoVenta.dataset.buscarClientesUrl;
 
+    const crearClienteUrl =
+        puntoVenta.dataset.crearClienteUrl;
+
     const ventasIndexUrl =
         puntoVenta.dataset.ventasIndexUrl;
 
@@ -50,6 +53,21 @@
 
     const btnQuitarCliente =
         document.getElementById("btnQuitarCliente");
+
+    const btnNuevoCliente =
+        document.getElementById("btnNuevoCliente");
+
+    const nuevoClienteModal =
+        document.getElementById("nuevoClienteModal");
+
+    const nuevoClienteForm =
+        document.getElementById("nuevoClienteForm");
+
+    const nuevoClienteError =
+        document.getElementById("nuevoClienteError");
+
+    const btnGuardarCliente =
+        document.getElementById("btnGuardarCliente");
 
     const inputClienteId =
         document.getElementById("clienteId");
@@ -1384,6 +1402,63 @@
         inputBuscarProducto.focus();
     }
 
+    function mostrarErroresNuevoCliente(errores) {
+        const mensajes = Object.values(errores || {}).flat();
+
+        nuevoClienteError.textContent = mensajes.length > 0
+            ? mensajes.join(" ")
+            : "No fue posible crear el cliente.";
+        nuevoClienteError.classList.remove("d-none");
+    }
+
+    async function crearClienteRapido(evento) {
+        evento.preventDefault();
+
+        if (!nuevoClienteForm.reportValidity()) {
+            return;
+        }
+
+        nuevoClienteError.classList.add("d-none");
+        nuevoClienteError.textContent = "";
+
+        const datos = new FormData(nuevoClienteForm);
+        const token = formVenta.querySelector(
+            'input[name="__RequestVerificationToken"]');
+
+        if (token) {
+            datos.append("__RequestVerificationToken", token.value);
+        }
+
+        const url = new URL(crearClienteUrl, window.location.origin);
+        url.searchParams.set("empresaId", empresaId);
+
+        btnGuardarCliente.disabled = true;
+
+        try {
+            const respuesta = await fetch(url, {
+                method: "POST",
+                body: datos,
+                headers: { Accept: "application/json" }
+            });
+
+            const contenido = await respuesta.json();
+
+            if (!respuesta.ok) {
+                mostrarErroresNuevoCliente(contenido.errores);
+                return;
+            }
+
+            seleccionarCliente(contenido);
+            bootstrap.Modal.getInstance(nuevoClienteModal)?.hide();
+            nuevoClienteForm.reset();
+            mostrarMensaje("Cliente creado y seleccionado correctamente.", "success");
+        } catch {
+            mostrarErroresNuevoCliente();
+        } finally {
+            btnGuardarCliente.disabled = false;
+        }
+    }
+
     function quitarCliente() {
         inputClienteId.value = "";
         inputClienteNombre.value = "Consumidor Final";
@@ -1684,6 +1759,15 @@
             inputBuscarCliente.focus();
         }
     });
+
+    btnNuevoCliente?.addEventListener("click", () => {
+        nuevoClienteForm.reset();
+        nuevoClienteError.classList.add("d-none");
+        nuevoClienteError.textContent = "";
+        bootstrap.Modal.getOrCreateInstance(nuevoClienteModal).show();
+    });
+
+    nuevoClienteForm?.addEventListener("submit", crearClienteRapido);
 
     inputBuscarCliente.addEventListener("input", () => {
         clearTimeout(temporizadorClientes);

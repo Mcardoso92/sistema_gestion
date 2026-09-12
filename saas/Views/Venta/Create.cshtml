@@ -25,6 +25,7 @@
           data-empresa-id="@empresaId"
           data-buscar-productos-url="@Url.Action("BuscarProductos", "Venta")"
           data-buscar-clientes-url="@Url.Action("BuscarClientes", "Venta")"
+          data-crear-cliente-url="@Url.Action("CrearRapido", "Cliente")"
           data-ventas-index-url="@Url.Action("Index", "Venta")"
           data-get-cajas-url="@Url.Action("GetCajasPorMedioPago", "Venta")"
           data-get-medios-url="@Url.Action("GetMediosPagoPorCaja", "Venta")">
@@ -71,12 +72,22 @@
                                     Datos del Cliente
                                 </label>
 
-                                <button type="button"
-                                        id="btnBuscarCliente"
-                                        class="btn btn-link text-primary-veltika p-0 text-decoration-none small fw-medium d-flex align-items-center gap-1">
-                                    <span class="material-symbols-outlined" style="font-size: 16px;">search</span>
-                                    Buscar cliente
-                                </button>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button"
+                                            id="btnNuevoCliente"
+                                            class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center"
+                                            title="Crear cliente"
+                                            aria-label="Crear cliente">
+                                        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                                    </button>
+
+                                    <button type="button"
+                                            id="btnBuscarCliente"
+                                            class="btn btn-link text-primary-veltika p-0 text-decoration-none small fw-medium d-flex align-items-center gap-1">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">search</span>
+                                        Buscar cliente
+                                    </button>
+                                </div>
                             </div>
 
                             <div class="d-flex align-items-center gap-3 bg-light p-2 rounded border">
@@ -567,6 +578,49 @@
         </div>
     </main>
 </form>
+
+<div class="modal fade" id="nuevoClienteModal" tabindex="-1" aria-labelledby="nuevoClienteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="nuevoClienteForm">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="nuevoClienteModalLabel">Nuevo cliente</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="nuevoClienteError" class="alert alert-danger d-none" role="alert"></div>
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label for="nuevoClienteNombre" class="form-label">Nombre <span class="text-danger">*</span></label>
+                            <input id="nuevoClienteNombre" name="Nombre" class="form-control" maxlength="50" required />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="nuevoClienteApellido" class="form-label">Apellido</label>
+                            <input id="nuevoClienteApellido" name="Apellido" class="form-control" maxlength="50" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="nuevoClienteDocumento" class="form-label">Documento</label>
+                            <input id="nuevoClienteDocumento" name="Documento" class="form-control" maxlength="20" autocomplete="off" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="nuevoClienteEmail" class="form-label">Email</label>
+                            <input id="nuevoClienteEmail" name="Email" class="form-control" type="email" maxlength="256" />
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="nuevoClienteTelefono" class="form-label">Teléfono</label>
+                            <input id="nuevoClienteTelefono" name="Telefono" class="form-control" type="tel" maxlength="30" />
+                        </div>
+                    </div>
+                    <p class="form-text mt-3 mb-0">Luego podrá completar la dirección y otros datos desde Clientes.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-v-outline" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" id="btnGuardarCliente" class="btn btn-v-primary">Crear y seleccionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     @{
