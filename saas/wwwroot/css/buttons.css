@@ -163,6 +163,35 @@
     line-height: 1;
 }
 
+/* Acción compacta compartida para crear una opción sin abandonar el formulario. */
+.app-body .btn-quick-create {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-surface);
+    color: var(--ui-text-muted);
+}
+
+.app-body .btn-quick-create:hover,
+.app-body .btn-quick-create:focus-visible {
+    border-color: var(--ui-primary);
+    background-color: var(--ui-primary-soft);
+    color: var(--ui-primary);
+}
+
+.app-body .btn-quick-create .material-symbols-outlined {
+    font-size: 1.125rem;
+    line-height: 1;
+}
+
 @media (max-width: 575.98px) {
     .app-body .btn-create-action {
         width: 100%;
