@@ -9,7 +9,7 @@
 }
 
 <main class="container-fluid px-4">
-    <div class="row justify-content-center">
+    <div class="row">
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm">
                 <div class="card-header d-flex align-items-center">
@@ -113,20 +113,35 @@
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm mt-4">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3">
-                        <span class="material-symbols-outlined text-primary">info</span>
+        </div>
 
-                        <div>
-                            <h6 class="fw-bold mb-2">El cliente no será eliminado</h6>
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
 
-                            <p class="text-muted mb-0" style="font-size: 13px;">
-                                VELTIKA utiliza desactivación lógica. El registro permanece
-                                almacenado para conservar su información y futuras relaciones
-                                con ventas, comprobantes e historial comercial.
-                            </p>
-                        </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">person_off</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Desactivación</h3>
+                        <p class="help-guide-item__text">El cliente dejará de aparecer entre los registros activos y no podrá seleccionarse en nuevas operaciones.</p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">history</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Historial protegido</h3>
+                        <p class="help-guide-item__text">
+                            VELTIKA utiliza desactivación lógica. El registro permanece almacenado para conservar su información y futuras relaciones con ventas, comprobantes e historial comercial.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">restart_alt</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Reactivación</h3>
+                        <p class="help-guide-item__text">Puede volver a habilitar el cliente posteriormente desde la pantalla Editar.</p>
                     </div>
                 </div>
             </div>
