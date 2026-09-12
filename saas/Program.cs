@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
 using saas.Data.Seed;
+using saas.Configuracion;
 using saas.Models;
 using saas.Services;
 using saas.Settings;
@@ -11,7 +12,12 @@ using saas.Settings;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.ModelBinderProviders.Insert(
+        0,
+        new HtmlDecimalModelBinderProvider());
+});
 
 builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
