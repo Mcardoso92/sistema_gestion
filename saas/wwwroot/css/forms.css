@@ -70,7 +70,7 @@
  * Uso: panel lateral que acompaña formularios y pantallas operativas.
  */
 .app-body .help-guide-panel {
-    height: 100%;
+    height: auto;
     padding: 1.5rem;
     border: 1px solid var(--ui-border-light);
     border-radius: var(--ui-radius-lg);

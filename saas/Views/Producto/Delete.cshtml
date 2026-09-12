@@ -1,97 +1,98 @@
-﻿@model saas.Models.Producto
+@model saas.Models.Producto
 
 @{
     ViewData["Title"] = "Desactivar Producto";
 }
 
-<h1>Desactivar Producto</h1>
-
-<h3>¿Está seguro que desea desactivar este producto?</h3>
-<div>
-    <h4>Producto</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Descripcion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Descripcion)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Categoria)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Categoria.Nombre)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrecioCosto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrecioCosto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PrecioVenta)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PrecioVenta)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stock)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stock)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PuntoReposicion)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PuntoReposicion)
-        </dd>
-        <dt class="col-sm-2">
-            Estado
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.Estado)
-            {
-                <span class="status-badge status-active">
-                    <span class="dot"></span>Activo
-                </span>
-            }
-            else
-            {
-                <span class="status-badge status-inactive">
-                    <span class="dot"></span>Inactivo
-                </span>
-            }
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.FechaAlta)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.FechaAlta)
-        </dd>
-        @if (User.IsInRole("SuperAdmin"))
-        {
-            <dt class = "col-sm-2">
-                @Html.DisplayNameFor(model => model.Empresa)
-            </dt>
-            <dd class = "col-sm-10">
-                @Html.DisplayFor(model => model.Empresa.Nombre)
-            </dd>
-        }
-    </dl>
-    
-    <div class="d-flex justify-content-end gap-2 mt-4">
-        <a asp-action="Index" class="btn btn-v-outline"> Volver </a>
-        <form asp-action="Delete" method="post" class="d-inline">
-            <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-v-primary"> Desactivar </button>
-        </form>
+<main class="container-fluid px-4">
+    <div class="mb-4">
+        <h1 class="h3 mb-0 fw-bold">Desactivar Producto</h1>
     </div>
-</div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">Información del Producto</div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning d-flex align-items-center mb-4">
+                        <span class="material-symbols-outlined me-2" aria-hidden="true">warning</span>
+                        <span>¿Está seguro que desea desactivar este producto?</span>
+                    </div>
+
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Nombre)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Nombre)</dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Descripcion)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Descripcion)</dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Categoria)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Categoria.Nombre)</dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecioCosto)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.PrecioCosto)</dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PrecioVenta)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.PrecioVenta)</dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Stock)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.Stock)</dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PuntoReposicion)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.PuntoReposicion)</dd>
+                        <dt class="col-sm-3">Estado</dt>
+                        <dd class="col-sm-9">
+                            @if (Model.Estado)
+                            {
+                                <span class="status-badge status-active"><span class="dot"></span>Activo</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-inactive"><span class="dot"></span>Inactivo</span>
+                            }
+                        </dd>
+                        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FechaAlta)</dt>
+                        <dd class="col-sm-9">@Html.DisplayFor(model => model.FechaAlta)</dd>
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Empresa)</dt>
+                            <dd class="col-sm-9">@Html.DisplayFor(model => model.Empresa.Nombre)</dd>
+                        }
+                    </dl>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-4">
+                        <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+                        <form asp-action="Delete" method="post" class="d-inline">
+                            <input type="hidden" asp-for="Id" />
+                            <button type="submit" class="btn btn-v-primary">Desactivar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">block</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Desactivación</h3>
+                        <p class="help-guide-item__text">El producto permanecerá registrado, pero dejará de estar disponible para nuevas operaciones.</p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">inventory_2</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Stock e historial</h3>
+                        <p class="help-guide-item__text">La desactivación conserva el stock y la información histórica asociada al producto.</p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">restart_alt</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Reactivación</h3>
+                        <p class="help-guide-item__text">Puede volver a habilitar el producto más adelante desde su edición.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
