@@ -1629,41 +1629,6 @@ main {
     gap: 2rem;
 }
 
-.public-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: .65rem;
-    color: #0b1930;
-    font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -.04em;
-    text-decoration: none;
-}
-
-    .public-brand:hover {
-        color: #0b1930;
-    }
-
-.public-brand-icon {
-    width: 34px;
-    height: 30px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg,#4f8cff,#164bbd);
-    color: #ffffff;
-    border-radius: 4px 12px 4px 12px;
-    font-size: 18px;
-    font-weight: 800;
-    transform: skewX(-8deg);
-}
-
-    .public-brand-icon.small {
-        width: 24px;
-        height: 22px;
-        font-size: 12px;
-    }
-
 .public-nav-links {
     align-items: center;
     gap: 2.25rem;
@@ -2284,14 +2249,6 @@ main {
     color: #ffffff;
 }
 
-.public-brand-footer {
-    color: #ffffff;
-}
-
-    .public-brand-footer:hover {
-        color: #ffffff;
-    }
-
 .public-footer-main {
     display: flex;
     align-items: start;
@@ -2362,10 +2319,6 @@ main {
 @media (max-width:767px) {
     .public-navbar {
         min-height: 64px;
-    }
-
-    .public-brand {
-        font-size: 22px;
     }
 
     .public-hero {
