@@ -65,5 +65,8 @@ namespace saas.Models
 
         [ValidateNever]
         public ICollection<MovimientoCaja> MovimientosCaja { get; set; } = new List<MovimientoCaja>();
+
+        [ValidateNever]
+        public ICollection<RevisionNotificacion> RevisionesNotificacion { get; set; } = new List<RevisionNotificacion>();
     }
 }

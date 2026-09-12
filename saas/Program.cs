@@ -25,6 +25,7 @@ builder.Services.AddSingleton<IFechaHoraService, FechaHoraService>();
 // Mantiene la vista previa de cada importación fuera del navegador hasta que el usuario la confirme.
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IProductoImportacionService, ProductoImportacionService>();
+builder.Services.AddScoped<IRevisionNotificacionService, RevisionNotificacionService>();
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection(
         "EmailSettings"));
