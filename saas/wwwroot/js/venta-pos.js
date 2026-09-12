@@ -545,7 +545,8 @@
                     cajaSelect);
 
                 actualizarBloqueEfectivo(
-                    pago);
+                    pago,
+                    true);
 
                 actualizarResumenPagos();
             });
@@ -558,6 +559,10 @@
             "input",
             function () {
 
+                if (recibidoInput?.dataset.autocompletado === "true") {
+                    recibidoInput.value = importe.value;
+                }
+
                 actualizarResumenPagos();
                 actualizarVuelto(pago);
             });
@@ -568,10 +573,20 @@
                 "input",
                 function () {
 
+                    recibidoInput.dataset.autocompletado = "false";
+
                     actualizarVuelto(pago);
                     actualizarResumenPagos();
                 });
         }
+
+        pago.addEventListener(
+            "keydown",
+            function (evento) {
+                if (evento.key === "Enter") {
+                    evento.preventDefault();
+                }
+            });
 
         eliminar.addEventListener(
             "click",
@@ -1499,7 +1514,9 @@
                 });
     }
 
-    function actualizarBloqueEfectivo(pago) {
+    function actualizarBloqueEfectivo(
+        pago,
+        completarPagoExacto = false) {
 
         const medioSelect =
             pago.querySelector(".medio-pago-select");
@@ -1522,6 +1539,19 @@
 
             bloque.classList.remove("d-none");
 
+            if (completarPagoExacto &&
+                recibidoInput &&
+                recibidoInput.value === "") {
+
+                const importeInput =
+                    pago.querySelector(".pago-importe");
+
+                recibidoInput.value =
+                    importeInput?.value ?? "";
+
+                recibidoInput.dataset.autocompletado = "true";
+            }
+
             actualizarVuelto(pago);
         }
         else {
@@ -1530,6 +1560,7 @@
 
             if (recibidoInput) {
                 recibidoInput.value = "";
+                recibidoInput.dataset.autocompletado = "false";
             }
 
             if (vueltoVisual) {
@@ -1725,7 +1756,9 @@
     });
 
     formVenta.addEventListener("formdata", evento => {
-        document.querySelectorAll(".pago-importe").forEach(input => {
+        document
+            .querySelectorAll(".pago-importe, .efectivo-recibido")
+            .forEach(input => {
             if (input.name && input.value) {
                 evento.formData.set(input.name, input.value.replace(".", ","));
             }
