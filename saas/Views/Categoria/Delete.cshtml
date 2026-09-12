@@ -1,40 +1,38 @@
-﻿@model saas.Models.Categoria
-
-@{
-    ViewData["Title"] = "Desactivar Categoría";
-}
-
-<div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-    <h2 class="h5 fw-bold mb-0">Información de la Categoría</h2>
-
-    <div class="d-flex gap-2">
-        <a asp-action="Index" class="btn btn-v-outline">Volver</a>
-        <form asp-action="Delete" method="post" class="d-inline">
-            <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-v-primary">Desactivar</button>
-        </form>
+@model saas.Models.Categoria
+@{ ViewData["Title"] = "Desactivar Categoría"; }
+<main class="container-fluid px-4 py-4">
+    <div class="mb-4"><h1 class="h3 fw-bold mb-1">Desactivar Categoría</h1><p class="text-muted mb-0">Revisá la información antes de confirmar.</p></div>
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8"><div class="form-container p-4">
+            <div class="alert alert-warning">La categoría dejará de estar disponible para nuevas operaciones. La información histórica se conservará.</div>
+            <dl class="row mb-4">
+                <dt class="col-sm-4">Nombre</dt><dd class="col-sm-8">@Model.Nombre</dd>
+                @if (User.IsInRole("SuperAdmin"))
+                {
+                    <dt class="col-sm-4">Empresa</dt><dd class="col-sm-8">@Model.Empresa?.Nombre</dd>
+                }
+            </dl>
+            <form asp-action="Delete" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-flex justify-content-end gap-3 pt-4 border-top"><a asp-action="Index" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-danger">Desactivar</button></div>
+            </form>
+        </div></div>
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">category</span>
+                    <div><h3 class="help-guide-item__title">Organización del catálogo</h3><p class="help-guide-item__text">Utilizá nombres claros para identificar rápidamente qué productos pertenecen a cada categoría.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">corporate_fare</span>
+                    <div><h3 class="help-guide-item__title">Empresa</h3><p class="help-guide-item__text">Cada categoría pertenece a una sola empresa y únicamente estará disponible para sus productos.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">history</span>
+                    <div><h3 class="help-guide-item__title">Información histórica</h3><p class="help-guide-item__text">Al desactivarla deja de estar disponible para nuevas operaciones, sin eliminar la información existente.</p></div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
-
-<h3>¿Está seguro que desea desactivar esta categoría?</h3>
-<div>
-    <h4>Categoría</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Nombre)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Nombre)
-        </dd>
-        @if (User.IsInRole("SuperAdmin"))
-        {
-            <dt class="col-sm-2">
-                @Html.DisplayNameFor(model => model.Empresa)
-            </dt>
-            <dd class="col-sm-10">
-                @Html.DisplayFor(model => model.Empresa.Nombre)
-            </dd>
-        }
-    </dl>
-</div>
+</main>

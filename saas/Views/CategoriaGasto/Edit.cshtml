@@ -1,125 +1,41 @@
-﻿@model saas.ViewModel.CategoriaGastoEditVM
-
-@{
-    ViewData["Title"] = "Editar Categoría de Gasto";
-}
-
-<div class="container-fluid px-4 py-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <div>
-            <h1 class="h3 fw-bold mb-1">
-                Editar Categoría de Gasto
-            </h1>
-        </div>
-
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
-
-    </div>
-
-    <form asp-action="Edit"
-          asp-route-id="@Model.Id"
-          method="post">
-
-        @Html.AntiForgeryToken()
-
-        <input asp-for="Id"
-               type="hidden" />
-
-        <input asp-for="EmpresaId"
-               type="hidden" />
-
-        <div asp-validation-summary="ModelOnly"
-             class="alert alert-danger"></div>
-
-        <div class="card border-0 shadow-sm">
-
-            <div class="card-body p-4">
-
+@model saas.ViewModel.CategoriaGastoEditVM
+@{ ViewData["Title"] = "Editar Categoría de Gasto"; }
+<main class="container-fluid px-4 py-4">
+    <div class="mb-4"><h1 class="h3 fw-bold mb-1">Editar Categoría de Gasto</h1><p class="text-muted mb-0">Actualizá la información y disponibilidad de la categoría.</p></div>
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8"><div class="form-container p-4">
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="Id" type="hidden" /><input asp-for="EmpresaId" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
                 <div class="row g-3">
-
-                    <div class="col-md-6">
-
-                        <label asp-for="Nombre"
-                               class="form-label fw-semibold">
-                            Nombre
-                        </label>
-
-                        <input asp-for="Nombre"
-                               class="form-control" />
-
-                        <span asp-validation-for="Nombre"
-                              class="text-danger"></span>
-
-                    </div>
-
+                    <div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" /><span asp-validation-for="Nombre" class="text-danger"></span></div>
+                    <div class="col-12"><label asp-for="Descripcion" class="form-label">Descripción</label><textarea asp-for="Descripcion" class="form-control" rows="3"></textarea><span asp-validation-for="Descripcion" class="text-danger"></span></div>
                     <div class="col-12">
-
-                        <label asp-for="Descripcion"
-                               class="form-label fw-semibold">
-                            Descripción
-                        </label>
-
-                        <textarea asp-for="Descripcion"
-                                  class="form-control"
-                                  rows="3"></textarea>
-
-                        <span asp-validation-for="Descripcion"
-                              class="text-danger"></span>
-
+                        <div class="form-check form-switch"><input asp-for="Estado" class="form-check-input" /><label asp-for="Estado" class="form-check-label fw-semibold">Categoría activa</label></div>
+                        @if (!Model.Estado) { <div class="form-text">Activá esta opción para reactivar la categoría.</div> }
                     </div>
-
-                    <div class="col-12">
-
-                        <div class="form-check form-switch">
-
-                            <input asp-for="Estado"
-                                   class="form-check-input" />
-
-                            <label asp-for="Estado"
-                                   class="form-check-label fw-semibold">
-                                Categoría activa
-                            </label>
-
-                        </div>
-
-                        @if (!Model.Estado)
-                        {
-                            <div class="form-text">
-                                Activá esta opción para reactivar la categoría.
-                            </div>
-                        }
-
-                    </div>
-
                 </div>
-
+                <div class="d-flex justify-content-end gap-3 pt-4 mt-4 border-top"><a asp-action="Index" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-v-primary">Guardar cambios</button></div>
+            </form>
+        </div></div>
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">receipt_long</span>
+                    <div><h3 class="help-guide-item__title">Clasificación de gastos</h3><p class="help-guide-item__text">Utilizá nombres claros para agrupar egresos del mismo tipo en Caja y reportes.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">description</span>
+                    <div><h3 class="help-guide-item__title">Descripción</h3><p class="help-guide-item__text">Podés agregar una aclaración para indicar cuándo corresponde utilizar esta categoría.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">history</span>
+                    <div><h3 class="help-guide-item__title">Movimientos históricos</h3><p class="help-guide-item__text">Al desactivarla deja de estar disponible para nuevos egresos, pero los movimientos anteriores se conservan.</p></div>
+                </div>
             </div>
-
         </div>
-
-        <div class="d-flex justify-content-end gap-2 mt-4">
-
-            <a asp-action="Index"
-               class="btn btn-outline-secondary">
-                Cancelar
-            </a>
-
-            <button type="submit"
-                    class="btn btn-primary">
-                Guardar cambios
-            </button>
-
-        </div>
-
-    </form>
-
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+    </div>
+</main>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
