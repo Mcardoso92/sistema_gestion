@@ -30,8 +30,9 @@
         @if (!User.IsInRole("SuperAdmin"))
         {
             <a asp-action="Abrir"
-               class="btn btn-primary">
-                Abrir turno
+               class="btn btn-create-action">
+                <span class="material-symbols-outlined">lock_open</span>
+                <span>Abrir turno</span>
             </a>
         }
 
@@ -254,8 +255,9 @@
                                     estadoActual == "abiertos")
                     {
                         <a asp-action="Abrir"
-                           class="btn btn-primary">
-                            Abrir turno
+                           class="btn btn-create-action">
+                            <span class="material-symbols-outlined">lock_open</span>
+                            <span>Abrir turno</span>
                         </a>
                     }
 

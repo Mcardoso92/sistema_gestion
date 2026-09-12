@@ -3,8 +3,10 @@
     --ui-primary-hover: #0a365c;
     --ui-primary-soft: #e8f0f8;
     --ui-success: #198754;
+    --ui-success-hover: #146c43;
     --ui-warning: #b26a00;
     --ui-danger: #ba1a1a;
+    --ui-danger-hover: #941515;
     --ui-surface: #ffffff;
     --ui-background: #f7f9fb;
     --ui-surface-muted: #f2f4f6;

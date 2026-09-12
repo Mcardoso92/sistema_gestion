@@ -20,16 +20,18 @@
 
         @if (!User.IsInRole("SuperAdmin"))
         {
-            <div class="d-flex gap-2">
+            <div class="d-flex flex-wrap gap-2">
 
                 <a asp-action="IngresoManual"
-                   class="btn btn-success">
-                    Nuevo ingreso
+                   class="btn btn-create-action btn-create-action--income">
+                    <span class="material-symbols-outlined">arrow_downward</span>
+                    <span>Nuevo ingreso</span>
                 </a>
 
                 <a asp-action="EgresoManual"
-                   class="btn btn-danger">
-                    Nuevo egreso
+                   class="btn btn-create-action btn-create-action--expense">
+                    <span class="material-symbols-outlined">arrow_upward</span>
+                    <span>Nuevo egreso</span>
                 </a>
 
             </div>

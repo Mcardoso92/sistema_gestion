@@ -130,6 +130,28 @@
     color: #ffffff;
 }
 
+.app-body .btn-create-action--income {
+    border-color: var(--ui-success);
+    background-color: var(--ui-success);
+}
+
+.app-body .btn-create-action--income:hover,
+.app-body .btn-create-action--income:focus-visible {
+    border-color: var(--ui-success-hover);
+    background-color: var(--ui-success-hover);
+}
+
+.app-body .btn-create-action--expense {
+    border-color: var(--ui-danger);
+    background-color: var(--ui-danger);
+}
+
+.app-body .btn-create-action--expense:hover,
+.app-body .btn-create-action--expense:focus-visible {
+    border-color: var(--ui-danger-hover);
+    background-color: var(--ui-danger-hover);
+}
+
 .app-body .btn-create-action:disabled,
 .app-body .btn-create-action.disabled {
     pointer-events: none;
