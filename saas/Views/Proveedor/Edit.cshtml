@@ -15,8 +15,10 @@
         <h1 class="h3 mb-0 fw-bold">Editar Proveedor</h1>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4 p-md-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
             <form asp-action="Edit" method="post">
                 <input asp-for="Id" type="hidden" />
 
@@ -142,6 +144,38 @@
                     </button>
                 </div>
             </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">edit</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Datos del proveedor</h3>
+                        <p class="help-guide-item__text">Mantenga actualizados los datos administrativos, de contacto y ubicación del proveedor.</p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">toggle_on</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Estado</h3>
+                        <p class="help-guide-item__text">Un proveedor activo puede seleccionarse en nuevas compras. Si está inactivo, sus datos permanecen conservados.</p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">restart_alt</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Reactivación</h3>
+                        <p class="help-guide-item__text">Para volver a utilizar un proveedor inactivo, habilite nuevamente su estado y guarde los cambios.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
