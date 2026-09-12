@@ -36,6 +36,10 @@
     font-size: 0.8rem;
 }
 
+.validation-summary-valid {
+    display: none;
+}
+
 .app-body .text-danger.field-validation-error,
 .app-body span.text-danger,
 .public-body .text-danger.field-validation-error,
