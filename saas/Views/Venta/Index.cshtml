@@ -24,10 +24,9 @@
             <a asp-controller="Reporte"
                asp-action="Ventas"
                asp-route-empresaId="@(User.IsInRole("SuperAdmin") ? Model.EmpresaId : null)"
-               class="btn btn-v-outline d-flex align-items-center gap-2 px-3 py-2">
+               class="btn btn-report-generate">
 
-                <span class="material-symbols-outlined"
-                      style="font-size: 18px;">
+                <span class="material-symbols-outlined">
                     analytics
                 </span>
 
