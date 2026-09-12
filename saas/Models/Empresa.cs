@@ -55,5 +55,8 @@ namespace saas.Models
 
         [ValidateNever]
         public ConfiguracionEmpresa? Configuracion { get; set; }
+
+        [ValidateNever]
+        public ICollection<RevisionNotificacion> RevisionesNotificacion { get; set; } = new List<RevisionNotificacion>();
     }
 }

@@ -35,6 +35,7 @@ namespace saas.Data
         public DbSet<TransferenciaCaja> TransferenciasCaja { get; set; } = null!;
         public DbSet<MovimientoCaja> MovimientosCaja { get; set; } = null!;
         public DbSet<CambioCostoProducto> CambiosCostoProducto { get; set; } = null!;
+        public DbSet<RevisionNotificacion> RevisionesNotificacion { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -604,6 +605,18 @@ namespace saas.Data
                 .WithMany(t => t.MovimientosCaja)
                 .HasForeignKey(m => m.TransferenciaCajaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<RevisionNotificacion>()
+                .HasOne(r => r.Usuario)
+                .WithMany(u => u.RevisionesNotificacion)
+                .HasForeignKey(r => r.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<RevisionNotificacion>()
+                .HasOne(r => r.Empresa)
+                .WithMany(e => e.RevisionesNotificacion)
+                .HasForeignKey(r => r.EmpresaId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private static void ConfigurarIndices(ModelBuilder modelBuilder)
@@ -969,6 +982,10 @@ namespace saas.Data
 
             modelBuilder.Entity<CambioCostoProducto>()
                 .HasIndex(c => new { c.EmpresaId, c.ProductoId, c.Fecha });
+
+            modelBuilder.Entity<RevisionNotificacion>()
+                .HasIndex(r => new { r.UsuarioId, r.EmpresaId })
+                .IsUnique();
         }
 
         private static void ConfigurarPropiedades(ModelBuilder modelBuilder)
