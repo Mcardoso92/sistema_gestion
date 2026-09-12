@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" role="img" aria-labelledby="title desc">
+  <title id="title">Favicon de Veltika</title>
+  <desc id="desc">Isotipo Veltika en sus colores oficiales y con fondo transparente.</desc>
+  <defs>
+    <linearGradient id="left" x1="500" y1="900" x2="130" y2="290" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#123F95"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="right" x1="620" y1="750" x2="1010" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#4F8CFF"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(114 159) scale(.9)">
+    <path fill="url(#left)" d="M28 292c-16 0-26 17-18 33l268 513c30 58 88 92 152 90 71-2 137-40 165-105 8-19 7-38-2-55L370 335c-13-26-40-43-69-43H28Z"/>
+    <path fill="url(#right)" d="m502 489 179-347c15-29 39-51 70-61l282-77c17-4 34 12 26 28L660 738c-10 18-35 18-45 0L502 522c-5-11-5-22 0-33Z"/>
+  </g>
+</svg>
