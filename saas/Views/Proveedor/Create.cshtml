@@ -15,8 +15,10 @@
         <h1 class="h3 mb-0 fw-bold">Alta de Proveedor</h1>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-4 p-md-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
             @if (User.IsInRole("SuperAdmin"))
             {
                 <div class="alert alert-warning mb-4">
@@ -141,6 +143,38 @@
                     </button>
                 </div>
             </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">domain</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Identificación</h3>
+                        <p class="help-guide-item__text">Ingrese la razón social del proveedor. El nombre de fantasía y el CUIT permiten reconocerlo con mayor facilidad.</p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">contact_mail</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Datos de contacto</h3>
+                        <p class="help-guide-item__text">El email y el teléfono facilitan la comunicación relacionada con pedidos, entregas y pagos.</p>
+                    </div>
+                </div>
+
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">location_on</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Ubicación</h3>
+                        <p class="help-guide-item__text">Complete la dirección y localidad para mantener actualizada la información comercial del proveedor.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
