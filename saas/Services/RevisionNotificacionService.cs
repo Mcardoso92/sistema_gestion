@@ -61,25 +61,51 @@ namespace saas.Services
             int empresaId,
             bool esSuperAdmin)
         {
-            await ValidarAccesoAsync(usuario, empresaId, esSuperAdmin);
+            await RegistrarRevisionesAsync(
+                usuario,
+                new[] { empresaId },
+                esSuperAdmin);
+        }
 
-            RevisionNotificacion? revision =
-                await _context.RevisionesNotificacion.SingleOrDefaultAsync(r =>
-                    r.UsuarioId == usuario.Id &&
-                    r.EmpresaId == empresaId);
+        public async Task RegistrarRevisionesAsync(
+            Usuario usuario,
+            IEnumerable<int> empresaIds,
+            bool esSuperAdmin)
+        {
+            int[] empresas = empresaIds.Distinct().ToArray();
 
-            if (revision == null)
+            foreach (int empresaId in empresas)
             {
-                revision = new RevisionNotificacion
-                {
-                    UsuarioId = usuario.Id,
-                    EmpresaId = empresaId
-                };
-
-                _context.RevisionesNotificacion.Add(revision);
+                await ValidarAccesoAsync(usuario, empresaId, esSuperAdmin);
             }
 
-            revision.FechaUltimaRevision = _fechaHora.UtcAhora;
+            Dictionary<int, RevisionNotificacion> revisiones =
+                await _context.RevisionesNotificacion
+                    .Where(r =>
+                        r.UsuarioId == usuario.Id &&
+                        empresas.Contains(r.EmpresaId))
+                    .ToDictionaryAsync(r => r.EmpresaId);
+
+            DateTime fechaRevision = _fechaHora.UtcAhora;
+
+            foreach (int empresaId in empresas)
+            {
+                if (!revisiones.TryGetValue(
+                    empresaId,
+                    out RevisionNotificacion? revision))
+                {
+                    revision = new RevisionNotificacion
+                    {
+                        UsuarioId = usuario.Id,
+                        EmpresaId = empresaId
+                    };
+
+                    _context.RevisionesNotificacion.Add(revision);
+                }
+
+                revision.FechaUltimaRevision = fechaRevision;
+            }
+
             await _context.SaveChangesAsync();
         }
 

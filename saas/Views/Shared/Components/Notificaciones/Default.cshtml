@@ -1,6 +1,11 @@
 ﻿@model saas.ViewModel.Notificaciones.NotificacionesVM
 
-<div class="dropdown">
+<div class="dropdown js-notifications"
+     data-mark-read-url="@Url.Action("MarcarComoVistas", "Notificacion")">
+    <form class="d-none js-notifications-token">
+        @Html.AntiForgeryToken()
+    </form>
+
     <button class="app-icon-btn position-relative"
             type="button"
             data-bs-toggle="dropdown"
@@ -13,7 +18,7 @@
 
         @if (Model.CantidadNuevas > 0)
         {
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" aria-label="@Model.CantidadNuevas notificaciones nuevas">
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger js-notification-new-badge" aria-label="@Model.CantidadNuevas notificaciones nuevas">
                 @(Model.CantidadNuevas > 99 ? "99+" : Model.CantidadNuevas)
             </span>
         }
@@ -26,7 +31,7 @@
 
                 @if (Model.CantidadNuevas > 0)
                 {
-                    <span class="badge text-bg-danger">@Model.CantidadNuevas nuevas</span>
+                    <span class="badge text-bg-danger js-notification-new-badge">@Model.CantidadNuevas nuevas</span>
                 }
             </div>
 

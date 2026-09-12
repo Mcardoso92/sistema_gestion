@@ -18,5 +18,10 @@ namespace saas.Services
             Usuario usuario,
             int empresaId,
             bool esSuperAdmin);
+
+        Task RegistrarRevisionesAsync(
+            Usuario usuario,
+            IEnumerable<int> empresaIds,
+            bool esSuperAdmin);
     }
 }
