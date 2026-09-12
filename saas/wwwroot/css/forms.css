@@ -65,6 +65,70 @@
     box-shadow: var(--ui-shadow-sm);
 }
 
+/*
+ * COMPONENTE: GUIA DE AYUDA
+ * Uso: panel lateral que acompaña formularios y pantallas operativas.
+ */
+.app-body .help-guide-panel {
+    height: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--ui-border-light);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
+    box-shadow: var(--ui-shadow-sm);
+}
+
+.app-body .help-guide-title {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--ui-border-light);
+    color: var(--ui-text);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.app-body .help-guide-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ui-border-light);
+}
+
+.app-body .help-guide-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.app-body .help-guide-item__icon {
+    flex: 0 0 auto;
+    margin-top: 0.25rem;
+    color: var(--ui-primary);
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.app-body .help-guide-item__title {
+    margin-bottom: 0.25rem;
+    color: var(--ui-text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.app-body .help-guide-item__text {
+    margin-bottom: 0;
+    color: var(--ui-text-muted);
+    font-size: 0.875rem;
+}
+
+@media (max-width: 767.98px) {
+    .app-body .help-guide-panel {
+        padding: 1rem;
+    }
+}
+
 .app-body form .row {
     row-gap: 0.25rem;
 }
