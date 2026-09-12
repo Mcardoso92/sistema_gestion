@@ -9,6 +9,11 @@ namespace saas.Services
             int empresaId,
             bool esSuperAdmin);
 
+        Task<IReadOnlyDictionary<int, DateTime>> ObtenerUltimasRevisionesAsync(
+            Usuario usuario,
+            IEnumerable<int> empresaIds,
+            bool esSuperAdmin);
+
         Task RegistrarRevisionAsync(
             Usuario usuario,
             int empresaId,
