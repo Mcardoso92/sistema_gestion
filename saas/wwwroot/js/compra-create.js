@@ -13,6 +13,13 @@
     const categoriasProductoUrl = compraForm?.dataset.categoriasProductoUrl;
     const createUrl = compraForm?.dataset.createUrl;
     const guardarCompraBtn = document.getElementById("guardarCompraBtn");
+    const proveedorSelect = document.getElementById("ProveedorId");
+    const nuevoProveedorBtn = document.getElementById("nuevoProveedorBtn");
+    const nuevoProveedorModal = document.getElementById("nuevoProveedorModal");
+    const nuevoProveedorForm = document.getElementById("nuevoProveedorForm");
+    const nuevoProveedorErrores = document.getElementById("nuevoProveedorErrores");
+    const crearProveedorBtn = document.getElementById("crearProveedorBtn");
+    const crearProveedorUrl = compraForm?.dataset.crearProveedorUrl;
 
     if (!compraForm || !detalleBody || !detalleTemplate || !agregarProductoBtn) {
         return;
@@ -37,6 +44,88 @@
 
     const obtenerFilas = () =>
         Array.from(detalleBody.querySelectorAll(".compra-detalle-row"));
+
+    const mostrarErroresProveedor = errores => {
+        if (!nuevoProveedorErrores) {
+            return;
+        }
+
+        const mensajes = Object.values(errores ?? {}).flat();
+        nuevoProveedorErrores.replaceChildren();
+
+        mensajes.forEach(mensaje => {
+            const item = document.createElement("div");
+            item.textContent = mensaje;
+            nuevoProveedorErrores.appendChild(item);
+        });
+
+        nuevoProveedorErrores.classList.toggle("d-none", mensajes.length === 0);
+    };
+
+    nuevoProveedorBtn?.addEventListener("click", () => {
+        if (empresaSelect && !empresaSelect.value) {
+            alert("Debe seleccionar una empresa antes de crear un proveedor.");
+            return;
+        }
+
+        nuevoProveedorForm?.reset();
+        mostrarErroresProveedor({});
+        bootstrap.Modal.getOrCreateInstance(nuevoProveedorModal).show();
+    });
+
+    nuevoProveedorForm?.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        if (!nuevoProveedorForm.reportValidity()) {
+            return;
+        }
+
+        mostrarErroresProveedor({});
+        crearProveedorBtn.disabled = true;
+
+        const datos = new FormData(nuevoProveedorForm);
+        const token = compraForm.querySelector('input[name="__RequestVerificationToken"]');
+
+        if (token) {
+            datos.append("__RequestVerificationToken", token.value);
+        }
+
+        const url = new URL(crearProveedorUrl, window.location.origin);
+        const empresaId = obtenerEmpresaId();
+
+        if (empresaId) {
+            url.searchParams.set("empresaId", empresaId);
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                body: datos,
+                headers: { Accept: "application/json" }
+            });
+            const resultado = await response.json();
+
+            if (!response.ok) {
+                mostrarErroresProveedor(resultado.errores);
+                return;
+            }
+
+            const texto = resultado.nombreFantasia
+                ? `${resultado.razonSocial} (${resultado.nombreFantasia})`
+                : resultado.razonSocial;
+            proveedorSelect.add(new Option(texto, resultado.id, true, true));
+            bootstrap.Modal.getInstance(nuevoProveedorModal)?.hide();
+            nuevoProveedorForm.reset();
+        }
+        catch {
+            mostrarErroresProveedor({
+                general: ["No fue posible crear el proveedor. Intente nuevamente."]
+            });
+        }
+        finally {
+            crearProveedorBtn.disabled = false;
+        }
+    });
 
     const cargarCategoriasProducto = async () => {
         const empresaId = obtenerEmpresaId();

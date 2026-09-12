@@ -16,15 +16,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly IFechaHoraService _fechaHora;
+        private readonly ProveedorAltaService _proveedorAltaService;
 
         public ProveedorController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            IFechaHoraService fechaHora)
+            IFechaHoraService fechaHora,
+            ProveedorAltaService proveedorAltaService)
         {
             _context = context;
             _userManager = userManager;
             _fechaHora = fechaHora;
+            _proveedorAltaService = proveedorAltaService;
         }
 
         // GET: Proveedor
@@ -247,7 +250,9 @@ namespace saas.Controllers
 
             if (!proveedorVM.EmpresaId.HasValue)
             {
-                ModelState.AddModelError(nameof(proveedorVM.EmpresaId), "Debe seleccionar una empresa.");
+                ModelState.AddModelError(
+                    nameof(proveedorVM.EmpresaId),
+                    "Debe seleccionar una empresa.");
 
                 if (esSuperAdmin)
                 {
@@ -257,15 +262,16 @@ namespace saas.Controllers
                 return View(proveedorVM);
             }
 
-            bool empresaValida = await _context.Empresas
-                .AsNoTracking()
-                .AnyAsync(e =>
-                    e.Id == proveedorVM.EmpresaId.Value &&
-                    e.Estado);
+            var resultado = await _proveedorAltaService.CrearAsync(
+                proveedorVM,
+                proveedorVM.EmpresaId.Value);
 
-            if (!empresaValida)
+            if (!resultado.Exitoso)
             {
-                ModelState.AddModelError(nameof(proveedorVM.EmpresaId), "La empresa seleccionada no es válida.");
+                foreach (var error in resultado.Errores)
+                {
+                    ModelState.AddModelError(error.Key, error.Value);
+                }
 
                 if (esSuperAdmin)
                 {
@@ -274,80 +280,92 @@ namespace saas.Controllers
 
                 return View(proveedorVM);
             }
-
-            proveedorVM.RazonSocial = proveedorVM.RazonSocial.Trim();
-            proveedorVM.NombreFantasia = NormalizarTextoOpcional(proveedorVM.NombreFantasia);
-            proveedorVM.Email = NormalizarTextoOpcional(proveedorVM.Email);
-            proveedorVM.Telefono = NormalizarTextoOpcional(proveedorVM.Telefono);
-            proveedorVM.Direccion = NormalizarTextoOpcional(proveedorVM.Direccion);
-            proveedorVM.Localidad = NormalizarTextoOpcional(proveedorVM.Localidad);
-            proveedorVM.Provincia = NormalizarTextoOpcional(proveedorVM.Provincia);
-            proveedorVM.CodigoPostal = NormalizarTextoOpcional(proveedorVM.CodigoPostal);
-            proveedorVM.Observaciones = NormalizarTextoOpcional(proveedorVM.Observaciones);
-
-            string? cuitNormalizado = null;
-
-            if (!string.IsNullOrWhiteSpace(proveedorVM.CUIT))
-            {
-                cuitNormalizado = CuitValidator.Normalizar(proveedorVM.CUIT)!;
-
-                if (!CuitValidator.EsValido(cuitNormalizado))
-                {
-                    ModelState.AddModelError(nameof(proveedorVM.CUIT), "El CUIT ingresado no es válido.");
-
-                    if (esSuperAdmin)
-                    {
-                        await CargarEmpresas(proveedorVM);
-                    }
-
-                    return View(proveedorVM);
-                }
-
-                bool existeCuit = await _context.Proveedores
-                    .AsNoTracking()
-                    .AnyAsync(p =>
-                        p.EmpresaId == proveedorVM.EmpresaId.Value &&
-                        p.CUIT == cuitNormalizado &&
-                        p.Estado);
-
-                if (existeCuit)
-                {
-                    ModelState.AddModelError(
-                        nameof(proveedorVM.CUIT),
-                        "Ya existe un proveedor activo con ese CUIT para esta empresa.");
-
-                    if (esSuperAdmin)
-                    {
-                        await CargarEmpresas(proveedorVM);
-                    }
-
-                    return View(proveedorVM);
-                }
-            }
-
-            var proveedor = new Proveedor
-            {
-                RazonSocial = proveedorVM.RazonSocial,
-                NombreFantasia = proveedorVM.NombreFantasia,
-                CUIT = cuitNormalizado,
-                Email = proveedorVM.Email,
-                Telefono = proveedorVM.Telefono,
-                Direccion = proveedorVM.Direccion,
-                Localidad = proveedorVM.Localidad,
-                Provincia = proveedorVM.Provincia,
-                CodigoPostal = proveedorVM.CodigoPostal,
-                Observaciones = proveedorVM.Observaciones,
-                Estado = true,
-                FechaAlta = _fechaHora.UtcAhora,
-                EmpresaId = proveedorVM.EmpresaId.Value
-            };
-
-            _context.Proveedores.Add(proveedor);
-            await _context.SaveChangesAsync();
 
             TempData["Success"] = "Proveedor creado correctamente.";
 
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CrearRapido(
+            ProveedorCreateVM proveedorVM,
+            int? empresaId = null)
+        {
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuario,
+                "SuperAdmin");
+
+            int empresaProveedorId;
+
+            if (esSuperAdmin)
+            {
+                if (!empresaId.HasValue)
+                {
+                    return BadRequest(new
+                    {
+                        errores = new Dictionary<string, string[]>
+                        {
+                            [nameof(proveedorVM.EmpresaId)] =
+                                ["Debe indicar una empresa."]
+                        }
+                    });
+                }
+
+                empresaProveedorId = empresaId.Value;
+            }
+            else
+            {
+                empresaProveedorId = usuario.EmpresaId;
+            }
+
+            proveedorVM.EmpresaId = empresaProveedorId;
+            ModelState.Remove(nameof(proveedorVM.EmpresaId));
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    errores = ModelState
+                        .Where(m => m.Value?.Errors.Count > 0)
+                        .ToDictionary(
+                            m => m.Key,
+                            m => m.Value!.Errors
+                                .Select(e => e.ErrorMessage)
+                                .ToArray())
+                });
+            }
+
+            var resultado = await _proveedorAltaService.CrearAsync(
+                proveedorVM,
+                empresaProveedorId);
+
+            if (!resultado.Exitoso)
+            {
+                return BadRequest(new
+                {
+                    errores = resultado.Errores.ToDictionary(
+                        e => e.Key,
+                        e => new[] { e.Value })
+                });
+            }
+
+            var proveedor = resultado.Proveedor!;
+
+            return Json(new
+            {
+                proveedor.Id,
+                proveedor.RazonSocial,
+                proveedor.NombreFantasia,
+                cuit = CuitValidator.Formatear(proveedor.CUIT)
+            });
         }
         // GET: Proveedor/Edit/5
         [HttpGet]
