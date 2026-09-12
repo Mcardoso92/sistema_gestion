@@ -1,44 +1,67 @@
-﻿@model Categoria
+@model Categoria
 
 @{
     ViewData["Title"] = "Crear Categoría";
 }
 
-<h1>Crear Categoría</h1>
-
-<h4>Categoría</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Nombre" class="control-label"></label>
-                <input asp-for="Nombre" class="form-control" />
-                <span asp-validation-for="Nombre" class="text-danger"></span>
-            </div>
-
-            @if (User.IsInRole("SuperAdmin"))
-            {
-                <div class="form-group"> 
-                    <label asp-for="EmpresaId" class="control-label"></label> 
-                    <select asp-for="EmpresaId" class="form-control" asp-items="ViewBag.EmpresaId"> 
-                        <option value="">Seleccione una empresa</option> 
-                    </select> 
-                    <span asp-validation-for="EmpresaId" class="text-danger"></span> 
-                </div>
-            }            
-            <div class="form-group">
-                <input type="submit" value="Guardar" class="btn btn-primary" />
-            </div>
-        </form>
+<main class="container-fluid px-4 py-4">
+    <div class="mb-4">
+        <h1 class="h3 fw-bold mb-1">Nueva Categoría</h1>
+        <p class="text-muted mb-0">Creá una categoría para organizar los productos del catálogo.</p>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Cancelar</a>
-</div>
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <div class="form-container p-4">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Nombre" class="form-label">Nombre</label>
+                            <input asp-for="Nombre" class="form-control" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                        @if (User.IsInRole("SuperAdmin"))
+                        {
+                            <div class="col-12">
+                                <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                <select asp-for="EmpresaId" class="form-select" asp-items="ViewBag.EmpresaId">
+                                    <option value="">Seleccione una empresa</option>
+                                </select>
+                                <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                            </div>
+                        }
+                    </div>
+                    <div class="d-flex justify-content-end gap-3 pt-4 mt-4 border-top">
+                        <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                        <button type="submit" class="btn btn-v-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">category</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Organización del catálogo</h3>
+                        <p class="help-guide-item__text">Utilizá un nombre claro que permita identificar rápidamente qué productos pertenecen a esta categoría.</p>
+                    </div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">corporate_fare</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Empresa</h3>
+                        <p class="help-guide-item__text">Cada categoría pertenece a una sola empresa y únicamente estará disponible para sus productos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }
