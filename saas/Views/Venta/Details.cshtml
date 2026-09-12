@@ -56,14 +56,9 @@
 
             <a asp-action="Create"
                asp-route-empresaId="@Model.EmpresaId"
-               class="btn btn-v-primary py-2 fw-medium d-flex align-items-center gap-2 small">
-
-                <span class="material-symbols-outlined"
-                      style="font-size: 18px;">
-                    add_shopping_cart
-                </span>
-
-                Nueva Venta
+               class="btn btn-create-action">
+                <span class="material-symbols-outlined">point_of_sale</span>
+                <span>Nueva venta</span>
             </a>
             @if (Model.Estado && Model.TotalCobrado > Model.TotalReintegrado)
             {
