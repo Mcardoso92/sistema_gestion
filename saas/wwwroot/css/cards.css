@@ -5,19 +5,6 @@
 }
 
 /* ==================================================
-   COMPONENTE: CONTENEDOR DE CONTENIDO
-   Uso: bloques de Ventas, Configuración, Reportes y Reintegros
-   Los paneles con filtros conservan su variante en forms.css.
-   ================================================== */
-.app-body .card-custom {
-    overflow: hidden;
-    border: 1px solid var(--veltika-border) !important;
-    border-radius: var(--veltika-radius-card);
-    background: var(--veltika-surface);
-    box-shadow: var(--veltika-shadow-sm);
-}
-
-/* ==================================================
    COMPONENTE: TARJETAS DEL DASHBOARD
    Pantalla piloto del sistema de diseño
    Fuente: Manual de Marca Veltika v1.0
@@ -69,6 +56,20 @@
     overflow: hidden;
     border: 1px solid var(--ui-border-light) !important;
     background: var(--ui-surface);
+}
+
+/* ==================================================
+   COMPONENTE: CONTENEDORES DE CONTENIDO Y FORMULARIO
+   Uso: card-custom y formularios CRUD migrados progresivamente
+   Los paneles con filtros conservan su variante en forms.css.
+   ================================================== */
+.app-body .card-custom,
+.app-body .form-card {
+    overflow: hidden;
+    border: 1px solid var(--veltika-border) !important;
+    border-radius: var(--veltika-radius-card);
+    background: var(--veltika-surface);
+    box-shadow: var(--veltika-shadow-sm);
 }
 
 .app-body .card-header,
