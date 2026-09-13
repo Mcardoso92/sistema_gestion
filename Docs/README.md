@@ -21,7 +21,8 @@ Docs/
 │   ├── Convenciones.md
 │   ├── Guia de deploy Veltika.md
 │   ├── Infraestructura Veltika.md
-│   └── Roadmap.md
+│   ├── Roadmap.md
+│   └── Sistema de diseño.md
 │
 ├── 01-Reglas_Negocio/
 │   ├── Caja/
@@ -81,6 +82,12 @@ Documenta configuración por ambiente, variables, secretos y reglas productivas.
 `Guia de deploy Veltika.md`
 
 Documenta build/tests, Release, migraciones idempotentes, empaquetado, SHA256, backups, instalación, smoke tests y recuperación.
+
+## Sistema de diseño
+
+`Sistema de diseño.md`
+
+Documenta los tokens oficiales, las extensiones semánticas, las reglas de compatibilidad y el proceso para crear o migrar componentes visuales sin duplicar estilos.
 
 ---
 
