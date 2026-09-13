@@ -71,10 +71,15 @@
     background: var(--ui-surface-muted) !important;
 }
 
+/* ==================================================
+   COMPONENTE: TARJETA DE ACCESO
+   Uso: ingreso, registro y recuperación de contraseña
+   La estructura responsive permanece temporalmente en site.css.
+   ================================================== */
 .login-card {
-    border: 1px solid var(--ui-border-light);
-    border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface);
-    color: var(--ui-text);
-    box-shadow: var(--ui-shadow-md);
+    border: 1px solid var(--veltika-border);
+    border-radius: var(--veltika-radius-card);
+    background: var(--veltika-surface);
+    color: var(--veltika-text);
+    box-shadow: var(--veltika-shadow-md);
 }
