@@ -164,6 +164,7 @@
     box-shadow: 0 0 0 0.2rem rgba(15, 76, 129, 0.12);
 }
 
+.app-body .filter-card,
 .app-body .card:has(form[method="get"]),
 .app-body .card-custom:has(form[method="get"]) {
     border: 1px solid var(--ui-border-light) !important;
@@ -172,6 +173,7 @@
     box-shadow: var(--ui-shadow-sm) !important;
 }
 
+.app-body .filter-card > .card-body,
 .app-body .card:has(form[method="get"]) > .card-body,
 .app-body .card-custom:has(form[method="get"]) {
     padding: 1.25rem !important;
