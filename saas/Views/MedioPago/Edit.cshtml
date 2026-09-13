@@ -6,20 +6,18 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
         <div>
             <h1 class="h3 fw-bold mb-1">
                 Editar Medio de Pago
             </h1>
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
     </div>
 
-    <form asp-action="Edit"
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <form asp-action="Edit"
           asp-route-id="@Model.Id"
           method="post">
 
@@ -137,7 +135,27 @@
 
         </div>
 
-    </form>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">payments</span>
+                    <div><h3 class="help-guide-item__title">Tipo de medio</h3><p class="help-guide-item__text">Si ya tiene movimientos financieros, el tipo no puede modificarse para proteger el historial.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">toggle_on</span>
+                    <div><h3 class="help-guide-item__title">Estado</h3><p class="help-guide-item__text">Un medio inactivo deja de estar disponible para nuevas operaciones, pero puede reactivarse.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">schedule</span>
+                    <div><h3 class="help-guide-item__title">Turnos abiertos</h3><p class="help-guide-item__text">No puede desactivarse mientras una caja asociada tenga un turno abierto.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
