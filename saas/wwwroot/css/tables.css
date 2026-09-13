@@ -84,6 +84,12 @@
 .app-body .table td > p:last-child {
     margin-bottom: 0;
 }
+
+/* Mantiene unidos signo, símbolo monetario e importe dentro de las tablas. */
+.app-body .table-currency {
+    white-space: nowrap;
+}
+
 .pagination-footer {
     display: grid;
     grid-template-columns: 1fr auto 1fr;

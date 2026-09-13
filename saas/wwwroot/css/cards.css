@@ -19,7 +19,7 @@
 
 /* Los importes necesitan conservar el símbolo y el valor en una sola línea.
    El tamaño fluido evita quiebres en las grillas de reportes con cinco tarjetas. */
-.app-body .dashboard-summary-value--currency {
+.app-body .summary-value--currency {
     font-size: clamp(1rem, 1.45vw, 1.5rem);
     white-space: nowrap;
 }
@@ -65,7 +65,9 @@
    ================================================== */
 .app-body .card-custom,
 .app-body .form-card,
-.app-body .detail-card {
+.app-body .detail-card,
+.app-body .table-card,
+.app-body .metric-card {
     overflow: hidden;
     border: 1px solid var(--veltika-border) !important;
     border-radius: var(--veltika-radius-card);
