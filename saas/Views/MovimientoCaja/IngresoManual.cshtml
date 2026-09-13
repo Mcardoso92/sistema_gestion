@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
             <h1 class="h3 fw-bold mb-1">
@@ -18,15 +18,12 @@
             </p>
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
-
     </div>
 
-    <form asp-action="IngresoManual"
-          method="post">
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <form asp-action="IngresoManual"
+                  method="post">
 
         @Html.AntiForgeryToken()
 
@@ -162,7 +159,27 @@
 
         </div>
 
-    </form>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">add_card</span>
+                    <div><h3 class="help-guide-item__title">Ingreso manual</h3><p class="help-guide-item__text">Usalo para registrar dinero que ingresa a la caja por fuera de una venta.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">account_balance_wallet</span>
+                    <div><h3 class="help-guide-item__title">Caja y medio</h3><p class="help-guide-item__text">El medio de pago debe estar habilitado en la caja seleccionada.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">receipt_long</span>
+                    <div><h3 class="help-guide-item__title">Concepto</h3><p class="help-guide-item__text">Indicá el origen del dinero para identificar el movimiento en el historial.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
