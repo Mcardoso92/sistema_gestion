@@ -60,11 +60,12 @@
 
 /* ==================================================
    COMPONENTE: CONTENEDORES DE CONTENIDO Y FORMULARIO
-   Uso: card-custom y formularios CRUD migrados progresivamente
+   Uso: contenido general, formularios y vistas de detalle.
    Los paneles con filtros conservan su variante en forms.css.
    ================================================== */
 .app-body .card-custom,
-.app-body .form-card {
+.app-body .form-card,
+.app-body .detail-card {
     overflow: hidden;
     border: 1px solid var(--veltika-border) !important;
     border-radius: var(--veltika-radius-card);
