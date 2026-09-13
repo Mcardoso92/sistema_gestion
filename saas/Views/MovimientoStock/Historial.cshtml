@@ -194,7 +194,8 @@
                         <th class="text-end">Stock Ant.</th>
                         <th class="text-end">Cantidad</th>
                         <th class="text-end">Stock Final</th>
-                        <th class="pe-4">Motivo</th>
+                        <th>Motivo</th>
+                        <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
 
@@ -202,7 +203,7 @@
                     @if (!Model.Movimientos.Any())
                     {
                         <tr>
-                            <td colspan="@(User.IsInRole("SuperAdmin") ? 9 : 8)" class="text-center text-secondary py-5">
+                            <td colspan="@(User.IsInRole("SuperAdmin") ? 10 : 9)" class="text-center text-secondary py-5">
                                 No se encontraron movimientos para los criterios seleccionados.
                             </td>
                         </tr>
@@ -247,8 +248,18 @@
                                 <td class="text-end fw-semibold @claseCantidad">@signo@movimiento.Cantidad</td>
                                 <td class="text-end fw-semibold">@movimiento.StockPosterior</td>
 
-                                <td class="pe-4 historial-motivo" title="@movimiento.Motivo">
+                                <td class="historial-motivo" title="@movimiento.Motivo">
                                     @(string.IsNullOrWhiteSpace(movimiento.Motivo) ? "-" : movimiento.Motivo)
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <a asp-action="Details"
+                                       asp-route-id="@movimiento.Id"
+                                       class="btn btn-sm btn-light table-action-btn"
+                                       title="Ver detalle"
+                                       aria-label="Ver detalle">
+                                        <span class="material-symbols-outlined">visibility</span>
+                                    </a>
                                 </td>
                             </tr>
                         }
