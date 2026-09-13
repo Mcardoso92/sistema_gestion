@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
         <div>
             <h1 class="h3 fw-bold mb-1">Nuevo Medio de Pago</h1>
             <p class="text-muted mb-0">
@@ -14,13 +14,11 @@
             </p>
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
     </div>
 
-    <form asp-action="Create" method="post">
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <form asp-action="Create" method="post">
         @Html.AntiForgeryToken()
 
         <div asp-validation-summary="ModelOnly"
@@ -118,7 +116,27 @@
             </button>
 
         </div>
-    </form>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">payments</span>
+                    <div><h3 class="help-guide-item__title">Tipo de medio</h3><p class="help-guide-item__text">El tipo define cómo se comportará el medio de pago y con qué cajas podrá utilizarse.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">point_of_sale</span>
+                    <div><h3 class="help-guide-item__title">Cajas asociadas</h3><p class="help-guide-item__text">Después de crearlo, podés habilitarlo en las cajas donde deba estar disponible.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">history</span>
+                    <div><h3 class="help-guide-item__title">Historial</h3><p class="help-guide-item__text">Las operaciones registradas conservan siempre el medio de pago utilizado.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
