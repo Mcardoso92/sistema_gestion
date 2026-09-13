@@ -9,7 +9,7 @@
     margin-bottom: 0.25rem;
     color: var(--ui-text);
     font-size: clamp(1.75rem, 3vw, 2.5rem);
-    font-weight: 700;
+    font-weight: var(--veltika-font-extrabold);
     line-height: 1.15;
     letter-spacing: -0.025em;
 }
@@ -19,7 +19,7 @@
     margin-bottom: 0.25rem;
     color: var(--ui-text);
     font-size: clamp(1.75rem, 2vw, 2.25rem);
-    font-weight: 700;
+    font-weight: var(--veltika-font-extrabold);
     line-height: 1.2;
 }
 
@@ -33,7 +33,7 @@
     margin-bottom: 1rem;
     color: var(--ui-text);
     font-size: 1.125rem;
-    font-weight: 700;
+    font-weight: var(--veltika-font-semibold);
 }
 
 .app-body .text-muted {
@@ -43,14 +43,14 @@
 .app-body .app-content h1:not(.text-danger):not(.text-success):not(.text-white) {
     color: var(--ui-text) !important;
     font-size: clamp(1.75rem, 2.5vw, 2.25rem) !important;
-    font-weight: 700 !important;
+    font-weight: var(--veltika-font-extrabold) !important;
     line-height: 1.2;
     letter-spacing: -0.025em;
 }
 
 .app-body .app-content h2 {
     color: var(--ui-text);
-    font-weight: 700;
+    font-weight: var(--veltika-font-extrabold);
     line-height: 1.25;
 }
 
@@ -59,7 +59,7 @@
 .app-body .app-content h5,
 .app-body .app-content h6 {
     color: var(--ui-text);
-    font-weight: 600;
+    font-weight: var(--veltika-font-semibold);
     line-height: 1.3;
 }
 

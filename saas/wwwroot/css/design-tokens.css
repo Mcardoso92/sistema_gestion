@@ -12,6 +12,10 @@
     --veltika-muted: #64748b;
     --veltika-border: #e2e8f0;
     --veltika-font: Inter, sans-serif;
+    --veltika-font-regular: 400;
+    --veltika-font-medium: 500;
+    --veltika-font-semibold: 600;
+    --veltika-font-extrabold: 800;
 
     /* Estados semánticos: extensiones para producto digital. */
     --veltika-success: #15803d;
