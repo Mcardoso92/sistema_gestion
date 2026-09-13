@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
 
@@ -19,12 +19,6 @@
             </p>
 
         </div>
-
-        <a asp-action="Details"
-           asp-route-id="@Model.TurnoCajaId"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
 
     </div>
 
@@ -120,11 +114,42 @@
 
                 </div>
 
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body p-4">
+                        <label asp-for="Motivo"
+                               class="form-label fw-semibold">
+                            Motivo de regularización
+                        </label>
+
+                        <textarea asp-for="Motivo"
+                                  class="form-control"
+                                  rows="3"
+                                  maxlength="500"
+                                  placeholder="Indicá el motivo o la explicación de la diferencia"></textarea>
+
+                        <span asp-validation-for="Motivo"
+                              class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a asp-action="Details"
+                       asp-route-id="@Model.TurnoCajaId"
+                       class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Confirmar regularización
+                    </button>
+                </div>
+
             </div>
 
             <div class="col-lg-5">
 
-                <div class="card border-0 shadow-sm h-100">
+                <div class="card border-0 shadow-sm">
 
                     <div class="card-body p-4">
 
@@ -173,48 +198,23 @@
 
                 </div>
 
-            </div>
-
-            <div class="col-12">
-
-                <div class="card border-0 shadow-sm">
-
-                    <div class="card-body p-4">
-
-                        <label asp-for="Motivo"
-                               class="form-label fw-semibold">
-                            Motivo de regularización
-                        </label>
-
-                        <textarea asp-for="Motivo"
-                                  class="form-control"
-                                  rows="3"
-                                  maxlength="500"
-                                  placeholder="Indicá el motivo o la explicación de la diferencia"></textarea>
-
-                        <span asp-validation-for="Motivo"
-                              class="text-danger"></span>
-
+                <div class="help-guide-panel mt-4">
+                    <h2 class="help-guide-title">Guía de Ayuda</h2>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">add_card</span>
+                        <div><h3 class="help-guide-item__title">Sobrante</h3><p class="help-guide-item__text">Si se contó más efectivo del esperado, se genera un ingreso de ajuste en la caja.</p></div>
                     </div>
-
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">payments</span>
+                        <div><h3 class="help-guide-item__title">Faltante</h3><p class="help-guide-item__text">Si se contó menos efectivo del esperado, se genera un egreso de ajuste.</p></div>
+                    </div>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">history</span>
+                        <div><h3 class="help-guide-item__title">Trazabilidad</h3><p class="help-guide-item__text">La regularización conserva el importe, el usuario, la fecha y el motivo informado.</p></div>
+                    </div>
                 </div>
 
             </div>
-
-        </div>
-
-        <div class="d-flex justify-content-end gap-2 mt-4">
-
-            <a asp-action="Details"
-               asp-route-id="@Model.TurnoCajaId"
-               class="btn btn-outline-secondary">
-                Cancelar
-            </a>
-
-            <button type="submit"
-                    class="btn btn-primary">
-                Confirmar regularización
-            </button>
 
         </div>
 
