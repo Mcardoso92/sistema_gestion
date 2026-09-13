@@ -40,6 +40,7 @@
     --veltika-icon-lg: 2rem;
     --veltika-control-height: 2.75rem;
     --veltika-transition: 180ms ease;
+    --veltika-focus-ring: rgba(79, 140, 255, 0.38);
 
     /* ==================================================
        COMPATIBILIDAD TEMPORAL

@@ -1,6 +1,6 @@
 .app-body {
-    color: var(--ui-text);
-    font-family: 'Inter', sans-serif;
+    color: var(--veltika-text);
+    font-family: var(--veltika-font);
 }
 
 .app-body .page-title,
