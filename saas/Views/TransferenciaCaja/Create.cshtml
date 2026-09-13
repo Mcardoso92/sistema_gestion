@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
             <h1 class="h3 fw-bold mb-1">
@@ -18,15 +18,12 @@
             </p>
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
-
     </div>
 
-    <form asp-action="Create"
-          method="post">
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <form asp-action="Create"
+                  method="post">
 
         @Html.AntiForgeryToken()
 
@@ -169,7 +166,27 @@
 
         </div>
 
-    </form>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">move_down</span>
+                    <div><h3 class="help-guide-item__title">Caja de origen</h3><p class="help-guide-item__text">El importe se descuenta de esta caja y no puede superar su saldo disponible.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">move_up</span>
+                    <div><h3 class="help-guide-item__title">Caja de destino</h3><p class="help-guide-item__text">Debe ser diferente de la caja de origen y recibirá el importe transferido.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">receipt_long</span>
+                    <div><h3 class="help-guide-item__title">Motivo</h3><p class="help-guide-item__text">Describí el propósito del movimiento para facilitar su seguimiento posterior.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
