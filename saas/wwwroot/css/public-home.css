@@ -1,0 +1,14 @@
+.feature-icon .material-symbols-outlined,
+.benefit-icon .material-symbols-outlined {
+    display: block;
+    line-height: 1;
+}
+
+.feature-icon {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.feature-card h3 {
+    text-align: center;
+}
