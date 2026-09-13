@@ -1,10 +1,21 @@
 .app-body .card,
-.app-body .card-custom,
-.app-body .dashboard-summary-card,
-.app-body .dashboard-panel {
+.app-body .card-custom {
     border-color: var(--ui-border-light) !important;
     border-radius: var(--ui-radius-lg);
     box-shadow: var(--ui-shadow-sm);
+}
+
+/* ==================================================
+   COMPONENTE: TARJETAS DEL DASHBOARD
+   Pantalla piloto del sistema de diseño
+   Fuente: Manual de Marca Veltika v1.0
+   ================================================== */
+.app-body .dashboard-summary-card,
+.app-body .dashboard-panel {
+    border-color: var(--veltika-border) !important;
+    border-radius: var(--veltika-radius-card);
+    background: var(--veltika-surface);
+    box-shadow: var(--veltika-shadow-sm);
 }
 
 .app-body .card-header,
