@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div class="mb-4">
 
         <div>
             <h1 class="h3 fw-bold mb-1">
@@ -17,13 +17,6 @@
                 Compra #@Model.CompraId · @Model.ProveedorNombre
             </p>
         </div>
-
-        <a asp-controller="Compra"
-           asp-action="Details"
-           asp-route-id="@Model.CompraId"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
 
     </div>
 
@@ -39,7 +32,9 @@
         <div asp-validation-summary="All"
              class="alert alert-danger"></div>
 
-        <div class="card border-0 shadow-sm mb-4">
+        <div class="row g-4 align-items-start mb-4">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
 
             <div class="card-body p-4">
 
@@ -79,9 +74,9 @@
 
             </div>
 
-        </div>
+                </div>
 
-        <div class="card border-0 shadow-sm">
+        <div class="card border-0 shadow-sm mt-4">
 
             <div class="card-header bg-white py-3">
 
@@ -209,6 +204,18 @@
                 Confirmar devolución
             </button>
 
+        </div>
+
+            </div>
+
+            <div class="col-lg-4">
+                <div class="help-guide-panel">
+                    <h2 class="help-guide-title">Guía de Ayuda</h2>
+                    <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">inventory</span><div><h3 class="help-guide-item__title">Cantidad disponible</h3><p class="help-guide-item__text">Solo pueden devolverse unidades compradas que no hayan sido devueltas anteriormente.</p></div></div>
+                    <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">remove_shopping_cart</span><div><h3 class="help-guide-item__title">Impacto en stock</h3><p class="help-guide-item__text">Las cantidades confirmadas se descuentan del inventario actual.</p></div></div>
+                    <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">payments</span><div><h3 class="help-guide-item__title">Saldo a recuperar</h3><p class="help-guide-item__text">La devolución genera un importe pendiente de reintegro por parte del proveedor.</p></div></div>
+                </div>
+            </div>
         </div>
 
     </form>
