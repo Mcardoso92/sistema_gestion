@@ -1,4 +1,50 @@
 :root {
+    /* ==================================================
+       SISTEMA DE DISEÑO: TOKENS OFICIALES
+       Fuente: Manual de Marca Veltika v1.0
+       ================================================== */
+    --veltika-primary: #2563eb;
+    --veltika-dark: #123f95;
+    --veltika-accent: #4f8cff;
+    --veltika-bg: #f8fafc;
+    --veltika-surface: #ffffff;
+    --veltika-text: #0f172a;
+    --veltika-muted: #64748b;
+    --veltika-border: #e2e8f0;
+    --veltika-font: Inter, sans-serif;
+
+    /* Estados semánticos: extensiones para producto digital. */
+    --veltika-success: #15803d;
+    --veltika-warning: #b45309;
+    --veltika-danger: #b91c1c;
+    --veltika-info: #0369a1;
+    --veltika-income: #15803d;
+    --veltika-expense: #b91c1c;
+    --veltika-disabled: #94a3b8;
+
+    /* Escalas base compartidas. */
+    --veltika-space-1: 0.25rem;
+    --veltika-space-2: 0.5rem;
+    --veltika-space-3: 0.75rem;
+    --veltika-space-4: 1rem;
+    --veltika-space-6: 1.5rem;
+    --veltika-space-8: 2rem;
+    --veltika-radius-sm: 0.5rem;
+    --veltika-radius-md: 0.75rem;
+    --veltika-radius: 0.875rem;
+    --veltika-radius-card: 1.25rem;
+    --veltika-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --veltika-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --veltika-icon-sm: 1.25rem;
+    --veltika-icon-md: 1.5rem;
+    --veltika-icon-lg: 2rem;
+    --veltika-control-height: 2.75rem;
+    --veltika-transition: 180ms ease;
+
+    /* ==================================================
+       COMPATIBILIDAD TEMPORAL
+       Consumidores existentes; migrar progresivamente.
+       ================================================== */
     --ui-primary: #0f4c81;
     --ui-primary-hover: #0a365c;
     --ui-primary-soft: #e8f0f8;
