@@ -18,6 +18,13 @@
     box-shadow: var(--veltika-shadow-sm);
 }
 
+/* Los importes necesitan conservar el símbolo y el valor en una sola línea.
+   El tamaño fluido evita quiebres en las grillas de reportes con cinco tarjetas. */
+.app-body .dashboard-summary-value--currency {
+    font-size: clamp(1rem, 1.45vw, 1.5rem);
+    white-space: nowrap;
+}
+
 .app-body .card-header,
 .app-body .card-header-bg {
     padding: 1rem 1.25rem;

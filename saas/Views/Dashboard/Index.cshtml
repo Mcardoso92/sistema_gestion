@@ -35,7 +35,7 @@
 
                 <div>
                     <div class="dashboard-summary-label">Ventas de hoy</div>
-                    <div class="dashboard-summary-value">@Model.TotalVentasDia.ToString("C")</div>
+                    <div class="dashboard-summary-value dashboard-summary-value--currency">@Model.TotalVentasDia.ToString("C")</div>
                     <div class="dashboard-summary-detail">
                         @Model.CantidadVentasDia operaciones
                     </div>
@@ -51,7 +51,7 @@
 
                 <div>
                     <div class="dashboard-summary-label">Ventas del mes</div>
-                    <div class="dashboard-summary-value">@Model.TotalVentasMes.ToString("C")</div>
+                    <div class="dashboard-summary-value dashboard-summary-value--currency">@Model.TotalVentasMes.ToString("C")</div>
                     <div class="dashboard-summary-detail">
                         @Model.CantidadVentasMes operaciones
                     </div>
