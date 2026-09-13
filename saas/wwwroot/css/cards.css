@@ -1,8 +1,20 @@
-.app-body .card,
-.app-body .card-custom {
+.app-body .card {
     border-color: var(--ui-border-light) !important;
     border-radius: var(--ui-radius-lg);
     box-shadow: var(--ui-shadow-sm);
+}
+
+/* ==================================================
+   COMPONENTE: CONTENEDOR DE CONTENIDO
+   Uso: bloques de Ventas, Configuración, Reportes y Reintegros
+   Los paneles con filtros conservan su variante en forms.css.
+   ================================================== */
+.app-body .card-custom {
+    overflow: hidden;
+    border: 1px solid var(--veltika-border) !important;
+    border-radius: var(--veltika-radius-card);
+    background: var(--veltika-surface);
+    box-shadow: var(--veltika-shadow-sm);
 }
 
 /* ==================================================
@@ -53,8 +65,7 @@
     text-align: center;
 }
 
-.app-body .card,
-.app-body .card-custom {
+.app-body .card {
     overflow: hidden;
     border: 1px solid var(--ui-border-light) !important;
     background: var(--ui-surface);
