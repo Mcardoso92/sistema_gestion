@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
             <h1 class="h3 fw-bold mb-1">
@@ -18,15 +18,12 @@
             </p>
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
-
     </div>
 
-    <form asp-action="EgresoManual"
-          method="post">
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <form asp-action="EgresoManual"
+                  method="post">
 
         @Html.AntiForgeryToken()
 
@@ -207,7 +204,27 @@
 
         </div>
 
-    </form>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">payments</span>
+                    <div><h3 class="help-guide-item__title">Saldo disponible</h3><p class="help-guide-item__text">El egreso no puede superar el saldo disponible en la caja seleccionada.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">category</span>
+                    <div><h3 class="help-guide-item__title">Categoría de gasto</h3><p class="help-guide-item__text">Clasificá la salida para facilitar el análisis posterior de los gastos.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">receipt_long</span>
+                    <div><h3 class="help-guide-item__title">Concepto</h3><p class="help-guide-item__text">Describí el destino del dinero para mantener una trazabilidad clara.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 

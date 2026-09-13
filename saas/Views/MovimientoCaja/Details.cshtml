@@ -38,21 +38,23 @@
 
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
-        @if (!Model.EsReversion &&
-                !Model.FueRevertido &&
-                (Model.Tipo == saas.Models.Enums.TipoMovimientoCaja.IngresoManual ||
-                Model.Tipo == saas.Models.Enums.TipoMovimientoCaja.EgresoManual))
-        {
-            <a asp-action="Revertir"
-               asp-route-id="@Model.Id"
-               class="btn btn-warning">
-                Revertir
+        <div class="d-flex gap-2">
+            <a asp-action="Index"
+               class="btn btn-outline-secondary">
+                Volver
             </a>
-        }
+            @if (!Model.EsReversion &&
+                    !Model.FueRevertido &&
+                    (Model.Tipo == saas.Models.Enums.TipoMovimientoCaja.IngresoManual ||
+                    Model.Tipo == saas.Models.Enums.TipoMovimientoCaja.EgresoManual))
+            {
+                <a asp-action="Revertir"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-warning">
+                    Revertir
+                </a>
+            }
+        </div>
 
     </div>
 
@@ -199,6 +201,22 @@
 
                 </div>
 
+            </div>
+
+            <div class="help-guide-panel mt-4">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">swap_vert</span>
+                    <div><h3 class="help-guide-item__title">Dirección</h3><p class="help-guide-item__text">Un ingreso aumenta el saldo de la caja y un egreso lo disminuye.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">undo</span>
+                    <div><h3 class="help-guide-item__title">Reversión</h3><p class="help-guide-item__text">Los movimientos manuales pueden corregirse generando otro movimiento de dirección contraria.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">history</span>
+                    <div><h3 class="help-guide-item__title">Trazabilidad</h3><p class="help-guide-item__text">El movimiento original nunca se elimina y las reversiones quedan vinculadas.</p></div>
+                </div>
             </div>
 
         </div>
