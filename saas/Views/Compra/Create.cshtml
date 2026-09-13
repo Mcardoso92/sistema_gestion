@@ -30,8 +30,10 @@
           data-categorias-producto-url="@Url.Action("ObtenerCategoriasProducto", "Compra")">
         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-        <div class="card bg-white mb-4">
-            <div class="card-body p-4">
+        <div class="row g-4 align-items-start mb-4">
+            <div class="col-lg-8">
+                <div class="card bg-white">
+                    <div class="card-body p-4">
                 <h2 class="compra-section-title">
                     <span class="material-symbols-outlined icon-sm">receipt_long</span>
                     Información general
@@ -78,6 +80,26 @@
                         <label asp-for="Observaciones" class="form-label fw-medium">Observaciones</label>
                         <textarea asp-for="Observaciones" class="form-control" rows="3" maxlength="500" placeholder="Información adicional sobre la compra..."></textarea>
                         <span asp-validation-for="Observaciones" class="text-danger text-sm"></span>
+                    </div>
+                </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="help-guide-panel">
+                    <h2 class="help-guide-title">Guía de Ayuda</h2>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">local_shipping</span>
+                        <div><h3 class="help-guide-item__title">Proveedor</h3><p class="help-guide-item__text">Seleccioná el proveedor de la compra. Si todavía no existe, podés crearlo desde el botón +.</p></div>
+                    </div>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">inventory_2</span>
+                        <div><h3 class="help-guide-item__title">Stock y costo</h3><p class="help-guide-item__text">Al guardar, las cantidades se incorporan al stock y se actualiza el último costo de cada producto.</p></div>
+                    </div>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">sell</span>
+                        <div><h3 class="help-guide-item__title">Precio de venta</h3><p class="help-guide-item__text">El nuevo precio es opcional. Si lo dejás vacío, el precio de venta actual no se modifica.</p></div>
                     </div>
                 </div>
             </div>
