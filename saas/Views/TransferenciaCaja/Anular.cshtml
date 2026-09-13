@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
 
@@ -20,12 +20,6 @@
 
         </div>
 
-        <a asp-action="Details"
-           asp-route-id="@Model.Id"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
-
     </div>
 
     @if (ViewBag.Error != null)
@@ -35,7 +29,9 @@
         </div>
     }
 
-    <div class="alert alert-warning">
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <div class="alert alert-warning">
 
         <div class="fw-semibold mb-1">
             Esta acción no elimina la transferencia.
@@ -47,9 +43,9 @@
             a la caja de origen.
         </div>
 
-    </div>
+            </div>
 
-    <div class="card border-0 shadow-sm mb-4">
+            <div class="card border-0 shadow-sm mb-4">
 
         <div class="card-body p-4">
 
@@ -123,9 +119,9 @@
 
         </div>
 
-    </div>
+            </div>
 
-    <form asp-action="Anular"
+            <form asp-action="Anular"
           asp-route-id="@Model.Id"
           method="post">
 
@@ -170,6 +166,26 @@
 
         </div>
 
-    </form>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">undo</span>
+                    <div><h3 class="help-guide-item__title">Movimientos inversos</h3><p class="help-guide-item__text">La anulación devuelve el importe a la caja de origen mediante movimientos compensatorios.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">history</span>
+                    <div><h3 class="help-guide-item__title">Registro conservado</h3><p class="help-guide-item__text">La transferencia original no se elimina y continuará visible como anulada.</p></div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">edit_note</span>
+                    <div><h3 class="help-guide-item__title">Motivo obligatorio</h3><p class="help-guide-item__text">Indicá claramente la razón de la anulación para mantener la trazabilidad.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
