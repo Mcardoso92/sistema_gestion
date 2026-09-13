@@ -6,18 +6,13 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
             <h1 class="h3 fw-bold mb-1">
                 Editar Caja
             </h1>
         </div>
-
-        <a asp-action="Index"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
 
     </div>
 
@@ -156,6 +151,11 @@
                     </div>
                 </div>
 
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                </div>
+
             </div>
 
             <div class="col-lg-4">
@@ -211,21 +211,23 @@
                     </div>
                 </div>
 
+                <div class="help-guide-panel mt-4">
+                    <h2 class="help-guide-title">Guía de Ayuda</h2>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">point_of_sale</span>
+                        <div><h3 class="help-guide-item__title">Tipo de caja</h3><p class="help-guide-item__text">El tipo determina qué medios de pago pueden asociarse y cómo se registrarán sus movimientos.</p></div>
+                    </div>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">schedule</span>
+                        <div><h3 class="help-guide-item__title">Turnos de caja</h3><p class="help-guide-item__text">Los turnos solo pueden habilitarse en cajas de efectivo. Una caja con turno abierto tiene restricciones de edición.</p></div>
+                    </div>
+                    <div class="help-guide-item">
+                        <span class="material-symbols-outlined help-guide-item__icon">account_balance_wallet</span>
+                        <div><h3 class="help-guide-item__title">Saldo e historial</h3><p class="help-guide-item__text">Para desactivar una caja debe estar sin turnos abiertos y con saldo cero. Su historial siempre se conserva.</p></div>
+                    </div>
+                </div>
+
             </div>
-
-        </div>
-
-        <div class="d-flex justify-content-end gap-2 mt-4">
-
-            <a asp-action="Index"
-               class="btn btn-outline-secondary">
-                Cancelar
-            </a>
-
-            <button type="submit"
-                    class="btn btn-primary">
-                Guardar cambios
-            </button>
 
         </div>
 
