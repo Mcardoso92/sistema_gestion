@@ -6,7 +6,7 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="mb-4">
 
         <div>
             <h1 class="h3 fw-bold mb-1">
@@ -18,18 +18,11 @@
             </p>
         </div>
 
-        <a asp-controller="Compra"
-           asp-action="Details"
-           asp-route-id="@Model.CompraId"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
-
     </div>
 
-    <div class="row justify-content-center">
+    <div class="row g-4 align-items-start">
 
-        <div class="col-lg-7">
+        <div class="col-lg-8">
 
             <div class="card border-0 shadow-sm">
 
@@ -100,6 +93,15 @@
 
             </div>
 
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">undo</span><div><h3 class="help-guide-item__title">Stock restituido</h3><p class="help-guide-item__text">Las unidades de la devolución anulada vuelven a incorporarse al inventario.</p></div></div>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">payments</span><div><h3 class="help-guide-item__title">Impacto financiero</h3><p class="help-guide-item__text">Se revierte el importe pendiente de recuperar asociado a la devolución.</p></div></div>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">history</span><div><h3 class="help-guide-item__title">Trazabilidad</h3><p class="help-guide-item__text">La devolución original se conserva junto con el motivo de anulación.</p></div></div>
+            </div>
         </div>
 
     </div>

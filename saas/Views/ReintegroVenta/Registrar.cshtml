@@ -6,7 +6,7 @@
 
 <main class="container-fluid py-4 px-4">
 
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+    <div class="mb-4">
 
         <div>
             <h1 class="h2 fw-bold mb-1">
@@ -17,13 +17,6 @@
                 Venta #@Model.VentaId
             </p>
         </div>
-
-        <a asp-controller="Venta"
-           asp-action="Details"
-           asp-route-id="@Model.VentaId"
-           class="btn btn-outline-secondary">
-            Volver
-        </a>
 
     </div>
 
@@ -155,6 +148,44 @@
 
                 </div>
 
+                <div class="card-custom p-4 mt-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="MedioPagoId" class="form-label fw-semibold">Medio de pago</label>
+                            <select asp-for="MedioPagoId" class="form-select">
+                                <option value="">Seleccionar medio</option>
+                                @foreach (var medio in Model.MediosPagoDisponibles)
+                                {
+                                    <option value="@medio.Id">@medio.Nombre</option>
+                                }
+                            </select>
+                            <span asp-validation-for="MedioPagoId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CajaId" class="form-label fw-semibold">Caja</label>
+                            <select asp-for="CajaId" class="form-select">
+                                <option value="">Seleccionar caja</option>
+                                @foreach (var caja in Model.CajasDisponibles)
+                                {
+                                    <option value="@caja.Id">@caja.Nombre</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CajaId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-panel p-4 mt-4">
+                    <div class="small text-white-50 text-uppercase fw-semibold mb-2">Total a reintegrar</div>
+                    <div class="display-6 fw-bold text-white" id="totalReintegro">$0,00</div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a asp-controller="Venta" asp-action="Details" asp-route-id="@Model.VentaId" class="btn btn-outline-secondary">Cancelar</a>
+                    <button type="submit" id="btnConfirmarReintegroVenta" class="btn btn-danger">Confirmar reintegro</button>
+                </div>
+
             </div>
 
             <div class="col-lg-4">
@@ -173,99 +204,16 @@
 
                     </div>
 
-                    <div class="card-custom p-4">
-
-                        <div class="mb-3">
-
-                            <label asp-for="MedioPagoId"
-                                   class="form-label fw-semibold">
-                                Medio de pago
-                            </label>
-
-                            <select asp-for="MedioPagoId"
-                                    class="form-select">
-
-                                <option value="">
-                                    Seleccionar medio
-                                </option>
-
-                                @foreach (var medio in Model.MediosPagoDisponibles)
-                                {
-                                    <option value="@medio.Id">
-                                        @medio.Nombre
-                                    </option>
-                                }
-
-                            </select>
-
-                            <span asp-validation-for="MedioPagoId"
-                                  class="text-danger"></span>
-
-                        </div>
-
-                        <div class="mb-3">
-
-                            <label asp-for="CajaId"
-                                   class="form-label fw-semibold">
-                                Caja
-                            </label>
-
-                            <select asp-for="CajaId"
-                                    class="form-select">
-
-                                <option value="">
-                                    Seleccionar caja
-                                </option>
-
-                                @foreach (var caja in Model.CajasDisponibles)
-                                {
-                                    <option value="@caja.Id">
-                                        @caja.Nombre
-                                    </option>
-                                }
-
-                            </select>
-
-                            <span asp-validation-for="CajaId"
-                                  class="text-danger"></span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="summary-panel p-4">
-
-                        <div class="small text-white-50 text-uppercase fw-semibold mb-2">
-                            Total a reintegrar
-                        </div>
-
-                        <div class="display-6 fw-bold text-white"
-                             id="totalReintegro">
-                            $0,00
-                        </div>
-
+                    <div class="help-guide-panel">
+                        <h2 class="help-guide-title">Guía de Ayuda</h2>
+                        <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">inventory</span><div><h3 class="help-guide-item__title">Unidades disponibles</h3><p class="help-guide-item__text">Solo pueden reintegrarse unidades vendidas que no hayan sido devueltas anteriormente.</p></div></div>
+                        <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">payments</span><div><h3 class="help-guide-item__title">Importe</h3><p class="help-guide-item__text">El total se calcula con las cantidades seleccionadas y sus precios de venta originales.</p></div></div>
+                        <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">history</span><div><h3 class="help-guide-item__title">Impacto</h3><p class="help-guide-item__text">El reintegro devuelve stock y genera el movimiento financiero correspondiente.</p></div></div>
                     </div>
 
                 </div>
 
             </div>
-
-        </div>
-
-        <div class="d-flex justify-content-end gap-2 mt-4">
-
-            <a asp-controller="Venta"
-               asp-action="Details"
-               asp-route-id="@Model.VentaId"
-               class="btn btn-outline-secondary">
-                Cancelar
-            </a>
-
-            <button type="submit"
-                    id="btnConfirmarReintegroVenta"
-                    class="btn btn-danger">
-                Confirmar reintegro
-            </button>
 
         </div>
 
