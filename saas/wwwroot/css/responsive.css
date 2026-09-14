@@ -18,10 +18,8 @@
         flex: 1 1 140px;
     }
 
-    .app-body .filter-panel,
     .app-body .card-body.p-4,
-    .app-body .card-footer.p-4,
-    .app-body .form-container {
+    .app-body .card-footer.p-4 {
         padding: 1rem !important;
     }
 
