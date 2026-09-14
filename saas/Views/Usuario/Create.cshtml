@@ -29,7 +29,7 @@
                     </div>
                 }
                 <form asp-action="Create" method="post" enctype="multipart/form-data" id="newUserForm">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger form-validation-summary"></div>
                     <div class="row g-4">
                         <div class="col-md-6">
                             <label asp-for="Nombre" class="form-label">Nombre del Usuario</label>

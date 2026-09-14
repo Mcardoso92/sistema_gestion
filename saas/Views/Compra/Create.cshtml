@@ -6,19 +6,16 @@
 }
 
 <main class="container-fluid px-4 py-4">
-    <div class="mb-4">
-        <nav aria-label="breadcrumb" class="mb-2">
-            <ol class="breadcrumb text-sm mb-0">
-                <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted-custom">Compras</a></li>
-                <li class="breadcrumb-item active text-dark fw-medium" aria-current="page">Nueva compra</li>
-            </ol>
-        </nav>
-
-        <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
-            <div>
-                <h1 class="h2 mb-1">Nueva compra</h1>
-                <p class="text-muted-custom mb-0">Registrá una compra a proveedor y actualizá stock, costo y precios asociados.</p>
-            </div>
+    <div class="page-header">
+        <div class="page-header-content">
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none text-muted">Compras</a></li>
+                    <li class="breadcrumb-item active fw-semibold" aria-current="page">Nueva compra</li>
+                </ol>
+            </nav>
+            <h1 class="page-title">Nueva compra</h1>
+            <p class="page-subtitle">Registrá una compra a proveedor y actualizá stock, costo y precios asociados.</p>
         </div>
     </div>
 
@@ -28,11 +25,11 @@
           data-create-url="@Url.Action("Create", "Compra")"
           data-crear-proveedor-url="@Url.Action("CrearRapido", "Proveedor")"
           data-categorias-producto-url="@Url.Action("ObtenerCategoriasProducto", "Compra")">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger form-validation-summary"></div>
 
         <div class="row g-4 align-items-start mb-4">
             <div class="col-lg-8">
-                <div class="card form-card">
+                <div class="form-card">
                     <div class="card-body p-4">
                 <h2 class="section-title section-title--divided">
                     <span class="material-symbols-outlined icon-sm">receipt_long</span>
@@ -43,7 +40,7 @@
                     @if (esSuperAdmin)
                     {
                         <div class="col-md-6">
-                            <label asp-for="EmpresaId" class="form-label fw-medium">Empresa <span class="text-danger">*</span></label>
+                            <label asp-for="EmpresaId" class="form-label">Empresa <span class="text-danger">*</span></label>
                             <select asp-for="EmpresaId" asp-items="Model.Empresas" class="form-select" id="empresaSelect">
                                 <option value="">-- Seleccione una empresa --</option>
                             </select>
@@ -52,7 +49,7 @@
                     }
 
                     <div class="col-md-6">
-                        <label asp-for="ProveedorId" class="form-label fw-medium">Proveedor <span class="text-danger">*</span></label>
+                        <label asp-for="ProveedorId" class="form-label">Proveedor <span class="text-danger">*</span></label>
                         <div class="d-flex align-items-center gap-2">
                             <select asp-for="ProveedorId" asp-items="Model.Proveedores" class="form-select flex-grow-1">
                                 <option value="">-- Seleccione un proveedor --</option>
@@ -65,19 +62,19 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="TipoComprobante" class="form-label fw-medium">Tipo de comprobante</label>
+                        <label asp-for="TipoComprobante" class="form-label">Tipo de comprobante</label>
                         <input asp-for="TipoComprobante" class="form-control" maxlength="30" placeholder="Ej.: Factura A, Remito" />
                         <span asp-validation-for="TipoComprobante" class="text-danger text-sm"></span>
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="NumeroComprobante" class="form-label fw-medium">Número de comprobante</label>
+                        <label asp-for="NumeroComprobante" class="form-label">Número de comprobante</label>
                         <input asp-for="NumeroComprobante" class="form-control" maxlength="50" placeholder="Ej.: 0001-00001234" />
                         <span asp-validation-for="NumeroComprobante" class="text-danger text-sm"></span>
                     </div>
 
                     <div class="col-12">
-                        <label asp-for="Observaciones" class="form-label fw-medium">Observaciones</label>
+                        <label asp-for="Observaciones" class="form-label">Observaciones</label>
                         <textarea asp-for="Observaciones" class="form-control" rows="3" maxlength="500" placeholder="Información adicional sobre la compra..."></textarea>
                         <span asp-validation-for="Observaciones" class="text-danger text-sm"></span>
                     </div>

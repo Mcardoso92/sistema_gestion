@@ -41,13 +41,9 @@
     <div class="row">
         <!-- Form Column -->
         <div class="col-md-8">
-            <div class="card form-card border-0 shadow-sm">
-                <div class="card-header">
-                    Nueva Empresa
-                </div>
-                <div class="card-body p-4">
+            <div class="form-card p-4 p-md-5">
                     <form asp-action="Create" method="post" class="row g-4" id="empresaForm">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger form-validation-summary"></div>
                         <div class="col-md-8">
                             <label asp-for="Nombre" class="form-label">Nombre de la Empresa</label>
                             <input asp-for="Nombre" class="form-control" type="text" />
@@ -58,7 +54,6 @@
                             <button type="submit" class="btn btn-v-primary">Guardar</button>
                         </div>
                     </form>
-                </div>
             </div>
         </div>
         <!-- Help Guide Column -->

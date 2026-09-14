@@ -28,9 +28,9 @@
         @Html.AntiForgeryToken()
 
         <div asp-validation-summary="ModelOnly"
-             class="alert alert-danger"></div>
+             class="alert alert-danger form-validation-summary"></div>
 
-        <div class="card form-card border-0 shadow-sm">
+        <div class="form-card">
 
             <div class="card-body p-4">
 
@@ -39,7 +39,7 @@
                     <div class="col-md-6">
 
                         <label asp-for="CajaId"
-                               class="form-label fw-semibold">
+                               class="form-label">
                             Caja
                         </label>
 
@@ -68,7 +68,7 @@
                     <div class="col-md-6">
 
                         <label asp-for="MedioPagoId"
-                               class="form-label fw-semibold">
+                               class="form-label">
                             Medio de pago
                         </label>
 
@@ -90,7 +90,7 @@
                     <div class="col-md-6">
 
                         <label asp-for="Importe"
-                               class="form-label fw-semibold">
+                               class="form-label">
                             Importe
                         </label>
 
@@ -108,7 +108,7 @@
                     <div class="col-12">
 
                         <label asp-for="Concepto"
-                               class="form-label fw-semibold">
+                               class="form-label">
                             Concepto
                         </label>
 
@@ -125,7 +125,7 @@
                     <div class="col-12">
 
                         <label asp-for="Observaciones"
-                               class="form-label fw-semibold">
+                               class="form-label">
                             Observaciones
                         </label>
 

@@ -14,12 +14,7 @@
     <div class="row">
         <!-- Form Column -->
         <div class="col-md-8">
-            <div class="card form-card border-0 shadow-sm">
-                <div class="card-header">
-                    Nuevo Cliente
-                </div>
-
-                <div class="card-body p-4">
+            <div class="form-card p-4 p-md-5">
                     @if (User.IsInRole("SuperAdmin"))
                     {
                         <div class="alert alert-warning mb-4">
@@ -29,7 +24,7 @@
                     }
 
                     <form asp-action="Create" method="post" class="row g-4">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger form-validation-summary"></div>
 
                         <div class="col-md-6">
                             <label asp-for="Nombre" class="form-label">Nombre</label>
@@ -109,7 +104,6 @@
                             <button type="submit" class="btn btn-v-primary">Guardar</button>
                         </div>
                     </form>
-                </div>
             </div>
         </div>
 
