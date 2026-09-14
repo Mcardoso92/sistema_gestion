@@ -49,22 +49,6 @@
     font-size: 0.8rem;
 }
 
-.app-body .filter-panel {
-    margin-bottom: 1.5rem;
-    padding: 1.25rem;
-    border: 1px solid var(--ui-border-light);
-    border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface);
-    box-shadow: var(--ui-shadow-sm);
-}
-
-.app-body .form-container {
-    border-color: var(--ui-border-light) !important;
-    border-radius: var(--ui-radius-lg);
-    background: var(--ui-surface);
-    box-shadow: var(--ui-shadow-sm);
-}
-
 /*
  * COMPONENTE: GUIA DE AYUDA
  * Uso: panel lateral que acompaña formularios y pantallas operativas.
@@ -164,8 +148,7 @@
     box-shadow: 0 0 0 0.2rem rgba(15, 76, 129, 0.12);
 }
 
-.app-body .filter-card,
-.app-body .card:has(form[method="get"]) {
+.app-body .filter-card {
     border: 1px solid var(--ui-border-light) !important;
     border-radius: var(--ui-radius-lg) !important;
     background: var(--ui-surface) !important;
@@ -173,8 +156,7 @@
 }
 
 .app-body .filter-card > .card-body,
-.app-body .filter-card:has(> form),
-.app-body .card:has(form[method="get"]) > .card-body {
+.app-body .filter-card:has(> form) {
     padding: 1.25rem !important;
 }
 

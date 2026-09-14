@@ -6,7 +6,7 @@
         <div class="d-flex gap-2"><a asp-action="Index" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
     </div>
     <div class="row g-4 align-items-start">
-        <div class="col-lg-8"><div class="form-container p-4">
+        <div class="col-lg-8"><div class="detail-card p-4">
             <dl class="row mb-0">
                 <dt class="col-sm-4">Nombre</dt><dd class="col-sm-8">@Model.Nombre</dd>
                 <dt class="col-sm-4">Estado</dt><dd class="col-sm-8">@(Model.Estado ? "Activa" : "Inactiva")</dd>
