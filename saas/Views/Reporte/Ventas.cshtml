@@ -107,15 +107,15 @@
 
     <div class="row g-4 mb-4">
         <div class="col-md-4">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-primary">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--primary">
                     <span class="material-symbols-outlined">payments</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Total vendido</div>
-                    <div class="dashboard-summary-value summary-value--currency">@Model.TotalVendido.ToString("C")</div>
-                    <div class="dashboard-summary-detail">
+                    <div class="metric-card__label">Total vendido</div>
+                    <div class="metric-card__value summary-value--currency">@Model.TotalVendido.ToString("C")</div>
+                    <div class="metric-card__detail">
                         En el período seleccionado
                     </div>
                 </div>
@@ -123,15 +123,15 @@
         </div>
 
         <div class="col-md-4">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-success">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--success">
                     <span class="material-symbols-outlined">receipt_long</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Cantidad de ventas</div>
-                    <div class="dashboard-summary-value">@Model.CantidadVentas</div>
-                    <div class="dashboard-summary-detail">
+                    <div class="metric-card__label">Cantidad de ventas</div>
+                    <div class="metric-card__value">@Model.CantidadVentas</div>
+                    <div class="metric-card__detail">
                         Operaciones completadas
                     </div>
                 </div>
@@ -139,15 +139,15 @@
         </div>
 
         <div class="col-md-4">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-info">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--info">
                     <span class="material-symbols-outlined">monitoring</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Ticket promedio</div>
-                    <div class="dashboard-summary-value summary-value--currency">@Model.TicketPromedio.ToString("C")</div>
-                    <div class="dashboard-summary-detail">
+                    <div class="metric-card__label">Ticket promedio</div>
+                    <div class="metric-card__value summary-value--currency">@Model.TicketPromedio.ToString("C")</div>
+                    <div class="metric-card__detail">
                         Promedio por operación
                     </div>
                 </div>

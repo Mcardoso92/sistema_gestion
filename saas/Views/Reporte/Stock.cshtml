@@ -103,75 +103,75 @@
 
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-primary">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--primary">
                     <span class="material-symbols-outlined">inventory_2</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Productos</div>
-                    <div class="dashboard-summary-value">@Model.CantidadProductos</div>
-                    <div class="dashboard-summary-detail">Productos activos</div>
+                    <div class="metric-card__label">Productos</div>
+                    <div class="metric-card__value">@Model.CantidadProductos</div>
+                    <div class="metric-card__detail">Productos activos</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-info">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--info">
                     <span class="material-symbols-outlined">package_2</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Unidades</div>
-                    <div class="dashboard-summary-value">@Model.UnidadesStock</div>
-                    <div class="dashboard-summary-detail">Unidades disponibles</div>
+                    <div class="metric-card__label">Unidades</div>
+                    <div class="metric-card__value">@Model.UnidadesStock</div>
+                    <div class="metric-card__detail">Unidades disponibles</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-warning">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--warning">
                     <span class="material-symbols-outlined">warning</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Stock bajo</div>
-                    <div class="dashboard-summary-value">@Model.ProductosStockBajo</div>
-                    <div class="dashboard-summary-detail">Productos para revisar</div>
+                    <div class="metric-card__label">Stock bajo</div>
+                    <div class="metric-card__value">@Model.ProductosStockBajo</div>
+                    <div class="metric-card__detail">Productos para revisar</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-primary">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--primary">
                     <span class="material-symbols-outlined">payments</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Valor a costo</div>
-                    <div class="dashboard-summary-value summary-value--currency">
+                    <div class="metric-card__label">Valor a costo</div>
+                    <div class="metric-card__value summary-value--currency">
                         @Model.ValorInventarioCosto.ToString("C")
                     </div>
-                    <div class="dashboard-summary-detail">Inversión actual</div>
+                    <div class="metric-card__detail">Inversión actual</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-success">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--success">
                     <span class="material-symbols-outlined">trending_up</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Valor de venta</div>
-                    <div class="dashboard-summary-value summary-value--currency">
+                    <div class="metric-card__label">Valor de venta</div>
+                    <div class="metric-card__value summary-value--currency">
                         @Model.ValorInventarioVenta.ToString("C")
                     </div>
-                    <div class="dashboard-summary-detail">Valor potencial</div>
+                    <div class="metric-card__detail">Valor potencial</div>
                 </div>
             </div>
         </div>

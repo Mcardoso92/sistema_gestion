@@ -28,15 +28,15 @@
 
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-primary">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--primary">
                     <span class="material-symbols-outlined">today</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Ventas de hoy</div>
-                    <div class="dashboard-summary-value summary-value--currency">@Model.TotalVentasDia.ToString("C")</div>
-                    <div class="dashboard-summary-detail">
+                    <div class="metric-card__label">Ventas de hoy</div>
+                    <div class="metric-card__value summary-value--currency">@Model.TotalVentasDia.ToString("C")</div>
+                    <div class="metric-card__detail">
                         @Model.CantidadVentasDia operaciones
                     </div>
                 </div>
@@ -44,15 +44,15 @@
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-success">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--success">
                     <span class="material-symbols-outlined">calendar_month</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Ventas del mes</div>
-                    <div class="dashboard-summary-value summary-value--currency">@Model.TotalVentasMes.ToString("C")</div>
-                    <div class="dashboard-summary-detail">
+                    <div class="metric-card__label">Ventas del mes</div>
+                    <div class="metric-card__value summary-value--currency">@Model.TotalVentasMes.ToString("C")</div>
+                    <div class="metric-card__detail">
                         @Model.CantidadVentasMes operaciones
                     </div>
                 </div>
@@ -60,15 +60,15 @@
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-warning">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--warning">
                     <span class="material-symbols-outlined">inventory_2</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Stock bajo</div>
-                    <div class="dashboard-summary-value">@Model.ProductosStockBajo.Count</div>
-                    <div class="dashboard-summary-detail">
+                    <div class="metric-card__label">Stock bajo</div>
+                    <div class="metric-card__value">@Model.ProductosStockBajo.Count</div>
+                    <div class="metric-card__detail">
                         productos para revisar
                     </div>
                 </div>
@@ -76,15 +76,15 @@
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-info">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--info">
                     <span class="material-symbols-outlined">groups</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Clientes frecuentes</div>
-                    <div class="dashboard-summary-value">@Model.ClientesFrecuentes.Count</div>
-                    <div class="dashboard-summary-detail">
+                    <div class="metric-card__label">Clientes frecuentes</div>
+                    <div class="metric-card__value">@Model.ClientesFrecuentes.Count</div>
+                    <div class="metric-card__detail">
                         clientes destacados
                     </div>
                 </div>
