@@ -14,9 +14,9 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-secondary small">Productos detectados</div><div class="fs-3 fw-semibold">@Model.TotalFilas</div></div></div></div>
-        <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-secondary small">Filas válidas</div><div class="fs-3 fw-semibold text-success">@Model.FilasValidas</div></div></div></div>
-        <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-secondary small">Filas con errores</div><div class="fs-3 fw-semibold text-danger">@Model.FilasConErrores</div></div></div></div>
+        <div class="col-md-4"><div class="card metric-card h-100"><div class="card-body"><div class="text-secondary small">Productos detectados</div><div class="fs-3 fw-semibold">@Model.TotalFilas</div></div></div></div>
+        <div class="col-md-4"><div class="card metric-card h-100"><div class="card-body"><div class="text-secondary small">Filas válidas</div><div class="fs-3 fw-semibold text-success">@Model.FilasValidas</div></div></div></div>
+        <div class="col-md-4"><div class="card metric-card h-100"><div class="card-body"><div class="text-secondary small">Filas con errores</div><div class="fs-3 fw-semibold text-danger">@Model.FilasConErrores</div></div></div></div>
     </div>
 
     @if (Model.TotalFilas == 0)
@@ -32,7 +32,7 @@
         <div class="alert alert-success">Todas las filas son válidas. Podés confirmar la importación.</div>
     }
 
-    <div class="card shadow-sm overflow-hidden mb-4">
+    <div class="card table-card mb-4">
         <div class="table-responsive">
             <table class="table table-hover mb-0 align-middle">
                 <thead>
