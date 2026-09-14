@@ -9,8 +9,7 @@
    Pantalla piloto del sistema de diseño
    Fuente: Manual de Marca Veltika v1.0
    ================================================== */
-.app-body .metric-card--featured,
-.app-body .dashboard-panel {
+.app-body .metric-card--featured {
     border-color: var(--veltika-border) !important;
     border-radius: var(--veltika-radius-card);
     background: var(--veltika-surface);
@@ -151,6 +150,7 @@
    ================================================== */
 .app-body .form-card,
 .app-body .detail-card,
+.app-body .content-card,
 .app-body .table-card,
 .app-body .metric-card {
     overflow: hidden;
@@ -158,6 +158,27 @@
     border-radius: var(--veltika-radius-card);
     background: var(--veltika-surface);
     box-shadow: var(--veltika-shadow-sm);
+}
+
+.app-body .content-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--veltika-space-4);
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--veltika-border);
+}
+
+.app-body .detail-card--danger {
+    border-color: var(--veltika-danger) !important;
+}
+
+.app-body .info-callout {
+    overflow: hidden;
+    border: 1px solid var(--veltika-info-soft);
+    border-radius: var(--veltika-radius-card);
+    background: var(--veltika-info-soft);
+    color: var(--veltika-text);
 }
 
 /* Permite que menús y autocompletados se superpongan sin cambiar la altura de la grilla. */

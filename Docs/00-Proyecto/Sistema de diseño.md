@@ -87,10 +87,14 @@ Cada contenedor debe utilizar la clase correspondiente a su responsabilidad:
 
 - `form-card`: formularios y controles de entrada.
 - `detail-card`: información de una entidad u operación.
+- `content-card`: paneles de contenido general; su encabezado reutilizable utiliza `content-card__header`.
 - `filter-card`: filtros de listados y reportes.
 - `table-card`: tablas y sus estados vacíos.
 - `metric-card`: indicadores y valores resumidos.
 - `metric-card--featured`: variante destacada con icono, etiqueta, valor y detalle.
+- `info-callout`: aviso informativo integrado al contenido, sin apariencia de alerta crítica.
+
+Las variantes semánticas se agregan al componente base, por ejemplo `detail-card detail-card--danger`, y sólo deben existir cuando comunican una diferencia real de estado.
 
 No deben crearse clases de tarjeta por pantalla cuando alguno de estos componentes cubra la misma necesidad. La antigua clase genérica `card-custom` ya no debe utilizarse en vistas nuevas.
 
