@@ -30,7 +30,7 @@
                type="hidden" />
 
         <div asp-validation-summary="All"
-             class="alert alert-danger"></div>
+             class="alert alert-danger form-validation-summary"></div>
 
         <div class="row g-4">
 
@@ -151,7 +151,7 @@
                 <div class="form-card p-4 mt-4">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label asp-for="MedioPagoId" class="form-label fw-semibold">Medio de pago</label>
+                            <label asp-for="MedioPagoId" class="form-label">Medio de pago</label>
                             <select asp-for="MedioPagoId" class="form-select">
                                 <option value="">Seleccionar medio</option>
                                 @foreach (var medio in Model.MediosPagoDisponibles)
@@ -163,7 +163,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label asp-for="CajaId" class="form-label fw-semibold">Caja</label>
+                            <label asp-for="CajaId" class="form-label">Caja</label>
                             <select asp-for="CajaId" class="form-select">
                                 <option value="">Seleccionar caja</option>
                                 @foreach (var caja in Model.CajasDisponibles)

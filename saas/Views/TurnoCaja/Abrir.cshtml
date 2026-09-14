@@ -28,9 +28,9 @@
         @Html.AntiForgeryToken()
 
         <div asp-validation-summary="ModelOnly"
-             class="alert alert-danger"></div>
+             class="alert alert-danger form-validation-summary"></div>
 
-        <div class="card form-card border-0 shadow-sm">
+        <div class="form-card">
 
             <div class="card-body p-4">
 
@@ -39,7 +39,7 @@
                     <div class="mb-3">
 
                         <label asp-for="CajaId"
-                               class="form-label fw-semibold">
+                               class="form-label">
                             Caja
                         </label>
 

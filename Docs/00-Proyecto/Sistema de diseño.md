@@ -189,3 +189,17 @@ Los nombres de estos componentes deben describir su función y no la primera pan
 ## 22. Compatibilidad y limpieza
 
 Las vistas deben consumir únicamente los nombres vigentes del sistema de diseño. No se conservan alias antiguos sin consumidores: cuando una migración termina, se actualizan todas las vistas y se elimina la definición anterior para evitar reglas duplicadas o contradictorias.
+
+## 23. Formularios de creación y altas operativas
+
+Todas las altas utilizan `page-header`, `page-title` y `page-subtitle` para el encabezado; `form-card` para la superficie principal; `form-label`, `form-control` y `form-select` para los controles; `form-actions` para las acciones; y `form-validation-summary` para los errores generales. Las guías laterales utilizan exclusivamente la familia `help-guide-*`.
+
+Existen tres variantes:
+
+- **Estándar con guía:** formulario principal y guía lateral en una distribución 8 + 4. Se aplica a Usuario, Empresa, Cliente, Producto y Proveedor.
+- **Simple:** conserva los mismos componentes sin forzar secciones innecesarias. Se aplica a Categoría, Categoría de gasto y Medio de pago.
+- **Operativa:** mantiene la ergonomía propia de Compra, Venta/POS, Caja, transferencias, turnos y movimientos financieros. Puede conservar acciones fuera de una tarjeta o utilizar varias superficies cuando el flujo lo requiera.
+
+El breadcrumb forma parte del encabezado cuando aporta contexto de navegación, especialmente en recorridos administrativos con más de un nivel. Puede omitirse en una alta directa cuando el módulo y la acción ya resultan evidentes; si se utiliza, debe permanecer dentro de `page-header-content` y usar el estilo compartido.
+
+Las clases de Bootstrap pueden emplearse para grilla y espaciado, pero no deben duplicar la responsabilidad visual de `form-card` ni redefinir el peso de `form-label`. Las excepciones funcionales deben conservar los componentes compartidos compatibles y quedar documentadas antes de crear una clase particular.

@@ -40,6 +40,18 @@
     display: none;
 }
 
+/* Resumen general de errores compartido por formularios estándar y operativos. */
+.app-body .form-validation-summary,
+.public-body .form-validation-summary {
+    margin-bottom: 1rem;
+}
+
+.app-body .form-validation-summary ul,
+.public-body .form-validation-summary ul {
+    margin-bottom: 0;
+    padding-left: 1.25rem;
+}
+
 .app-body .text-danger.field-validation-error,
 .app-body span.text-danger,
 .public-body .text-danger.field-validation-error,
