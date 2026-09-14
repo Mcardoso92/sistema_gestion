@@ -25,6 +25,10 @@
     --veltika-income: #15803d;
     --veltika-expense: #b91c1c;
     --veltika-disabled: #94a3b8;
+    --veltika-primary-soft: #dceafb;
+    --veltika-success-soft: #d6f5ee;
+    --veltika-warning-soft: #fff0c7;
+    --veltika-info-soft: #e6e9ff;
 
     /* Escalas base compartidas. */
     --veltika-space-1: 0.25rem;

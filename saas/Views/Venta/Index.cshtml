@@ -58,7 +58,7 @@
     </div>
 
     <!-- Filtros -->
-    <div class="card-custom p-3 mb-4">
+    <div class="filter-card mb-4">
 
         <form asp-action="Index"
               method="get">
@@ -256,7 +256,7 @@
 
         <div class="col-md-4">
 
-            <div class="card-custom p-3 h-100">
+            <div class="metric-card p-3 h-100">
 
                 <div class="small text-muted mb-1">
                     Ventas mostradas
@@ -272,7 +272,7 @@
 
         <div class="col-md-4">
 
-            <div class="card-custom p-3 h-100">
+            <div class="metric-card p-3 h-100">
 
                 <div class="small text-muted mb-1">
                     Con saldo pendiente
@@ -288,13 +288,13 @@
 
         <div class="col-md-4">
 
-            <div class="card-custom p-3 h-100">
+            <div class="metric-card p-3 h-100">
 
                 <div class="small text-muted mb-1">
                     Pendiente de cobro
                 </div>
 
-                <div class="h4 fw-bold mb-0">
+                <div class="h4 fw-bold mb-0 summary-value--currency">
                     @Model.TotalPendienteCobro.ToString("C")
                 </div>
 

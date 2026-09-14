@@ -118,73 +118,73 @@
 
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-primary">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--primary">
                     <span class="material-symbols-outlined">groups</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Clientes</div>
-                    <div class="dashboard-summary-value">@Model.CantidadClientes</div>
-                    <div class="dashboard-summary-detail">Resultados encontrados</div>
+                    <div class="metric-card__label">Clientes</div>
+                    <div class="metric-card__value">@Model.CantidadClientes</div>
+                    <div class="metric-card__detail">Resultados encontrados</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-success">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--success">
                     <span class="material-symbols-outlined">person_check</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Activos</div>
-                    <div class="dashboard-summary-value">@Model.ClientesActivos</div>
-                    <div class="dashboard-summary-detail">Clientes habilitados</div>
+                    <div class="metric-card__label">Activos</div>
+                    <div class="metric-card__value">@Model.ClientesActivos</div>
+                    <div class="metric-card__detail">Clientes habilitados</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-warning">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--warning">
                     <span class="material-symbols-outlined">person_off</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Inactivos</div>
-                    <div class="dashboard-summary-value">@Model.ClientesInactivos</div>
-                    <div class="dashboard-summary-detail">Clientes deshabilitados</div>
+                    <div class="metric-card__label">Inactivos</div>
+                    <div class="metric-card__value">@Model.ClientesInactivos</div>
+                    <div class="metric-card__detail">Clientes deshabilitados</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-info">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--info">
                     <span class="material-symbols-outlined">shopping_bag</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Con compras</div>
-                    <div class="dashboard-summary-value">@Model.ClientesConCompras</div>
-                    <div class="dashboard-summary-detail">Clientes compradores</div>
+                    <div class="metric-card__label">Con compras</div>
+                    <div class="metric-card__value">@Model.ClientesConCompras</div>
+                    <div class="metric-card__detail">Clientes compradores</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-primary">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--primary">
                     <span class="material-symbols-outlined">payments</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Importe comprado</div>
-                    <div class="dashboard-summary-value summary-value--currency">
+                    <div class="metric-card__label">Importe comprado</div>
+                    <div class="metric-card__value summary-value--currency">
                         @Model.ImporteTotalComprado.ToString("C")
                     </div>
-                    <div class="dashboard-summary-detail">Ventas activas acumuladas</div>
+                    <div class="metric-card__detail">Ventas activas acumuladas</div>
                 </div>
             </div>
         </div>

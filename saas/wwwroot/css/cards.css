@@ -9,12 +9,98 @@
    Pantalla piloto del sistema de diseño
    Fuente: Manual de Marca Veltika v1.0
    ================================================== */
-.app-body .dashboard-summary-card,
+.app-body .metric-card--featured,
 .app-body .dashboard-panel {
     border-color: var(--veltika-border) !important;
     border-radius: var(--veltika-radius-card);
     background: var(--veltika-surface);
     box-shadow: var(--veltika-shadow-sm);
+}
+
+.app-body .metric-card--featured {
+    display: flex;
+    align-items: center;
+    gap: var(--veltika-space-4);
+    min-height: 132px;
+    padding: 1.25rem;
+}
+
+.app-body .metric-card__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: var(--veltika-radius-card);
+}
+
+.app-body .metric-card__icon .material-symbols-outlined {
+    font-size: 1.75rem;
+}
+
+.app-body .metric-card__icon--primary {
+    color: var(--veltika-dark);
+    background: var(--veltika-primary-soft);
+}
+
+.app-body .metric-card__icon--success {
+    color: var(--veltika-success);
+    background: var(--veltika-success-soft);
+}
+
+.app-body .metric-card__icon--warning {
+    color: var(--veltika-warning);
+    background: var(--veltika-warning-soft);
+}
+
+.app-body .metric-card__icon--info {
+    color: var(--veltika-info);
+    background: var(--veltika-info-soft);
+}
+
+.app-body .metric-card__label {
+    margin-bottom: var(--veltika-space-1);
+    color: var(--veltika-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.app-body .metric-card__value {
+    color: var(--veltika-text);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.app-body .metric-card__detail {
+    margin-top: var(--veltika-space-1);
+    color: var(--veltika-muted);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 767.98px) {
+    .app-body .metric-card--featured {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 575px) {
+    .app-body .metric-card--featured {
+        gap: 0.75rem;
+        padding: var(--veltika-space-4);
+    }
+
+    .app-body .metric-card--featured > div:last-child {
+        min-width: 0;
+    }
+
+    .app-body .metric-card__value {
+        font-size: clamp(1.25rem, 7vw, 1.5rem);
+        overflow-wrap: anywhere;
+    }
 }
 
 /* Los importes necesitan conservar el símbolo y el valor en una sola línea.

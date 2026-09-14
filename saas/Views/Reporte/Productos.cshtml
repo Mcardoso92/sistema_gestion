@@ -117,59 +117,59 @@
 
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-primary">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--primary">
                     <span class="material-symbols-outlined">inventory_2</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Productos</div>
-                    <div class="dashboard-summary-value">@Model.CantidadProductos</div>
-                    <div class="dashboard-summary-detail">Resultados encontrados</div>
+                    <div class="metric-card__label">Productos</div>
+                    <div class="metric-card__value">@Model.CantidadProductos</div>
+                    <div class="metric-card__detail">Resultados encontrados</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-success">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--success">
                     <span class="material-symbols-outlined">check_circle</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Activos</div>
-                    <div class="dashboard-summary-value">@Model.ProductosActivos</div>
-                    <div class="dashboard-summary-detail">Productos habilitados</div>
+                    <div class="metric-card__label">Activos</div>
+                    <div class="metric-card__value">@Model.ProductosActivos</div>
+                    <div class="metric-card__detail">Productos habilitados</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-warning">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--warning">
                     <span class="material-symbols-outlined">block</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Inactivos</div>
-                    <div class="dashboard-summary-value">@Model.ProductosInactivos</div>
-                    <div class="dashboard-summary-detail">Productos deshabilitados</div>
+                    <div class="metric-card__label">Inactivos</div>
+                    <div class="metric-card__value">@Model.ProductosInactivos</div>
+                    <div class="metric-card__detail">Productos deshabilitados</div>
                 </div>
             </div>
         </div>
 
         <div class="col-sm-6 col-xl-3">
-            <div class="dashboard-summary-card">
-                <div class="dashboard-summary-icon dashboard-icon-info">
+            <div class="metric-card metric-card--featured">
+                <div class="metric-card__icon metric-card__icon--info">
                     <span class="material-symbols-outlined">percent</span>
                 </div>
 
                 <div>
-                    <div class="dashboard-summary-label">Margen promedio</div>
-                    <div class="dashboard-summary-value">
+                    <div class="metric-card__label">Margen promedio</div>
+                    <div class="metric-card__value">
                         @Model.MargenPromedioPorcentaje.ToString("N2") %
                     </div>
-                    <div class="dashboard-summary-detail">Sobre precio de costo</div>
+                    <div class="metric-card__detail">Sobre precio de costo</div>
                 </div>
             </div>
         </div>
