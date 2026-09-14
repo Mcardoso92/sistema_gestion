@@ -216,6 +216,15 @@
     background: linear-gradient(180deg, #0f6ba8, #00355f);
 }
 
+/* Alturas fijas de la muestra ilustrativa del gráfico público. */
+.preview-bar-chart > div:nth-child(1) i { height: 52%; }
+.preview-bar-chart > div:nth-child(2) i { height: 76%; }
+.preview-bar-chart > div:nth-child(3) i { height: 64%; }
+.preview-bar-chart > div:nth-child(4) i { height: 94%; }
+.preview-bar-chart > div:nth-child(5) i { height: 83%; }
+.preview-bar-chart > div:nth-child(6) i { height: 57%; }
+.preview-bar-chart > div:nth-child(7) i { height: 70%; }
+
 @media (min-width: 1200px) {
     .dashboard-preview {
         width: calc(100% + (100vw - 1140px) / 2 - 30px);

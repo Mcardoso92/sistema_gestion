@@ -15,7 +15,7 @@
 
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
-                <h1 class="h3 mb-1 fw-bold">Detalle del Proveedor</h1>
+                <h1 class="page-title">Detalle del Proveedor</h1>
                 <p class="text-muted mb-0">Información registrada del proveedor seleccionado.</p>
             </div>
 
@@ -37,45 +37,43 @@
         <div class="col-lg-8">
             <div class="card detail-card mb-4">
                 <div class="card-body p-4">
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">domain</span>
                         Información General
                     </h2>
 
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Razón Social</div>
-                            <div class="proveedor-detail-value">@Model.RazonSocial</div>
+                            <div class="detail-label">Razón Social</div>
+                            <div class="detail-value">@Model.RazonSocial</div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Nombre de Fantasía</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">Nombre de Fantasía</div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.NombreFantasia) ? "—" : Model.NombreFantasia)
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">CUIT</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">CUIT</div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.CUIT) ? "—" : Model.CUIT)
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Estado</div>
+                            <div class="detail-label">Estado</div>
 
                             @if (Model.Estado)
                             {
                                 <span class="status-badge status-active">
-                                    <span class="dot"></span>
                                     Activo
                                 </span>
                             }
                             else
                             {
                                 <span class="status-badge status-inactive">
-                                    <span class="dot"></span>
                                     Inactivo
                                 </span>
                             }
@@ -84,14 +82,14 @@
                         @if (User.IsInRole("SuperAdmin"))
                         {
                             <div class="col-md-6">
-                                <div class="proveedor-detail-label">Empresa</div>
-                                <div class="proveedor-detail-value">@Model.EmpresaNombre</div>
+                                <div class="detail-label">Empresa</div>
+                                <div class="detail-value">@Model.EmpresaNombre</div>
                             </div>
                         }
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Fecha de Alta</div>
-                            <div class="proveedor-detail-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy HH:mm")</div>
+                            <div class="detail-label">Fecha de Alta</div>
+                            <div class="detail-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy HH:mm")</div>
                         </div>
                     </div>
                 </div>
@@ -99,15 +97,15 @@
 
             <div class="card detail-card mb-4">
                 <div class="card-body p-4">
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">contact_mail</span>
                         Datos de Contacto
                     </h2>
 
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Email</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">
                                 @if (!string.IsNullOrWhiteSpace(Model.Email))
                                 {
                                     <a href="mailto:@Model.Email" class="text-decoration-none">@Model.Email</a>
@@ -120,8 +118,8 @@
                         </div>
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Teléfono</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">Teléfono</div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.Telefono) ? "—" : Model.Telefono)
                             </div>
                         </div>
@@ -131,36 +129,36 @@
 
             <div class="card detail-card mb-4">
                 <div class="card-body p-4">
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">location_on</span>
                         Ubicación
                     </h2>
 
                     <div class="row g-4">
                         <div class="col-md-12">
-                            <div class="proveedor-detail-label">Dirección</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">Dirección</div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.Direccion) ? "—" : Model.Direccion)
                             </div>
                         </div>
 
                         <div class="col-md-5">
-                            <div class="proveedor-detail-label">Localidad</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">Localidad</div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.Localidad) ? "—" : Model.Localidad)
                             </div>
                         </div>
 
                         <div class="col-md-5">
-                            <div class="proveedor-detail-label">Provincia</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">Provincia</div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.Provincia) ? "—" : Model.Provincia)
                             </div>
                         </div>
 
                         <div class="col-md-2">
-                            <div class="proveedor-detail-label">Código Postal</div>
-                            <div class="proveedor-detail-value">
+                            <div class="detail-label">Código Postal</div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.CodigoPostal) ? "—" : Model.CodigoPostal)
                             </div>
                         </div>
@@ -170,12 +168,12 @@
 
             <div class="card detail-card">
                 <div class="card-body p-4">
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">notes</span>
                         Observaciones
                     </h2>
 
-                    <div class="proveedor-detail-value mb-0">
+                    <div class="detail-value mb-0">
                         @(string.IsNullOrWhiteSpace(Model.Observaciones) ? "Sin observaciones." : Model.Observaciones)
                     </div>
                 </div>

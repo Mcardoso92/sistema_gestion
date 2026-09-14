@@ -163,6 +163,24 @@
     line-height: 1;
 }
 
+/* Acción compartida para exportar información desde los reportes. */
+.app-body .btn-export-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-color: var(--ui-success);
+    background: var(--ui-success);
+    color: #fff;
+}
+
+.app-body .btn-export-action:hover,
+.app-body .btn-export-action:focus-visible {
+    border-color: var(--ui-success-hover);
+    background: var(--ui-success-hover);
+    color: #fff;
+}
+
 /* Acción compacta compartida para crear una opción sin abandonar el formulario. */
 .app-body .btn-quick-create {
     width: 32px;
@@ -226,12 +244,8 @@
 
 .app-body .btn-primary,
 .app-body .btn-v-primary,
-.app-body .btn-primary-veltika,
-.app-body .btn-primary-custom,
 .public-body .btn-primary,
-.public-body .btn-v-primary,
-.public-body .btn-primary-veltika,
-.public-body .btn-primary-custom {
+.public-body .btn-v-primary {
     border-color: var(--ui-primary) !important;
     background-color: var(--ui-primary) !important;
     color: #ffffff !important;
@@ -239,29 +253,21 @@
 
 .app-body .btn-primary:hover,
 .app-body .btn-v-primary:hover,
-.app-body .btn-primary-veltika:hover,
-.app-body .btn-primary-custom:hover,
 .public-body .btn-primary:hover,
-.public-body .btn-v-primary:hover,
-.public-body .btn-primary-veltika:hover,
-.public-body .btn-primary-custom:hover {
+.public-body .btn-v-primary:hover {
     border-color: var(--ui-primary-hover) !important;
     background-color: var(--ui-primary-hover) !important;
     color: #ffffff !important;
 }
 
 .app-body .btn-v-outline,
-.app-body .btn-outline-veltika,
-.public-body .btn-v-outline,
-.public-body .btn-outline-veltika {
+.public-body .btn-v-outline {
     border-color: var(--ui-primary);
     color: var(--ui-primary);
 }
 
 .app-body .btn-v-outline:hover,
-.app-body .btn-outline-veltika:hover,
-.public-body .btn-v-outline:hover,
-.public-body .btn-outline-veltika:hover {
+.public-body .btn-v-outline:hover {
     border-color: var(--ui-primary);
     background-color: var(--ui-primary);
     color: #ffffff;
@@ -274,22 +280,6 @@
     justify-content: flex-end;
     flex-wrap: wrap;
     gap: 0.75rem;
-}
-
-.app-body .action-icon-btn {
-    width: 34px;
-    min-width: 34px;
-    height: 34px;
-    min-height: 34px;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.app-body .action-icon-btn .material-symbols-outlined {
-    font-size: 1.125rem;
-    line-height: 1;
 }
 
 .app-body .table-action-btn {
@@ -315,48 +305,8 @@
     color: var(--ui-danger);
 }
 
-.app-body .action-view {
-    border: 1px solid var(--ui-primary) !important;
-    background: transparent !important;
-    color: var(--ui-primary) !important;
-}
-
-.app-body .action-view:hover,
-.app-body .action-view:focus-visible {
-    border-color: var(--ui-primary) !important;
-    background: var(--ui-primary) !important;
-    color: #ffffff !important;
-}
-
-.app-body .action-edit {
-    border: 1px solid var(--ui-warning) !important;
-    background: transparent !important;
-    color: var(--ui-warning) !important;
-}
-
-.app-body .action-edit:hover,
-.app-body .action-edit:focus-visible {
-    border-color: var(--ui-warning) !important;
-    background: var(--ui-warning) !important;
-    color: #ffffff !important;
-}
-
-.app-body .action-disable {
-    border: 1px solid var(--ui-danger) !important;
-    background: transparent !important;
-    color: var(--ui-danger) !important;
-}
-
-.app-body .action-disable:hover,
-.app-body .action-disable:focus-visible {
-    border-color: var(--ui-danger) !important;
-    background: var(--ui-danger) !important;
-    color: #ffffff !important;
-}
-
 /* Acciones estándar de los listados. Estas reglas prevalecen sobre estilos heredados de cada módulo. */
-.app-body table a[title="Ver detalle"],
-.app-body table .action-view {
+.app-body table a[title="Ver detalle"] {
     width: 34px !important;
     min-width: 34px !important;
     height: 34px !important;
@@ -372,9 +322,7 @@
 }
 
 .app-body table a[title="Ver detalle"]:hover,
-.app-body table a[title="Ver detalle"]:focus-visible,
-.app-body table .action-view:hover,
-.app-body table .action-view:focus-visible {
+.app-body table a[title="Ver detalle"]:focus-visible {
     border-color: var(--ui-primary) !important;
     background: var(--ui-primary) !important;
     color: #ffffff !important;

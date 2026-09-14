@@ -31,7 +31,7 @@
             tipo === tipoSalida && cantidad > stockActual;
 
         stockResultante.textContent = salidaInvalida ? "—" : resultado;
-        stockResultante.classList.toggle("ajuste-resultado-negativo", salidaInvalida);
+        stockResultante.classList.toggle("result-box--danger", salidaInvalida);
         stockResultanteError.classList.toggle("d-none", !salidaInvalida);
         cantidadAjuste.classList.toggle("is-invalid", salidaInvalida);
         btnGuardarAjuste.disabled = salidaInvalida;

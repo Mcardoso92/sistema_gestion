@@ -6,13 +6,13 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="page-header">
 
-        <div>
+        <div class="page-header-content">
 
             <div class="d-flex align-items-center gap-2">
 
-                <h1 class="h3 fw-bold mb-0">
+                <h1 class="page-title mb-0">
                     Movimiento #@Model.Id
                 </h1>
 
@@ -32,15 +32,15 @@
 
             </div>
 
-            <p class="text-muted mb-0 mt-1">
+            <p class="page-subtitle mt-1">
                 @TextoPresentacion.ValorEnum(Model.Tipo)
             </p>
 
         </div>
 
-        <div class="d-flex gap-2">
+        <div class="page-actions">
             <a asp-action="Index"
-               class="btn btn-outline-secondary">
+               class="btn btn-v-outline">
                 Volver
             </a>
             @if (!Model.EsReversion &&
@@ -271,7 +271,7 @@
 
                             <a asp-action="Details"
                                asp-route-id="@reversion.Id"
-                               class="btn btn-sm btn-outline-secondary">
+                               class="btn btn-sm btn-v-outline">
                                 Ver
                             </a>
 

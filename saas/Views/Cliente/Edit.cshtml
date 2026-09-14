@@ -5,6 +5,12 @@
 }
 
 <main class="container-fluid px-4">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Editar Cliente</h1>
+            <p class="page-subtitle">Actualizá la información del cliente.</p>
+        </div>
+    </div>
     <div class="row">
         <!-- Form Column -->
         <div class="col-md-8">
@@ -101,7 +107,7 @@
                         <div class="col-12">
                             <div class="form-check form-switch mt-2">
                                 <input asp-for="Estado"
-                                       class="form-check-input"
+                                       class="form-check-input status-switch"
                                        role="switch" />
                                 <label asp-for="Estado" class="form-check-label fw-semibold">
                                     Estado del Cliente (Activo/Inactivo)
@@ -116,7 +122,7 @@
                             }
                         </div>
 
-                        <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
+                        <div class="col-12 form-actions mt-5 border-top pt-4">
                             <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
                             <button type="submit" class="btn btn-v-primary">Guardar cambios</button>
                         </div>

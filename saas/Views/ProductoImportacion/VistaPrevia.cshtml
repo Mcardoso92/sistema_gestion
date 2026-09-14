@@ -5,11 +5,11 @@
 }
 
 <main class="container-fluid px-4 py-4">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-        <div>
+    <div class="page-header">
+        <div class="page-header-content">
             <a asp-action="Index" class="text-decoration-none text-secondary">← Elegir otro archivo</a>
-            <h1 class="h2 fw-semibold mb-1 mt-2">Vista previa</h1>
-            <p class="text-secondary mb-0">Revisá el resultado de <strong>@Model.NombreArchivo</strong> antes de importar.</p>
+            <h1 class="page-title mt-2">Vista previa</h1>
+            <p class="page-subtitle">Revisá el resultado de <strong>@Model.NombreArchivo</strong> antes de importar.</p>
         </div>
     </div>
 
@@ -80,7 +80,7 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-end gap-2">
+    <div class="form-actions">
         <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
         @if (Model.PuedeImportar)
         {

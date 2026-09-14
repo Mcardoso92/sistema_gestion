@@ -12,7 +12,7 @@
                 <li class="breadcrumb-item active" aria-current="page">Editar</li>
             </ol>
         </nav>
-        <h1 class="h3 mb-0 fw-bold">Editar Proveedor</h1>
+        <h1 class="page-title">Editar Proveedor</h1>
     </div>
 
     <div class="row">
@@ -32,7 +32,7 @@
                 }
 
                 <div class="mb-5">
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">domain</span>
                         Información General
                     </h2>
@@ -60,7 +60,7 @@
                             <label class="form-label">Estado</label>
 
                             <div class="form-check form-switch mt-2">
-                                <input asp-for="Estado" class="form-check-input" type="checkbox" role="switch" />
+                                <input asp-for="Estado" class="form-check-input status-switch" type="checkbox" role="switch" />
                                 <label asp-for="Estado" class="form-check-label">
                                     @(Model.Estado ? "Proveedor activo" : "Proveedor inactivo")
                                 </label>
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="mb-5">
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">contact_mail</span>
                         Datos de Contacto
                     </h2>
@@ -91,7 +91,7 @@
                 </div>
 
                 <div class="mb-5">
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">location_on</span>
                         Ubicación
                     </h2>
@@ -124,7 +124,7 @@
                 </div>
 
                 <div>
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">notes</span>
                         Observaciones
                     </h2>
@@ -136,7 +136,7 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-3 mt-5 pt-4 border-top">
+                <div class="form-actions mt-5 pt-4 border-top">
                     <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
                     <button type="submit" class="btn btn-v-primary d-flex align-items-center gap-2">
                         <span class="material-symbols-outlined fs-6">save</span>

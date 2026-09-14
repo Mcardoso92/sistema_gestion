@@ -21,12 +21,12 @@
 
 <main class="container-fluid px-4 mb-5">
     <!-- Header -->
-    <div class="row align-items-end mb-4">
-        <div class="col-md-8">
-            <h1 class="display-6 fw-bold text-dark mb-1">Gestión de Usuarios</h1>
-            <p class="text-muted mb-0">Administre los accesos y perfiles de los usuarios del sistema VELTIKA.</p>
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Gestión de Usuarios</h1>
+            <p class="page-subtitle">Administre los accesos y perfiles de los usuarios del sistema VELTIKA.</p>
         </div>
-        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="page-actions">
             <a asp-action="Create" class="btn btn-create-action">
                 <span class="material-symbols-outlined">person_add</span>
                 <span>Nuevo usuario</span>
@@ -38,7 +38,7 @@
         <div class="card-body p-4">
             <form asp-action="Index" method="get" class="row g-3 align-items-end">
                 <div class="col-md-2">
-                    <label for="estado" class="form-label small fw-bold text-muted text-uppercase">Estado</label>
+                    <label for="estado" class="form-label field-label-compact">Estado</label>
                     <select id="estado" name="estado" class="form-select">
                         <option value="activos" selected="@(estadoSeleccionado == "activos")">Activos</option>
                         <option value="inactivos" selected="@(estadoSeleccionado == "inactivos")">Inactivos</option>
@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label for="rol" class="form-label small fw-bold text-muted text-uppercase">Rol</label>
+                    <label for="rol" class="form-label field-label-compact">Rol</label>
                     <select id="rol" name="rol" class="form-select">
                         <option value="">Todos los roles</option>
                         @foreach (var rol in rolesDisponibles)
@@ -60,7 +60,7 @@
                 @if (User.IsInRole("SuperAdmin"))
                 {
                     <div class="col-md-2">
-                        <label for="empresaId" class="form-label small fw-bold text-muted text-uppercase">Empresa</label>
+                        <label for="empresaId" class="form-label field-label-compact">Empresa</label>
                         <select id="empresaId" name="empresaId" class="form-select">
                             <option value="">Todas las empresas</option>
                             @foreach (var empresa in empresas)
@@ -72,7 +72,7 @@
                 }
 
                 <div class="col-md-4">
-                    <label for="busqueda" class="form-label small fw-bold text-muted text-uppercase">Buscar usuario</label>
+                    <label for="busqueda" class="form-label field-label-compact">Buscar usuario</label>
                     <div class="search-input-wrapper">
                         <span class="material-symbols-outlined">search</span>
                         <input id="busqueda" name="busqueda" value="@busqueda" class="form-control" maxlength="100" placeholder="Buscar por nombre, apellido o email..." type="text" />
@@ -136,11 +136,11 @@
                                     <div class="d-flex align-items-center gap-2">
                                         @if (!string.IsNullOrWhiteSpace(usuario.ImagenPerfil))
                                         {
-                                            <img src="@usuario.ImagenPerfil" alt="Imagen de @usuario.Nombre" class="rounded-circle border" style="width: 40px; height: 40px; object-fit: cover;" />
+                                            <img src="@usuario.ImagenPerfil" alt="Imagen de @usuario.Nombre" class="avatar avatar--sm border" />
                                         }
                                         else
                                         {
-                                            <span class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center fw-semibold text-muted" style="width: 40px; height: 40px;">
+                                            <span class="avatar avatar--sm bg-light border fw-semibold text-muted">
                                                 @usuario.Nombre.Substring(0, 1).ToUpper()
                                             </span>
                                         }
@@ -162,15 +162,11 @@
                                 <td>
                                     @if (usuario.Estado)
                                     {
-                                        <span class="status-badge status-active">
-                                            <span class="d-inline-block rounded-circle bg-success me-1" style="width: 6px; height: 6px;"></span> Activo
-                                        </span>
+                                        <span class="status-badge status-active">Activo</span>
                                     }
                                     else
                                     {
-                                        <span class="status-badge status-inactive">
-                                            <span class="d-inline-block rounded-circle bg-danger me-1" style="width: 6px; height: 6px;"></span> Inactivo
-                                        </span>
+                                        <span class="status-badge status-inactive">Inactivo</span>
                                     }
                                 </td>
                                 <td class="text-muted">@FechaHora.ConvertirAHoraLocal(usuario.FechaAlta).ToString("dd/MM/yyyy")</td>

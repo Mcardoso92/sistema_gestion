@@ -10,7 +10,88 @@ body {
     font-family: var(--veltika-font);
 }
 
+/* Estructura común de las pantallas públicas de autenticación. */
+.public-body .auth-page {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    width: 100%;
+    padding: 3rem 1rem;
+}
+
+@media (max-width: 575.98px) {
+    .public-body .auth-page {
+        align-items: flex-start;
+        padding: 1.5rem 0.75rem;
+    }
+
+    .public-body .auth-card {
+        padding: 1.5rem;
+    }
+}
+
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 3px solid var(--veltika-focus-ring);
     outline-offset: 2px;
+}
+
+/* Escala única para iconos del producto. El tamaño se declara en el elemento, no por pantalla. */
+.material-symbols-outlined.icon-xs {
+    font-size: var(--veltika-icon-xs);
+}
+
+.material-symbols-outlined.icon-sm {
+    font-size: var(--veltika-icon-sm);
+}
+
+.material-symbols-outlined.icon-md {
+    font-size: var(--veltika-icon-md);
+}
+
+.material-symbols-outlined.icon-lg {
+    font-size: var(--veltika-icon-lg);
+}
+
+/* Representaciones visuales reutilizables de personas y entidades. */
+.avatar,
+.media-thumbnail {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    object-fit: cover;
+}
+
+.avatar {
+    border-radius: 50%;
+}
+
+.avatar--sm,
+.media-thumbnail--sm {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.avatar--xs {
+    width: 2rem;
+    height: 2rem;
+}
+
+.avatar--md {
+    width: 3rem;
+    height: 3rem;
+}
+
+.avatar--lg {
+    width: 8.75rem;
+    height: 8.75rem;
+}
+
+/* Vista previa de una imagen cargada sin deformar su proporción. */
+.media-preview {
+    max-width: 11.25rem;
+    max-height: 11.25rem;
+    object-fit: contain;
 }

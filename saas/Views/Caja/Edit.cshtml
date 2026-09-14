@@ -6,10 +6,10 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="mb-4">
+    <div class="page-header">
 
-        <div>
-            <h1 class="h3 fw-bold mb-1">
+        <div class="page-header-content">
+            <h1 class="page-title">
                 Editar Caja
             </h1>
         </div>
@@ -98,11 +98,11 @@
                                     @if (Model.TieneTurnoAbierto)
                                     {
                                         <input asp-for="PermiteTurnos" type="hidden" />
-                                        <input class="form-check-input" type="checkbox" checked="@(Model.PermiteTurnos ? "checked" : null)" disabled />
+                                        <input class="form-check-input status-switch" type="checkbox" role="switch" checked="@(Model.PermiteTurnos ? "checked" : null)" disabled />
                                     }
                                     else
                                     {
-                                        <input asp-for="PermiteTurnos" class="form-check-input" id="permiteTurnos" />
+                                        <input asp-for="PermiteTurnos" class="form-check-input status-switch" role="switch" id="permiteTurnos" />
                                     }
 
                                     <label asp-for="PermiteTurnos"
@@ -120,11 +120,11 @@
                                     @if (Model.TieneTurnoAbierto)
                                     {
                                         <input asp-for="Estado" type="hidden" />
-                                        <input class="form-check-input" type="checkbox" checked="@(Model.Estado ? "checked" : null)" disabled />
+                                        <input class="form-check-input status-switch" type="checkbox" role="switch" checked="@(Model.Estado ? "checked" : null)" disabled />
                                     }
                                     else
                                     {
-                                        <input asp-for="Estado" class="form-check-input" />
+                                        <input asp-for="Estado" class="form-check-input status-switch" role="switch" />
                                     }
 
                                     <label asp-for="Estado"
@@ -151,9 +151,9 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <div class="form-actions mt-4">
+                    <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                    <button type="submit" class="btn btn-v-primary">Guardar cambios</button>
                 </div>
 
             </div>

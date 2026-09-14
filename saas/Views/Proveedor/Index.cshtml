@@ -51,14 +51,14 @@
                         Buscar
                     </label>
 
-                    <div class="position-relative">
-                        <span class="material-symbols-outlined proveedor-search-icon">
+                    <div class="search-input-wrapper">
+                        <span class="material-symbols-outlined">
                             search
                         </span>
 
                         <input asp-for="Busqueda"
                                maxlength="100"
-                               class="form-control ps-5"
+                               class="form-control"
                                placeholder="Razón social, nombre, CUIT o email" />
                     </div>
                 </div>
@@ -258,7 +258,7 @@
         else
         {
             <div class="text-center py-5 px-3">
-                <span class="material-symbols-outlined proveedor-empty-icon mb-2">
+                <span class="material-symbols-outlined empty-state-icon mb-2">
                     local_shipping
                 </span>
 

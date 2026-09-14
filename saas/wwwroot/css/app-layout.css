@@ -155,12 +155,27 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    object-fit: cover;
     flex: 0 0 34px;
     border-radius: 50%;
     background-color: #eaf1ff;
     color: var(--app-primary);
     font-size: 12px;
     font-weight: 700;
+}
+
+.notifications-menu {
+    width: 360px;
+    max-width: 90vw;
+}
+
+.notifications-scroll {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.notifications-scroll--compact {
+    max-height: 300px;
 }
 
 .app-user-data {

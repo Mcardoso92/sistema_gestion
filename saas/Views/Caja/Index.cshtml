@@ -6,20 +6,22 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="page-header">
 
-        <div>
-            <h1 class="h3 fw-bold mb-1">Cajas</h1>
-            <p class="text-muted mb-0">
+        <div class="page-header-content">
+            <h1 class="page-title">Cajas</h1>
+            <p class="page-subtitle">
                 Administrá las cajas y cuentas financieras de la empresa.
             </p>
         </div>
 
-        <a asp-action="Create"
-           class="btn btn-create-action">
-            <span class="material-symbols-outlined">add_circle</span>
-            <span>Nueva caja</span>
-        </a>
+        <div class="page-actions">
+            <a asp-action="Create"
+               class="btn btn-create-action">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Nueva caja</span>
+            </a>
+        </div>
 
     </div>
 

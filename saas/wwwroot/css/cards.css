@@ -1,6 +1,9 @@
 .app-body .card {
+    overflow: hidden;
+    border: 1px solid var(--ui-border-light) !important;
     border-color: var(--ui-border-light) !important;
     border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface);
     box-shadow: var(--ui-shadow-sm);
 }
 
@@ -14,12 +17,10 @@
     border-radius: var(--veltika-radius-card);
     background: var(--veltika-surface);
     box-shadow: var(--veltika-shadow-sm);
-}
-
-.app-body .metric-card--featured {
     display: flex;
     align-items: center;
     gap: var(--veltika-space-4);
+    height: 100%;
     min-height: 132px;
     padding: 1.25rem;
 }
@@ -121,12 +122,6 @@
     color: var(--ui-text);
 }
 
-.app-body .card {
-    overflow: hidden;
-    border: 1px solid var(--ui-border-light) !important;
-    background: var(--ui-surface);
-}
-
 /* ==================================================
    COMPONENTE: CONTENEDORES DE CONTENIDO Y FORMULARIO
    Uso: contenido general, formularios y vistas de detalle.
@@ -153,6 +148,12 @@
     border-bottom: 1px solid var(--veltika-border);
 }
 
+.app-body .content-card__header--brand {
+    border-bottom: 0;
+    background: var(--ui-primary);
+    color: var(--veltika-surface);
+}
+
 .app-body .detail-card--danger {
     border-color: var(--veltika-danger) !important;
 }
@@ -163,6 +164,106 @@
     border-radius: var(--veltika-radius-card);
     background: var(--veltika-info-soft);
     color: var(--veltika-text);
+}
+
+.app-body .empty-state-icon {
+    font-size: 2.625rem;
+}
+
+/* Estado vacío reutilizable para paneles, tablas y reportes sin resultados. */
+.app-body .empty-state {
+    padding: 3rem 1.25rem;
+    color: var(--veltika-muted);
+    text-align: center;
+}
+
+.app-body .summary-total__label {
+    letter-spacing: 0.1em;
+}
+
+.app-body .summary-total__value {
+    letter-spacing: -0.02em;
+}
+
+.app-body .summary-total-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 13.75rem;
+}
+
+.app-body .info-panel {
+    padding: 1.25rem;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--veltika-radius-sm);
+    background: var(--ui-surface-muted);
+}
+
+.app-body .metric-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(15, 76, 129, 0.2);
+    border-radius: var(--veltika-radius-sm);
+    background: rgba(15, 76, 129, 0.05);
+}
+
+.app-body .result-box {
+    display: flex;
+    align-items: center;
+    min-height: 2.375rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-surface-muted);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.app-body .result-box--danger {
+    border-color: var(--ui-danger);
+    background: #fbe9e9;
+    color: var(--ui-danger);
+}
+
+/* Bloque ilustrativo reutilizable que acompaña guías y contenido contextual. */
+.app-body .context-visual {
+    position: relative;
+    height: 11.25rem;
+}
+
+.app-body .context-visual__media {
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-size: cover;
+}
+
+.app-body .context-visual__overlay {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 1rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+}
+
+/* La ilustración de usuarios se comparte entre alta y edición. */
+.app-body .context-visual--users {
+    background: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCm9IU27yOF55-MZ3eXO0RLtz0j8npcG4F1JZpPPGWhZlOvmj8ki_ahd_et0HtbTRCfinWu_cRp3hcyEzjtw7xPuW6KBMaHWNuHTRg3dhKdvLncWzqtXOY8B84F7ycVZNVY5KF7jMQDFaLqqRYhNP8DloSWoq62Kb-TnmpDFg-twXpNKGpdS90pFABMdtCTlUUrav_hlVkKSmujFOqNs3VQIk_yLDYSK5H1AsugdVSwN9kpHSpISeTr8Q") center / cover no-repeat;
+}
+
+.public-body .auth-card {
+    z-index: 10;
+    width: 100%;
+    max-width: 26.25rem;
+    padding: 2.5rem;
+    border: 1px solid var(--veltika-border);
+    border-radius: var(--veltika-radius-card);
+    background: var(--veltika-surface);
+    box-shadow: var(--veltika-shadow-md);
 }
 
 /* Permite que menús y autocompletados se superpongan sin cambiar la altura de la grilla. */
@@ -182,15 +283,3 @@
     background: var(--ui-surface-muted) !important;
 }
 
-/* ==================================================
-   COMPONENTE: TARJETA DE ACCESO
-   Uso: ingreso, registro y recuperación de contraseña
-   La estructura responsive permanece temporalmente en site.css.
-   ================================================== */
-.login-card {
-    border: 1px solid var(--veltika-border);
-    border-radius: var(--veltika-radius-card);
-    background: var(--veltika-surface);
-    color: var(--veltika-text);
-    box-shadow: var(--veltika-shadow-md);
-}

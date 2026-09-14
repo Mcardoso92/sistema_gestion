@@ -79,13 +79,13 @@
                                 @if (Model.Estado)
                                 {
                                     <span class="status-badge status-active">
-                                        <span class="dot"></span>Activo
+                                        Activo
                                     </span>
                                 }
                                 else
                                 {
                                     <span class="status-badge status-inactive">
-                                        <span class="dot"></span>Inactivo
+                                        Inactivo
                                     </span>
                                 }
                             </div>
@@ -95,7 +95,7 @@
                     <form asp-action="Delete"
                           asp-route-id="@Model.Id"
                           method="post"
-                          class="mt-5 border-top pt-4 d-flex justify-content-end gap-3">
+                          class="form-actions mt-5 border-top pt-4">
 
                         <input asp-for="Id" type="hidden" />
 

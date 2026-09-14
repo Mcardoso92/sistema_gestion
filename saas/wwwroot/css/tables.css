@@ -3,15 +3,18 @@
 }
 
 .app-body .table {
+    width: 100%;
     margin-bottom: 0;
+    border-color: var(--ui-border-light) !important;
+    background: var(--ui-surface);
     color: var(--ui-text);
 }
 
 .app-body .table thead th {
     padding: 0.875rem 1rem;
     border-bottom: 1px solid var(--ui-border);
-    background: var(--ui-surface-muted);
-    color: var(--ui-text-muted);
+    background: var(--ui-surface-muted) !important;
+    color: var(--ui-text-muted) !important;
     font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.04em;
@@ -21,12 +24,14 @@
 
 .app-body .table tbody td {
     padding: 0.875rem 1rem;
-    border-color: var(--ui-border-light);
+    border-color: var(--ui-border-light) !important;
+    background: var(--ui-surface) !important;
+    color: var(--ui-text);
     vertical-align: middle;
 }
 
 .app-body .table-hover > tbody > tr:hover > * {
-    background-color: #f8fafc;
+    background-color: var(--ui-primary-soft) !important;
 }
 
 .app-body .table-actions {
@@ -48,29 +53,9 @@
     white-space: nowrap;
 }
 
-.app-body .table {
-    width: 100%;
-    border-color: var(--ui-border-light) !important;
-    background: var(--ui-surface);
-}
-
 .app-body .table > :not(caption) > * > * {
     border-color: var(--ui-border-light) !important;
     box-shadow: none;
-}
-
-.app-body .table thead th {
-    background: var(--ui-surface-muted) !important;
-    color: var(--ui-text-muted) !important;
-}
-
-.app-body .table tbody td {
-    background: var(--ui-surface) !important;
-    color: var(--ui-text);
-}
-
-.app-body .table-hover > tbody > tr:hover > * {
-    background: var(--ui-primary-soft) !important;
 }
 
 .app-body .table td > p:last-child {
@@ -79,6 +64,22 @@
 
 /* Mantiene unidos signo, símbolo monetario e importe dentro de las tablas. */
 .app-body .table-currency {
+    white-space: nowrap;
+}
+
+/* Anchos mínimos reutilizables para tablas con muchas columnas. */
+.app-body .table--medium {
+    min-width: 50rem;
+}
+
+.app-body .table--wide {
+    min-width: 65.625rem;
+}
+
+.app-body .table-text-truncate {
+    max-width: 17.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
 }
 

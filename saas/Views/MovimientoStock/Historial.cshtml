@@ -9,7 +9,7 @@
 <main class="flex-grow-1 container-fluid px-4 py-4">
     <div class="mb-4">
         <nav aria-label="breadcrumb" class="mb-2">
-            <ol class="breadcrumb historial-breadcrumb mb-0">
+            <ol class="breadcrumb breadcrumb-meta mb-0">
                 <li class="breadcrumb-item">
                     <a asp-action="Index" class="text-decoration-none text-secondary">Stock</a>
                 </li>
@@ -28,7 +28,7 @@
             </div>
 
             <div class="d-flex gap-2">
-                <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2 fw-medium">
+                <a asp-action="Index" class="btn btn-v-outline">
                     <span class="material-symbols-outlined fs-5">arrow_back</span>Volver
                 </a>
 
@@ -36,7 +36,7 @@
                 {
                     <a asp-action="Ajustar"
                        asp-route-productoId="@Model.ProductoId"
-                       class="btn btn-primary d-flex align-items-center gap-2 fw-medium">
+                       class="btn btn-v-primary">
                         <span class="material-symbols-outlined fs-5">add</span>Nuevo Ajuste
                     </a>
                 }
@@ -54,56 +54,56 @@
                     @if (Model.StockActual == 0)
                     {
                         <span class="status-badge status-empty">
-                            <span class="dot"></span>Sin stock
+                            Sin stock
                         </span>
                     }
                     else if (Model.StockActual <= Model.PuntoReposicion)
                     {
                         <span class="status-badge status-low">
-                            <span class="dot"></span>Stock bajo
+                            Stock bajo
                         </span>
                     }
                     else
                     {
                         <span class="status-badge status-normal">
-                            <span class="dot"></span>Con stock
+                            Con stock
                         </span>
                     }
                 </div>
 
                 <div class="row g-4">
                     <div class="col-md-6 col-lg-4">
-                        <p class="historial-label mb-1">Producto</p>
+                        <p class="detail-label mb-1">Producto</p>
                         <p class="fs-5 fw-semibold mb-0">@Model.ProductoNombre</p>
                     </div>
 
                     <div class="col-md-6 col-lg-4">
-                        <p class="historial-label mb-1">Código de Barras</p>
+                        <p class="detail-label mb-1">Código de Barras</p>
                         <p class="font-monospace mb-0">
                             @(string.IsNullOrWhiteSpace(Model.CodigoBarra) ? "Sin código" : Model.CodigoBarra)
                         </p>
                     </div>
 
                     <div class="col-md-6 col-lg-4">
-                        <p class="historial-label mb-1">Categoría</p>
+                        <p class="detail-label mb-1">Categoría</p>
                         <p class="mb-0">@Model.CategoriaNombre</p>
                     </div>
 
                     @if (User.IsInRole("SuperAdmin"))
                     {
                         <div class="col-md-6 col-lg-4">
-                            <p class="historial-label mb-1">Empresa</p>
+                            <p class="detail-label mb-1">Empresa</p>
                             <p class="mb-0">@Model.EmpresaNombre</p>
                         </div>
                     }
 
                     <div class="col-md-6 col-lg-4">
-                        <p class="historial-label mb-1">Stock Actual</p>
+                        <p class="detail-label mb-1">Stock Actual</p>
                         <p class="fs-4 fw-bold mb-0">@Model.StockActual</p>
                     </div>
 
                     <div class="col-md-6 col-lg-4">
-                        <p class="historial-label mb-1">Punto de Reposición</p>
+                        <p class="detail-label mb-1">Punto de Reposición</p>
                         <p class="fs-5 mb-0">@Model.PuntoReposicion unidades</p>
                     </div>
                 </div>
@@ -216,7 +216,7 @@
 
                             string signo = esEntrada ? "+" : "-";
                             string claseCantidad = esEntrada ? "text-success" : "text-danger";
-                            string claseBadge = esEntrada ? "historial-badge-entrada" : "historial-badge-salida";
+                            string claseBadge = esEntrada ? "movement-badge--income" : "movement-badge--expense";
                             string icono = esEntrada ? "arrow_downward" : "arrow_upward";
 
                             <tr>
@@ -238,7 +238,7 @@
                                 <td>@movimiento.UsuarioNombre</td>
 
                                 <td>
-                                    <span class="historial-badge @claseBadge">
+                                    <span class="movement-badge @claseBadge">
                                         <span class="material-symbols-outlined">@icono</span>
                                         @TextoPresentacion.ValorEnum(movimiento.Tipo)
                                     </span>
@@ -248,7 +248,7 @@
                                 <td class="text-end fw-semibold @claseCantidad">@signo@movimiento.Cantidad</td>
                                 <td class="text-end fw-semibold">@movimiento.StockPosterior</td>
 
-                                <td class="historial-motivo" title="@movimiento.Motivo">
+                                <td class="table-text-truncate" title="@movimiento.Motivo">
                                     @(string.IsNullOrWhiteSpace(movimiento.Motivo) ? "-" : movimiento.Motivo)
                                 </td>
 

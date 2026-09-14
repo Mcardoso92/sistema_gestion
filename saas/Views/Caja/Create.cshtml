@@ -6,10 +6,10 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="mb-4">
-        <div>
-            <h1 class="h3 fw-bold mb-1">Nueva Caja</h1>
-            <p class="text-muted mb-0">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Nueva Caja</h1>
+            <p class="page-subtitle">
                 Configurá una nueva caja o cuenta financiera.
             </p>
         </div>
@@ -112,7 +112,8 @@
                             <div class="col-12">
                                 <div class="form-check form-switch">
                                     <input asp-for="PermiteTurnos"
-                                           class="form-check-input"
+                                           class="form-check-input status-switch"
+                                           role="switch"
                                            id="permiteTurnos" />
 
                                     <label asp-for="PermiteTurnos"
@@ -133,9 +134,9 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                    <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-primary">Crear Caja</button>
+                <div class="form-actions mt-4">
+                    <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                    <button type="submit" class="btn btn-v-primary">Crear Caja</button>
                 </div>
 
             </div>
