@@ -81,3 +81,21 @@ Antes de incorporar una nueva decisión visual:
 
 La base oficial está disponible, pero las variables históricas todavía poseen consumidores. Durante la transición deben coexistir sin alterar el aspecto actual. Cada bloque posterior deberá indicar qué componente migra, qué consumidores fueron revisados y qué compatibilidad continúa pendiente.
 
+## 8. Tarjetas canónicas
+
+Cada contenedor debe utilizar la clase correspondiente a su responsabilidad:
+
+- `form-card`: formularios y controles de entrada.
+- `detail-card`: información de una entidad u operación.
+- `filter-card`: filtros de listados y reportes.
+- `table-card`: tablas y sus estados vacíos.
+- `metric-card`: indicadores y valores resumidos.
+- `metric-card--featured`: variante destacada con icono, etiqueta, valor y detalle.
+
+No deben crearse clases de tarjeta por pantalla cuando alguno de estos componentes cubra la misma necesidad. La antigua clase genérica `card-custom` ya no debe utilizarse en vistas nuevas.
+
+## 9. Autocompletado
+
+Las búsquedas con sugerencias utilizan `autocomplete` como ancla y `autocomplete-results` como lista superpuesta. La tarjeta contenedora debe incorporar `form-card--dropdown` para permitir que la lista se muestre por encima del contenido siguiente sin modificar la altura de la grilla.
+
+Las listas extensas deben limitar la cantidad de resultados visibles y permitir que el usuario refine la búsqueda. El Punto de Venta muestra un máximo de cinco productos por consulta.

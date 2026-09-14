@@ -165,8 +165,7 @@
 }
 
 .app-body .filter-card,
-.app-body .card:has(form[method="get"]),
-.app-body .card-custom:has(form[method="get"]) {
+.app-body .card:has(form[method="get"]) {
     border: 1px solid var(--ui-border-light) !important;
     border-radius: var(--ui-radius-lg) !important;
     background: var(--ui-surface) !important;
@@ -175,8 +174,7 @@
 
 .app-body .filter-card > .card-body,
 .app-body .filter-card:has(> form),
-.app-body .card:has(form[method="get"]) > .card-body,
-.app-body .card-custom:has(form[method="get"]) {
+.app-body .card:has(form[method="get"]) > .card-body {
     padding: 1.25rem !important;
 }
 
@@ -209,4 +207,22 @@
 
 .app-body .search-input-wrapper > input.form-control {
     padding-left: 2.75rem;
+}
+
+.app-body .autocomplete {
+    position: relative;
+}
+
+.app-body .autocomplete-results {
+    position: absolute;
+    top: calc(100% + var(--veltika-space-2));
+    right: 0;
+    left: 0;
+    z-index: 1050;
+    max-height: 17.5rem;
+    overflow-y: auto;
+    border: 1px solid var(--veltika-border);
+    border-radius: var(--veltika-radius-md);
+    background: var(--veltika-surface);
+    box-shadow: var(--veltika-shadow-md);
 }
