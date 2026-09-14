@@ -162,6 +162,51 @@
 
             </div>
 
+            @if (!activa)
+            {
+                <div class="card detail-card detail-card--danger mt-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">
+                            Anulación
+                        </h5>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="text-muted small">
+                                    Fecha de anulación
+                                </div>
+
+                                <div>
+                                    @(Model.FechaAnulacion.HasValue
+                                        ? FechaHora.ConvertirAHoraLocal(Model.FechaAnulacion.Value).ToString("dd/MM/yyyy HH:mm")
+                                        : "-")
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="text-muted small">
+                                    Usuario
+                                </div>
+
+                                <div>
+                                    @(Model.UsuarioAnulacionNombre ?? "-")
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="text-muted small">
+                                    Motivo
+                                </div>
+
+                                <div>
+                                    @(Model.MotivoAnulacion ?? "-")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
         </div>
 
         <div class="col-lg-4">
@@ -201,62 +246,5 @@
         </div>
 
     </div>
-
-    @if (!activa)
-    {
-        <div class="card border-danger shadow-sm mt-4">
-
-            <div class="card-body p-4">
-
-                <h5 class="fw-bold mb-3">
-                    Anulación
-                </h5>
-
-                <div class="row g-3">
-
-                    <div class="col-md-6">
-
-                        <div class="text-muted small">
-                            Fecha de anulación
-                        </div>
-
-                        <div>
-                            @(Model.FechaAnulacion.HasValue
-                                                    ? FechaHora.ConvertirAHoraLocal(Model.FechaAnulacion.Value).ToString("dd/MM/yyyy HH:mm")
-                                                    : "-")
-                    </div>
-
-                    </div>
-
-                    <div class="col-md-6">
-
-                        <div class="text-muted small">
-                            Usuario
-                        </div>
-
-                        <div>
-                            @(Model.UsuarioAnulacionNombre ?? "-")
-                        </div>
-
-                    </div>
-
-                    <div class="col-12">
-
-                        <div class="text-muted small">
-                            Motivo
-                        </div>
-
-                        <div>
-                            @(Model.MotivoAnulacion ?? "-")
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-        }
 
 </div>
