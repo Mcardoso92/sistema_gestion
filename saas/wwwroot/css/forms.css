@@ -148,6 +148,47 @@
     box-shadow: 0 0 0 0.2rem rgba(15, 76, 129, 0.12);
 }
 
+.app-body .status-switch {
+    width: 2.8em;
+    height: 1.4em;
+    cursor: pointer;
+}
+
+/* Mantiene alineados y separados el interruptor y su etiqueta en todos los formularios. */
+.app-body .form-switch:has(.status-switch) {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-left: 0;
+}
+
+.app-body .form-switch:has(.status-switch) .status-switch {
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.app-body .form-switch:has(.status-switch) .form-check-label {
+    margin: 0;
+}
+
+.app-body .status-switch:disabled {
+    cursor: not-allowed;
+}
+
+/* Control numérico compacto alineado al extremo de una celda de tabla. */
+.app-body .quantity-input {
+    max-width: 6.875rem;
+    margin-left: auto;
+}
+
+.app-body .textarea-fixed {
+    resize: none;
+}
+
+.app-body .readonly-value {
+    background: var(--ui-surface-muted);
+}
+
 .app-body .filter-card {
     border: 1px solid var(--ui-border-light) !important;
     border-radius: var(--ui-radius-lg) !important;

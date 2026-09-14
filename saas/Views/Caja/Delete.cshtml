@@ -5,9 +5,11 @@
 }
 
 <div class="container-fluid px-4 py-4">
-    <div class="mb-4">
-        <h1 class="h3 fw-bold mb-1">Desactivar Caja</h1>
-        <p class="text-muted mb-0">Revisá el turno y el saldo antes de confirmar.</p>
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Desactivar Caja</h1>
+            <p class="page-subtitle">Revisá el turno y el saldo antes de confirmar.</p>
+        </div>
     </div>
 
     <div class="row g-4 align-items-start">
@@ -61,10 +63,10 @@
 
                 @Html.AntiForgeryToken()
 
-                <div class="d-flex justify-content-end gap-2">
+                <div class="form-actions">
 
                     <a asp-action="Index"
-                       class="btn btn-outline-secondary">
+                       class="btn btn-v-outline">
                         Cancelar
                     </a>
 

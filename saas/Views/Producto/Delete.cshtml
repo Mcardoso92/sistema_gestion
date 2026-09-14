@@ -6,7 +6,7 @@
 
 <main class="container-fluid px-4">
     <div class="mb-4">
-        <h1 class="h3 mb-0 fw-bold">Desactivar Producto</h1>
+        <h1 class="page-title">Desactivar Producto</h1>
     </div>
 
     <div class="row">
@@ -38,11 +38,11 @@
                         <dd class="col-sm-9">
                             @if (Model.Estado)
                             {
-                                <span class="status-badge status-active"><span class="dot"></span>Activo</span>
+                                <span class="status-badge status-active">Activo</span>
                             }
                             else
                             {
-                                <span class="status-badge status-inactive"><span class="dot"></span>Inactivo</span>
+                                <span class="status-badge status-inactive">Inactivo</span>
                             }
                         </dd>
                         <dt class="col-sm-3">@Html.DisplayNameFor(model => model.FechaAlta)</dt>
@@ -54,7 +54,7 @@
                         }
                     </dl>
 
-                    <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-4">
+                    <div class="form-actions mt-4 border-top pt-4">
                         <a asp-action="Index" class="btn btn-v-outline">Volver</a>
                         <form asp-action="Delete" method="post" class="d-inline">
                             <input type="hidden" asp-for="Id" />

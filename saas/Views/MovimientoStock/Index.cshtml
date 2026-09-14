@@ -10,7 +10,7 @@
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
-            <h1 class="h2 fw-semibold mb-1">Control de Stock</h1>
+            <h1 class="page-title">Control de Stock</h1>
             <p class="text-secondary mb-0">
                 Supervise y gestione el inventario de productos en tiempo real.
             </p>
@@ -209,7 +209,6 @@
                                         case EstadoStockVM.SinStock:
 
                                             <span class="status-badge status-empty">
-                                                <span class="dot"></span>
                                                 Sin stock
                                             </span>
 
@@ -218,7 +217,6 @@
                                         case EstadoStockVM.StockBajo:
 
                                             <span class="status-badge status-low">
-                                                <span class="dot"></span>
                                                 Stock bajo
                                             </span>
 
@@ -227,7 +225,6 @@
                                         default:
 
                                             <span class="status-badge status-normal">
-                                                <span class="dot"></span>
                                                 Con stock
                                             </span>
 
@@ -241,14 +238,12 @@
                                     @if (producto.ProductoActivo)
                                     {
                                         <span class="status-badge status-active">
-                                            <span class="dot"></span>
                                             Activo
                                         </span>
                                     }
                                     else
                                     {
                                         <span class="status-badge status-inactive">
-                                            <span class="dot"></span>
                                             Inactivo
                                         </span>
                                     }

@@ -2,8 +2,8 @@
 
 <main class="container-fluid px-4 mb-5">
     <!-- Header -->
-    <div class="row align-items-end mb-4">
-        <div class="col-12">
+    <div class="page-header">
+        <div class="page-header-content">
             <nav aria-label="breadcrumb" class="mb-2">
                 <ol class="breadcrumb small">
                     <li class="breadcrumb-item"><a class="text-decoration-none text-muted" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
@@ -11,8 +11,8 @@
                     <li aria-current="page" class="breadcrumb-item active fw-semibold">Detalle del Usuario</li>
                 </ol>
             </nav>
-            <h1 class="display-6 fw-bold text-dark mb-1">Detalle del Usuario</h1>
-            <p class="text-muted mb-0">Visualice la información detallada y el historial del miembro seleccionado.</p>
+            <h1 class="page-title">Detalle del Usuario</h1>
+            <p class="page-subtitle">Visualice la información detallada y el historial del miembro seleccionado.</p>
         </div>
     </div>
     <!-- Two-Column Layout -->
@@ -21,7 +21,7 @@
         <div class="col-lg-8">
             <div class="detail-card p-4 p-md-5">
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                    <h2 class="h5 fw-bold mb-0">Información del Usuario</h2>
+                    <h2 class="section-title mb-0">Información del Usuario</h2>
                     <div class="d-flex gap-2">
                         <a asp-action="Index" class="btn btn-v-outline">Volver</a>
                         <a asp-action="Edit"  asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a>
@@ -29,21 +29,21 @@
                 </div>
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <div class="info-label">Nombre Completo</div>
-                        <div class="info-value">@Model.Nombre @Model.Apellido</div>
-                        <div class="info-label">Correo Electrónico</div>
-                        <div class="info-value">@Model.Email</div>
+                        <div class="detail-label">Nombre Completo</div>
+                        <div class="detail-value">@Model.Nombre @Model.Apellido</div>
+                        <div class="detail-label">Correo Electrónico</div>
+                        <div class="detail-value">@Model.Email</div>
                         @if (User.IsInRole("SuperAdmin"))
                         {
-                            <div class="info-label">Empresa Asociada</div>
-                            <div class="info-value">@Model.Empresa.Nombre</div>
+                            <div class="detail-label">Empresa Asociada</div>
+                            <div class="detail-value">@Model.Empresa.Nombre</div>
                         }
                     </div>
                     <div class="col-md-6">
-                        <div class="info-label">Rol del Sistema</div>
-                        <div class="info-value">@TextoPresentacion.Rol(ViewBag.Rol as string)</div>
-                        <div class="info-label">Estado de Cuenta</div>
-                        <div class="info-value">
+                        <div class="detail-label">Rol del Sistema</div>
+                        <div class="detail-value">@TextoPresentacion.Rol(ViewBag.Rol as string)</div>
+                        <div class="detail-label">Estado de Cuenta</div>
+                        <div class="detail-value">
                             @if (Model.Estado)
                             {
                                 <span class="status-badge status-active">Activo</span>
@@ -53,8 +53,8 @@
                                 <span class="status-badge status-inactive">Inactivo</span>
                             }
                         </div>
-                        <div class="info-label">Fecha de alta</div>
-                        <div class="info-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")</div>
+                        <div class="detail-label">Fecha de alta</div>
+                        <div class="detail-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")</div>
                     </div>
                 </div>
                 <div class="info-callout mt-4">

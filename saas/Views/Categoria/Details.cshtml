@@ -1,9 +1,9 @@
 @model saas.Models.Categoria
 @{ ViewData["Title"] = "Detalles de la Categoría"; }
 <main class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div><h1 class="h3 fw-bold mb-1">Detalle de Categoría</h1><p class="text-muted mb-0">Consultá la información registrada.</p></div>
-        <div class="d-flex gap-2"><a asp-action="Index" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
+    <div class="page-header">
+        <div class="page-header-content"><h1 class="page-title">Detalle de Categoría</h1><p class="page-subtitle">Consultá la información registrada.</p></div>
+        <div class="page-actions"><a asp-action="Index" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
     </div>
     <div class="row g-4 align-items-start">
         <div class="col-lg-8"><div class="detail-card p-4">

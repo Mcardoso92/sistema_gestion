@@ -43,7 +43,6 @@
 }
 
 .app-body .status-pending,
-.app-body .status-warning,
 .app-body .status-low {
     border-color: #fedf89 !important;
     background: #fffaeb !important;
@@ -51,15 +50,12 @@
 }
 
 .app-body .status-cancelled,
-.app-body .status-danger,
-.app-body .status-empty,
-.app-body .status-overdue {
+.app-body .status-empty {
     border-color: #fecdca !important;
     background: #fef3f2 !important;
     color: #b42318 !important;
 }
 
-.app-body .status-info,
 .app-body .status-partial {
     border-color: #b2ddff !important;
     background: #eff8ff !important;
@@ -69,4 +65,32 @@
 .app-body .status-badge .dot,
 .app-body .status-badge > .rounded-circle {
     display: none !important;
+}
+
+.app-body .movement-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: var(--veltika-font-semibold);
+    white-space: nowrap;
+}
+
+.app-body .movement-badge .material-symbols-outlined {
+    font-size: 0.875rem;
+}
+
+.app-body .movement-badge--income {
+    border-color: rgba(0, 107, 95, 0.2);
+    background: rgba(0, 107, 95, 0.1);
+    color: #006b5f;
+}
+
+.app-body .movement-badge--expense {
+    border-color: rgba(186, 26, 26, 0.2);
+    background: rgba(186, 26, 26, 0.1);
+    color: var(--ui-danger);
 }

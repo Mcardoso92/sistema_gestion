@@ -12,7 +12,7 @@
                 <li class="breadcrumb-item active" aria-current="page">Desactivar</li>
             </ol>
         </nav>
-        <h1 class="h3 mb-1 fw-bold">Desactivar Proveedor</h1>
+        <h1 class="page-title">Desactivar Proveedor</h1>
         <p class="text-muted mb-0">Confirme la desactivación del proveedor seleccionado.</p>
     </div>
 
@@ -28,50 +28,50 @@
                         </div>
                     </div>
 
-                    <h2 class="proveedor-section-title">
+                    <h2 class="section-title section-title--divided">
                         <span class="material-symbols-outlined fs-5">domain</span>
                         Proveedor a desactivar
                     </h2>
 
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Razón Social</div>
-                            <div class="proveedor-detail-value">@Model.RazonSocial</div>
+                            <div class="detail-label">Razón Social</div>
+                            <div class="detail-value">@Model.RazonSocial</div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Nombre de Fantasía</div>
-                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.NombreFantasia) ? "—" : Model.NombreFantasia)</div>
+                            <div class="detail-label">Nombre de Fantasía</div>
+                            <div class="detail-value">@(string.IsNullOrWhiteSpace(Model.NombreFantasia) ? "—" : Model.NombreFantasia)</div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">CUIT</div>
-                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.CUIT) ? "—" : Model.CUIT)</div>
+                            <div class="detail-label">CUIT</div>
+                            <div class="detail-value">@(string.IsNullOrWhiteSpace(Model.CUIT) ? "—" : Model.CUIT)</div>
                         </div>
 
                         @if (User.IsInRole("SuperAdmin"))
                         {
                             <div class="col-md-6">
-                                <div class="proveedor-detail-label">Empresa</div>
-                                <div class="proveedor-detail-value">@Model.EmpresaNombre</div>
+                                <div class="detail-label">Empresa</div>
+                                <div class="detail-value">@Model.EmpresaNombre</div>
                             </div>
                         }
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Email</div>
-                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email)</div>
+                            <div class="detail-label">Email</div>
+                            <div class="detail-value">@(string.IsNullOrWhiteSpace(Model.Email) ? "—" : Model.Email)</div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="proveedor-detail-label">Teléfono</div>
-                            <div class="proveedor-detail-value">@(string.IsNullOrWhiteSpace(Model.Telefono) ? "—" : Model.Telefono)</div>
+                            <div class="detail-label">Teléfono</div>
+                            <div class="detail-value">@(string.IsNullOrWhiteSpace(Model.Telefono) ? "—" : Model.Telefono)</div>
                         </div>
                     </div>
 
                     <form asp-action="Delete" method="post">
                         <input asp-for="Id" type="hidden" />
 
-                        <div class="d-flex justify-content-end gap-3 mt-5 pt-4 border-top">
+                        <div class="form-actions mt-5 pt-4 border-top">
                             <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
                             <button type="submit" class="btn btn-danger d-flex align-items-center gap-2">
                                 <span class="material-symbols-outlined fs-6">block</span>

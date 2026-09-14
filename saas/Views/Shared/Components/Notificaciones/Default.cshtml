@@ -24,7 +24,7 @@
         }
     </button>
 
-    <div class="dropdown-menu dropdown-menu-end shadow border-0 p-0" style="width: 360px; max-width: 90vw;">
+    <div class="dropdown-menu dropdown-menu-end shadow border-0 p-0 notifications-menu">
         <div class="p-3 border-bottom">
             <div class="d-flex justify-content-between align-items-center">
                 <h2 class="h6 fw-bold mb-0">Notificaciones</h2>
@@ -44,7 +44,7 @@
 
         @if (Model.Productos.Any() || Model.Ventas.Any())
         {
-            <div style="max-height: 360px; overflow-y: auto;">
+            <div class="notifications-scroll">
                 @foreach (var producto in Model.Productos)
                 {
                     <a asp-controller="MovimientoStock"
@@ -87,7 +87,7 @@
                     <span class="small fw-semibold text-muted">Ventas importantes de hoy</span>
                 </div>
 
-                <div style="max-height: 300px; overflow-y: auto;">
+                <div class="notifications-scroll notifications-scroll--compact">
                     @foreach (var venta in Model.Ventas)
                     {
                         <a asp-controller="Venta"

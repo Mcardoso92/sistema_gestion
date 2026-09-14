@@ -5,8 +5,11 @@
 }
 
 <main class="container-fluid px-4">
-    <div class="mb-4">
-        <h1 class="h3 mb-0 fw-bold">Nuevo Producto</h1>
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Nuevo Producto</h1>
+            <p class="page-subtitle">Registrá un producto en el catálogo.</p>
+        </div>
     </div>
 
     <div class="row">
@@ -42,7 +45,7 @@
                                 </select>
                                 <button type="button"
                                         id="btnNuevaCategoria"
-                                        class="btn btn-outline-secondary d-flex align-items-center justify-content-center"
+                                        class="btn btn-quick-create"
                                         data-crear-url="@Url.Action("CrearRapida", "Categoria")"
                                         aria-label="Crear una categoría"
                                         title="Crear una categoría">
@@ -99,7 +102,7 @@
                             <textarea asp-for="Descripcion" class="form-control" id="description" placeholder="Escriba las especificaciones técnicas o detalles del producto..." rows="4"></textarea>
                             <span asp-validation-for="Descripcion" class="text-danger"></span>
                         </div>
-                        <div class="col-12 mt-5 border-top pt-4 d-flex justify-content-end gap-3">
+                        <div class="col-12 form-actions mt-5 border-top pt-4">
                             <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
                             <button type="submit" class="btn btn-v-primary">Guardar</button>
                         </div>
@@ -179,13 +182,13 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button"
-                            class="btn btn-outline-secondary"
+                            class="btn btn-v-outline"
                             data-bs-dismiss="modal">
                         Cancelar
                     </button>
                     <button type="submit"
                             id="btnGuardarCategoria"
-                            class="btn btn-primary">
+                            class="btn btn-v-primary">
                         Crear categoría
                     </button>
                 </div>

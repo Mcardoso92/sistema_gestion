@@ -36,6 +36,41 @@
     font-weight: var(--veltika-font-semibold);
 }
 
+.app-body .section-title--divided {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--veltika-border);
+    color: var(--ui-primary);
+}
+
+.app-body .detail-label {
+    margin-bottom: 0.25rem;
+    color: var(--veltika-muted);
+    font-size: 0.75rem;
+    font-weight: var(--veltika-font-semibold);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.app-body .detail-value {
+    color: var(--veltika-text);
+    font-size: 0.9375rem;
+    font-weight: var(--veltika-font-medium);
+}
+
+.app-body .breadcrumb-meta,
+.app-body .field-label-compact {
+    font-size: 0.75rem;
+    font-weight: var(--veltika-font-semibold);
+}
+
+.app-body .section-title--compact {
+    font-size: 0.875rem;
+    letter-spacing: 0.03125rem;
+}
+
 .app-body .text-muted {
     color: var(--ui-text-muted) !important;
 }
@@ -74,4 +109,20 @@
 .app-body .app-content small,
 .app-body .app-content .small {
     line-height: 1.45;
+}
+
+.app-body .text-caption {
+    font-size: 0.75rem;
+}
+
+.app-body .text-micro {
+    font-size: 0.7rem;
+}
+
+.app-body .text-brand {
+    color: var(--ui-primary) !important;
+}
+
+.app-body .field-warning {
+    line-height: 1.25;
 }

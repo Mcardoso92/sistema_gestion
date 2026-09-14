@@ -6,9 +6,9 @@
 
 <div class="container-fluid px-4 py-4">
 
-    <div class="mb-4">
-        <div>
-            <h1 class="h3 fw-bold mb-1">@Model.Nombre</h1>
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">@Model.Nombre</h1>
 
             @if (Model.Estado)
             {
@@ -31,27 +31,27 @@
                     <div class="row g-4">
 
                         <div class="col-md-6">
-                            <div class="text-muted small">Nombre</div>
-                            <div class="fw-semibold">@Model.Nombre</div>
+                            <div class="detail-label">Nombre</div>
+                            <div class="detail-value">@Model.Nombre</div>
                         </div>
                         <div class="col-md-6">
-                            <div class="text-muted small">Tipo</div>
-                            <div class="fw-semibold">@TextoPresentacion.ValorEnum(Model.Tipo)</div>
+                            <div class="detail-label">Tipo</div>
+                            <div class="detail-value">@TextoPresentacion.ValorEnum(Model.Tipo)</div>
                         </div>
                         <div class="col-md-6">
-                            <div class="text-muted small">Empresa</div>
-                            <div class="fw-semibold">@Model.EmpresaNombre</div>
+                            <div class="detail-label">Empresa</div>
+                            <div class="detail-value">@Model.EmpresaNombre</div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="text-muted small">Fecha de alta</div>
-                            <div>@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")</div>
+                            <div class="detail-label">Fecha de alta</div>
+                            <div class="detail-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")</div>
                         </div>
 
                         <div class="col-12">
-                            <div class="text-muted small">Descripción</div>
+                            <div class="detail-label">Descripción</div>
 
-                            <div>
+                            <div class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.Descripcion)
                                                                 ? "Sin descripción"
                                                                 : Model.Descripcion)
@@ -63,9 +63,9 @@
                 </div>
             </div>
 
-            <div class="d-flex justify-content-end gap-2 mt-4">
-                <a asp-action="Index" class="btn btn-outline-secondary">Volver</a>
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+            <div class="form-actions mt-4">
+                <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a>
             </div>
         </div>
 

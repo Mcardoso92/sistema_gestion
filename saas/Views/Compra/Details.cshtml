@@ -38,7 +38,7 @@
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
-                <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                <a asp-action="Index" class="btn btn-v-outline">
                     <span class="material-symbols-outlined icon-sm">arrow_back</span>
                     Volver
                 </a>
@@ -66,52 +66,52 @@
                 <div class="card-body p-4">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <span class="compra-detail-label">Proveedor</span>
-                            <p class="compra-detail-value">@Model.ProveedorNombre</p>
+                            <span class="detail-label">Proveedor</span>
+                            <p class="detail-value">@Model.ProveedorNombre</p>
                         </div>
 
                         @if (esSuperAdmin)
                         {
                             <div class="col-md-6">
-                                <span class="compra-detail-label">Empresa</span>
-                                <p class="compra-detail-value">@Model.EmpresaNombre</p>
+                                <span class="detail-label">Empresa</span>
+                                <p class="detail-value">@Model.EmpresaNombre</p>
                             </div>
                         }
 
                         <div class="col-md-4">
-                            <span class="compra-detail-label">Fecha</span>
-                            <p class="compra-detail-value">@FechaHora.ConvertirAHoraLocal(Model.Fecha).ToString("dd/MM/yyyy HH:mm")</p>
+                            <span class="detail-label">Fecha</span>
+                            <p class="detail-value">@FechaHora.ConvertirAHoraLocal(Model.Fecha).ToString("dd/MM/yyyy HH:mm")</p>
                         </div>
 
                         <div class="col-md-4">
-                            <span class="compra-detail-label">Tipo de comprobante</span>
-                            <p class="compra-detail-value">
+                            <span class="detail-label">Tipo de comprobante</span>
+                            <p class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.TipoComprobante) ? "—" : Model.TipoComprobante)
                             </p>
                         </div>
 
                         <div class="col-md-4">
-                            <span class="compra-detail-label">Nº de comprobante</span>
-                            <p class="compra-detail-value">
+                            <span class="detail-label">Nº de comprobante</span>
+                            <p class="detail-value">
                                 @(string.IsNullOrWhiteSpace(Model.NumeroComprobante) ? "—" : Model.NumeroComprobante)
                             </p>
                         </div>
 
                         <div class="col-md-6">
-                            <span class="compra-detail-label">Registrada por</span>
-                            <p class="compra-detail-value">@Model.UsuarioEmail</p>
+                            <span class="detail-label">Registrada por</span>
+                            <p class="detail-value">@Model.UsuarioEmail</p>
                         </div>
 
                         <div class="col-md-6">
-                            <span class="compra-detail-label">Estado</span>
-                            <p class="compra-detail-value">@(Model.Estado ? "Activa" : "Anulada")</p>
+                            <span class="detail-label">Estado</span>
+                            <p class="detail-value">@(Model.Estado ? "Activa" : "Anulada")</p>
                         </div>
 
                         @if (!string.IsNullOrWhiteSpace(Model.Observaciones))
                         {
                             <div class="col-12">
-                                <span class="compra-detail-label">Observaciones</span>
-                                <p class="compra-detail-value mb-0">@Model.Observaciones</p>
+                                <span class="detail-label">Observaciones</span>
+                                <p class="detail-value mb-0">@Model.Observaciones</p>
                             </div>
                         }
                     </div>
@@ -129,7 +129,7 @@
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0 align-middle compra-details-table">
+                    <table class="table table-hover mb-0 align-middle table--medium">
                         <thead>
                             <tr>
                                 <th class="ps-4">Producto</th>
@@ -195,7 +195,7 @@
                             <a asp-controller="PagoProveedor"
                                asp-action="Registrar"
                                asp-route-compraId="@Model.Id"
-                               class="btn btn-primary d-flex align-items-center gap-2">
+                               class="btn btn-v-primary">
                                 <span class="material-symbols-outlined icon-sm">payments</span>
                                 Registrar pago
                             </a>
@@ -486,7 +486,7 @@
                             <a asp-controller="ReintegroProveedor"
                                asp-action="Registrar"
                                asp-route-compraId="@Model.Id"
-                               class="btn btn-primary d-flex align-items-center gap-2">
+                               class="btn btn-v-primary">
                                 <span class="material-symbols-outlined icon-sm">
                                     account_balance_wallet
                                 </span>
@@ -611,7 +611,7 @@
 
                 <div class="card-footer bg-white border-top p-4">
                     <div class="d-flex justify-content-end">
-                        <div class="compra-total-box">
+                        <div class="summary-total-group">
                             <div class="mb-2">
                                 <span class="text-sm text-muted-custom d-block">Total de la compra</span>
                                 <strong class="fs-4">@Model.Total.ToString("C")</strong>
@@ -681,15 +681,15 @@
 
                     <div class="card-body p-4">
                         <div class="mb-3">
-                            <span class="compra-detail-label">Fecha de anulación</span>
-                            <p class="compra-detail-value">
+                            <span class="detail-label">Fecha de anulación</span>
+                            <p class="detail-value">
                                 @(FechaHora.ConvertirAHoraLocal(Model.FechaAnulacion)?.ToString("dd/MM/yyyy HH:mm") ?? "—")
                             </p>
                         </div>
 
                         <div>
-                            <span class="compra-detail-label">Anulada por</span>
-                            <p class="compra-detail-value mb-0">
+                            <span class="detail-label">Anulada por</span>
+                            <p class="detail-value mb-0">
                                 @(string.IsNullOrWhiteSpace(Model.UsuarioAnulacionEmail) ? "—" : Model.UsuarioAnulacionEmail)
                             </p>
                         </div>
@@ -734,7 +734,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-v-outline" data-bs-dismiss="modal">Cancelar</button>
 
                     <form asp-action="Anular" asp-route-id="@Model.Id" method="post">
                         @Html.AntiForgeryToken()

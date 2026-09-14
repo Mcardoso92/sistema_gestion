@@ -5,9 +5,11 @@
 }
 
 <main class="container-fluid px-4 py-4">
-    <div class="mb-4">
-        <h1 class="h3 fw-bold mb-1">Nueva Categoría de Gasto</h1>
-        <p class="text-muted mb-0">Creá una categoría para clasificar egresos y gastos.</p>
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Nueva Categoría de Gasto</h1>
+            <p class="page-subtitle">Creá una categoría para clasificar egresos y gastos.</p>
+        </div>
     </div>
 
     <div class="row g-4 align-items-start">
@@ -42,7 +44,7 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-3 pt-4 mt-4 border-top">
+                    <div class="form-actions pt-4 mt-4 border-top">
                         <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
                         <button type="submit" class="btn btn-v-primary">Crear Categoría</button>
                     </div>

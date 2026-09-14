@@ -5,49 +5,49 @@
     ViewData["Title"] = "Ajustar Stock";
 }
 
-<main class="container-fluid flex-grow-1 px-3 px-md-5 py-4 py-md-5" style="max-width: 1440px;">
+<main class="container-fluid flex-grow-1 px-3 px-md-5 py-4 py-md-5 page-width-wide">
     <div class="mb-4">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-2 ajuste-breadcrumb">
+            <ol class="breadcrumb mb-2 breadcrumb-meta">
                 <li class="breadcrumb-item">
                     <a asp-action="Index" class="text-decoration-none text-secondary d-flex align-items-center">
                         <span class="material-symbols-outlined fs-6 me-1">inventory_2</span>Stock
                     </a>
                 </li>
-                <li class="breadcrumb-item active text-corporate" aria-current="page">Ajustar</li>
+                <li class="breadcrumb-item active text-brand" aria-current="page">Ajustar</li>
             </ol>
         </nav>
-        <h1 class="display-6 fw-bold text-corporate mb-1">Ajustar Stock</h1>
+        <h1 class="page-title text-brand">Ajustar Stock</h1>
         <p class="text-muted mb-0">Actualice el inventario manualmente registrando el motivo del cambio.</p>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card form-card border-0 bg-white shadow-sm h-100">
-                <div class="card-header card-header-corporate d-flex align-items-center gap-2">
+                <div class="card-header content-card__header content-card__header--brand d-flex align-items-center gap-2">
                     <span class="material-symbols-outlined">inventory_2</span>
                     <h2 class="h5 mb-0">Detalles del Ajuste</h2>
                 </div>
 
                 <div class="card-body p-4 p-md-5">
-                    <div class="ajuste-info-box mb-4">
-                        <h3 class="text-muted text-uppercase mb-3 ajuste-section-title">Información del Producto</h3>
+                    <div class="info-panel mb-4">
+                        <h3 class="text-muted text-uppercase mb-3 section-title--compact">Información del Producto</h3>
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <span class="d-block text-muted mb-1 ajuste-info-label">Producto</span>
+                                <span class="d-block text-muted mb-1 field-label-compact">Producto</span>
                                 <span class="d-block fw-semibold text-dark">@Model.ProductoNombre</span>
                             </div>
                             <div class="col-md-4">
-                                <span class="d-block text-muted mb-1 ajuste-info-label">Código de Barras</span>
+                                <span class="d-block text-muted mb-1 field-label-compact">Código de Barras</span>
                                 <span class="d-block fw-semibold text-dark">
                                     @(string.IsNullOrWhiteSpace(Model.CodigoBarra) ? "Sin código" : Model.CodigoBarra)
                                 </span>
                             </div>
                             <div class="col-md-4">
-                                <div class="ajuste-stock-box">
-                                    <span class="d-block text-corporate mb-1 ajuste-info-label">Stock Actual</span>
+                                <div class="metric-box">
+                                    <span class="d-block text-brand mb-1 field-label-compact">Stock Actual</span>
                                     <div class="d-flex align-items-baseline">
-                                        <span class="fs-3 fw-bold text-corporate lh-1">@Model.StockActual</span>
+                                        <span class="fs-3 fw-bold text-brand lh-1">@Model.StockActual</span>
                                         <span class="text-muted ms-1 small">uds.</span>
                                     </div>
                                 </div>
@@ -66,7 +66,7 @@
 
                         <div class="row g-4 mb-4">
                             <div class="col-md-4">
-                                <label asp-for="Tipo" class="form-label">Tipo de Ajuste <span class="required-asterisk">*</span></label>
+                                <label asp-for="Tipo" class="form-label">Tipo de Ajuste <span class="text-danger">*</span></label>
                                 <select asp-for="Tipo" class="form-select" id="tipoAjuste">
                                     <option value="">Seleccione el tipo...</option>
                                     <option value="@((int)TipoAjusteStockVM.Entrada)">Entrada</option>
@@ -76,14 +76,14 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label asp-for="Cantidad" class="form-label">Cantidad <span class="required-asterisk">*</span></label>
+                                <label asp-for="Cantidad" class="form-label">Cantidad <span class="text-danger">*</span></label>
                                 <input asp-for="Cantidad" class="form-control" min="1" id="cantidadAjuste" placeholder="0" />
                                 <span asp-validation-for="Cantidad" class="text-danger small"></span>
                             </div>
 
                             <div class="col-md-4">
                                 <label class="form-label">Stock Resultante</label>
-                                <div class="ajuste-resultado-box" id="stockResultante">@Model.StockActual</div>
+                                <div class="result-box" id="stockResultante">@Model.StockActual</div>
                                 <div class="text-danger small d-none" id="stockResultanteError">
                                     La salida no puede superar el stock disponible.
                                 </div>
@@ -91,8 +91,8 @@
                         </div>
 
                         <div class="mb-4">
-                            <label asp-for="Motivo" class="form-label">Motivo del Ajuste <span class="required-asterisk">*</span></label>
-                            <textarea asp-for="Motivo" class="form-control ajuste-motivo" id="motivo" maxlength="250" rows="4" placeholder="Especifique la razón del cambio de stock..."></textarea>
+                            <label asp-for="Motivo" class="form-label">Motivo del Ajuste <span class="text-danger">*</span></label>
+                            <textarea asp-for="Motivo" class="form-control textarea-fixed" id="motivo" maxlength="250" rows="4" placeholder="Especifique la razón del cambio de stock..."></textarea>
                             <div class="d-flex justify-content-between mt-1">
                                 <span asp-validation-for="Motivo" class="text-danger small"></span>
                                 <small class="text-muted"><span id="motivoContador">0</span> / 250</small>
@@ -101,9 +101,9 @@
 
                         <hr class="my-4 text-muted" />
 
-                        <div class="d-flex justify-content-end gap-2">
-                            <a asp-action="Index" class="btn btn-outline-secondary px-4 fw-medium">CANCELAR</a>
-                            <button class="btn btn-corporate px-4 d-flex align-items-center gap-2" id="btnGuardarAjuste" type="submit">
+                        <div class="form-actions">
+                            <a asp-action="Index" class="btn btn-v-outline">CANCELAR</a>
+                            <button class="btn btn-v-primary px-4 d-flex align-items-center gap-2" id="btnGuardarAjuste" type="submit">
                                 <span class="material-symbols-outlined fs-5">save</span>GUARDAR AJUSTE
                             </button>
                         </div>
