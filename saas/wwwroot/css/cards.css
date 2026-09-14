@@ -149,7 +149,6 @@
    Uso: contenido general, formularios y vistas de detalle.
    Los paneles con filtros conservan su variante en forms.css.
    ================================================== */
-.app-body .card-custom,
 .app-body .form-card,
 .app-body .detail-card,
 .app-body .table-card,
@@ -159,6 +158,13 @@
     border-radius: var(--veltika-radius-card);
     background: var(--veltika-surface);
     box-shadow: var(--veltika-shadow-sm);
+}
+
+/* Permite que menús y autocompletados se superpongan sin cambiar la altura de la grilla. */
+.app-body .form-card--dropdown {
+    position: relative;
+    z-index: 2;
+    overflow: visible;
 }
 
 .app-body .card-header,

@@ -39,6 +39,8 @@
     const resultadosProductos =
         document.getElementById("resultadosProductos");
 
+    const MAX_RESULTADOS_PRODUCTOS = 5;
+
     const btnBuscarCliente =
         document.getElementById("btnBuscarCliente");
 
@@ -1143,7 +1145,10 @@
 
     function mostrarResultadosProductos(productos) {
         resultadosProductos.innerHTML = "";
-        productosEncontrados = Array.isArray(productos) ? productos : [];
+        // Una lista breve evita cubrir el punto de venta; el usuario puede afinar el texto para encontrar otros productos.
+        productosEncontrados = Array.isArray(productos)
+            ? productos.slice(0, MAX_RESULTADOS_PRODUCTOS)
+            : [];
         indiceProductoSeleccionado = productosEncontrados.length > 0 ? 0 : -1;
 
         if (!Array.isArray(productos) || productos.length === 0) {
