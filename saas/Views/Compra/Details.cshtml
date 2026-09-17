@@ -610,63 +610,68 @@
                 </div>
 
                 <div class="card-footer bg-white border-top p-4">
-                    <div class="d-flex justify-content-end">
-                        <div class="summary-total-group">
-                            <div class="mb-2">
-                                <span class="text-sm text-muted-custom d-block">Total de la compra</span>
-                                <strong class="fs-4">@Model.Total.ToString("C")</strong>
-                            </div>
+                    <h2 class="h6 fw-bold text-dark mb-3">
+                        Resumen financiero
+                    </h2>
 
-                            <div class="mb-2">
-                                <span class="text-sm text-muted-custom d-block">Total pagado</span>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="detail-card p-3 h-100">
+                                <span class="text-sm text-muted-custom d-block mb-1">Total de la compra</span>
+                                <strong>@Model.Total.ToString("C")</strong>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="detail-card p-3 h-100">
+                                <span class="text-sm text-muted-custom d-block mb-1">Total pagado</span>
                                 <strong>@Model.TotalPagado.ToString("C")</strong>
                             </div>
+                        </div>
 
-                            <div>
-                                <span class="text-sm text-muted-custom d-block">Saldo pendiente</span>
+                        <div class="col-md-4">
+                            <div class="detail-card p-3 h-100">
+                                <span class="text-sm text-muted-custom d-block mb-1">Saldo pendiente</span>
                                 <strong>@Model.SaldoPendiente.ToString("C")</strong>
                             </div>
-                            <div class="mt-3">
-                                <div class="text-muted small">
-                                    Reintegrado por proveedor
-                                </div>
+                        </div>
 
-                                <div class="fw-semibold">
-                                    @Model.TotalReintegrado.ToString("C")
-                                </div>
+                        <div class="col-md-6">
+                            <div class="detail-card p-3 h-100">
+                                <span class="text-sm text-muted-custom d-block mb-1">Reintegrado por proveedor</span>
+                                <strong>@Model.TotalReintegrado.ToString("C")</strong>
                             </div>
-                            <div class="mt-3">
-                                <div class="text-muted small">
-                                    Pendiente de recuperar
-                                </div>
+                        </div>
 
-                                <div class="fw-bold">
-                                    @Model.PendienteRecuperar.ToString("C")
-                                </div>
+                        <div class="col-md-6">
+                            <div class="detail-card p-3 h-100">
+                                <span class="text-sm text-muted-custom d-block mb-1">Pendiente de recuperar</span>
+                                <strong>@Model.PendienteRecuperar.ToString("C")</strong>
                             </div>
-                            @if (Model.SaldoPendiente > 0)
-                            {
-                                <div class="alert alert-warning mt-4 mb-0">
-                                    Queda un saldo pendiente de
-                                    <strong>@Model.SaldoPendiente.ToString("C")</strong>
-                                    por pagar al proveedor.
-                                </div>
-                            }
-                            else if (Model.PendienteRecuperar > 0)
-                            {
-                                <div class="alert alert-info mt-4 mb-0">
-                                    El proveedor debe reintegrar
-                                    <strong>@Model.PendienteRecuperar.ToString("C")</strong>.
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-success mt-4 mb-0">
-                                    La compra no tiene saldos financieros pendientes.
-                                </div>
-                            }
                         </div>
                     </div>
+
+                    @if (Model.SaldoPendiente > 0)
+                    {
+                        <div class="alert alert-warning mt-4 mb-0">
+                            Queda un saldo pendiente de
+                            <strong>@Model.SaldoPendiente.ToString("C")</strong>
+                            por pagar al proveedor.
+                        </div>
+                    }
+                    else if (Model.PendienteRecuperar > 0)
+                    {
+                        <div class="alert alert-info mt-4 mb-0">
+                            El proveedor debe reintegrar
+                            <strong>@Model.PendienteRecuperar.ToString("C")</strong>.
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mt-4 mb-0">
+                            La compra no tiene saldos financieros pendientes.
+                        </div>
+                    }
                 </div>
             </div>
         </div>
