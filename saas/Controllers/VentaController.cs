@@ -1638,6 +1638,64 @@ namespace saas.Controllers
                         Tipo = m.Tipo
                     })
                     .ToListAsync();
+
+            ventaVM.MedioPagoEfectivoPredeterminadoId =
+                ventaVM.MediosPagoDisponibles
+                    .FirstOrDefault(m =>
+                        m.Tipo == TipoMedioPago.Efectivo)
+                    ?.Id;
+
+            if (!ventaVM.MedioPagoEfectivoPredeterminadoId.HasValue)
+            {
+                return;
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return;
+            }
+
+            int medioEfectivoId =
+                ventaVM.MedioPagoEfectivoPredeterminadoId.Value;
+
+            // Se prioriza la caja del turno abierto propio. Así la sugerencia
+            // coincide con la validación que se aplica al confirmar la venta.
+            ventaVM.CajaPredeterminadaId =
+                await _context.TurnosCaja
+                    .AsNoTracking()
+                    .Where(t =>
+                        t.EmpresaId == empresaId &&
+                        t.UsuarioAperturaId == usuario.Id &&
+                        t.Estado == EstadoTurnoCaja.Abierto &&
+                        t.Caja.Estado &&
+                        t.Caja.CajaMediosPago.Any(cm =>
+                            cm.MedioPagoId == medioEfectivoId))
+                    .Select(t => (int?)t.CajaId)
+                    .FirstOrDefaultAsync();
+
+            if (ventaVM.CajaPredeterminadaId.HasValue)
+            {
+                return;
+            }
+
+            // Sin turno propio, se propone una caja operable sin turno para
+            // efectivo. La caja inicial puede haberse renombrado, por eso no
+            // dependemos de un nombre fijo para encontrar el respaldo.
+            ventaVM.CajaPredeterminadaId =
+                await _context.Cajas
+                    .AsNoTracking()
+                    .Where(c =>
+                        c.EmpresaId == empresaId &&
+                        c.Estado &&
+                        !c.PermiteTurnos &&
+                        c.CajaMediosPago.Any(cm =>
+                            cm.MedioPagoId == medioEfectivoId))
+                    .OrderBy(c => c.Nombre == "Caja principal" ? 0 : 1)
+                    .ThenBy(c => c.Nombre)
+                    .Select(c => (int?)c.Id)
+                    .FirstOrDefaultAsync();
         }
     }
 }

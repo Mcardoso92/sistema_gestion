@@ -28,6 +28,14 @@ namespace saas.ViewModel
         public List<CajaOpcionSimpleVM> CajasDisponibles { get; set; }
             = new List<CajaOpcionSimpleVM>();
 
+        // Valores sugeridos por el servidor para nuevas líneas de pago del POS.
+        // No reemplazan las validaciones ni impiden que el usuario los cambie.
+        [ValidateNever]
+        public int? MedioPagoEfectivoPredeterminadoId { get; set; }
+
+        [ValidateNever]
+        public int? CajaPredeterminadaId { get; set; }
+
         public int TotalLineas =>
             Detalles.Count;
 

@@ -24,6 +24,12 @@
     const getMediosUrl =
         puntoVenta.dataset.getMediosUrl;
 
+    const medioPagoEfectivoPredeterminadoId =
+        Number(puntoVenta.dataset.medioPagoEfectivoId);
+
+    const cajaPredeterminadaId =
+        Number(puntoVenta.dataset.cajaPredeterminadaId);
+
     const btnVolverVentas =
         document.getElementById("btnVolverVentas");
 
@@ -284,7 +290,8 @@
 
     async function cargarCajasPorMedioPago(
         medioSelect,
-        cajaSelect) {
+        cajaSelect,
+        cajaPreferidaId = 0) {
 
         const medioPagoId =
             medioSelect.value;
@@ -329,7 +336,12 @@
                 cajaSelect.appendChild(option);
             });
 
-            if (cajas.length === 1) {
+            if (cajaPreferidaId > 0 &&
+                cajas.some(caja => Number(caja.id) === cajaPreferidaId)) {
+
+                cajaSelect.value = cajaPreferidaId.toString();
+            }
+            else if (cajas.length === 1) {
                 cajaSelect.value =
                     cajas[0].id;
             }
@@ -388,7 +400,7 @@
         });
     }
 
-    function crearPago() {
+    async function crearPago() {
 
         if (carrito.length === 0) {
             mostrarMensaje(
@@ -527,6 +539,29 @@
 
             importeInput.value =
                 saldoRestante.toFixed(2);
+        }
+
+        const medioSelect =
+            pago.querySelector(".medio-pago-select");
+
+        if (medioPagoEfectivoPredeterminadoId > 0 && medioSelect) {
+            medioSelect.value =
+                medioPagoEfectivoPredeterminadoId.toString();
+
+            await cargarCajasPorMedioPago(
+                medioSelect,
+                pago.querySelector(".caja-pago-select"),
+                cajaPredeterminadaId);
+
+            actualizarBloqueEfectivo(pago, true);
+
+            const recibidoInput =
+                pago.querySelector(".efectivo-recibido");
+
+            requestAnimationFrame(() => {
+                recibidoInput?.focus();
+                recibidoInput?.select();
+            });
         }
 
         actualizarResumenPagos();
