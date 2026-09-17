@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using saas.Models;
-using saas.Services;
 
 namespace saas.Data.Seed
 {
@@ -9,62 +6,8 @@ namespace saas.Data.Seed
     {
         public static async Task SeedAsync(IServiceProvider services)
         {
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = services.GetRequiredService<UserManager<Usuario>>();
-            var context = services.GetRequiredService<SaasDbContext>();
-            var fechaHora = services.GetRequiredService<IFechaHoraService>();
-
-            // ==========================
-            // EMPRESAS
-            // ==========================
-
-            var empresaVeltika = await context.Empresas.FirstOrDefaultAsync(e => e.Nombre == "Veltika Demo");
-
-            if (empresaVeltika == null)
-            {
-                empresaVeltika = new Empresa
-                {
-                    Nombre = "Veltika Demo",
-                    Estado = true,
-                    FechaAlta = fechaHora.UtcAhora
-                };
-
-                context.Empresas.Add(empresaVeltika);
-            }
-
-            var empresaKiosko = await context.Empresas.FirstOrDefaultAsync(e => e.Nombre == "Kiosko Don José");
-
-            if (empresaKiosko == null)
-            {
-                empresaKiosko = new Empresa
-                {
-                    Nombre = "Kiosko Don José",
-                    Estado = true,
-                    FechaAlta = fechaHora.UtcAhora
-                };
-
-                context.Empresas.Add(empresaKiosko);
-            }
-
-            var empresaFerreteria = await context.Empresas.FirstOrDefaultAsync(e => e.Nombre == "Ferretería Central");
-
-            if (empresaFerreteria == null)
-            {
-                empresaFerreteria = new Empresa
-                {
-                    Nombre = "Ferretería Central",
-                    Estado = true,
-                    FechaAlta = fechaHora.UtcAhora
-                };
-
-                context.Empresas.Add(empresaFerreteria);
-            }
-
-            await context.SaveChangesAsync();
-
-            // ==========================
-            // ROLES
-            // ==========================
+            var roleManager =
+                services.GetRequiredService<RoleManager<IdentityRole>>();
 
             string[] roles =
             {
@@ -81,98 +24,8 @@ namespace saas.Data.Seed
                 }
             }
 
-            // ==========================
-            // SUPER ADMIN
-            // ==========================
-
-            var superAdmin = await userManager.FindByEmailAsync("[REDACTED]");
-
-            if (superAdmin == null)
-            {
-                superAdmin = new Usuario
-                {
-                    UserName = "[REDACTED]",
-                    Email = "[REDACTED]",
-
-                    Nombre = "Administrador",
-                    Apellido = "General",
-
-                    EmpresaId = empresaVeltika.Id,
-
-                    Estado = true,
-                    FechaAlta = fechaHora.UtcAhora,
-                    ImagenPerfil = ""
-                };
-
-                var resultado = await userManager.CreateAsync(superAdmin, "[REDACTED]");
-
-                if (resultado.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(superAdmin, "SuperAdmin");
-                }
-            }
-
-            // ==========================
-            // ADMIN KIOSKO
-            // ==========================
-
-            var adminKiosko = await userManager.FindByEmailAsync("[REDACTED]");
-
-            if (adminKiosko == null)
-            {
-                adminKiosko = new Usuario
-                {
-                    UserName = "[REDACTED]",
-                    Email = "[REDACTED]",
-
-                    Nombre = "Juan",
-                    Apellido = "Pérez",
-
-                    EmpresaId = empresaKiosko.Id,
-
-                    Estado = true,
-                    FechaAlta = fechaHora.UtcAhora,
-                    ImagenPerfil = ""
-                };
-
-                var resultado = await userManager.CreateAsync(adminKiosko, "[REDACTED]");
-
-                if (resultado.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminKiosko, "AdminEmpresa");
-                }
-            }
-
-            // ==========================
-            // ADMIN FERRETERÍA
-            // ==========================
-
-            var adminFerreteria = await userManager.FindByEmailAsync("[REDACTED]");
-
-            if (adminFerreteria == null)
-            {
-                adminFerreteria = new Usuario
-                {
-                    UserName = "[REDACTED]",
-                    Email = "[REDACTED]",
-
-                    Nombre = "María",
-                    Apellido = "Gómez",
-
-                    EmpresaId = empresaFerreteria.Id,
-
-                    Estado = true,
-                    FechaAlta = fechaHora.UtcAhora,
-                    ImagenPerfil = ""
-                };
-
-                var resultado = await userManager.CreateAsync(adminFerreteria, "[REDACTED]");
-
-                if (resultado.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(adminFerreteria, "AdminEmpresa");
-                }
-            }
+            // Las cuentas administrativas se crean desde flujos controlados.
+            // El seeder nunca debe contener ni recrear credenciales conocidas.
         }
     }
 }
