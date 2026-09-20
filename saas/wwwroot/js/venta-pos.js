@@ -624,6 +624,27 @@
 
         if (recibidoInput) {
 
+            // Un input numérico cambia su valor con la rueda aun cuando el
+            // usuario solo quiere recorrer el POS. Mantenemos el foco y
+            // trasladamos el desplazamiento a la página sin tocar el importe.
+            recibidoInput.addEventListener(
+                "wheel",
+                function (evento) {
+
+                    if (evento.ctrlKey) {
+                        return;
+                    }
+
+                    evento.preventDefault();
+
+                    window.scrollBy({
+                        top: evento.deltaY,
+                        left: evento.deltaX,
+                        behavior: "auto"
+                    });
+                },
+                { passive: false });
+
             recibidoInput.addEventListener(
                 "input",
                 function () {
