@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Localization;
 using System.Threading.RateLimiting;
+using System.Globalization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
@@ -8,6 +10,7 @@ using saas.Configuracion;
 using saas.Models;
 using saas.Services;
 using saas.Settings;
+using saas.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +20,36 @@ builder.Services.AddControllersWithViews(options =>
     options.ModelBinderProviders.Insert(
         0,
         new HtmlDecimalModelBinderProvider());
-});
+
+    // Los mensajes técnicos del model binding se muestran al usuario en todos
+    // los formularios, por eso se traducen una única vez desde esta configuración.
+    options.ModelBindingMessageProvider.SetMissingBindRequiredValueAccessor(
+        nombreCampo => $"El campo {nombreCampo} es obligatorio.");
+    options.ModelBindingMessageProvider.SetMissingKeyOrValueAccessor(
+        () => "Debe ingresar un valor.");
+    options.ModelBindingMessageProvider.SetMissingRequestBodyRequiredValueAccessor(
+        () => "Debe enviar la información requerida.");
+    options.ModelBindingMessageProvider.SetNonPropertyAttemptedValueIsInvalidAccessor(
+        valor => $"El valor '{valor}' no es válido.");
+    options.ModelBindingMessageProvider.SetNonPropertyUnknownValueIsInvalidAccessor(
+        () => "El valor ingresado no es válido.");
+    options.ModelBindingMessageProvider.SetUnknownValueIsInvalidAccessor(
+        nombreCampo => $"El valor ingresado para {nombreCampo} no es válido.");
+    options.ModelBindingMessageProvider.SetValueIsInvalidAccessor(
+        valor => $"El valor '{valor}' no es válido.");
+    options.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(
+        nombreCampo => $"El campo {nombreCampo} debe ser numérico.");
+    options.ModelBindingMessageProvider.SetValueMustNotBeNullAccessor(
+        nombreCampo => $"El campo {nombreCampo} es obligatorio.");
+})
+    .AddDataAnnotationsLocalization(options =>
+    {
+        options.DataAnnotationLocalizerProvider =
+            (_, factory) => factory.Create(typeof(ValidacionRecursos));
+    });
+
+builder.Services.AddLocalization(options =>
+    options.ResourcesPath = "Resources");
 
 builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
@@ -65,6 +97,7 @@ builder.Services.AddIdentity<Usuario, IdentityRole>(options =>
 }
 )
     .AddEntityFrameworkStores<SaasDbContext>()
+    .AddErrorDescriber<IdentidadErrorDescriber>()
     .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -137,6 +170,10 @@ app.UseStaticFiles(new StaticFileOptions
         context.Context.Response.Headers.CacheControl = "public,max-age=604800";
     }
 });
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .SetDefaultCulture("es-AR")
+    .AddSupportedCultures("es-AR")
+    .AddSupportedUICultures("es-AR"));
 app.UseRouting();
 app.UseRateLimiter();
 
