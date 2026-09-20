@@ -1940,6 +1940,24 @@
     });
 
     document.addEventListener("keydown", evento => {
+        // Los atajos del POS reutilizan los botones existentes para conservar
+        // sus validaciones, mensajes y flujo de negocio en un único lugar.
+        if (evento.repeat || document.querySelector(".modal.show")) {
+            return;
+        }
+
+        if (evento.key === "F4") {
+            evento.preventDefault();
+            btnAgregarPago.click();
+            return;
+        }
+
+        if (evento.ctrlKey && evento.key === "Enter") {
+            evento.preventDefault();
+            btnConfirmarVenta.click();
+            return;
+        }
+
         if (evento.key === "F2") {
             evento.preventDefault();
             inputBuscarProducto.focus();
