@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace saas.ViewModel.Reportes
 {
-    public class ReporteVentasVM
+    public class ReporteVentasVM : ReportePaginadoVM
     {
         [DataType(DataType.Date)]
         public DateTime FechaDesde { get; set; }

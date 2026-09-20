@@ -2,7 +2,7 @@
 
 namespace saas.ViewModel.Reportes
 {
-    public class ReporteStockVM
+    public class ReporteStockVM : ReportePaginadoVM
     {
         public int? CategoriaId { get; set; }
 

@@ -2,7 +2,7 @@
 
 namespace saas.ViewModel.Reportes
 {
-    public class ReporteClientesVM
+    public class ReporteClientesVM : ReportePaginadoVM
     {
         public int? EmpresaId { get; set; }
 

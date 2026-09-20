@@ -274,5 +274,15 @@
                 No se encontraron productos para los filtros seleccionados.
             </div>
         }
+
+        <partial name="_Paginacion"
+                 model='new PaginacionVM
+                 {
+                     PaginaActual = Model.PaginaActual,
+                     TotalPaginas = Model.TotalPaginas,
+                     TotalRegistros = Model.TotalRegistros,
+                     NombreSingular = "producto encontrado",
+                     NombrePlural = "productos encontrados"
+                 }' />
     </section>
 </main>

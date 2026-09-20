@@ -224,5 +224,15 @@
                 No se encontraron ventas para los filtros seleccionados.
             </div>
         }
+
+        <partial name="_Paginacion"
+                 model='new PaginacionVM
+                 {
+                     PaginaActual = Model.PaginaActual,
+                     TotalPaginas = Model.TotalPaginas,
+                     TotalRegistros = Model.TotalRegistros,
+                     NombreSingular = "venta encontrada",
+                     NombrePlural = "ventas encontradas"
+                 }' />
     </section>
 </main>

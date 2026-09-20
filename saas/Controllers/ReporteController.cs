@@ -34,7 +34,8 @@ namespace saas.Controllers
             DateTime? fechaDesde,
             DateTime? fechaHasta,
             int? clienteId,
-            int? empresaId)
+            int? empresaId,
+            int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -134,9 +135,30 @@ namespace saas.Controllers
                     v.ClienteId == clienteId.Value);
             }
 
+            const int tamanioPagina = 20;
+            int totalRegistros = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalRegistros / (double)tamanioPagina);
+
+            pagina = Math.Max(pagina, 1);
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            vm.PaginaActual = pagina;
+            vm.TotalPaginas = totalPaginas;
+            vm.TotalRegistros = totalRegistros;
+            vm.CantidadVentas = totalRegistros;
+            vm.TotalVendido = await consulta.SumAsync(v => (decimal?)v.Total) ?? 0;
+            vm.TicketPromedio = vm.CantidadVentas > 0
+                ? vm.TotalVendido / vm.CantidadVentas
+                : 0;
+
             vm.Ventas = await consulta
                 .OrderByDescending(v => v.Fecha)
                 .ThenByDescending(v => v.Id)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(v => new ReporteVentaFilaVM
                 {
                     VentaId = v.Id,
@@ -152,12 +174,6 @@ namespace saas.Controllers
                     Total = v.Total
                 })
                 .ToListAsync();
-
-            vm.TotalVendido = vm.Ventas.Sum(v => v.Total);
-            vm.CantidadVentas = vm.Ventas.Count;
-            vm.TicketPromedio = vm.CantidadVentas > 0
-                ? vm.TotalVendido / vm.CantidadVentas
-                : 0;
 
             await CargarOpciones(
                 vm,
@@ -273,7 +289,8 @@ namespace saas.Controllers
         public async Task<IActionResult> Stock(
             int? categoriaId,
             int? empresaId,
-            string situacion = "todos")
+            string situacion = "todos",
+            int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -374,9 +391,30 @@ namespace saas.Controllers
                 _ => consulta
             };
 
+            const int tamanioPagina = 20;
+            int totalRegistros = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalRegistros / (double)tamanioPagina);
+
+            pagina = Math.Max(pagina, 1);
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            vm.PaginaActual = pagina;
+            vm.TotalPaginas = totalPaginas;
+            vm.TotalRegistros = totalRegistros;
+            vm.CantidadProductos = totalRegistros;
+            vm.UnidadesStock = await consulta.SumAsync(p => (int?)p.Stock) ?? 0;
+            vm.ProductosStockBajo = await consulta.CountAsync(p => p.Stock <= p.PuntoReposicion);
+            vm.ValorInventarioCosto = await consulta.SumAsync(p => (decimal?)(p.PrecioCosto * p.Stock)) ?? 0;
+            vm.ValorInventarioVenta = await consulta.SumAsync(p => (decimal?)(p.PrecioVenta * p.Stock)) ?? 0;
+
             vm.Productos = await consulta
                 .OrderBy(p => p.Stock)
                 .ThenBy(p => p.Nombre)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(p => new ReporteStockFilaVM
                 {
                     ProductoId = p.Id,
@@ -397,15 +435,6 @@ namespace saas.Controllers
                             : "Normal"
                 })
                 .ToListAsync();
-
-            vm.CantidadProductos = vm.Productos.Count;
-            vm.UnidadesStock = vm.Productos.Sum(p => p.Stock);
-            vm.ProductosStockBajo = vm.Productos.Count(p =>
-                p.Stock <= p.PuntoReposicion);
-            vm.ValorInventarioCosto = vm.Productos.Sum(p =>
-                p.ValorCosto);
-            vm.ValorInventarioVenta = vm.Productos.Sum(p =>
-                p.ValorVenta);
 
             await CargarOpcionesStock(
                 vm,
@@ -537,7 +566,8 @@ namespace saas.Controllers
             int? categoriaId,
             int? empresaId,
             string estado = "activos",
-            string? busqueda = null)
+            string? busqueda = null,
+            int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -641,8 +671,34 @@ namespace saas.Controllers
                 _ => consulta
             };
 
+            const int tamanioPagina = 20;
+            int totalRegistros = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalRegistros / (double)tamanioPagina);
+
+            pagina = Math.Max(pagina, 1);
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            vm.PaginaActual = pagina;
+            vm.TotalPaginas = totalPaginas;
+            vm.TotalRegistros = totalRegistros;
+            vm.CantidadProductos = totalRegistros;
+            vm.ProductosActivos = await consulta.CountAsync(p => p.Estado);
+            vm.ProductosInactivos = await consulta.CountAsync(p => !p.Estado);
+            vm.MargenPromedioPorcentaje = totalRegistros > 0
+                ? await consulta
+                    .Select(p => p.PrecioCosto > 0
+                        ? (p.PrecioVenta - p.PrecioCosto) / p.PrecioCosto * 100
+                        : 0)
+                    .AverageAsync()
+                : 0;
+
             vm.Productos = await consulta
                 .OrderBy(p => p.Nombre)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(p => new ReporteProductoFilaVM
                 {
                     ProductoId = p.Id,
@@ -661,13 +717,6 @@ namespace saas.Controllers
                     Estado = p.Estado
                 })
                 .ToListAsync();
-
-            vm.CantidadProductos = vm.Productos.Count;
-            vm.ProductosActivos = vm.Productos.Count(p => p.Estado);
-            vm.ProductosInactivos = vm.Productos.Count(p => !p.Estado);
-            vm.MargenPromedioPorcentaje = vm.Productos.Any()
-                ? vm.Productos.Average(p => p.MargenPorcentaje)
-                : 0;
 
             await CargarOpcionesProductos(
                 vm,
@@ -802,7 +851,8 @@ namespace saas.Controllers
             int? empresaId,
             string estado = "activos",
             string actividad = "todos",
-            string? busqueda = null)
+            string? busqueda = null,
+            int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -924,9 +974,34 @@ namespace saas.Controllers
                      c.Email.Contains(busqueda)));
             }
 
+            const int tamanioPagina = 20;
+            int totalRegistros = await consulta.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalRegistros / (double)tamanioPagina);
+
+            pagina = Math.Max(pagina, 1);
+            if (totalPaginas > 0 && pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
+            vm.PaginaActual = pagina;
+            vm.TotalPaginas = totalPaginas;
+            vm.TotalRegistros = totalRegistros;
+            vm.CantidadClientes = totalRegistros;
+            vm.ClientesActivos = await consulta.CountAsync(c => c.Estado);
+            vm.ClientesInactivos = await consulta.CountAsync(c => !c.Estado);
+            vm.ClientesConCompras = await consulta.CountAsync(c => c.Ventas.Any(v => v.Estado));
+            vm.ImporteTotalComprado = await consulta
+                .Select(c => c.Ventas
+                    .Where(v => v.Estado)
+                    .Sum(v => (decimal?)v.Total) ?? 0)
+                .SumAsync();
+
             vm.Clientes = await consulta
                 .OrderBy(c => c.Nombre)
                 .ThenBy(c => c.Apellido)
+                .Skip((pagina - 1) * tamanioPagina)
+                .Take(tamanioPagina)
                 .Select(c => new ReporteClienteFilaVM
                 {
                     ClienteId = c.Id,
@@ -950,14 +1025,6 @@ namespace saas.Controllers
                     Estado = c.Estado
                 })
                 .ToListAsync();
-
-            vm.CantidadClientes = vm.Clientes.Count;
-            vm.ClientesActivos = vm.Clientes.Count(c => c.Estado);
-            vm.ClientesInactivos = vm.Clientes.Count(c => !c.Estado);
-            vm.ClientesConCompras = vm.Clientes.Count(c =>
-                c.CantidadCompras > 0);
-            vm.ImporteTotalComprado = vm.Clientes.Sum(c =>
-                c.ImporteComprado);
 
             await CargarOpcionesClientes(vm);
 
