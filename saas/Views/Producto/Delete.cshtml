@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Desactivar Producto";
+    string? returnUrl = ViewData["ReturnUrl"] as string;
+    string urlVolver = returnUrl ?? Url.Action("Index", "Producto")!;
 }
 
 <main class="container-fluid px-4">
@@ -55,9 +57,10 @@
                     </dl>
 
                     <div class="form-actions mt-4 border-top pt-4">
-                        <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+                        <a href="@urlVolver" class="btn btn-v-outline">Volver</a>
                         <form asp-action="Delete" method="post" class="d-inline">
                             <input type="hidden" asp-for="Id" />
+                            <input type="hidden" name="returnUrl" value="@returnUrl" />
                             <button type="submit" class="btn btn-v-primary">Desactivar</button>
                         </form>
                     </div>

@@ -10,6 +10,7 @@
     int paginaActual = ViewBag.PaginaActual is int pagina ? pagina : 1;
     int totalPaginas = ViewBag.TotalPaginas is int paginas ? paginas : 0;
     int totalProductos = ViewBag.TotalProductos is int total ? total : 0;
+    string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
 
     IEnumerable<Categoria> categorias = ViewBag.Categorias as IEnumerable<Categoria>
         ?? Enumerable.Empty<Categoria>();
@@ -185,7 +186,7 @@
                                             </div>
                                         }
                                         <div>
-                                            <a asp-action="Details" asp-route-id="@producto.Id" class="product-name d-block text-decoration-none">@producto.Nombre</a>
+                                            <a asp-action="Details" asp-route-id="@producto.Id" asp-route-returnUrl="@returnUrl" class="product-name d-block text-decoration-none">@producto.Nombre</a>
                                         </div>
                                     </div>
                                 </td>
@@ -229,11 +230,11 @@
                                 </td>
                                 <td class="px-4 py-3 text-end">
                                     <div class="table-actions">
-                                    <a asp-action="Details" asp-route-id="@producto.Id" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                    <a asp-action="Details" asp-route-id="@producto.Id" asp-route-returnUrl="@returnUrl" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
                                     <a asp-action="Edit" asp-route-id="@producto.Id" class="btn btn-sm btn-light table-action-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                     @if (producto.Estado)
                                     {
-                                        <a asp-action="Delete" asp-route-id="@producto.Id" class="btn btn-sm btn-light table-action-btn table-action-danger" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
+                                        <a asp-action="Delete" asp-route-id="@producto.Id" asp-route-returnUrl="@returnUrl" class="btn btn-sm btn-light table-action-btn table-action-danger" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
                                     }
                                     </div>
                                 </td>

@@ -11,6 +11,8 @@ namespace saas.ViewModel
 
         public string ProveedorNombre { get; set; } = string.Empty;
 
+        public int ProveedorId { get; set; }
+
         public string? TipoComprobante { get; set; }
 
         public string? NumeroComprobante { get; set; }

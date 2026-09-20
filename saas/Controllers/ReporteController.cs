@@ -129,7 +129,11 @@ namespace saas.Controllers
                     v.EmpresaId == usuario.EmpresaId);
             }
 
-            if (clienteId.HasValue)
+            if (clienteId == ReporteVentasVM.ClienteConsumidorFinalId)
+            {
+                consulta = consulta.Where(v => v.ClienteId == null);
+            }
+            else if (clienteId.HasValue)
             {
                 consulta = consulta.Where(v =>
                     v.ClienteId == clienteId.Value);
@@ -223,7 +227,11 @@ namespace saas.Controllers
                 consulta = consulta.Where(v => v.EmpresaId == usuario.EmpresaId);
             }
 
-            if (clienteId.HasValue)
+            if (clienteId == ReporteVentasVM.ClienteConsumidorFinalId)
+            {
+                consulta = consulta.Where(v => v.ClienteId == null);
+            }
+            else if (clienteId.HasValue)
             {
                 consulta = consulta.Where(v => v.ClienteId == clienteId.Value);
             }
@@ -1195,8 +1203,7 @@ namespace saas.Controllers
             }
 
             IQueryable<Cliente> consultaClientes = _context.Clientes
-                .AsNoTracking()
-                .Where(c => c.Estado);
+                .AsNoTracking();
 
             if (esSuperAdmin)
             {
@@ -1219,20 +1226,33 @@ namespace saas.Controllers
                 {
                     c.Id,
                     c.Nombre,
-                    c.Apellido
+                    c.Apellido,
+                    c.Estado
                 })
                 .ToListAsync();
 
-            vm.Clientes = clientes
-                .Select(c => new SelectListItem
+            vm.Clientes = new List<SelectListItem>
+            {
+                new()
+                {
+                    Value = ReporteVentasVM.ClienteConsumidorFinalId.ToString(),
+                    Text = "Consumidor final",
+                    Selected = vm.ClienteId == ReporteVentasVM.ClienteConsumidorFinalId
+                }
+            };
+
+            vm.Clientes.AddRange(clientes.Select(c =>
+            {
+                string nombre = string.Join(" ", new[] { c.Nombre, c.Apellido }
+                    .Where(parte => !string.IsNullOrWhiteSpace(parte)));
+
+                return new SelectListItem
                 {
                     Value = c.Id.ToString(),
-                    Text = string.IsNullOrWhiteSpace(c.Apellido)
-                        ? c.Nombre
-                        : $"{c.Nombre} {c.Apellido}",
+                    Text = c.Estado ? nombre : $"{nombre} (inactivo)",
                     Selected = vm.ClienteId == c.Id
-                })
-                .ToList();
+                };
+            }));
         }
 
         private async Task CargarOpcionesStock(

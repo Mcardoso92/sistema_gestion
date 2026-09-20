@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -760,7 +761,7 @@ namespace saas.Controllers
         }
         // GET: Compra/Details/5
         [HttpGet]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -912,6 +913,7 @@ namespace saas.Controllers
             {
                 Id = compra.Id,
                 Fecha = compra.Fecha,
+                ProveedorId = compra.ProveedorId,
                 ProveedorNombre = compra.Proveedor.RazonSocial,
                 TipoComprobante = compra.TipoComprobante,
                 NumeroComprobante = compra.NumeroComprobante,
@@ -942,6 +944,8 @@ namespace saas.Controllers
                     })
                     .ToList()
             };
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(compraVM);
         }

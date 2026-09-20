@@ -3,6 +3,8 @@
 
 @{
     ViewData["Title"] = "Detalle de Venta";
+    string? returnUrl = ViewData["ReturnUrl"] as string;
+    string urlVolver = returnUrl ?? Url.Action("Index", "Venta")!;
 }
 
 <main class="container-fluid px-4 pb-4">
@@ -19,7 +21,7 @@
                     </li>
 
                     <li class="breadcrumb-item">
-                        <a asp-controller="Venta" asp-action="Index">
+                        <a href="@urlVolver">
                             Ventas
                         </a>
                     </li>
@@ -43,7 +45,7 @@
         </div>
 
         <div class="page-actions">
-            <a asp-action="Index"
+            <a href="@urlVolver"
                class="btn btn-v-outline">
 
                 <span class="material-symbols-outlined icon-sm">

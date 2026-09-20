@@ -5,6 +5,9 @@ namespace saas.ViewModel.Reportes
 {
     public class ReporteVentasVM : ReportePaginadoVM
     {
+        // Valor reservado para filtrar ventas sin cliente registrado.
+        public const int ClienteConsumidorFinalId = 0;
+
         [DataType(DataType.Date)]
         public DateTime FechaDesde { get; set; }
 

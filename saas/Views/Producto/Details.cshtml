@@ -2,6 +2,11 @@
 
 @{
     ViewData["Title"] = "Detalles del Producto";
+    string? returnUrl = ViewData["ReturnUrl"] as string;
+    string urlVolver = returnUrl ?? Url.Action("Index", "Producto")!;
+    string textoVolver = returnUrl?.StartsWith("/Reporte/", StringComparison.OrdinalIgnoreCase) is true
+        ? "Volver al reporte"
+        : "Volver";
 }
 
 <main class="container-fluid px-4">
@@ -76,8 +81,8 @@
                             </div>
                         </div>
                         <div class="col-12 form-actions mt-5 border-top pt-4">
-                            <a asp-action="Index" class="btn btn-v-outline">Volver</a>
-                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary"> Editar </a>
+                            <a href="@urlVolver" class="btn btn-v-outline">@textoVolver</a>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@returnUrl" class="btn btn-v-primary"> Editar </a>
                         </div>
                     </div>
                 </div>

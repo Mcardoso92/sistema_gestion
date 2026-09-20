@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Editar Producto";
+    string? returnUrl = ViewData["ReturnUrl"] as string;
+    string urlCancelar = returnUrl ?? Url.Action("Index", "Producto")!;
 }
 
 <main class="container-fluid px-4">
@@ -22,6 +24,7 @@
                     <form asp-action="Edit" method="post" enctype="multipart/form-data" class="row g-4" id="productForm">
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="UrlImagen" />
+                        <input type="hidden" name="returnUrl" value="@returnUrl" />
                         <div class="col-md-8">
                             <label asp-for="Nombre" class="form-label">Nombre del Producto</label>
                             <input asp-for="Nombre" class="form-control" type="text" />
@@ -128,7 +131,7 @@
                             <span asp-validation-for="Estado" class="text-danger"></span>
                         </div>
                         <div class="col-12 form-actions mt-5 border-top pt-4">
-                            <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                            <a href="@urlCancelar" class="btn btn-v-outline">Cancelar</a>
                             <button type="submit" class="btn btn-v-primary">Guardar</button>
                         </div>
                     </form>

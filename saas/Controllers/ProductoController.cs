@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -139,7 +140,7 @@ namespace saas.Controllers
         }
 
         // GET: Producto/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
             if (usuario == null)
@@ -172,6 +173,8 @@ namespace saas.Controllers
                 .OrderByDescending(c => c.Fecha)
                 .ThenByDescending(c => c.Id)
                 .ToListAsync();
+
+            PrepararReturnUrl(returnUrl);
 
             return View(producto);
         }
@@ -368,8 +371,10 @@ namespace saas.Controllers
         }
 
         // GET: Producto/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string? returnUrl = null)
         {
+            PrepararReturnUrl(returnUrl);
+
             if (id == null)
             {
                 return NotFound();
@@ -407,8 +412,10 @@ namespace saas.Controllers
         // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,PuntoReposicion,Estado,EmpresaId")] Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false, string? motivoCambioCosto = null)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,PuntoReposicion,Estado,EmpresaId")] Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false, string? motivoCambioCosto = null, string? returnUrl = null)
         {
+            string? returnUrlValido = PrepararReturnUrl(returnUrl);
+
             if (id != producto.Id)
             {
                 return NotFound();
@@ -587,7 +594,9 @@ namespace saas.Controllers
                 }
 
                 TempData["Success"] = "Producto modificado correctamente.";
-                return RedirectToAction(nameof(Index));
+                return returnUrlValido != null
+                    ? LocalRedirect(returnUrlValido)
+                    : RedirectToAction(nameof(Index));
             }
             catch (DbUpdateException ex) when (EsCodigoBarraDuplicado(ex))
             {
@@ -617,6 +626,14 @@ namespace saas.Controllers
             return string.IsNullOrEmpty(codigoNormalizado) ? null : codigoNormalizado;
         }
 
+        // Centraliza la validación del origen para que Volver, Cancelar y Guardar no creen redirecciones abiertas.
+        private string? PrepararReturnUrl(string? returnUrl)
+        {
+            string? returnUrlValido = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = returnUrlValido;
+            return returnUrlValido;
+        }
+
         private static bool EsCodigoBarraDuplicado(DbUpdateException excepcion)
         {
             return excepcion.InnerException is SqlException sqlException &&
@@ -624,8 +641,10 @@ namespace saas.Controllers
         }
 
         // GET: Producto/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string? returnUrl = null)
         {
+            PrepararReturnUrl(returnUrl);
+
             if (id == null)
             {
                 return NotFound();
@@ -662,8 +681,10 @@ namespace saas.Controllers
         // POST: Producto/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl = null)
         {
+            string? returnUrlValido = PrepararReturnUrl(returnUrl);
+
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -693,13 +714,15 @@ namespace saas.Controllers
 
                 TempData["Success"] = "Producto desactivado correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return returnUrlValido != null
+                    ? LocalRedirect(returnUrlValido)
+                    : RedirectToAction(nameof(Index));
             }
             catch
             {
                 TempData["Error"] = "Ocurrió un error al desactivar el producto.";
 
-                return RedirectToAction(nameof(Delete), new { id });
+                return RedirectToAction(nameof(Delete), new { id, returnUrl = returnUrlValido });
             }
         }
 

@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Reporte de productos";
+    string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
 }
 
 <main class="container-fluid py-4 px-4">
@@ -224,6 +225,7 @@
                                     <a asp-controller="Producto"
                                        asp-action="Details"
                                        asp-route-id="@producto.ProductoId"
+                                       asp-route-returnUrl="@returnUrl"
                                        class="text-decoration-none fw-semibold">
                                         @producto.Nombre
                                     </a>
