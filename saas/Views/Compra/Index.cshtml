@@ -121,6 +121,7 @@
 
                             <th class="text-end">Total</th>
                             <th class="text-center">Estado</th>
+                            <th class="text-center">Pago</th>
                             <th class="text-end pe-4">Acciones</th>
                         </tr>
                     </thead>
@@ -181,6 +182,33 @@
                                     else
                                     {
                                         <span class="status-badge status-cancelled">Anulada</span>
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                    @if (!compra.Estado)
+                                    {
+                                        <span class="status-badge status-neutral">—</span>
+                                    }
+                                    else if (compra.EstaPagada)
+                                    {
+                                        <span class="status-badge status-paid">Pagada</span>
+                                    }
+                                    else if (compra.TienePagoParcial)
+                                    {
+                                        <div class="d-flex flex-column align-items-center gap-1">
+                                            <span class="status-badge status-partial">Pago parcial</span>
+                                            <span class="small text-muted">
+                                                Pendiente: @compra.SaldoPendiente.ToString("C")
+                                            </span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="d-flex flex-column align-items-center gap-1">
+                                            <span class="status-badge status-pending">Pendiente</span>
+                                            <span class="small text-muted">@compra.SaldoPendiente.ToString("C")</span>
+                                        </div>
                                     }
                                 </td>
 

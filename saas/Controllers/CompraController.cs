@@ -157,6 +157,14 @@ namespace saas.Controllers
                     TipoComprobante = c.TipoComprobante,
                     NumeroComprobante = c.NumeroComprobante,
                     Total = c.Total,
+                    TotalPagado = c.PagosProveedor
+                        .Where(p => p.Estado == EstadoPago.Activo)
+                        .Sum(p => (decimal?)p.Importe)
+                        ?? 0,
+                    TotalDevuelto = c.DevolucionesCompra
+                        .Where(d => d.Estado)
+                        .Sum(d => (decimal?)d.Total)
+                        ?? 0,
                     Estado = c.Estado,
                     EmpresaNombre = c.Empresa.Nombre
                 })
