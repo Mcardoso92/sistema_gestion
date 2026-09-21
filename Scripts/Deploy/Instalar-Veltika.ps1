@@ -7,7 +7,8 @@ param(
     [string]$RutaAplicacion = "C:\inetpub\Veltika",
     [string]$InstanciaSql = ".\SQLEXPRESS",
     [string]$BaseDatos = "Veltika_DB",
-    [string]$HostPrueba = "www.veltika.com.ar"
+    [string]$HostPrueba = "www.veltika.com.ar",
+    [ValidateSet("Machine", "AppPool")][string]$OrigenVariables = "Machine"
 )
 
 $ErrorActionPreference = "Stop"
@@ -19,12 +20,51 @@ function Verificar-Administrador {
 }
 
 function Verificar-Variables {
-    # Si ASPNETCORE_ENVIRONMENT no esta definido, ASP.NET Core utiliza Production,
-    # que es precisamente la configuracion esperada en el servidor.
+    param(
+        [Parameter(Mandatory)][string]$NombreAppPool,
+        [Parameter(Mandatory)][ValidateSet("Machine", "AppPool")][string]$Origen,
+        [Parameter(Mandatory)][string]$BaseDatosEsperada
+    )
+
     $requeridas = @("ConnectionStrings__SaasDbContext", "EmailSettings__Host", "EmailSettings__Port", "EmailSettings__UserName", "EmailSettings__Password", "EmailSettings__FromEmail", "EmailSettings__FromName", "EmailSettings__UseSsl")
-    $faltantes = foreach ($nombre in $requeridas) {
-        if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($nombre, "Machine"))) { $nombre }
+
+    if ($Origen -eq "Machine") {
+        # Produccion conserva las variables globales actuales. Si el ambiente no
+        # esta definido, ASP.NET Core utiliza Production de forma predeterminada.
+        $faltantes = foreach ($nombre in $requeridas) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($nombre, "Machine"))) { $nombre }
+        }
     }
+    else {
+        if (-not (Test-Path "IIS:\AppPools\$NombreAppPool")) {
+            throw "No existe el App Pool '$NombreAppPool'."
+        }
+
+        $requeridasAppPool = @("ASPNETCORE_ENVIRONMENT") + $requeridas
+        $filtro = "system.applicationHost/applicationPools/add[@name='$NombreAppPool']/environmentVariables"
+        $configuracion = Get-WebConfiguration -PSPath "MACHINE/WEBROOT/APPHOST" -Filter $filtro
+        $variablesConfiguradas = @{}
+        foreach ($elemento in $configuracion.Collection) {
+            $variablesConfiguradas[[string]$elemento.GetAttributeValue("name")] = [string]$elemento.GetAttributeValue("value")
+        }
+
+        $faltantes = @($requeridasAppPool | Where-Object {
+            -not $variablesConfiguradas.ContainsKey($_) -or [string]::IsNullOrWhiteSpace($variablesConfiguradas[$_])
+        })
+
+        if (-not $faltantes) {
+            if ($variablesConfiguradas["ASPNETCORE_ENVIRONMENT"] -cne "Staging") {
+                throw "El App Pool '$NombreAppPool' debe utilizar ASPNETCORE_ENVIRONMENT=Staging."
+            }
+
+            $baseEscapada = [Regex]::Escape($BaseDatosEsperada)
+            $patronBase = "(?i)(Database|Initial Catalog)\s*=\s*$baseEscapada(?:\s*;|\s*$)"
+            if ($variablesConfiguradas["ConnectionStrings__SaasDbContext"] -notmatch $patronBase) {
+                throw "La connection string del App Pool '$NombreAppPool' no apunta a '$BaseDatosEsperada'."
+            }
+        }
+    }
+
     if ($faltantes) { throw "Faltan variables de entorno: $($faltantes -join ', ')" }
 }
 
@@ -60,7 +100,8 @@ function Detener-AplicacionIis {
 }
 
 Verificar-Administrador
-Verificar-Variables
+Import-Module WebAdministration
+Verificar-Variables -NombreAppPool $AppPool -Origen $OrigenVariables -BaseDatosEsperada $BaseDatos
 if (-not (Test-Path -LiteralPath $PaqueteZip)) { throw "No se encontro el paquete: $PaqueteZip" }
 
 $hashReal = (Get-FileHash -LiteralPath $PaqueteZip -Algorithm SHA256).Hash
@@ -69,7 +110,6 @@ if ($hashReal -ne $HashEsperado.Trim()) { throw "El SHA256 del paquete no coinci
 $confirmacion = Read-Host "Escribi DESPLEGAR para continuar"
 if ($confirmacion -cne "DESPLEGAR") { throw "Deploy cancelado." }
 
-Import-Module WebAdministration
 $marca = Get-Date -Format "yyyyMMdd-HHmmss"
 $directorioTrabajo = "C:\Deploy\Trabajo-$marca"
 $respaldoAplicacion = "C:\VeltikaBackups\$marca-predeploy"
