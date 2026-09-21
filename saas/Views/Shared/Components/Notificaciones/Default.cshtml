@@ -1,5 +1,9 @@
 ﻿@model saas.ViewModel.Notificaciones.NotificacionesVM
 
+@{
+    string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
+}
+
 <div class="dropdown js-notifications"
      data-mark-read-url="@Url.Action("MarcarComoVistas", "Notificacion")">
     <form class="d-none js-notifications-token">
@@ -50,6 +54,7 @@
                     <a asp-controller="MovimientoStock"
                        asp-action="Historial"
                        asp-route-productoId="@producto.ProductoId"
+                       asp-route-returnUrl="@returnUrl"
                        class="dropdown-item text-wrap py-3 border-bottom">
 
                         <div class="d-flex gap-3">
@@ -93,6 +98,7 @@
                         <a asp-controller="Venta"
                            asp-action="Details"
                            asp-route-id="@venta.VentaId"
+                           asp-route-returnUrl="@returnUrl"
                            class="dropdown-item text-wrap py-3 border-bottom">
 
                             <div class="d-flex gap-3">

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -316,7 +317,8 @@ namespace saas.Controllers
         }
         public async Task<IActionResult> Historial(
             int? id,
-            StockHistorialVM historialVM)
+            StockHistorialVM historialVM,
+            string? returnUrl = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -324,6 +326,8 @@ namespace saas.Controllers
             {
                 return Challenge();
             }
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
 
