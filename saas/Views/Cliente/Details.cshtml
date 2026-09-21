@@ -6,6 +6,8 @@
     string nombreCompleto = string.IsNullOrWhiteSpace(Model.Apellido)
         ? Model.Nombre
         : $"{Model.Nombre} {Model.Apellido}";
+    string? returnUrl = ViewData["ReturnUrl"] as string;
+    string urlVolver = returnUrl ?? Url.Action("Index", "Cliente")!;
 }
 
 <main class="container-fluid px-4">
@@ -112,7 +114,7 @@
                         </div>
 
                         <div class="col-12 form-actions mt-5 border-top pt-4">
-                            <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+                            <a href="@urlVolver" class="btn btn-v-outline">Volver</a>
 
                             <a asp-action="Edit"
                                asp-route-id="@Model.Id"

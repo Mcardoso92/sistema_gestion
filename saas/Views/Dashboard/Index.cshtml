@@ -7,6 +7,7 @@
     decimal maximoGrafico = Model.VentasUltimosDias.Any()
         ? Model.VentasUltimosDias.Max(v => v.Total)
         : 0;
+    string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
 }
 
 <main class="container-fluid px-4 mb-5 dashboard-page">
@@ -151,6 +152,7 @@
                         {
                             <a asp-controller="Producto" asp-action="Details"
                                asp-route-id="@producto.ProductoId"
+                               asp-route-returnUrl="@returnUrl"
                                class="dashboard-list-item">
 
                                 <div>
@@ -243,6 +245,7 @@
 
                             <a asp-controller="Cliente" asp-action="Details"
                                asp-route-id="@cliente.ClienteId"
+                               asp-route-returnUrl="@returnUrl"
                                class="dashboard-ranking-item dashboard-ranking-link">
 
                                 <div class="dashboard-ranking-position">@(i + 1)</div>
