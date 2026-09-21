@@ -118,7 +118,8 @@ if (Test-Path $uploadsAnteriores) {
 & icacls $uploadsNuevos /grant "IIS AppPool\$AppPool`:(OI)(CI)(M)" /T
 
 Write-Host "=== INICIO Y PRUEBA LOCAL ==="
-iisreset | Out-Host
+# El sitio y su App Pool se administran de forma individual. Reiniciar IIS completo
+# interrumpiria otros ambientes alojados en el mismo servidor, como Veltika-QA.
 Start-WebAppPool -Name $AppPool
 Start-WebSite -Name $Sitio
 $respuesta = Invoke-WebRequest "http://localhost" -Headers @{ Host = $HostPrueba } -UseBasicParsing
