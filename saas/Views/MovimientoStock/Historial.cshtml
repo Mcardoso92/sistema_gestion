@@ -6,6 +6,7 @@
     bool historialProducto = Model.ProductoId.HasValue;
     string? returnUrl = ViewData["ReturnUrl"] as string;
     string urlVolver = returnUrl ?? Url.Action("Index", "MovimientoStock")!;
+    string historialUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 }
 
 <main class="flex-grow-1 container-fluid px-4 py-4">
@@ -38,6 +39,7 @@
                 {
                     <a asp-action="Ajustar"
                        asp-route-productoId="@Model.ProductoId"
+                       asp-route-returnUrl="@historialUrl"
                        class="btn btn-v-primary">
                         <span class="material-symbols-outlined fs-5">add</span>Nuevo Ajuste
                     </a>
@@ -258,6 +260,7 @@
                                 <td class="text-end pe-4">
                                     <a asp-action="Details"
                                        asp-route-id="@movimiento.Id"
+                                       asp-route-returnUrl="@historialUrl"
                                        class="btn btn-sm btn-light table-action-btn"
                                        title="Ver detalle"
                                        aria-label="Ver detalle">

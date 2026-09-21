@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Ajustar Stock";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <main class="container-fluid flex-grow-1 px-3 px-md-5 py-4 py-md-5 page-width-wide">
@@ -10,7 +11,7 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-2 breadcrumb-meta">
                 <li class="breadcrumb-item">
-                    <a asp-action="Index" class="text-decoration-none text-secondary d-flex align-items-center">
+                    <a href="@urlVolver" class="text-decoration-none text-secondary d-flex align-items-center">
                         <span class="material-symbols-outlined fs-6 me-1">inventory_2</span>Stock
                     </a>
                 </li>
@@ -62,6 +63,7 @@
                     <form asp-action="Ajustar" method="post">
                         @Html.AntiForgeryToken()
                         <input asp-for="ProductoId" type="hidden" />
+                        <input type="hidden" name="returnUrl" value="@urlVolver" />
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <div class="row g-4 mb-4">
@@ -102,7 +104,7 @@
                         <hr class="my-4 text-muted" />
 
                         <div class="form-actions">
-                            <a asp-action="Index" class="btn btn-v-outline">CANCELAR</a>
+                            <a href="@urlVolver" class="btn btn-v-outline">CANCELAR</a>
                             <button class="btn btn-v-primary px-4 d-flex align-items-center gap-2" id="btnGuardarAjuste" type="submit">
                                 <span class="material-symbols-outlined fs-5">save</span>GUARDAR AJUSTE
                             </button>

@@ -151,7 +151,7 @@ namespace saas.Controllers
         }
         [HttpGet]
         [Authorize(Roles = "AdminEmpresa")]
-        public async Task<IActionResult> Ajustar(int productoId)
+        public async Task<IActionResult> Ajustar(int productoId, string? returnUrl = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -174,7 +174,9 @@ namespace saas.Controllers
             if (!producto.Estado)
             {
                 TempData["Error"] = "No se puede ajustar el stock de un producto inactivo.";
-                return RedirectToAction(nameof(Index));
+                string urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl)
+                    ?? Url.Action(nameof(Index))!;
+                return Redirect(urlOrigen);
             }
 
             var ajusteVM = new StockAjusteVM
@@ -185,13 +187,16 @@ namespace saas.Controllers
                 StockActual = producto.Stock
             };
 
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             return View(ajusteVM);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "AdminEmpresa")]
-        public async Task<IActionResult> Ajustar(StockAjusteVM ajusteVM)
+        public async Task<IActionResult> Ajustar(StockAjusteVM ajusteVM, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -216,11 +221,13 @@ namespace saas.Controllers
             if (!producto.Estado)
             {
                 ModelState.AddModelError("", "No se puede ajustar el stock de un producto inactivo.");
+                ViewData["ReturnUrl"] = urlOrigen;
                 return View(ajusteVM);
             }
 
             if (!ModelState.IsValid)
             {
+                ViewData["ReturnUrl"] = urlOrigen;
                 return View(ajusteVM);
             }
 
@@ -258,6 +265,7 @@ namespace saas.Controllers
                                 nameof(ajusteVM.Cantidad),
                                 "La cantidad a retirar no puede superar el stock disponible.");
 
+                            ViewData["ReturnUrl"] = urlOrigen;
                             return View(ajusteVM);
                         }
 
@@ -272,6 +280,7 @@ namespace saas.Controllers
                             nameof(ajusteVM.Tipo),
                             "El tipo de ajuste seleccionado no es válido.");
 
+                        ViewData["ReturnUrl"] = urlOrigen;
                         return View(ajusteVM);
                 }
 
@@ -299,7 +308,9 @@ namespace saas.Controllers
 
                 TempData["Success"] = "Stock ajustado correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
             catch
             {
@@ -312,6 +323,7 @@ namespace saas.Controllers
                     "",
                     "Ocurrió un error al realizar el ajuste de stock.");
 
+                ViewData["ReturnUrl"] = urlOrigen;
                 return View(ajusteVM);
             }
         }
@@ -509,7 +521,7 @@ namespace saas.Controllers
         }
 
         // GET: MovimientoStock/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -543,6 +555,8 @@ namespace saas.Controllers
             {
                 return NotFound();
             }
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(movimientoStock);
         }

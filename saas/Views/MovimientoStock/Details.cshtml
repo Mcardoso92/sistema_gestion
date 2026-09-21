@@ -4,6 +4,7 @@
     ViewData["Title"] = "Detalle del movimiento de stock";
     bool esEntrada = Model.StockPosterior > Model.StockAnterior;
     string usuarioNombre = $"{Model.Usuario.Nombre} {Model.Usuario.Apellido}".Trim();
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <main class="container-fluid px-4 py-4">
@@ -87,7 +88,7 @@
             </div>
 
             <div class="form-actions mt-4">
-                <a asp-action="Index" class="btn btn-v-outline">Volver al listado</a>
+                <a href="@urlVolver" class="btn btn-v-outline">Volver al listado</a>
             </div>
         </div>
 

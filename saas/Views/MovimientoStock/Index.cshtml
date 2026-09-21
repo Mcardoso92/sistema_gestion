@@ -3,6 +3,7 @@
 
 @{
     ViewData["Title"] = "Stock";
+    string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 }
 
 <main class="flex-grow-1 py-5 container-fluid px-4">
@@ -256,6 +257,7 @@
 
                                         <a asp-action="Historial"
                                            asp-route-productoId="@producto.ProductoId"
+                                           asp-route-returnUrl="@returnUrl"
                                            class="btn btn-sm btn-light table-action-btn"
                                            title="Ver historial">
                                             <span class="material-symbols-outlined">
@@ -269,6 +271,7 @@
                                         {
                                             <a asp-action="Ajustar"
                                                asp-route-productoId="@producto.ProductoId"
+                                               asp-route-returnUrl="@returnUrl"
                                                class="btn btn-sm btn-light table-action-btn"
                                                title="Ajustar stock">
 

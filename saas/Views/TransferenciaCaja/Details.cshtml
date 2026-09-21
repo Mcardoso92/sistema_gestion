@@ -6,6 +6,7 @@
     bool activa =
         Model.Estado ==
         saas.Models.Enums.EstadoTransferenciaCaja.Activa;
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -43,7 +44,7 @@
 
         <div class="page-actions">
 
-            <a asp-action="Index"
+            <a href="@urlVolver"
                class="btn btn-v-outline">
                 Volver
             </a>
