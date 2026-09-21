@@ -18,6 +18,9 @@ namespace saas.ViewModel
 
         public string? Concepto { get; set; }
 
+        // Sólo existe cuando el movimiento proviene de un cobro o reintegro de venta.
+        public int? VentaId { get; set; }
+
         public decimal Importe { get; set; }
     }
 }

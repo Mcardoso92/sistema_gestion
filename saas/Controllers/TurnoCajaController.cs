@@ -483,6 +483,11 @@ namespace saas.Controllers
                             ? m.MedioPago.Nombre
                             : null,
                     Concepto = m.Concepto,
+                    VentaId = m.CobroVenta != null
+                        ? m.CobroVenta.VentaId
+                        : m.ReintegroVenta != null
+                            ? m.ReintegroVenta.VentaId
+                            : null,
                     Importe = m.Importe
                 })
                 .ToListAsync();

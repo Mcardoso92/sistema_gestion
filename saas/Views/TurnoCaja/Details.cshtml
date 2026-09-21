@@ -5,6 +5,7 @@
 
     bool estaAbierto =
         Model.Estado == saas.Models.Enums.EstadoTurnoCaja.Abierto;
+    string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
 }
 
 <div class="container-fluid px-4 py-4">
@@ -457,7 +458,8 @@
                                 <th>Dirección</th>
                                 <th>Medio de pago</th>
                                 <th>Concepto</th>
-                                <th class="text-end pe-4">Importe</th>
+                                <th class="text-end">Importe</th>
+                                <th class="text-end pe-4">Acciones</th>
                             </tr>
 
                         </thead>
@@ -519,10 +521,35 @@
                                     @(string.IsNullOrWhiteSpace(movimiento.Concepto)
                                                                     ? "-"
                                                                     : movimiento.Concepto)
+
+                                    @if (movimiento.VentaId.HasValue)
+                                    {
+                                        <a asp-controller="Venta"
+                                           asp-action="Details"
+                                           asp-route-id="@movimiento.VentaId"
+                                           asp-route-returnUrl="@returnUrl"
+                                           class="d-block small text-decoration-none mt-1">
+                                            Venta #@movimiento.VentaId
+                                        </a>
+                                    }
                             </td>
 
-                                    <td class="text-end pe-4 fw-semibold">
+                                    <td class="text-end fw-semibold">
                                         @movimiento.Importe.ToString("C")
+                                    </td>
+
+                                    <td class="text-end pe-4">
+                                        <div class="table-actions justify-content-end">
+                                            <a asp-controller="MovimientoCaja"
+                                               asp-action="Details"
+                                               asp-route-id="@movimiento.Id"
+                                               asp-route-returnUrl="@returnUrl"
+                                               class="btn btn-sm btn-light table-action-btn"
+                                               title="Ver detalle"
+                                               aria-label="Ver detalle">
+                                                <span class="material-symbols-outlined">visibility</span>
+                                            </a>
+                                        </div>
                                     </td>
 
                                 </tr>
@@ -596,6 +623,7 @@
                                 <a asp-controller="MovimientoCaja"
                                    asp-action="Details"
                                    asp-route-id="@Model.Regularizacion.MovimientoCajaId"
+                                   asp-route-returnUrl="@returnUrl"
                                    class="btn btn-sm btn-outline-success">
                                     Ver movimiento
                                 </a>
