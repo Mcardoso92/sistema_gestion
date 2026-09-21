@@ -337,8 +337,10 @@ namespace saas.Controllers
         // POST: Categoria/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Estado,EmpresaId")] Categoria categoria)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Estado,EmpresaId")] Categoria categoria, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
             if (id != categoria.Id)
             {
                 return NotFound();
@@ -433,7 +435,9 @@ namespace saas.Controllers
 
                 TempData["Success"] = "Categoría modificada correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
             catch
             {

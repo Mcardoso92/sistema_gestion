@@ -427,8 +427,11 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            CategoriaGastoEditVM categoriaVM)
+            CategoriaGastoEditVM categoriaVM,
+            string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
             if (id != categoriaVM.Id)
             {
                 return NotFound();
@@ -508,7 +511,9 @@ namespace saas.Controllers
                         ? "Categoría de gasto modificada correctamente."
                         : "Categoría de gasto modificada y desactivada correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
             catch
             {

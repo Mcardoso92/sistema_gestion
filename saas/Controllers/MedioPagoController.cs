@@ -430,8 +430,10 @@ namespace saas.Controllers
         // POST: MedioPago/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, MedioPagoEditVM medioPagoVM)
+        public async Task<IActionResult> Edit(int id, MedioPagoEditVM medioPagoVM, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
             if (id != medioPagoVM.Id)
             {
                 return NotFound();
@@ -575,7 +577,9 @@ namespace saas.Controllers
                         ? "Medio de pago modificado correctamente."
                         : "Medio de pago modificado y desactivado correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
             catch
             {

@@ -10,6 +10,7 @@
             <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
                 @Html.AntiForgeryToken()
                 <input asp-for="Id" type="hidden" /><input asp-for="EmpresaId" type="hidden" />
+                <input type="hidden" name="returnUrl" value="@urlVolver" />
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
                 <div class="row g-3">
                     <div class="col-md-6"><label asp-for="Nombre" class="form-label">Nombre</label><input asp-for="Nombre" class="form-control" /><span asp-validation-for="Nombre" class="text-danger"></span></div>
