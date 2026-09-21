@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Anular Transferencia";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -126,6 +127,7 @@
           method="post">
 
         @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@urlVolver" />
 
         <div class="card form-card">
 
@@ -155,6 +157,7 @@
 
             <a asp-action="Details"
                asp-route-id="@Model.Id"
+               asp-route-returnUrl="@urlVolver"
                class="btn btn-v-outline">
                 Cancelar
             </a>

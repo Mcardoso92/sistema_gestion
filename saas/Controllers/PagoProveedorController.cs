@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -550,8 +551,10 @@ namespace saas.Controllers
         }
         // GET: PagoProveedor/Anular/5
         [HttpGet]
-        public async Task<IActionResult> Anular(int id)
+        public async Task<IActionResult> Anular(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -596,7 +599,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new { id = pago.CompraId });
+                    new { id = pago.CompraId, returnUrl = urlOrigen });
             }
 
             var movimiento =
@@ -614,7 +617,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new { id = pago.CompraId });
+                    new { id = pago.CompraId, returnUrl = urlOrigen });
             }
 
             bool yaRevertido =
@@ -631,7 +634,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new { id = pago.CompraId });
+                    new { id = pago.CompraId, returnUrl = urlOrigen });
             }
 
             var vm =
@@ -650,13 +653,18 @@ namespace saas.Controllers
                         pago.MedioPago.Nombre
                 };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(vm);
         }
         // POST: PagoProveedor/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(AnularPagoProveedorVM vm)
+        public async Task<IActionResult> Anular(AnularPagoProveedorVM vm, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -1002,7 +1010,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new { id = pagoActual.CompraId });
+                    new { id = pagoActual.CompraId, returnUrl = urlOrigen });
             }
             catch
             {

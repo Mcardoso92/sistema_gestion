@@ -28,7 +28,7 @@
                     <h2 class="section-title mb-0">Información del Usuario</h2>
                     <div class="d-flex gap-2">
                         <a href="@urlVolver" class="btn btn-v-outline">Volver</a>
-                        <a asp-action="Edit"  asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a>
+                        <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@urlVolver" class="btn btn-v-primary">Editar</a>
                     </div>
                 </div>
                 <div class="row g-4">

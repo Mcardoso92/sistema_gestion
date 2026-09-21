@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -540,8 +541,10 @@ namespace saas.Controllers
         }
         // GET: ReintegroProveedor/Anular/5
         [HttpGet]
-        public async Task<IActionResult> Anular(int id)
+        public async Task<IActionResult> Anular(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -585,7 +588,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new { id = reintegro.CompraId });
+                    new { id = reintegro.CompraId, returnUrl = urlOrigen });
             }
 
             var vm =
@@ -601,13 +604,18 @@ namespace saas.Controllers
                         reintegro.Importe
                 };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(vm);
         }
         // POST: ReintegroProveedor/Anular
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(AnularReintegroProveedorVM vm)
+        public async Task<IActionResult> Anular(AnularReintegroProveedorVM vm, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -869,7 +877,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new { id = reintegroActual.CompraId });
+                    new { id = reintegroActual.CompraId, returnUrl = urlOrigen });
             }
             catch
             {

@@ -80,6 +80,7 @@
                 <form asp-action="Anular" asp-route-id="@Model.Id" method="post" class="d-inline"
                       onsubmit="return confirm('¿Está seguro de que desea anular esta venta? El stock de los productos será restaurado.');">
                     @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@urlVolver" />
 
                     <button type="submit" class="btn btn-outline-danger py-2 fw-medium d-flex align-items-center gap-2 small">
                         <span class="material-symbols-outlined icon-sm">cancel</span>
@@ -309,6 +310,7 @@
                                                 <a asp-controller="CobroVenta"
                                                    asp-action="Anular"
                                                    asp-route-id="@cobro.Id"
+                                                   asp-route-returnUrl="@urlVolver"
                                                    class="btn btn-sm btn-outline-danger">
 
                                                     <span class="material-symbols-outlined align-middle icon-sm">
@@ -471,6 +473,7 @@
                                                 <a asp-controller="ReintegroVenta"
                                                    asp-action="Anular"
                                                    asp-route-id="@reintegro.Id"
+                                                   asp-route-returnUrl="@urlVolver"
                                                    class="btn btn-sm btn-outline-danger">
 
                                                     <span class="material-symbols-outlined align-middle icon-sm">

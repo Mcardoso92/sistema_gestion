@@ -1107,8 +1107,10 @@ namespace saas.Controllers
         // POST: Venta/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(int id)
+        public async Task<IActionResult> Anular(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -1144,7 +1146,7 @@ namespace saas.Controllers
                     await transaccion.RollbackAsync();
 
                     TempData["Error"] = "La venta ya se encuentra anulada.";
-                    return RedirectToAction(nameof(Details), new { id });
+                    return RedirectToAction(nameof(Details), new { id, returnUrl = urlOrigen });
                 }
 
                 bool tieneCobrosActivos = await _context.CobrosVenta
@@ -1160,7 +1162,7 @@ namespace saas.Controllers
 
                     TempData["Error"] = "No se puede anular la venta porque tiene cobros activos. Debe anular primero los cobros asociados.";
 
-                    return RedirectToAction(nameof(Details), new { id });
+                    return RedirectToAction(nameof(Details), new { id, returnUrl = urlOrigen });
                 }
 
                 bool tieneReintegrosActivos = await _context.ReintegrosVenta
@@ -1176,7 +1178,7 @@ namespace saas.Controllers
 
                     TempData["Error"] = "No se puede anular la venta porque tiene reintegros activos. Debe anular primero los reintegros asociados.";
 
-                    return RedirectToAction(nameof(Details), new { id });
+                    return RedirectToAction(nameof(Details), new { id, returnUrl = urlOrigen });
                 }
 
                 DateTime fechaAnulacion = _fechaHora.UtcAhora;
@@ -1208,21 +1210,21 @@ namespace saas.Controllers
 
                 TempData["Success"] = "Venta anulada correctamente. El stock fue restaurado.";
 
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Details), new { id, returnUrl = urlOrigen });
             }
             catch (DbUpdateException)
             {
                 await transaccion.RollbackAsync();
 
                 TempData["Error"] = "No fue posible anular la venta debido a un error en la base de datos.";
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Details), new { id, returnUrl = urlOrigen });
             }
             catch (Exception)
             {
                 await transaccion.RollbackAsync();
 
                 TempData["Error"] = "Ocurrió un error inesperado al anular la venta.";
-                return RedirectToAction(nameof(Details), new { id });
+                return RedirectToAction(nameof(Details), new { id, returnUrl = urlOrigen });
             }
         }
         // GET: Venta/BuscarProductos

@@ -5,7 +5,7 @@
 
     bool estaAbierto =
         Model.Estado == saas.Models.Enums.EstadoTurnoCaja.Abierto;
-    string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -48,8 +48,7 @@
 
         <div class="page-actions">
 
-            <a asp-action="Index"
-               class="btn btn-v-outline">
+            <a href="@urlVolver" class="btn btn-v-outline">
                 Volver
             </a>
 
@@ -57,6 +56,7 @@
             {
                 <a asp-action="Cerrar"
                    asp-route-id="@Model.Id"
+                   asp-route-returnUrl="@urlVolver"
                    class="btn btn-v-primary">
                     Cerrar turno
                 </a>
@@ -527,7 +527,7 @@
                                         <a asp-controller="Venta"
                                            asp-action="Details"
                                            asp-route-id="@movimiento.VentaId"
-                                           asp-route-returnUrl="@returnUrl"
+                                           asp-route-returnUrl="@urlVolver"
                                            class="d-block small text-decoration-none mt-1">
                                             Venta #@movimiento.VentaId
                                         </a>
@@ -543,7 +543,7 @@
                                             <a asp-controller="MovimientoCaja"
                                                asp-action="Details"
                                                asp-route-id="@movimiento.Id"
-                                               asp-route-returnUrl="@returnUrl"
+                                               asp-route-returnUrl="@urlVolver"
                                                class="btn btn-sm btn-light table-action-btn"
                                                title="Ver detalle"
                                                aria-label="Ver detalle">
@@ -623,7 +623,7 @@
                                 <a asp-controller="MovimientoCaja"
                                    asp-action="Details"
                                    asp-route-id="@Model.Regularizacion.MovimientoCajaId"
-                                   asp-route-returnUrl="@returnUrl"
+                                   asp-route-returnUrl="@urlVolver"
                                    class="btn btn-sm btn-outline-success">
                                     Ver movimiento
                                 </a>
@@ -643,6 +643,7 @@
 
                         <a asp-action="RegularizarDiferencia"
                            asp-route-id="@Model.Id"
+                           asp-route-returnUrl="@urlVolver"
                            class="btn btn-warning">
                             Regularizar diferencia
                         </a>

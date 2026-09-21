@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -426,8 +427,10 @@ namespace saas.Controllers
         }
         // GET: TurnoCaja/Details/5
         [HttpGet]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             if (id == null)
             {
                 return NotFound();
@@ -594,8 +597,11 @@ namespace saas.Controllers
         }
         // GET: TurnoCaja/Cerrar/5
         [HttpGet]
-        public async Task<IActionResult> Cerrar(int? id)
+        public async Task<IActionResult> Cerrar(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             if (id == null)
             {
                 return NotFound();
@@ -645,7 +651,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             bool esPropietarioTurno =
@@ -708,8 +714,11 @@ namespace saas.Controllers
         // POST: TurnoCaja/Cerrar/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Cerrar(int id, CierreTurnoVM vm)
+        public async Task<IActionResult> Cerrar(int id, CierreTurnoVM vm, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             if (id != vm.TurnoCajaId)
             {
                 return NotFound();
@@ -758,7 +767,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             bool esPropietarioTurno =
@@ -897,7 +906,7 @@ namespace saas.Controllers
 
                     return RedirectToAction(
                         nameof(Details),
-                        new { id = turno.Id });
+                        new { id = turno.Id, returnUrl = urlOrigen });
                 }
 
                 if (vm.ImporteRendido > 0 && vm.CajaDestinoId.HasValue)
@@ -1014,7 +1023,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
             catch
             {
@@ -1031,8 +1040,11 @@ namespace saas.Controllers
         }
         // GET: TurnoCaja/RegularizarDiferencia/5
         [HttpGet]
-        public async Task<IActionResult> RegularizarDiferencia(int? id)
+        public async Task<IActionResult> RegularizarDiferencia(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             if (id == null)
             {
                 return NotFound();
@@ -1077,7 +1089,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             if (!turno.Diferencia.HasValue ||
@@ -1088,7 +1100,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             bool yaRegularizado =
@@ -1108,7 +1120,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             var vm = new RegularizarDiferenciaTurnoVM
@@ -1132,8 +1144,11 @@ namespace saas.Controllers
         // POST: TurnoCaja/RegularizarDiferencia/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegularizarDiferencia(int id, RegularizarDiferenciaTurnoVM vm)
+        public async Task<IActionResult> RegularizarDiferencia(int id, RegularizarDiferenciaTurnoVM vm, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             if (id != vm.TurnoCajaId)
             {
                 return NotFound();
@@ -1177,7 +1192,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             if (!turno.Diferencia.HasValue ||
@@ -1188,7 +1203,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             bool yaRegularizado =
@@ -1208,7 +1223,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
 
             vm.CajaNombre =
@@ -1278,7 +1293,7 @@ namespace saas.Controllers
 
                     return RedirectToAction(
                         nameof(Details),
-                        new { id = turno.Id });
+                        new { id = turno.Id, returnUrl = urlOrigen });
                 }
 
                 var movimiento =
@@ -1335,7 +1350,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = turno.Id });
+                    new { id = turno.Id, returnUrl = urlOrigen });
             }
             catch
             {

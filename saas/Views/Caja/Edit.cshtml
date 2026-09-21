@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Editar Caja";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -24,6 +25,7 @@
 
         <input asp-for="Id" type="hidden" />
         <input asp-for="EmpresaId" type="hidden" />
+        <input type="hidden" name="returnUrl" value="@urlVolver" />
 
         <div asp-validation-summary="ModelOnly"
              class="alert alert-danger"></div>
@@ -152,7 +154,7 @@
                 </div>
 
                 <div class="form-actions mt-4">
-                    <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                    <a href="@urlVolver" class="btn btn-v-outline">Cancelar</a>
                     <button type="submit" class="btn btn-v-primary">Guardar cambios</button>
                 </div>
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -758,8 +759,10 @@ namespace saas.Controllers
         }
         // GET: ReintegroVenta/Anular/5
         [HttpGet]
-        public async Task<IActionResult> Anular(int id)
+        public async Task<IActionResult> Anular(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -804,7 +807,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Venta",
-                    new { id = reintegro.VentaId });
+                    new { id = reintegro.VentaId, returnUrl = urlOrigen });
             }
 
             var movimientoCaja =
@@ -822,7 +825,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Venta",
-                    new { id = reintegro.VentaId });
+                    new { id = reintegro.VentaId, returnUrl = urlOrigen });
             }
 
             bool yaRevertido =
@@ -840,7 +843,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Venta",
-                    new { id = reintegro.VentaId });
+                    new { id = reintegro.VentaId, returnUrl = urlOrigen });
             }
 
             var vm =
@@ -859,13 +862,18 @@ namespace saas.Controllers
                         reintegro.MedioPago.Nombre
                 };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(vm);
         }
         // POST: ReintegroVenta/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(AnularReintegroVentaVM vm)
+        public async Task<IActionResult> Anular(AnularReintegroVentaVM vm, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -1158,7 +1166,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Venta",
-                    new { id = reintegro.VentaId });
+                    new { id = reintegro.VentaId, returnUrl = urlOrigen });
             }
             catch
             {

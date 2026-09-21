@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Models.Enums;
 using saas.Services;
@@ -548,8 +549,10 @@ namespace saas.Controllers
         }
         // GET: DevolucionCompra/Anular/5
         [HttpGet]
-        public async Task<IActionResult> Anular(int id)
+        public async Task<IActionResult> Anular(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -592,7 +595,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new { id = devolucion.CompraId });
+                    new { id = devolucion.CompraId, returnUrl = urlOrigen });
             }
 
             var vm =
@@ -608,13 +611,18 @@ namespace saas.Controllers
                         devolucion.Total
                 };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(vm);
         }
         // POST: DevolucionCompra/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(AnularDevolucionCompraVM vm)
+        public async Task<IActionResult> Anular(AnularDevolucionCompraVM vm, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             var usuario =
                 await _userManager.GetUserAsync(User);
 
@@ -849,11 +857,7 @@ namespace saas.Controllers
                 return RedirectToAction(
                     "Details",
                     "Compra",
-                    new
-                    {
-                        id =
-                            devolucionActual.CompraId
-                    });
+                    new { id = devolucionActual.CompraId, returnUrl = urlOrigen });
             }
             catch
             {

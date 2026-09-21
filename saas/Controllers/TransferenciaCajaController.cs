@@ -693,8 +693,10 @@ namespace saas.Controllers
         }
         // GET: TransferenciaCaja/Anular/5
         [HttpGet]
-        public async Task<IActionResult> Anular(int? id)
+        public async Task<IActionResult> Anular(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             if (id == null)
             {
                 return NotFound();
@@ -743,7 +745,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = transferencia.Id });
+                    new { id = transferencia.Id, returnUrl = urlOrigen });
             }
 
             if (transferencia.TurnoCajaId.HasValue &&
@@ -756,7 +758,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = transferencia.Id });
+                    new { id = transferencia.Id, returnUrl = urlOrigen });
             }
 
             var vm = new TransferenciaCajaResumenVM
@@ -786,13 +788,18 @@ namespace saas.Controllers
                     transferencia.Estado
             };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(vm);
         }
         // POST: TransferenciaCaja/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(int id, string motivoAnulacion)
+        public async Task<IActionResult> Anular(int id, string motivoAnulacion, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -835,7 +842,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = transferencia.Id });
+                    new { id = transferencia.Id, returnUrl = urlOrigen });
             }
 
             if (transferencia.TurnoCajaId.HasValue &&
@@ -848,7 +855,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = transferencia.Id });
+                    new { id = transferencia.Id, returnUrl = urlOrigen });
             }
 
             if (string.IsNullOrWhiteSpace(
@@ -904,7 +911,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = transferencia.Id });
+                    new { id = transferencia.Id, returnUrl = urlOrigen });
             }
 
             bool yaTieneReversion =
@@ -923,7 +930,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = transferencia.Id });
+                    new { id = transferencia.Id, returnUrl = urlOrigen });
             }
 
             await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
@@ -938,7 +945,7 @@ namespace saas.Controllers
 
                     TempData["Error"] = "La transferencia ya fue anulada por otra operación.";
 
-                    return RedirectToAction(nameof(Details), new { id = transferencia.Id });
+                    return RedirectToAction(nameof(Details), new { id = transferencia.Id, returnUrl = urlOrigen });
                 }
 
                 bool reversionRegistradaDuranteLaOperacion = await _context.MovimientosCaja
@@ -953,7 +960,7 @@ namespace saas.Controllers
 
                     TempData["Error"] = "Los movimientos de la transferencia ya fueron revertidos por otra operación.";
 
-                    return RedirectToAction(nameof(Details), new { id = transferencia.Id });
+                    return RedirectToAction(nameof(Details), new { id = transferencia.Id, returnUrl = urlOrigen });
                 }
 
                 decimal saldoDisponibleDestino = await _context.MovimientosCaja
@@ -1101,7 +1108,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = transferencia.Id });
+                    new { id = transferencia.Id, returnUrl = urlOrigen });
             }
             catch
             {

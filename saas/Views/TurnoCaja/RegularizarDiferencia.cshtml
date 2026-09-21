@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Regularizar Diferencia";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -27,6 +28,7 @@
           method="post">
 
         @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@urlVolver" />
 
         <input asp-for="TurnoCajaId"
                type="hidden" />
@@ -135,6 +137,7 @@
                 <div class="form-actions mt-4">
                     <a asp-action="Details"
                        asp-route-id="@Model.TurnoCajaId"
+                       asp-route-returnUrl="@urlVolver"
                        class="btn btn-v-outline">
                         Cancelar
                     </a>

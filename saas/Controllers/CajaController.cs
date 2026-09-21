@@ -500,7 +500,7 @@ namespace saas.Controllers
         }
         // GET: Caja/Edit/5
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -561,6 +561,8 @@ namespace saas.Controllers
 
             await CargarMediosPago(cajaVM, caja.EmpresaId);
 
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             return View(cajaVM);
         }
         // POST: Caja/Edit/5
@@ -568,8 +570,10 @@ namespace saas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             int id,
-            CajaEditVM cajaVM)
+            CajaEditVM cajaVM, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
             if (id != cajaVM.Id)
             {
                 return NotFound();
@@ -805,7 +809,7 @@ namespace saas.Controllers
                         ? "Caja modificada correctamente."
                         : "Caja modificada y desactivada correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }
             catch
             {
@@ -822,8 +826,10 @@ namespace saas.Controllers
         }
         // GET: Caja/Delete/5
         [HttpGet]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             if (id == null)
             {
                 return NotFound();
@@ -862,7 +868,7 @@ namespace saas.Controllers
                 TempData["Error"] =
                     "La caja ya se encuentra inactiva.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }
 
             var cajaVM = new CajaDetailsVM
@@ -891,13 +897,17 @@ namespace saas.Controllers
                     .ToListAsync()
             };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(cajaVM);
         }
         // POST: Caja/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -929,7 +939,7 @@ namespace saas.Controllers
                 TempData["Error"] =
                     "La caja ya se encuentra inactiva.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }
 
             bool tieneTurnoAbierto = await _context.TurnosCaja
@@ -946,7 +956,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Delete),
-                    new { id });
+                    new { id, returnUrl = urlOrigen });
             }
 
             decimal saldoActual =
@@ -959,7 +969,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Delete),
-                    new { id });
+                    new { id, returnUrl = urlOrigen });
             }
 
             try
@@ -977,7 +987,7 @@ namespace saas.Controllers
                     "Ocurrió un error al desactivar la caja.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
         }
 
 

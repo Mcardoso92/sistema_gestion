@@ -168,7 +168,7 @@ namespace saas.Controllers
             }
         }
         // GET: Empresa/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string? returnUrl = null)
         {
 
             if (id == null)
@@ -181,13 +181,17 @@ namespace saas.Controllers
             {
                 return NotFound();
             }
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             return View(empresa);
         }
         // POST: Empresa/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Estado")] Empresa empresa)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Estado")] Empresa empresa, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
             if (id != empresa.Id)
             {
                 return NotFound();
@@ -225,7 +229,7 @@ namespace saas.Controllers
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Empresa modificada correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }
             catch
             {
@@ -234,8 +238,10 @@ namespace saas.Controllers
             }
         }
         // GET: Empresa/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             if (id == null)
             {
                 return NotFound();
@@ -248,13 +254,17 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(empresa);
         }
         // POST: Empresa/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             try
             {
                 var empresa = await _context.Empresas.FindAsync(id);
@@ -275,7 +285,7 @@ namespace saas.Controllers
                 TempData["Error"] = "Ocurrió un error al desactivar la empresa.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
         }
     }
 }

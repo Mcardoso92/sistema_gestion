@@ -281,6 +281,7 @@
                                                     <a asp-controller="PagoProveedor"
                                                        asp-action="Anular"
                                                        asp-route-id="@pago.Id"
+                                                       asp-route-returnUrl="@urlVolver"
                                                        class="btn btn-sm btn-outline-danger">
                                                         Anular
                                                     </a>
@@ -391,6 +392,7 @@
                                                     <a asp-controller="DevolucionCompra"
                                                        asp-action="Anular"
                                                        asp-route-id="@devolucion.Id"
+                                                       asp-route-returnUrl="@urlVolver"
                                                        class="btn btn-sm btn-outline-danger">
                                                         Anular
                                                     </a>
@@ -581,6 +583,7 @@
                                                     <a asp-controller="ReintegroProveedor"
                                                        asp-action="Anular"
                                                        asp-route-id="@reintegro.Id"
+                                                       asp-route-returnUrl="@urlVolver"
                                                        class="btn btn-sm btn-outline-danger">
                                                         Anular
                                                     </a>
@@ -768,6 +771,7 @@
 
                     <form asp-action="Anular" asp-route-id="@Model.Id" method="post">
                         @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@urlVolver" />
 
                         <button type="submit" class="btn btn-danger d-flex align-items-center gap-2">
                             <span class="material-symbols-outlined icon-sm">cancel</span>

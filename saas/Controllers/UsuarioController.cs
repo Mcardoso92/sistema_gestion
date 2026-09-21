@@ -475,7 +475,7 @@ namespace saas.Controllers
             }
         }
         // GET: Producto/Edit/5
-        public async Task<IActionResult> Edit(string? id)
+        public async Task<IActionResult> Edit(string? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -543,12 +543,16 @@ namespace saas.Controllers
             // Cargo los combos
             await CargarCombos(viewModel, esSuperAdmin);
 
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             return View(viewModel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, UsuarioEditVM usuario)
+        public async Task<IActionResult> Edit(string id, UsuarioEditVM usuario, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
             if (id != usuario.Id)
             {
                 return NotFound();
@@ -820,7 +824,7 @@ namespace saas.Controllers
 
                 TempData["Success"] = "Usuario modificado correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }
             catch
             {
@@ -837,8 +841,10 @@ namespace saas.Controllers
             }
         }
         // GET: Usuario/Delete/5
-        public async Task<IActionResult> Delete(string? id)
+        public async Task<IActionResult> Delete(string? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
@@ -898,14 +904,18 @@ namespace saas.Controllers
             vm.PuedeDesactivar =
                 vm.MotivoBloqueoDesactivacion == null;
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(vm);
         }
         // POST: Usuario/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "SuperAdmin,AdminEmpresa")]
-        public async Task<IActionResult> DeleteConfirmed(string id)
+        public async Task<IActionResult> DeleteConfirmed(string id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
@@ -956,7 +966,7 @@ namespace saas.Controllers
             {
                 TempData["Error"] = motivoBloqueo;
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }           
 
             try
@@ -969,18 +979,18 @@ namespace saas.Controllers
                 {
                     TempData["Error"] = "Ocurrió un error al desactivar el usuario.";
 
-                    return RedirectToAction(nameof(Index));
+                    return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
                 }
 
                 TempData["Success"] = "Usuario desactivado correctamente.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }
             catch
             {
                 TempData["Error"] = "Ocurrió un error al desactivar el usuario.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is null ? RedirectToAction(nameof(Index)) : Redirect(urlOrigen);
             }
         }
         [AllowAnonymous]

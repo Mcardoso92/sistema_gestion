@@ -942,8 +942,11 @@ namespace saas.Controllers
         }
         // GET: MovimientoCaja/Revertir/5
         [HttpGet]
-        public async Task<IActionResult> Revertir(int? id)
+        public async Task<IActionResult> Revertir(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             if (id == null)
             {
                 return NotFound();
@@ -989,7 +992,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimiento.Id, returnUrl = urlOrigen });
             }
 
             bool tipoReversible =
@@ -1003,7 +1006,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimiento.Id, returnUrl = urlOrigen });
             }
 
             bool yaRevertido =
@@ -1019,7 +1022,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimiento.Id, returnUrl = urlOrigen });
             }
 
             ViewBag.Movimiento = movimiento;
@@ -1029,8 +1032,11 @@ namespace saas.Controllers
         // POST: MovimientoCaja/Revertir/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Revertir(int id, string motivo)
+        public async Task<IActionResult> Revertir(int id, string motivo, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+            ViewData["ReturnUrl"] = urlOrigen;
+
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -1068,7 +1074,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimiento.Id, returnUrl = urlOrigen });
             }
 
             bool tipoReversible =
@@ -1082,7 +1088,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimiento.Id, returnUrl = urlOrigen });
             }
 
             bool yaRevertido =
@@ -1098,7 +1104,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimiento.Id, returnUrl = urlOrigen });
             }
 
             if (string.IsNullOrWhiteSpace(motivo))
@@ -1140,7 +1146,7 @@ namespace saas.Controllers
 
                     return RedirectToAction(
                         nameof(Details),
-                        new { id = movimiento.Id });
+                        new { id = movimiento.Id, returnUrl = urlOrigen });
                 }
             }
 
@@ -1168,7 +1174,7 @@ namespace saas.Controllers
 
                     TempData["Error"] = "El movimiento ya fue revertido por otra operación.";
 
-                    return RedirectToAction(nameof(Details), new { id = movimiento.Id });
+                    return RedirectToAction(nameof(Details), new { id = movimiento.Id, returnUrl = urlOrigen });
                 }
 
                 if (direccionReversion == DireccionMovimientoCaja.Egreso)
@@ -1266,7 +1272,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = movimiento.Id });
+                    new { id = movimiento.Id, returnUrl = urlOrigen });
             }
             catch
             {

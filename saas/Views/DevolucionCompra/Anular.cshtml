@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Anular Devolución";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index", "Compra")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -46,6 +47,7 @@
                           method="post">
 
                         @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@urlVolver" />
 
                         <input asp-for="DevolucionCompraId"
                                type="hidden" />
@@ -76,6 +78,7 @@
                             <a asp-controller="Compra"
                                asp-action="Details"
                                asp-route-id="@Model.CompraId"
+                               asp-route-returnUrl="@urlVolver"
                                class="btn btn-v-outline">
                                 Cancelar
                             </a>

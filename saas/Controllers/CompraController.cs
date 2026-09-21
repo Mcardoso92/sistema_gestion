@@ -952,8 +952,10 @@ namespace saas.Controllers
         // POST: Compra/Anular/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Anular(int id)
+        public async Task<IActionResult> Anular(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -996,7 +998,7 @@ namespace saas.Controllers
 
                     return RedirectToAction(
                         nameof(Details),
-                        new { id });
+                        new { id, returnUrl = urlOrigen });
                 }
                 bool tienePagosActivos =
                     await _context.PagosProveedor
@@ -1015,7 +1017,7 @@ namespace saas.Controllers
 
                     return RedirectToAction(
                         nameof(Details),
-                        new { id });
+                        new { id, returnUrl = urlOrigen });
                 }
 
                 bool tieneDevolucionesActivas =
@@ -1035,7 +1037,7 @@ namespace saas.Controllers
 
                     return RedirectToAction(
                         nameof(Details),
-                        new { id });
+                        new { id, returnUrl = urlOrigen });
                 }
 
                 foreach (var detalle in compra.Detalles)
@@ -1051,7 +1053,7 @@ namespace saas.Controllers
 
                         return RedirectToAction(
                             nameof(Details),
-                            new { id });
+                            new { id, returnUrl = urlOrigen });
                     }
                 }
 
@@ -1149,7 +1151,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id = compra.Id });
+                    new { id = compra.Id, returnUrl = urlOrigen });
             }
             catch (DbUpdateException)
             {
@@ -1160,7 +1162,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id });
+                    new { id, returnUrl = urlOrigen });
             }
             catch (Exception)
             {
@@ -1171,7 +1173,7 @@ namespace saas.Controllers
 
                 return RedirectToAction(
                     nameof(Details),
-                    new { id });
+                    new { id, returnUrl = urlOrigen });
             }
         }
 
