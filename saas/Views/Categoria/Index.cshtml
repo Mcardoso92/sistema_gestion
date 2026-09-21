@@ -9,6 +9,7 @@
 
     IEnumerable<Empresa> empresas = ViewBag.Empresas as IEnumerable<Empresa>
         ?? Enumerable.Empty<Empresa>();
+    string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 }
 
 
@@ -129,7 +130,7 @@
                                 </td>
                                 <td class="px-4 py-3 text-end">
                                     <div class="table-actions">
-                                        <a asp-action="Details" asp-route-id="@categoria.Id" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                        <a asp-action="Details" asp-route-id="@categoria.Id" asp-route-returnUrl="@returnUrl" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
                                         <a asp-action="Edit" asp-route-id="@categoria.Id" class="btn btn-sm btn-light table-action-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                         @if (categoria.Estado)
                                         {

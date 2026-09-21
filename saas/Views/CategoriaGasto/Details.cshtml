@@ -1,9 +1,11 @@
 @model saas.ViewModel.CategoriaGastoDetailsVM
-@{ ViewData["Title"] = "Detalle de Categoría de Gasto"; }
+@{
+    ViewData["Title"] = "Detalle de Categoría de Gasto";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
+}
 <main class="container-fluid px-4 py-4">
     <div class="page-header">
         <div class="page-header-content"><div class="d-flex align-items-center gap-2 mb-1"><h1 class="page-title mb-0">@Model.Nombre</h1><span class="status-badge @(Model.Estado ? "status-active" : "status-inactive")">@(Model.Estado ? "Activa" : "Inactiva")</span></div><p class="page-subtitle">Información de la categoría de gasto.</p></div>
-        <div class="page-actions"><a asp-action="Index" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
     </div>
     <div class="row g-4 align-items-start">
         <div class="col-lg-8"><div class="detail-card p-4">
@@ -13,7 +15,9 @@
                 <div class="col-md-6"><div class="detail-label">Fecha de alta</div><div class="detail-value">@FechaHora.ConvertirAHoraLocal(Model.FechaAlta).ToString("dd/MM/yyyy")</div></div>
                 <div class="col-12"><div class="detail-label">Descripción</div><div class="detail-value">@(string.IsNullOrWhiteSpace(Model.Descripcion) ? "Sin descripción" : Model.Descripcion)</div></div>
             </div>
-        </div></div>
+        </div>
+        <div class="form-actions mt-4"><a href="@urlVolver" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
+        </div>
         <div class="col-lg-4">
             <div class="help-guide-panel">
                 <h2 class="help-guide-title">Guía de Ayuda</h2>

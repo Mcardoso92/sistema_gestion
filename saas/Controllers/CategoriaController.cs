@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 
 namespace saas.Controllers
@@ -109,7 +110,7 @@ namespace saas.Controllers
         }
 
         // GET: Categoria/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
             var usuario = await _userManager.GetUserAsync(User);
             if (usuario == null)
@@ -131,6 +132,8 @@ namespace saas.Controllers
             {
                 return NotFound();
             }
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(categoria);
         }

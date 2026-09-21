@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Services;
 using saas.ViewModel;
@@ -321,7 +322,7 @@ namespace saas.Controllers
         }
         // GET: CategoriaGasto/Details/5
         [HttpGet]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -366,6 +367,8 @@ namespace saas.Controllers
                 FechaAlta = categoria.FechaAlta,
                 EmpresaNombre = categoria.Empresa.Nombre
             };
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(categoriaVM);
         }

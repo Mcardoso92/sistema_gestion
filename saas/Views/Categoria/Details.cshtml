@@ -1,9 +1,11 @@
 @model saas.Models.Categoria
-@{ ViewData["Title"] = "Detalles de la Categoría"; }
+@{
+    ViewData["Title"] = "Detalles de la Categoría";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
+}
 <main class="container-fluid px-4 py-4">
     <div class="page-header">
         <div class="page-header-content"><h1 class="page-title">Detalle de Categoría</h1><p class="page-subtitle">Consultá la información registrada.</p></div>
-        <div class="page-actions"><a asp-action="Index" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
     </div>
     <div class="row g-4 align-items-start">
         <div class="col-lg-8"><div class="detail-card p-4">
@@ -15,7 +17,9 @@
                     <dt class="col-sm-4">Empresa</dt><dd class="col-sm-8">@Model.Empresa?.Nombre</dd>
                 }
             </dl>
-        </div></div>
+        </div>
+        <div class="form-actions mt-4"><a href="@urlVolver" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
+        </div>
         <div class="col-lg-4">
             <div class="help-guide-panel">
                 <h2 class="help-guide-title">Guía de Ayuda</h2>

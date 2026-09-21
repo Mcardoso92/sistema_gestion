@@ -11,6 +11,7 @@
 
     int? empresaIdActual =
         ViewBag.EmpresaId as int?;
+    string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 }
 
 <div class="container-fluid px-4 py-4">
@@ -255,6 +256,7 @@
 
                                             <a asp-action="Details"
                                                asp-route-id="@medio.Id"
+                                               asp-route-returnUrl="@returnUrl"
                                                class="btn btn-sm btn-light table-action-btn"
                                                title="Ver detalle"
                                                aria-label="Ver detalle">

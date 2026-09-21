@@ -317,7 +317,7 @@ namespace saas.Controllers
         }
         // GET: MedioPago/Details/5
         [HttpGet]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -370,6 +370,8 @@ namespace saas.Controllers
                 EmpresaNombre = medioPago.Empresa.Nombre,
                 CajasAsociadas = cajasAsociadas
             };
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(medioPagoVM);
         }
