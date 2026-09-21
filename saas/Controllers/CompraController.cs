@@ -414,15 +414,15 @@ namespace saas.Controllers
             }
 
             compraVM.Detalles ??= new List<DetalleCompraCreateVM>();
+            var detallesCompra = compraVM.Detalles;
 
-            foreach (var detalleNuevo in compraVM.Detalles.Where(d => d.EsProductoNuevo))
+            foreach (var detalleNuevo in detallesCompra.Where(d => d.EsProductoNuevo))
             {
                 detalleNuevo.ProductoNuevoNombre = detalleNuevo.ProductoNuevoNombre?.Trim();
                 detalleNuevo.ProductoNuevoCodigoBarra = NormalizarTextoOpcional(detalleNuevo.ProductoNuevoCodigoBarra);
             }
 
-            if (compraVM.Detalles != null &&
-                compraVM.Detalles.Any(d =>
+            if (detallesCompra.Any(d =>
                     (!d.EsProductoNuevo && d.ProductoId <= 0) ||
                     d.Cantidad <= 0 ||
                     d.PrecioUnitario <= 0 ||
@@ -448,7 +448,7 @@ namespace saas.Controllers
                 return View(compraVM);
             }
 
-            bool hayProductosRepetidos = compraVM.Detalles!
+            bool hayProductosRepetidos = detallesCompra
                 .Where(d => !d.EsProductoNuevo)
                 .GroupBy(d => d.ProductoId)
                 .Any(g => g.Count() > 1);
@@ -467,7 +467,7 @@ namespace saas.Controllers
                 return View(compraVM);
             }
 
-            var productosNuevos = compraVM.Detalles
+            var productosNuevos = detallesCompra
                 .Where(d => d.EsProductoNuevo)
                 .ToList();
 

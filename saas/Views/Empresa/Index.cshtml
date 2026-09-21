@@ -5,6 +5,7 @@
 
     string estadoSeleccionado = ViewBag.Estado?.ToString() ?? "activos";
     string? busqueda = ViewBag.Busqueda?.ToString();
+    string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 }
 
 <main class="flex-grow-1 py-5 container-fluid px-4">
@@ -105,7 +106,7 @@
                                 <td class="px-4 py-3">@FechaHora.ConvertirAHoraLocal(empresa.FechaAlta).ToString("dd MMM yyyy")</td>
                                 <td class="px-4 py-3 text-end">
                                     <div class="table-actions">
-                                        <a asp-action="Details" asp-route-id="@empresa.Id" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                        <a asp-action="Details" asp-route-id="@empresa.Id" asp-route-returnUrl="@returnUrl" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
                                         <a asp-action="Edit" asp-route-id="@empresa.Id" class="btn btn-sm btn-light table-action-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                         @if (empresa.Estado)
                                         {

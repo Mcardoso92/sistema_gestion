@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Detalle de Caja";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -115,7 +116,7 @@
             </div>
 
             <div class="form-actions mt-4">
-                <a asp-action="Index" class="btn btn-v-outline">Volver</a>
+                <a href="@urlVolver" class="btn btn-v-outline">Volver</a>
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a>
             </div>
 

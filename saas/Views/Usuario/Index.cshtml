@@ -17,6 +17,7 @@
 
     Dictionary<string, string> rolesUsuarios = ViewBag.Roles as Dictionary<string, string>
         ?? new Dictionary<string, string>();
+    string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
 }
 
 <main class="container-fluid px-4 mb-5">
@@ -172,7 +173,7 @@
                                 <td class="text-muted">@FechaHora.ConvertirAHoraLocal(usuario.FechaAlta).ToString("dd/MM/yyyy")</td>
                                 <td class="pe-4 text-end">
                                     <div class="table-actions">
-                                    <a asp-action="Details" asp-route-id="@usuario.Id" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
+                                    <a asp-action="Details" asp-route-id="@usuario.Id" asp-route-returnUrl="@returnUrl" class="btn btn-sm btn-light table-action-btn" title="Ver detalle" aria-label="Ver detalle"><span class="material-symbols-outlined">visibility</span></a>
                                     <a asp-action="Edit" asp-route-id="@usuario.Id" class="btn btn-sm btn-light table-action-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                     @if (usuario.Estado)
                                     {

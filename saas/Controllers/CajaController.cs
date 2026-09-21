@@ -429,7 +429,7 @@ namespace saas.Controllers
         }
         // GET: Caja/Details/5
         [HttpGet]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -493,6 +493,8 @@ namespace saas.Controllers
                 MediosPago = mediosPago,
                 TieneTurnoAbierto = tieneTurnoAbierto
             };
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(cajaVM);
         }

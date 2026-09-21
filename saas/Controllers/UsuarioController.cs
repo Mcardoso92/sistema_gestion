@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using saas.Data;
+using saas.Helpers;
 using saas.Models;
 using saas.Services;
 using saas.Settings;
@@ -183,7 +184,7 @@ namespace saas.Controllers
             return View(listaUsuarios);
         }
         // GET: Producto/Details/5
-        public async Task<IActionResult> Details(string? id)
+        public async Task<IActionResult> Details(string? id, string? returnUrl = null)
         {
             if (string.IsNullOrEmpty(id))
             {
@@ -226,6 +227,7 @@ namespace saas.Controllers
             var rol = (await _userManager.GetRolesAsync(usuario)).FirstOrDefault();
 
             ViewBag.Rol = rol;
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(usuario);
         }

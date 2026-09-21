@@ -153,14 +153,17 @@ namespace saas.Controllers
                 return View(vm);
             }
 
+            // A esta altura EmpresaId fue validado y representa una empresa activa.
+            int empresaId = vm.EmpresaId.GetValueOrDefault();
+
             var configuracion = await _context.ConfiguracionesEmpresa
-                .FirstOrDefaultAsync(c => c.EmpresaId == vm.EmpresaId!.Value);
+                .FirstOrDefaultAsync(c => c.EmpresaId == empresaId);
 
             if (configuracion == null)
             {
                 configuracion = new ConfiguracionEmpresa
                 {
-                    EmpresaId = vm.EmpresaId.GetValueOrDefault()
+                    EmpresaId = empresaId
                 };
 
                 _context.ConfiguracionesEmpresa.Add(configuracion);
@@ -171,7 +174,7 @@ namespace saas.Controllers
 
             if (vm.LogoArchivo != null)
             {
-                ResultadoImagen resultado = await _imagenService.GuardarAsync(vm.LogoArchivo, vm.EmpresaId.Value, "logos");
+                ResultadoImagen resultado = await _imagenService.GuardarAsync(vm.LogoArchivo, empresaId, "logos");
 
                 if (!resultado.Exito)
                 {

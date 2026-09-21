@@ -242,6 +242,8 @@ namespace saas.Controllers
                     compra);
             }
 
+            var detallesDevolucion = vm.Detalles ?? new List<RegistrarDetalleDevolucionCompraVM>();
+
             vm.Observaciones =
                 string.IsNullOrWhiteSpace(vm.Observaciones)
                     ? null
@@ -281,7 +283,7 @@ namespace saas.Controllers
                 }
 
                 var detallesSolicitados =
-                    vm.Detalles
+                    detallesDevolucion
                         .Where(d =>
                             d.CantidadDevolver > 0)
                         .ToList();
