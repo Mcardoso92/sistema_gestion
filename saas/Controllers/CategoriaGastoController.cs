@@ -374,7 +374,7 @@ namespace saas.Controllers
         }
         // GET: CategoriaGasto/Edit/5
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -417,6 +417,8 @@ namespace saas.Controllers
                 Estado = categoria.Estado,
                 EmpresaId = categoria.EmpresaId
             };
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(categoriaVM);
         }

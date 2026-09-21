@@ -294,7 +294,7 @@ namespace saas.Controllers
         }
 
         // GET: Categoria/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -328,6 +328,8 @@ namespace saas.Controllers
             {
                 CargarEmpresas(categoria.EmpresaId);
             }
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(categoria);
         }

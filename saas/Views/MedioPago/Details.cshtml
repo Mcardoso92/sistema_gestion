@@ -66,7 +66,7 @@
 
             <div class="form-actions mt-4">
                 <a href="@urlVolver" class="btn btn-v-outline">Volver</a>
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a>
+                <a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@urlVolver" class="btn btn-v-primary">Editar</a>
             </div>
         </div>
 

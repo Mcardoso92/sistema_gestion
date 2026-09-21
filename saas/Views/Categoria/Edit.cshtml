@@ -1,5 +1,8 @@
 @model Categoria
-@{ ViewData["Title"] = "Editar Categoría"; }
+@{
+    ViewData["Title"] = "Editar Categoría";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
+}
 <main class="container-fluid px-4 py-4">
     <div class="page-header"><div class="page-header-content"><h1 class="page-title">Editar Categoría</h1><p class="page-subtitle">Actualizá la información y disponibilidad de la categoría.</p></div></div>
     <div class="row g-4 align-items-start">
@@ -15,7 +18,7 @@
                     }
                     <div class="col-12"><div class="form-check form-switch"><input asp-for="Estado" class="form-check-input status-switch" role="switch" /><label asp-for="Estado" class="form-check-label fw-semibold">Categoría activa</label></div></div>
                 </div>
-                <div class="form-actions pt-4 mt-4 border-top"><a asp-action="Index" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-v-primary">Guardar</button></div>
+                <div class="form-actions pt-4 mt-4 border-top"><a href="@urlVolver" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-v-primary">Guardar</button></div>
             </form>
         </div></div>
         <div class="col-lg-4">

@@ -16,7 +16,7 @@
                 <div class="col-12"><div class="detail-label">Descripción</div><div class="detail-value">@(string.IsNullOrWhiteSpace(Model.Descripcion) ? "Sin descripción" : Model.Descripcion)</div></div>
             </div>
         </div>
-        <div class="form-actions mt-4"><a href="@urlVolver" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar</a></div>
+        <div class="form-actions mt-4"><a href="@urlVolver" class="btn btn-v-outline">Volver</a><a asp-action="Edit" asp-route-id="@Model.Id" asp-route-returnUrl="@urlVolver" class="btn btn-v-primary">Editar</a></div>
         </div>
         <div class="col-lg-4">
             <div class="help-guide-panel">

@@ -1,7 +1,8 @@
 ﻿@model saas.ViewModel.MedioPagoEditVM
 
-@{
+@{ 
     ViewData["Title"] = "Editar Medio de Pago";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
 }
 
 <div class="container-fluid px-4 py-4">
@@ -123,7 +124,7 @@
 
         <div class="form-actions mt-4">
 
-            <a asp-action="Index"
+            <a href="@urlVolver"
                class="btn btn-v-outline">
                 Cancelar
             </a>

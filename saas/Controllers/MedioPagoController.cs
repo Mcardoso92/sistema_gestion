@@ -377,7 +377,7 @@ namespace saas.Controllers
         }
         // GET: MedioPago/Edit/5
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -422,6 +422,8 @@ namespace saas.Controllers
                 TieneTurnoAbiertoAsociado =
                     await TieneTurnoAbiertoAsociado(medioPago.Id)
             };
+
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
 
             return View(medioPagoVM);
         }

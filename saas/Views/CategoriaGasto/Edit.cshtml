@@ -1,5 +1,8 @@
 @model saas.ViewModel.CategoriaGastoEditVM
-@{ ViewData["Title"] = "Editar Categoría de Gasto"; }
+@{
+    ViewData["Title"] = "Editar Categoría de Gasto";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
+}
 <main class="container-fluid px-4 py-4">
     <div class="page-header"><div class="page-header-content"><h1 class="page-title">Editar Categoría de Gasto</h1><p class="page-subtitle">Actualizá la información y disponibilidad de la categoría.</p></div></div>
     <div class="row g-4 align-items-start">
@@ -16,7 +19,7 @@
                         @if (!Model.Estado) { <div class="form-text">Activá esta opción para reactivar la categoría.</div> }
                     </div>
                 </div>
-                <div class="form-actions pt-4 mt-4 border-top"><a asp-action="Index" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-v-primary">Guardar cambios</button></div>
+                <div class="form-actions pt-4 mt-4 border-top"><a href="@urlVolver" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-v-primary">Guardar cambios</button></div>
             </form>
         </div></div>
         <div class="col-lg-4">
