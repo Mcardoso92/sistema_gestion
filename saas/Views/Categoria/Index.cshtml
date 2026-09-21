@@ -134,7 +134,7 @@
                                         <a asp-action="Edit" asp-route-id="@categoria.Id" asp-route-returnUrl="@returnUrl" class="btn btn-sm btn-light table-action-btn" title="Editar" aria-label="Editar"><span class="material-symbols-outlined">edit</span></a>
                                         @if (categoria.Estado)
                                         {
-                                            <a asp-action="Delete" asp-route-id="@categoria.Id" class="btn btn-sm btn-light table-action-btn table-action-danger" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
+                                            <a asp-action="Delete" asp-route-id="@categoria.Id" asp-route-returnUrl="@returnUrl" class="btn btn-sm btn-light table-action-btn table-action-danger" title="Desactivar" aria-label="Desactivar"><span class="material-symbols-outlined">block</span></a>
                                         }
                                     </div>
                                 </td>

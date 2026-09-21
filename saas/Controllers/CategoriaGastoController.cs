@@ -526,8 +526,9 @@ namespace saas.Controllers
         }
         // GET: CategoriaGasto/Delete/5
         [HttpGet]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
             if (id == null)
             {
                 return NotFound();
@@ -567,7 +568,9 @@ namespace saas.Controllers
                 TempData["Error"] =
                     "La categoría de gasto ya se encuentra inactiva.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
 
             var categoriaVM = new CategoriaGastoDetailsVM
@@ -580,13 +583,16 @@ namespace saas.Controllers
                 EmpresaNombre = categoria.Empresa.Nombre
             };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(categoriaVM);
         }
         // POST: CategoriaGasto/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -619,7 +625,9 @@ namespace saas.Controllers
                 TempData["Error"] =
                     "La categoría de gasto ya se encuentra inactiva.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
 
             try
@@ -637,7 +645,9 @@ namespace saas.Controllers
                     "Ocurrió un error al desactivar la categoría de gasto.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return urlOrigen is not null
+                ? Redirect(urlOrigen)
+                : RedirectToAction(nameof(Index));
         }
 
 

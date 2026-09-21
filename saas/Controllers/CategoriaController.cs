@@ -453,7 +453,7 @@ namespace saas.Controllers
         }
 
         // GET: Categoria/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string? returnUrl = null)
         {
             if (id == null)
             {
@@ -484,14 +484,17 @@ namespace saas.Controllers
                 return NotFound();
             }
 
+            ViewData["ReturnUrl"] = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
+
             return View(categoria);
         }
 
         // POST: Categoria/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -522,7 +525,7 @@ namespace saas.Controllers
             if (tieneProductos)
             {
                 TempData["Error"] = "No es posible desactivar la categoría porque tiene productos activos asociados.";
-                return RedirectToAction(nameof(Delete), new { id });
+                return RedirectToAction(nameof(Delete), new { id, returnUrl = urlOrigen });
             }
 
             try
@@ -538,7 +541,9 @@ namespace saas.Controllers
                 TempData["Error"] = "Ocurrió un error al desactivar la categoría.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return urlOrigen is not null
+                ? Redirect(urlOrigen)
+                : RedirectToAction(nameof(Index));
         }
 
         private async Task<(string Campo, string Mensaje)?>

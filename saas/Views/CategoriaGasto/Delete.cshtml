@@ -1,5 +1,8 @@
 @model saas.ViewModel.CategoriaGastoDetailsVM
-@{ ViewData["Title"] = "Desactivar Categoría de Gasto"; }
+@{
+    ViewData["Title"] = "Desactivar Categoría de Gasto";
+    string urlVolver = ViewData["ReturnUrl"] as string ?? Url.Action("Index")!;
+}
 <main class="container-fluid px-4 py-4">
     <div class="page-header"><div class="page-header-content"><h1 class="page-title">Desactivar Categoría de Gasto</h1><p class="page-subtitle">Revisá la información antes de confirmar.</p></div></div>
     <div class="row g-4 align-items-start">
@@ -12,7 +15,8 @@
             </dl>
             <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
                 @Html.AntiForgeryToken()
-                <div class="form-actions pt-4 border-top"><a asp-action="Index" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-danger">Desactivar</button></div>
+                <input type="hidden" name="returnUrl" value="@urlVolver" />
+                <div class="form-actions pt-4 border-top"><a href="@urlVolver" class="btn btn-v-outline">Cancelar</a><button type="submit" class="btn btn-danger">Desactivar</button></div>
             </form>
         </div></div>
         <div class="col-lg-4">

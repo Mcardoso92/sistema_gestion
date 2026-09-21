@@ -592,8 +592,9 @@ namespace saas.Controllers
         }
         // GET: MedioPago/Delete/5
         [HttpGet]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
             if (id == null)
             {
                 return NotFound();
@@ -632,7 +633,9 @@ namespace saas.Controllers
                 TempData["Error"] =
                     "El medio de pago ya se encuentra inactivo.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
 
             var cajasAsociadas = await _context.CajaMediosPago
@@ -655,13 +658,16 @@ namespace saas.Controllers
                     await TieneTurnoAbiertoAsociado(medioPago.Id)
             };
 
+            ViewData["ReturnUrl"] = urlOrigen;
+
             return View(medioPagoVM);
         }
         // POST: MedioPago/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, string? returnUrl = null)
         {
+            string? urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl);
             var usuario = await _userManager.GetUserAsync(User);
 
             if (usuario == null)
@@ -693,7 +699,9 @@ namespace saas.Controllers
                 TempData["Error"] =
                     "El medio de pago ya se encuentra inactivo.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
 
             if (await TieneTurnoAbiertoAsociado(medioPago.Id))
@@ -701,7 +709,9 @@ namespace saas.Controllers
                 TempData["Error"] =
                     "No puede desactivar un medio de pago asociado a una caja con turno abierto.";
 
-                return RedirectToAction(nameof(Index));
+                return urlOrigen is not null
+                    ? Redirect(urlOrigen)
+                    : RedirectToAction(nameof(Index));
             }
 
             try
@@ -719,7 +729,9 @@ namespace saas.Controllers
                     "Ocurrió un error al desactivar el medio de pago.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return urlOrigen is not null
+                ? Redirect(urlOrigen)
+                : RedirectToAction(nameof(Index));
         }
 
         //Helpers Methods
