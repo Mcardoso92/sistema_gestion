@@ -49,7 +49,7 @@ try {
     & dotnet ef migrations script --idempotent --project $proyectoWeb --startup-project $proyectoWeb --output $scriptMigraciones
     if ($LASTEXITCODE -ne 0) { throw "La generacion del script de migraciones fallo con codigo $LASTEXITCODE." }
 
-    $obligatorios = @("saas.dll", "web.config", "appsettings.json", "appsettings.Production.json")
+    $obligatorios = @("saas.dll", "web.config", "appsettings.json", "appsettings.Production.json", "appsettings.Staging.json")
     foreach ($nombre in $obligatorios) {
         $archivo = Join-Path $directorioAplicacion $nombre
         if (-not (Test-Path $archivo)) { throw "Falta un archivo obligatorio: $archivo" }
