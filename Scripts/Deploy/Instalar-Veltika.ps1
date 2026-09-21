@@ -8,7 +8,10 @@ param(
     [string]$InstanciaSql = ".\SQLEXPRESS",
     [string]$BaseDatos = "Veltika_DB",
     [string]$HostPrueba = "www.veltika.com.ar",
-    [ValidateSet("Machine", "AppPool")][string]$OrigenVariables = "Machine"
+    [ValidateSet("Machine", "AppPool")][string]$OrigenVariables = "Machine",
+    [string]$ScriptBackup = "C:\Scripts\Veltika\Backup-Veltika.ps1",
+    [string]$DirectorioBackups = "C:\VeltikaBackups",
+    [string]$PrefijoRespaldo = "Veltika"
 )
 
 $ErrorActionPreference = "Stop"
@@ -99,9 +102,32 @@ function Detener-AplicacionIis {
     throw "IIS no libero los archivos de la aplicacion dentro de 30 segundos."
 }
 
+function Verificar-BackupsAislados {
+    param(
+        [Parameter(Mandatory)][ValidateSet("Machine", "AppPool")][string]$Origen,
+        [Parameter(Mandatory)][string]$RutaScriptBackup,
+        [Parameter(Mandatory)][string]$RutaDirectorioBackups,
+        [Parameter(Mandatory)][string]$Prefijo
+    )
+
+    if ($Origen -ne "AppPool") { return }
+
+    $scriptProductivo = [IO.Path]::GetFullPath("C:\Scripts\Veltika\Backup-Veltika.ps1")
+    $directorioProductivo = [IO.Path]::GetFullPath("C:\VeltikaBackups").TrimEnd("\")
+    $scriptRecibido = [IO.Path]::GetFullPath($RutaScriptBackup)
+    $directorioRecibido = [IO.Path]::GetFullPath($RutaDirectorioBackups).TrimEnd("\")
+
+    if ($scriptRecibido -ieq $scriptProductivo -or
+        $directorioRecibido -ieq $directorioProductivo -or
+        $Prefijo -ieq "Veltika") {
+        throw "QA debe utilizar script, carpeta y prefijo de backup exclusivos."
+    }
+}
+
 Verificar-Administrador
 Import-Module WebAdministration
 Verificar-Variables -NombreAppPool $AppPool -Origen $OrigenVariables -BaseDatosEsperada $BaseDatos
+Verificar-BackupsAislados -Origen $OrigenVariables -RutaScriptBackup $ScriptBackup -RutaDirectorioBackups $DirectorioBackups -Prefijo $PrefijoRespaldo
 if (-not (Test-Path -LiteralPath $PaqueteZip)) { throw "No se encontro el paquete: $PaqueteZip" }
 
 $hashReal = (Get-FileHash -LiteralPath $PaqueteZip -Algorithm SHA256).Hash
@@ -112,10 +138,11 @@ if ($confirmacion -cne "DESPLEGAR") { throw "Deploy cancelado." }
 
 $marca = Get-Date -Format "yyyyMMdd-HHmmss"
 $directorioTrabajo = "C:\Deploy\Trabajo-$marca"
-$respaldoAplicacion = "C:\VeltikaBackups\$marca-predeploy"
-$rutaAnterior = "C:\inetpub\Veltika-anterior-$marca"
-$scriptBackup = "C:\Scripts\Veltika\Backup-Veltika.ps1"
-$backupIis = "Veltika-$marca"
+$respaldoAplicacion = Join-Path $DirectorioBackups "$marca-predeploy"
+$directorioPadreAplicacion = Split-Path -Parent $RutaAplicacion
+$nombreAplicacion = Split-Path -Leaf $RutaAplicacion
+$rutaAnterior = Join-Path $directorioPadreAplicacion "$nombreAplicacion-anterior-$marca"
+$backupIis = "$PrefijoRespaldo-$marca"
 
 New-Item -ItemType Directory -Path $directorioTrabajo -Force | Out-Null
 Expand-Archive -LiteralPath $PaqueteZip -DestinationPath $directorioTrabajo -Force
@@ -124,10 +151,10 @@ $scriptMigraciones = Join-Path $directorioTrabajo "Veltika-Migraciones.sql"
 
 if (-not (Test-Path (Join-Path $nuevaAplicacion "saas.dll"))) { throw "El paquete no contiene Aplicacion\saas.dll." }
 if (-not (Test-Path $scriptMigraciones)) { throw "El paquete no contiene Veltika-Migraciones.sql." }
-if (-not (Test-Path $scriptBackup)) { throw "No se encontro el script de backup: $scriptBackup" }
+if (-not (Test-Path $ScriptBackup)) { throw "No se encontro el script de backup: $ScriptBackup" }
 
 Write-Host "=== BACKUP PREVIO ==="
-& $scriptBackup
+& $ScriptBackup
 if (-not $?) { throw "Fallo el backup previo." }
 
 New-Item -ItemType Directory -Path $respaldoAplicacion -Force | Out-Null
@@ -166,7 +193,7 @@ $respuesta = Invoke-WebRequest "http://localhost" -Headers @{ Host = $HostPrueba
 if ($respuesta.StatusCode -ne 200) { throw "La prueba local devolvio HTTP $($respuesta.StatusCode)." }
 
 Write-Host "=== BACKUP POSTERIOR ==="
-& $scriptBackup
+& $ScriptBackup
 if (-not $?) { throw "La aplicacion funciona, pero fallo el backup posterior." }
 
 Write-Host ""
