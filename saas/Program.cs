@@ -158,6 +158,14 @@ app.Use(async (context, next) =>
     context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
     context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
 
+    // QA es accesible por dominio para probar releases, pero no debe aparecer
+    // en buscadores ni conservarse como una copia pública del sitio productivo.
+    if (app.Environment.IsStaging())
+    {
+        context.Response.Headers["X-Robots-Tag"] =
+            "noindex, nofollow, noarchive, nosnippet";
+    }
+
     await next();
 });
 
