@@ -878,15 +878,8 @@ namespace saas.Controllers
 
                 await transaccion.CommitAsync();
 
-                TempData["Success"] =
-                    totalPagado == totalVenta
-                        ? "Venta registrada y cobrada correctamente."
-                        : totalPagado == 0
-                            ? "Venta registrada a cuenta correctamente."
-                            : "Venta registrada con saldo pendiente correctamente.";
-
                 return RedirectToAction(
-                    nameof(Details),
+                    nameof(Confirmada),
                     new { id = venta.Id });
             }
             catch (DbUpdateException)
@@ -918,6 +911,56 @@ namespace saas.Controllers
                 return View(ventaVM);
             }
         }
+
+        // GET: Venta/Confirmada/5
+        // Esta pantalla forma parte del patrón Post/Redirect/Get: consultar o
+        // recargar la confirmación nunca vuelve a registrar la operación.
+        [HttpGet]
+        public async Task<IActionResult> Confirmada(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(
+                usuario,
+                "SuperAdmin");
+
+            IQueryable<Venta> consulta = _context.Ventas
+                .AsNoTracking();
+
+            if (!esSuperAdmin)
+            {
+                consulta = consulta.Where(v =>
+                    v.EmpresaId == usuario.EmpresaId);
+            }
+
+            var venta = await consulta
+                .Where(v => v.Id == id)
+                .Select(v => new VentaConfirmadaVM
+                {
+                    Id = v.Id,
+                    Total = v.Total,
+                    EmpresaId = v.EmpresaId
+                })
+                .FirstOrDefaultAsync();
+
+            if (venta == null)
+            {
+                return NotFound();
+            }
+
+            return View(venta);
+        }
+
         // GET: Venta/Details/5
         public async Task<IActionResult> Details(int? id, string? returnUrl = null)
         {

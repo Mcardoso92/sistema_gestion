@@ -70,12 +70,70 @@ public class VentaControllerTests
                 controller.ModelState.Values
                     .SelectMany(v => v.Errors)
                     .Select(e => e.ErrorMessage)));
+        RedirectToActionResult redireccion =
+            Assert.IsType<RedirectToActionResult>(resultado);
+        Assert.Equal(nameof(VentaController.Confirmada), redireccion.ActionName);
+        Assert.Equal(1, redireccion.RouteValues!["id"]);
         CobroVenta cobro = await context.CobrosVenta.SingleAsync();
         MovimientoCaja movimiento = await context.MovimientosCaja.SingleAsync();
         Assert.Equal(10, cobro.TurnoCajaId);
         Assert.Equal(
             tipoMedioPago == TipoMedioPago.Efectivo ? 10 : null,
             movimiento.TurnoCajaId);
+    }
+
+    [Fact]
+    public async Task Confirmada_MuestraResumenDeVentaDeLaEmpresaDelUsuario()
+    {
+        await using var context = TestDbContextFactory.Crear();
+        Usuario usuario = await CrearUsuario(context);
+        using UserManager<Usuario> userManager = CrearUserManager(context);
+        context.AddRange(
+            new Empresa { Id = 1, Nombre = "Empresa A", Estado = true },
+            new Venta
+            {
+                Id = 20,
+                EmpresaId = 1,
+                UsuarioId = usuario.Id,
+                Fecha = DateTime.UtcNow,
+                Total = 1250,
+                Estado = true
+            });
+        await context.SaveChangesAsync();
+        VentaController controller = CrearController(context, userManager, usuario);
+
+        IActionResult resultado = await controller.Confirmada(20);
+
+        ViewResult vista = Assert.IsType<ViewResult>(resultado);
+        VentaConfirmadaVM modelo = Assert.IsType<VentaConfirmadaVM>(vista.Model);
+        Assert.Equal(20, modelo.Id);
+        Assert.Equal(1250, modelo.Total);
+        Assert.Equal(1, modelo.EmpresaId);
+    }
+
+    [Fact]
+    public async Task Confirmada_NoExponeVentaDeOtraEmpresa()
+    {
+        await using var context = TestDbContextFactory.Crear();
+        Usuario usuario = await CrearUsuario(context);
+        using UserManager<Usuario> userManager = CrearUserManager(context);
+        context.AddRange(
+            new Empresa { Id = 2, Nombre = "Empresa B", Estado = true },
+            new Venta
+            {
+                Id = 21,
+                EmpresaId = 2,
+                UsuarioId = usuario.Id,
+                Fecha = DateTime.UtcNow,
+                Total = 500,
+                Estado = true
+            });
+        await context.SaveChangesAsync();
+        VentaController controller = CrearController(context, userManager, usuario);
+
+        IActionResult resultado = await controller.Confirmada(21);
+
+        Assert.IsType<NotFoundResult>(resultado);
     }
 
     [Fact]
