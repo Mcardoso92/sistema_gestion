@@ -21,19 +21,19 @@ function Verificar-AislamientoProduccion {
         [Parameter(Mandatory)][string]$NombreSitio,
         [Parameter(Mandatory)][string]$NombreAppPool,
         [Parameter(Mandatory)][string]$Ruta,
-        [Parameter(Mandatory)][string]$Host
+        [Parameter(Mandatory)][string]$NombreHost
     )
 
     if ($NombreSitio -ieq "Veltika" -or
         $NombreAppPool -ieq "VeltikaPool" -or
         $Ruta.TrimEnd("\") -ieq "C:\inetpub\Veltika" -or
-        $Host -ieq "www.veltika.com.ar") {
+        $NombreHost -ieq "www.veltika.com.ar") {
         throw "La configuracion de QA no puede reutilizar nombres, rutas ni host de produccion."
     }
 }
 
 Verificar-Administrador
-Verificar-AislamientoProduccion -NombreSitio $Sitio -NombreAppPool $AppPool -Ruta $RutaAplicacion -Host $HostQa
+Verificar-AislamientoProduccion -NombreSitio $Sitio -NombreAppPool $AppPool -Ruta $RutaAplicacion -NombreHost $HostQa
 Import-Module WebAdministration
 
 if (-not (Test-Path -LiteralPath $RutaAplicacion -PathType Container)) {
