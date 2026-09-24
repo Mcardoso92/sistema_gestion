@@ -53,27 +53,37 @@ if ($null -eq $hostCubierto) {
 }
 
 $bindingEsperado = "*:443:$HostQa"
-$bindingHttps = Get-WebBinding -Name $Sitio -Protocol "https" | Where-Object { $_.bindingInformation -eq $bindingEsperado }
+$bindingHttps = Get-WebBinding -Name $Sitio -Protocol "https" |
+    Where-Object { $_.bindingInformation -eq $bindingEsperado } |
+    Select-Object -First 1
+
 if ($null -eq $bindingHttps) {
-    New-WebBinding -Name $Sitio -Protocol "https" -Port 443 -HostHeader $HostQa -SslFlags 1
+    New-WebBinding -Name $Sitio -Protocol "https" -Port 443 -HostHeader $HostQa -SslFlags 1 | Out-Null
+    $bindingHttps = Get-WebBinding -Name $Sitio -Protocol "https" |
+        Where-Object { $_.bindingInformation -eq $bindingEsperado } |
+        Select-Object -First 1
 }
 
-$rutaBindingSsl = "IIS:\SslBindings\0.0.0.0!443!$HostQa"
-if (Test-Path $rutaBindingSsl) {
-    $bindingSsl = Get-Item $rutaBindingSsl
-    if ($bindingSsl.Thumbprint -is [byte[]]) {
-        $thumbprintActual = [BitConverter]::ToString($bindingSsl.Thumbprint) -replace '-', ''
-    }
-    else {
-        $thumbprintActual = [string]$bindingSsl.Thumbprint -replace '\s|-', ''
-    }
-    $thumbprintActual = $thumbprintActual.ToUpperInvariant()
-    if ($thumbprintActual -ne $thumbprint) {
-        throw "El binding HTTPS ya existe pero utiliza otro certificado. No se reemplazo."
-    }
+if ($null -eq $bindingHttps) {
+    throw "No se pudo crear o localizar el binding HTTPS '$bindingEsperado'."
+}
+
+$hashBinding = $bindingHttps.certificateHash
+if ($hashBinding -is [byte[]]) {
+    $thumbprintActual = [BitConverter]::ToString($hashBinding) -replace '-', ''
 }
 else {
-    $certificado | New-Item $rutaBindingSsl -SSLFlags 1 | Out-Null
+    $thumbprintActual = [string]$hashBinding -replace '\s|-', ''
+}
+$thumbprintActual = $thumbprintActual.ToUpperInvariant()
+
+if ([string]::IsNullOrWhiteSpace($thumbprintActual)) {
+    # AddSslCertificate trabaja sobre el binding SNI real y evita depender de
+    # la representación interna de IIS:\SslBindings, que varía por versión.
+    $bindingHttps.AddSslCertificate($thumbprint, "My")
+}
+elseif ($thumbprintActual -ne $thumbprint) {
+    throw "El binding HTTPS ya existe pero utiliza otro certificado. No se reemplazo."
 }
 
 Write-Host "HTTPS configurado correctamente para QA."
