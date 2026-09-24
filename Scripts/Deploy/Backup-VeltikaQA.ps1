@@ -27,7 +27,7 @@ $marca = Get-Date -Format "yyyyMMdd-HHmmss"
 $archivoBackup = Join-Path $directorioQa "Veltika_QA_DB_$marca.bak"
 $rutaSql = $archivoBackup.Replace("'", "''")
 
-$consulta = @"
+$consultaBackup = @"
 SET NOCOUNT ON;
 
 IF DB_ID(N'Veltika_QA_DB') IS NULL
@@ -37,20 +37,31 @@ END;
 
 BACKUP DATABASE [Veltika_QA_DB]
 TO DISK = N'$rutaSql'
-WITH COPY_ONLY, COMPRESSION, CHECKSUM, STATS = 10;
+WITH COPY_ONLY, CHECKSUM, STATS = 10;
+"@
+
+& sqlcmd -S $InstanciaSql -d "master" -E -C -b -Q $consultaBackup
+if ($LASTEXITCODE -ne 0) {
+    throw "Fallo el backup de QA. Codigo de sqlcmd: $LASTEXITCODE."
+}
+
+if (-not (Test-Path -LiteralPath $archivoBackup -PathType Leaf)) {
+    throw "SQL Server informo exito pero no se encontro el archivo de backup."
+}
+
+# La verificacion se ejecuta en una segunda llamada. De esta forma nunca se
+# intenta validar un archivo inexistente cuando BACKUP DATABASE falla.
+$consultaVerificar = @"
+SET NOCOUNT ON;
 
 RESTORE VERIFYONLY
 FROM DISK = N'$rutaSql'
 WITH CHECKSUM;
 "@
 
-& sqlcmd -S $InstanciaSql -d "master" -E -C -b -Q $consulta
+& sqlcmd -S $InstanciaSql -d "master" -E -C -b -Q $consultaVerificar
 if ($LASTEXITCODE -ne 0) {
-    throw "Fallo el backup o su verificacion. Codigo de sqlcmd: $LASTEXITCODE."
-}
-
-if (-not (Test-Path -LiteralPath $archivoBackup -PathType Leaf)) {
-    throw "SQL Server informo exito pero no se encontro el archivo de backup."
+    throw "Fallo la verificacion del backup de QA. Codigo de sqlcmd: $LASTEXITCODE."
 }
 
 $backup = Get-Item -LiteralPath $archivoBackup
