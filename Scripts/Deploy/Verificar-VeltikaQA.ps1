@@ -104,7 +104,6 @@ if ($sqlcmdDisponible) {
     $baseDatosSql = $BaseDatos.Replace("'", "''")
     $principalQa = "IIS APPPOOL\$AppPool"
     $principalQaSql = $principalQa.Replace("'", "''")
-    $baseDatosIdentificador = $BaseDatos.Replace("]", "]]" )
 
     $consultaDb = "SET NOCOUNT ON; SELECT COUNT(*) FROM sys.databases WHERE name = N'$baseDatosSql' AND state_desc = N'ONLINE';"
     $salidaDb = & sqlcmd -S $InstanciaSql -d "master" -E -C -b -h -1 -W -Q $consultaDb 2>$null
@@ -114,13 +113,16 @@ if ($sqlcmdDisponible) {
     if ($baseOnline) {
         $consultaPermisos = @"
 SET NOCOUNT ON;
-USE [$baseDatosIdentificador];
-SELECT CASE WHEN USER_ID(N'$principalQaSql') IS NOT NULL
- AND IS_ROLEMEMBER(N'db_datareader', N'$principalQaSql') = 1
- AND IS_ROLEMEMBER(N'db_datawriter', N'$principalQaSql') = 1
- THEN 1 ELSE 0 END;
+SELECT CASE WHEN COUNT(DISTINCT rol.name) = 2 THEN 1 ELSE 0 END
+FROM sys.database_role_members membresia
+INNER JOIN sys.database_principals rol
+    ON rol.principal_id = membresia.role_principal_id
+INNER JOIN sys.database_principals miembro
+    ON miembro.principal_id = membresia.member_principal_id
+WHERE miembro.name = N'$principalQaSql'
+  AND rol.name IN (N'db_datareader', N'db_datawriter');
 "@
-        $salidaPermisos = & sqlcmd -S $InstanciaSql -d "master" -E -C -b -h -1 -W -Q $consultaPermisos 2>$null
+        $salidaPermisos = & sqlcmd -S $InstanciaSql -d $BaseDatos -E -C -b -h -1 -W -Q $consultaPermisos 2>$null
         $permisosCorrectos = $LASTEXITCODE -eq 0 -and (($salidaPermisos -join "").Trim() -eq "1")
         Registrar-Resultado -Componente "Permisos SQL QA" -Correcto $permisosCorrectos -Detalle "Lectura y escritura para $AppPool"
     }
