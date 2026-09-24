@@ -6,7 +6,9 @@ param(
     [Parameter(Mandatory)][string]$EmailUsuario,
     [Parameter(Mandatory)][string]$EmailRemitente,
     [string]$EmailNombre = "Veltika QA",
-    [bool]$EmailUsaSsl = $true
+    # En el puerto SMTP 587, false selecciona STARTTLS en EmailService. TLS
+    # sigue siendo obligatorio; true se reserva para SSL directo (p. ej. 465).
+    [bool]$EmailUsaSsl = $false
 )
 
 $ErrorActionPreference = "Stop"
