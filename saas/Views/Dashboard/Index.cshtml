@@ -155,23 +155,23 @@
                                asp-route-returnUrl="@returnUrl"
                                class="dashboard-list-item">
 
-                                <div>
+                                <div class="dashboard-list-item__content">
                                     <div class="fw-semibold">@producto.Nombre</div>
                                     <div class="text-muted small">
                                         @(string.IsNullOrWhiteSpace(producto.CodigoBarra)
-                                                                        ? "Sin código"
-                                                                        : producto.CodigoBarra)
-                            </div>
-                        </div>
+                                            ? "Sin código"
+                                            : producto.CodigoBarra)
+                                    </div>
+                                </div>
 
-                                <div class="text-end">
+                                <div class="dashboard-list-item__value">
                                     <div class="fw-bold text-danger">@producto.Stock</div>
                                     <div class="text-muted small">
                                         Mín. @producto.PuntoReposicion
                                     </div>
                                 </div>
                             </a>
-                                        }
+                        }
                     </div>
                 }
                 else
