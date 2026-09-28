@@ -46,7 +46,8 @@
         <div class="card-body p-4">
 
             <form method="get"
-                  asp-action="Index">
+                  asp-action="Index"
+                  data-filter-autosubmit>
 
                 <div class="row g-3 align-items-end">
 
@@ -61,7 +62,8 @@
                                maxlength="100"
                                value="@busquedaActual"
                                class="form-control"
-                               placeholder="Caja o usuario..." />
+                               placeholder="Caja o usuario..."
+                               data-filter-search />
 
                     </div>
 

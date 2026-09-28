@@ -41,7 +41,7 @@
     <!-- Filter Bar -->
     <div class="card filter-card mb-4">
         <div class="card-body p-3">
-            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end" data-filter-autosubmit>
                 <div class="col-md-3">
                     <label for="estado" class="form-label fw-semibold">Estado</label>
                     <select id="estado" name="estado" class="form-select">
@@ -77,7 +77,8 @@
                                value="@busqueda"
                                class="form-control form-control-md"
                                placeholder="Nombre, documento o email..."
-                               type="text" />
+                               type="text"
+                               data-filter-search />
                     </div>
                 </div>
 

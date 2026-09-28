@@ -33,12 +33,12 @@
     <div class="card filter-card mb-4">
         <div class="card-body p-3">
             <span asp-validation-for="FechaHasta" class="filter-validation-message text-danger small"></span>
-            <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <form asp-action="Index" method="get" class="row g-3 align-items-end" data-filter-autosubmit>
                 <div class="col-12 col-lg">
                     <label asp-for="Busqueda" class="form-label text-sm fw-medium">Buscar</label>
                     <div class="search-input-wrapper">
                         <span class="material-symbols-outlined">search</span>
-                        <input asp-for="Busqueda" class="form-control" maxlength="100" placeholder="ID, número o tipo de comprobante" />
+                        <input asp-for="Busqueda" class="form-control" maxlength="100" placeholder="ID, número o tipo de comprobante" data-filter-search />
                     </div>
                 </div>
 

@@ -43,7 +43,8 @@
         <div class="card-body p-3">
             <form asp-action="Index"
                   method="get"
-                  class="row g-3 align-items-end">
+                  class="row g-3 align-items-end"
+                  data-filter-autosubmit>
 
                 <div class="col-12 col-lg">
                     <label asp-for="Busqueda"
@@ -59,7 +60,8 @@
                         <input asp-for="Busqueda"
                                maxlength="100"
                                class="form-control"
-                               placeholder="Razón social, nombre, CUIT o email" />
+                               placeholder="Razón social, nombre, CUIT o email"
+                               data-filter-search />
                     </div>
                 </div>
 
