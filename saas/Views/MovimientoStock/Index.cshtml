@@ -4,6 +4,8 @@
 @{
     ViewData["Title"] = "Stock";
     string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "producto";
+    string direccion = ViewBag.Direccion?.ToString() ?? "asc";
 }
 
 <main class="flex-grow-1 py-5 container-fluid px-4">
@@ -111,36 +113,22 @@
 
                 <thead>
                     <tr>
-                        <th class="px-4 py-3 border-0">
-                            Producto
-                        </th>
-
-                        <th class="px-4 py-3 border-0">
-                            Categoría
-                        </th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Producto", Columna = "producto", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Categoría", Columna = "categoria", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
 
                         @if (User.IsInRole("SuperAdmin"))
                         {
-                            <th class="px-4 py-3 border-0">
-                                Empresa
-                            </th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                         }
 
-                        <th class="px-4 py-3 border-0 text-center">
-                            Stock actual
-                        </th>
-
-                        <th class="px-4 py-3 border-0 text-center">
-                            Punto reposición
-                        </th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Stock actual", Columna = "stock", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Punto reposición", Columna = "reposicion", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
 
                         <th class="px-4 py-3 border-0 text-center">
                             Estado stock
                         </th>
 
-                        <th class="px-4 py-3 border-0 text-center">
-                            Producto
-                        </th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Producto", Columna = "activo", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
 
                         <th class="px-4 py-3 border-0 text-end">
                             Acciones

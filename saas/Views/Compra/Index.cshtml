@@ -4,6 +4,8 @@
     ViewData["Title"] = "Compras";
     bool esSuperAdmin = User.IsInRole("SuperAdmin");
     string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "fecha";
+    string direccion = ViewBag.Direccion?.ToString() ?? "desc";
 }
 
 <main class="container-fluid px-4 py-4">
@@ -110,18 +112,18 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th class="ps-4">ID</th>
-                            <th>Fecha</th>
-                            <th>Proveedor</th>
-                            <th>Comprobante</th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "ID", Columna = "id", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Fecha", Columna = "fecha", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Proveedor", Columna = "proveedor", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Comprobante", Columna = "comprobante", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
 
                             @if (esSuperAdmin)
                             {
-                                <th>Empresa</th>
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                             }
 
-                            <th class="text-end">Total</th>
-                            <th class="text-center">Estado</th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Total", Columna = "total", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-end" }' />
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Estado", Columna = "estado", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
                             <th class="text-center">Pago</th>
                             <th class="text-end pe-4">Acciones</th>
                         </tr>

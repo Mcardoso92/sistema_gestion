@@ -53,7 +53,7 @@ namespace saas.Controllers
             _fechaHora = fechaHora;
         }
         // GET: Usuario
-        public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null, int pagina = 1)
+        public async Task<IActionResult> Index(string estado = "activos", string? rol = null, int? empresaId = null, string? busqueda = null, string ordenarPor = "nombre", string direccion = "asc", int pagina = 1)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -133,6 +133,14 @@ namespace saas.Controllers
                     (u.Email != null && u.Email.Contains(busqueda)));
             }
 
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "nombre",
+                "nombre", "apellido", "email", "empresa", "estado", "fechaAlta");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
             const int tamanioPagina = 20;
             pagina = Math.Max(pagina, 1);
             int totalUsuarios = await usuarios.CountAsync();
@@ -147,9 +155,18 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalUsuarios;
 
-            var listaUsuarios = await usuarios
-                .OrderBy(u => u.Nombre)
-                .ThenBy(u => u.Apellido)
+            IOrderedQueryable<Usuario> usuariosOrdenados = ordenarPor switch
+            {
+                "apellido" => usuarios.Aplicar(u => u.Apellido, direccion),
+                "email" => usuarios.Aplicar(u => u.Email, direccion),
+                "empresa" => usuarios.Aplicar(u => u.Empresa!.Nombre, direccion),
+                "estado" => usuarios.Aplicar(u => u.Estado, direccion),
+                "fechaalta" => usuarios.Aplicar(u => u.FechaAlta, direccion),
+                _ => usuarios.Aplicar(u => u.Nombre, direccion).ThenBy(u => u.Apellido)
+            };
+
+            var listaUsuarios = await usuariosOrdenados
+                .ThenBy(u => u.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .ToListAsync();

@@ -4,6 +4,8 @@
 @{
     ViewData["Title"] = "Gestión de Ventas";
     string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "fecha";
+    string direccion = ViewBag.Direccion?.ToString() ?? "desc";
 }
 
 <main class="container-fluid py-4 px-4">
@@ -317,40 +319,19 @@
 
                     <tr>
 
-                        <th class="ps-4 py-3 small fw-bold text-muted text-uppercase">
-                            Venta
-                        </th>
-
-                        <th class="py-3 small fw-bold text-muted text-uppercase">
-                            Fecha
-                        </th>
-
-                        <th class="py-3 small fw-bold text-muted text-uppercase">
-                            Cliente
-                        </th>
-
-                        <th class="py-3 small fw-bold text-muted text-uppercase">
-                            Usuario
-                        </th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Venta", Columna = "venta", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Fecha", Columna = "fecha", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Cliente", Columna = "cliente", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Usuario", Columna = "usuario", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
 
                         @if (User.IsInRole("SuperAdmin"))
                         {
-                            <th class="py-3 small fw-bold text-muted text-uppercase">
-                                Empresa
-                            </th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                         }
 
-                        <th class="py-3 small fw-bold text-muted text-uppercase text-center">
-                            Unidades
-                        </th>
-
-                        <th class="py-3 small fw-bold text-muted text-uppercase text-end">
-                            Total
-                        </th>
-
-                        <th class="py-3 small fw-bold text-muted text-uppercase text-center">
-                            Estado
-                        </th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Unidades", Columna = "unidades", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Total", Columna = "total", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-end" }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Estado", Columna = "estado", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
                         <th class="py-3 small fw-bold text-muted text-uppercase text-center">
                             Cobro
                         </th>

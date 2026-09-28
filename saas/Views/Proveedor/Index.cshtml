@@ -3,6 +3,8 @@
 @{
     ViewData["Title"] = "Proveedores";
     bool esSuperAdmin = User.IsInRole("SuperAdmin");
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "razonsocial";
+    string direccion = ViewBag.Direccion?.ToString() ?? "asc";
 }
 
 <main class="container-fluid px-4 py-4">
@@ -127,17 +129,17 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead>
                         <tr>
-                            <th class="ps-4">Razón social</th>
-                            <th>Nombre de fantasía</th>
-                            <th>CUIT</th>
-                            <th>Contacto</th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Razón social", Columna = "razonSocial", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Nombre de fantasía", Columna = "nombreFantasia", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "CUIT", Columna = "cuit", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Contacto", Columna = "contacto", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
 
                             @if (esSuperAdmin)
                             {
-                                <th>Empresa</th>
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                             }
 
-                            <th class="text-center">Estado</th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Estado", Columna = "estado", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
                             <th class="text-end pe-4">Acciones</th>
                         </tr>
                     </thead>

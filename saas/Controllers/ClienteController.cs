@@ -33,7 +33,7 @@ namespace saas.Controllers
         }
 
         // GET: Cliente
-        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, int pagina = 1)
+        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, string ordenarPor = "cliente", string direccion = "asc", int pagina = 1)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -98,6 +98,14 @@ namespace saas.Controllers
             ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
             ViewBag.Busqueda = busqueda;
 
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "cliente",
+                "cliente", "documento", "contacto", "empresa", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
             const int tamanioPagina = 20;
             pagina = Math.Max(pagina, 1);
             int totalClientes = await clientes.CountAsync();
@@ -112,9 +120,17 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalClientes;
 
-            var listaClientes = await clientes
-                .OrderBy(c => c.Nombre)
-                .ThenBy(c => c.Apellido)
+            IOrderedQueryable<Cliente> clientesOrdenados = ordenarPor switch
+            {
+                "documento" => clientes.Aplicar(c => c.Documento, direccion),
+                "contacto" => clientes.Aplicar(c => c.Email, direccion),
+                "empresa" => clientes.Aplicar(c => c.Empresa.Nombre, direccion),
+                "estado" => clientes.Aplicar(c => c.Estado, direccion),
+                _ => clientes.Aplicar(c => c.Nombre, direccion).ThenBy(c => c.Apellido)
+            };
+
+            var listaClientes = await clientesOrdenados
+                .ThenBy(c => c.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .ToListAsync();

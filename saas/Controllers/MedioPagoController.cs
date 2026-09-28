@@ -33,6 +33,8 @@ namespace saas.Controllers
             string estado = "activos",
             int? empresaId = null,
             string? busqueda = null,
+            string ordenarPor = "nombre",
+            string direccion = "asc",
             int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
@@ -104,8 +106,26 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalMediosPago;
 
-            var mediosPago = await consulta
-                .OrderBy(m => m.Nombre)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "nombre",
+                "nombre", "tipo", "descripcion", "empresa", "fechaAlta", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<MedioPago> mediosPagoOrdenados = ordenarPor switch
+            {
+                "tipo" => consulta.Aplicar(m => m.Tipo, direccion),
+                "descripcion" => consulta.Aplicar(m => m.Descripcion, direccion),
+                "empresa" => consulta.Aplicar(m => m.Empresa.Nombre, direccion),
+                "fechaalta" => consulta.Aplicar(m => m.FechaAlta, direccion),
+                "estado" => consulta.Aplicar(m => m.Estado, direccion),
+                _ => consulta.Aplicar(m => m.Nombre, direccion)
+            };
+
+            var mediosPago = await mediosPagoOrdenados
+                .ThenBy(m => m.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .Select(m => new MedioPagoIndexVM

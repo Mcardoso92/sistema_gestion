@@ -12,6 +12,8 @@
     int? empresaIdActual =
         ViewBag.EmpresaId as int?;
     string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "nombre";
+    string direccion = ViewBag.Direccion?.ToString() ?? "asc";
 }
 
 <div class="container-fluid px-4 py-4">
@@ -166,28 +168,16 @@
 
                             <tr>
 
-                                <th class="ps-4">
-                                    Nombre
-                                </th>
-
-                                <th>
-                                    Descripción
-                                </th>
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Nombre", Columna = "nombre", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Descripción", Columna = "descripcion", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
 
                                 @if (User.IsInRole("SuperAdmin"))
                                 {
-                                    <th>
-                                        Empresa
-                                    </th>
+                                    <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                                 }
 
-                                <th>
-                                    Fecha de alta
-                                </th>
-
-                                <th class="text-center">
-                                    Estado
-                                </th>
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Fecha de alta", Columna = "fechaAlta", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Estado", Columna = "estado", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
 
                                 <th class="text-end pe-4">
                                     Acciones

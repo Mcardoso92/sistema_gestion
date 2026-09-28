@@ -31,7 +31,7 @@ namespace saas.Controllers
         }
 
         // GET: MovimientoStock
-        public async Task<IActionResult> Index(StockIndexVM stockVM, int pagina = 1)
+        public async Task<IActionResult> Index(StockIndexVM stockVM, string ordenarPor = "producto", string direccion = "asc", int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -109,8 +109,26 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalProductos;
 
-            stockVM.Productos = await consulta
-                .OrderBy(p => p.Nombre)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "producto",
+                "producto", "categoria", "empresa", "stock", "reposicion", "activo");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<Producto> productosOrdenados = ordenarPor switch
+            {
+                "categoria" => consulta.Aplicar(p => p.Categoria.Nombre, direccion),
+                "empresa" => consulta.Aplicar(p => p.Empresa.Nombre, direccion),
+                "stock" => consulta.Aplicar(p => p.Stock, direccion),
+                "reposicion" => consulta.Aplicar(p => p.PuntoReposicion, direccion),
+                "activo" => consulta.Aplicar(p => p.Estado, direccion),
+                _ => consulta.Aplicar(p => p.Nombre, direccion)
+            };
+
+            stockVM.Productos = await productosOrdenados
+                .ThenBy(p => p.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .Select(p => new StockIndexItemVM

@@ -44,6 +44,8 @@ namespace saas.Controllers
             DateTime? fechaDesde = null,
             DateTime? fechaHasta = null,
             int? empresaId = null,
+            string ordenarPor = "fecha",
+            string direccionOrden = "desc",
             int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
@@ -193,8 +195,27 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalMovimientos;
 
-            var movimientos = await consulta
-                .OrderByDescending(m => m.Fecha)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "fecha",
+                "fecha", "caja", "tipo", "medio", "concepto", "usuario", "importe");
+            direccionOrden = OrdenamientoConsulta.NormalizarDireccion(direccionOrden);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccionOrden;
+
+            IOrderedQueryable<MovimientoCaja> movimientosOrdenados = ordenarPor switch
+            {
+                "caja" => consulta.Aplicar(m => m.Caja.Nombre, direccionOrden),
+                "tipo" => consulta.Aplicar(m => m.Tipo, direccionOrden),
+                "medio" => consulta.Aplicar(m => m.MedioPago != null ? m.MedioPago.Nombre : string.Empty, direccionOrden),
+                "concepto" => consulta.Aplicar(m => m.Concepto, direccionOrden),
+                "usuario" => consulta.Aplicar(m => m.Usuario.UserName, direccionOrden),
+                "importe" => consulta.Aplicar(m => m.Importe, direccionOrden),
+                _ => consulta.Aplicar(m => m.Fecha, direccionOrden)
+            };
+
+            var movimientos = await movimientosOrdenados
+                .ThenByDescending(m => m.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .Select(m => new MovimientoCajaResumenVM

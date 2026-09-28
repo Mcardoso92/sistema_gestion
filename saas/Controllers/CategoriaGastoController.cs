@@ -29,7 +29,7 @@ namespace saas.Controllers
         }
 
         // GET: CategoriaGasto
-        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, int pagina = 1)
+        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, string ordenarPor = "nombre", string direccion = "asc", int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -98,8 +98,25 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalCategorias;
 
-            var categorias = await consulta
-                .OrderBy(c => c.Nombre)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "nombre",
+                "nombre", "descripcion", "empresa", "fechaAlta", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<CategoriaGasto> categoriasOrdenadas = ordenarPor switch
+            {
+                "descripcion" => consulta.Aplicar(c => c.Descripcion, direccion),
+                "empresa" => consulta.Aplicar(c => c.Empresa.Nombre, direccion),
+                "fechaalta" => consulta.Aplicar(c => c.FechaAlta, direccion),
+                "estado" => consulta.Aplicar(c => c.Estado, direccion),
+                _ => consulta.Aplicar(c => c.Nombre, direccion)
+            };
+
+            var categorias = await categoriasOrdenadas
+                .ThenBy(c => c.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .Select(c => new CategoriaGastoIndexVM

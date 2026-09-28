@@ -33,7 +33,7 @@ namespace saas.Controllers
         }
 
         // GET: Producto
-        public async Task<IActionResult> Index(string estado = "activos", int? categoriaId = null, int? empresaId = null, string? busqueda = null, int pagina = 1)
+        public async Task<IActionResult> Index(string estado = "activos", int? categoriaId = null, int? empresaId = null, string? busqueda = null, string ordenarPor = "nombre", string direccion = "asc", int pagina = 1)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -115,6 +115,14 @@ namespace saas.Controllers
             ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
             ViewBag.Busqueda = busqueda;
 
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "nombre",
+                "id", "nombre", "categoria", "empresa", "precio", "stock", "reposicion", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
             const int tamanioPagina = 20;
             pagina = Math.Max(pagina, 1);
 
@@ -130,8 +138,20 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalProductos = totalProductos;
 
-            var listaProductos = await productos
-                .OrderBy(p => p.Nombre)
+            IOrderedQueryable<Producto> productosOrdenados = ordenarPor switch
+            {
+                "id" => productos.Aplicar(p => p.Id, direccion),
+                "categoria" => productos.Aplicar(p => p.Categoria.Nombre, direccion),
+                "empresa" => productos.Aplicar(p => p.Empresa.Nombre, direccion),
+                "precio" => productos.Aplicar(p => p.PrecioVenta, direccion),
+                "stock" => productos.Aplicar(p => p.Stock, direccion),
+                "reposicion" => productos.Aplicar(p => p.PuntoReposicion, direccion),
+                "estado" => productos.Aplicar(p => p.Estado, direccion),
+                _ => productos.Aplicar(p => p.Nombre, direccion)
+            };
+
+            var listaProductos = await productosOrdenados
+                .ThenBy(p => p.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .ToListAsync();

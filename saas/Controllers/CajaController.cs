@@ -29,7 +29,7 @@ namespace saas.Controllers
         }
 
         // GET: Caja
-        public async Task<IActionResult> Index(CajaIndexVM cajaVM, int pagina = 1)
+        public async Task<IActionResult> Index(CajaIndexVM cajaVM, string ordenarPor = "nombre", string direccion = "asc", int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -105,8 +105,26 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalCajas;
 
-            cajaVM.Cajas = await consulta
-                .OrderBy(c => c.Nombre)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "nombre",
+                "nombre", "tipo", "empresa", "turnos", "fondoFijo", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<Caja> cajasOrdenadas = ordenarPor switch
+            {
+                "tipo" => consulta.Aplicar(c => c.Tipo, direccion),
+                "empresa" => consulta.Aplicar(c => c.Empresa.Nombre, direccion),
+                "turnos" => consulta.Aplicar(c => c.PermiteTurnos, direccion),
+                "fondofijo" => consulta.Aplicar(c => c.FondoFijo, direccion),
+                "estado" => consulta.Aplicar(c => c.Estado, direccion),
+                _ => consulta.Aplicar(c => c.Nombre, direccion)
+            };
+
+            cajaVM.Cajas = await cajasOrdenadas
+                .ThenBy(c => c.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .Select(c => new CajaIndexItemVM

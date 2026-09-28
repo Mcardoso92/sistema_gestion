@@ -40,6 +40,8 @@ namespace saas.Controllers
             DateTime? fechaDesde = null,
             DateTime? fechaHasta = null,
             int? empresaId = null,
+            string ordenarPor = "fecha",
+            string direccion = "desc",
             int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
@@ -135,9 +137,28 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalTransferencias;
 
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "fecha",
+                "fecha", "origen", "destino", "motivo", "usuario", "estado", "importe");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<TransferenciaCaja> transferenciasOrdenadas = ordenarPor switch
+            {
+                "origen" => consulta.Aplicar(t => t.CajaOrigen.Nombre, direccion),
+                "destino" => consulta.Aplicar(t => t.CajaDestino.Nombre, direccion),
+                "motivo" => consulta.Aplicar(t => t.Motivo, direccion),
+                "usuario" => consulta.Aplicar(t => t.Usuario.UserName, direccion),
+                "estado" => consulta.Aplicar(t => t.Estado, direccion),
+                "importe" => consulta.Aplicar(t => t.Importe, direccion),
+                _ => consulta.Aplicar(t => t.Fecha, direccion)
+            };
+
             var transferencias =
-                await consulta
-                    .OrderByDescending(t => t.Fecha)
+                await transferenciasOrdenadas
+                    .ThenByDescending(t => t.Id)
                     .Skip((pagina - 1) * tamanioPagina)
                     .Take(tamanioPagina)
                     .Select(t => new TransferenciaCajaResumenVM

@@ -36,7 +36,7 @@ namespace saas.Controllers
         }
 
         // GET: Venta
-        public async Task<IActionResult> Index(VentaIndexVM ventaVM, int pagina = 1)
+        public async Task<IActionResult> Index(VentaIndexVM ventaVM, string ordenarPor = "fecha", string direccion = "desc", int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -244,8 +244,27 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalVentas;
 
-            ventaVM.Ventas = await consulta
-                .OrderByDescending(v => v.Fecha)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "fecha",
+                "venta", "fecha", "cliente", "usuario", "empresa", "unidades", "total", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<Venta> ventasOrdenadas = ordenarPor switch
+            {
+                "venta" => consulta.Aplicar(v => v.Id, direccion),
+                "cliente" => consulta.Aplicar(v => v.Cliente == null ? string.Empty : v.Cliente.Nombre, direccion),
+                "usuario" => consulta.Aplicar(v => v.Usuario.Nombre, direccion),
+                "empresa" => consulta.Aplicar(v => v.Empresa.Nombre, direccion),
+                "unidades" => consulta.Aplicar(v => v.Detalles.Sum(d => d.Cantidad), direccion),
+                "total" => consulta.Aplicar(v => v.Total, direccion),
+                "estado" => consulta.Aplicar(v => v.Estado, direccion),
+                _ => consulta.Aplicar(v => v.Fecha, direccion)
+            };
+
+            ventaVM.Ventas = await ventasOrdenadas
                 .ThenByDescending(v => v.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)

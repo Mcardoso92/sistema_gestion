@@ -22,7 +22,7 @@ namespace saas.Controllers
         }
 
         // GET: Categoria
-        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, int pagina = 1)
+        public async Task<IActionResult> Index(string estado = "activos", int? empresaId = null, string? busqueda = null, string ordenarPor = "nombre", string direccion = "asc", int pagina = 1)
         {
             var usuarioLogueado = await _userManager.GetUserAsync(User);
 
@@ -86,6 +86,14 @@ namespace saas.Controllers
             ViewBag.EmpresaId = esSuperAdmin ? empresaId : null;
             ViewBag.Busqueda = busqueda;
 
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "nombre",
+                "id", "nombre", "empresa", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
             const int tamanioPagina = 20;
             pagina = Math.Max(pagina, 1);
             int totalCategorias = await categorias.CountAsync();
@@ -100,8 +108,16 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalCategorias;
 
-            var listaCategorias = await categorias
-                .OrderBy(c => c.Nombre)
+            IOrderedQueryable<Categoria> categoriasOrdenadas = ordenarPor switch
+            {
+                "id" => categorias.Aplicar(c => c.Id, direccion),
+                "empresa" => categorias.Aplicar(c => c.Empresa.Nombre, direccion),
+                "estado" => categorias.Aplicar(c => c.Estado, direccion),
+                _ => categorias.Aplicar(c => c.Nombre, direccion)
+            };
+
+            var listaCategorias = await categoriasOrdenadas
+                .ThenBy(c => c.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .ToListAsync();

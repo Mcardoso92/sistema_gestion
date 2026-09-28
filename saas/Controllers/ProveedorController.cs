@@ -32,7 +32,7 @@ namespace saas.Controllers
         }
 
         // GET: Proveedor
-        public async Task<IActionResult> Index(ProveedorIndexVM proveedorVM, int pagina = 1)
+        public async Task<IActionResult> Index(ProveedorIndexVM proveedorVM, string ordenarPor = "razonSocial", string direccion = "asc", int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -101,8 +101,26 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalProveedores;
 
-            proveedorVM.Proveedores = await consulta
-                .OrderBy(p => p.RazonSocial)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "razonsocial",
+                "razonsocial", "nombreFantasia", "cuit", "contacto", "empresa", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<Proveedor> proveedoresOrdenados = ordenarPor switch
+            {
+                "nombrefantasia" => consulta.Aplicar(p => p.NombreFantasia, direccion),
+                "cuit" => consulta.Aplicar(p => p.CUIT, direccion),
+                "contacto" => consulta.Aplicar(p => p.Email, direccion),
+                "empresa" => consulta.Aplicar(p => p.Empresa.Nombre, direccion),
+                "estado" => consulta.Aplicar(p => p.Estado, direccion),
+                _ => consulta.Aplicar(p => p.RazonSocial, direccion)
+            };
+
+            proveedorVM.Proveedores = await proveedoresOrdenados
+                .ThenBy(p => p.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .Select(p => new ProveedorIndexItemVM

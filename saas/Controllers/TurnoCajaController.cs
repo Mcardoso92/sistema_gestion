@@ -30,7 +30,7 @@ namespace saas.Controllers
         }
 
         // GET: TurnoCaja
-        public async Task<IActionResult> Index(string estado = "abiertos", int? empresaId = null, string? busqueda = null, int pagina = 1)
+        public async Task<IActionResult> Index(string estado = "abiertos", int? empresaId = null, string? busqueda = null, string ordenarPor = "apertura", string direccion = "desc", int pagina = 1)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -105,8 +105,26 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalTurnos;
 
-            var turnos = await consulta
-                .OrderByDescending(t => t.FechaApertura)
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "apertura",
+                "caja", "usuario", "empresa", "apertura", "fondoFijo", "estado");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
+            IOrderedQueryable<TurnoCaja> turnosOrdenados = ordenarPor switch
+            {
+                "caja" => consulta.Aplicar(t => t.Caja.Nombre, direccion),
+                "usuario" => consulta.Aplicar(t => t.UsuarioApertura.UserName, direccion),
+                "empresa" => consulta.Aplicar(t => t.Empresa.Nombre, direccion),
+                "fondofijo" => consulta.Aplicar(t => t.FondoFijoAplicado, direccion),
+                "estado" => consulta.Aplicar(t => t.Estado, direccion),
+                _ => consulta.Aplicar(t => t.FechaApertura, direccion)
+            };
+
+            var turnos = await turnosOrdenados
+                .ThenByDescending(t => t.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .Select(t => new TurnoCajaIndexVM

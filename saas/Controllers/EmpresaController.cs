@@ -26,7 +26,7 @@ namespace saas.Controllers
         }
 
         // GET: Empresa
-        public async Task<IActionResult> Index(string estado = "activos", string? busqueda = null, int pagina = 1)
+        public async Task<IActionResult> Index(string estado = "activos", string? busqueda = null, string ordenarPor = "nombre", string direccion = "asc", int pagina = 1)
         {
             IQueryable<Empresa> empresas = _context.Empresas
                 .AsNoTracking();
@@ -56,6 +56,14 @@ namespace saas.Controllers
             ViewBag.Estado = estado;
             ViewBag.Busqueda = busqueda;
 
+            ordenarPor = OrdenamientoConsulta.NormalizarColumna(
+                ordenarPor,
+                "nombre",
+                "id", "nombre", "estado", "fechaAlta");
+            direccion = OrdenamientoConsulta.NormalizarDireccion(direccion);
+            ViewBag.OrdenarPor = ordenarPor;
+            ViewBag.Direccion = direccion;
+
             const int tamanioPagina = 20;
             pagina = Math.Max(pagina, 1);
             int totalEmpresas = await empresas.CountAsync();
@@ -70,8 +78,16 @@ namespace saas.Controllers
             ViewBag.TotalPaginas = totalPaginas;
             ViewBag.TotalRegistros = totalEmpresas;
 
-            var listaEmpresas = await empresas
-                .OrderBy(e => e.Nombre)
+            IOrderedQueryable<Empresa> empresasOrdenadas = ordenarPor switch
+            {
+                "id" => empresas.Aplicar(e => e.Id, direccion),
+                "estado" => empresas.Aplicar(e => e.Estado, direccion),
+                "fechaalta" => empresas.Aplicar(e => e.FechaAlta, direccion),
+                _ => empresas.Aplicar(e => e.Nombre, direccion)
+            };
+
+            var listaEmpresas = await empresasOrdenadas
+                .ThenBy(e => e.Id)
                 .Skip((pagina - 1) * tamanioPagina)
                 .Take(tamanioPagina)
                 .ToListAsync();

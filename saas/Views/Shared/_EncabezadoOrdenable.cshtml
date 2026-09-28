@@ -1,0 +1,26 @@
+@model EncabezadoOrdenableVM
+
+@{
+    bool estaActivo = string.Equals(Model.Columna, Model.ColumnaActual, StringComparison.OrdinalIgnoreCase);
+    string siguienteDireccion = estaActivo && Model.DireccionActual == OrdenamientoConsulta.Ascendente
+        ? OrdenamientoConsulta.Descendente
+        : OrdenamientoConsulta.Ascendente;
+    string icono = !estaActivo
+        ? "unfold_more"
+        : Model.DireccionActual == OrdenamientoConsulta.Ascendente ? "arrow_upward" : "arrow_downward";
+
+    // Partimos de la consulta actual para conservar todos los filtros del listado.
+    var parametros = Context.Request.Query.ToDictionary(p => p.Key, p => (string?)p.Value.ToString());
+    parametros["ordenarPor"] = Model.Columna;
+    parametros[Model.ParametroDireccion] = siguienteDireccion;
+    parametros["pagina"] = "1";
+
+    string url = Microsoft.AspNetCore.WebUtilities.QueryHelpers.AddQueryString(Context.Request.Path, parametros);
+}
+
+<th class="px-4 py-3 border-0 @Model.Clase" aria-sort="@(estaActivo ? (Model.DireccionActual == OrdenamientoConsulta.Ascendente ? "ascending" : "descending") : "none")">
+    <a href="@url" class="table-sort-link @(estaActivo ? "is-active" : null)">
+        <span>@Model.Texto</span>
+        <span class="material-symbols-outlined table-sort-icon" aria-hidden="true">@icono</span>
+    </a>
+</th>

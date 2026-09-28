@@ -6,6 +6,8 @@
     string estadoSeleccionado = ViewBag.Estado?.ToString() ?? "activos";
     int? empresaSeleccionada = ViewBag.EmpresaId as int?;
     string? busqueda = ViewBag.Busqueda?.ToString();
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "cliente";
+    string direccion = ViewBag.Direccion?.ToString() ?? "asc";
 
     IEnumerable<Empresa> empresas = ViewBag.Empresas as IEnumerable<Empresa>
         ?? Enumerable.Empty<Empresa>();
@@ -108,14 +110,14 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th class="px-4 py-3 border-0">Cliente</th>
-                        <th class="px-4 py-3 border-0">Documento</th>
-                        <th class="px-4 py-3 border-0">Contacto</th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Cliente", Columna = "cliente", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Documento", Columna = "documento", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Contacto", Columna = "contacto", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                         @if (User.IsInRole("SuperAdmin"))
                         {
-                            <th class="px-4 py-3 border-0">Empresa</th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                         }
-                        <th class="px-4 py-3 border-0 text-center">Estado</th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Estado", Columna = "estado", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
                         <th class="px-4 py-3 border-0 text-end">Acciones</th>
                     </tr>
                 </thead>

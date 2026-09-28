@@ -10,6 +10,8 @@
     int paginaActual = ViewBag.PaginaActual is int pagina ? pagina : 1;
     int totalPaginas = ViewBag.TotalPaginas is int paginas ? paginas : 0;
     int totalProductos = ViewBag.TotalProductos is int total ? total : 0;
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "nombre";
+    string direccion = ViewBag.Direccion?.ToString() ?? "asc";
     string returnUrl = NavegacionContextual.ObtenerReturnUrl(Context.Request);
 
     IEnumerable<Categoria> categorias = ViewBag.Categorias as IEnumerable<Categoria>
@@ -147,18 +149,18 @@
             <table class="table table-hover mb-0 align-middle">
                 <thead>
                     <tr>
-                        <th class="px-4 py-3 border-0">ID</th>
-                        <th class="px-4 py-3 border-0">Producto</th>
-                        <th class="px-4 py-3 border-0">Categoría</th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "ID", Columna = "id", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Producto", Columna = "nombre", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Categoría", Columna = "categoria", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                         @if (User.IsInRole("SuperAdmin"))
                         {
-                            <th class="px-4 py-3 border-0">Empresa</th>
+                            <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                         }
-                        <th class="px-4 py-3 border-0 text-end">Precio Venta</th>
-                        <th class="px-4 py-3 border-0 text-center">Stock</th>
-                        <th class="px-4 py-3 border-0 text-center">Reposición</th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Precio Venta", Columna = "precio", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-end" }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Stock", Columna = "stock", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Reposición", Columna = "reposicion", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
                         <th class="px-4 py-3 border-0 text-center">Situación Stock</th>
-                        <th class="px-4 py-3 border-0 text-center">Estado</th>
+                        <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Estado", Columna = "estado", ColumnaActual = ordenarPor, DireccionActual = direccion, Clase = "text-center" }' />
                         <th class="px-4 py-3 border-0 text-end">Acciones</th>
                     </tr>
                 </thead>

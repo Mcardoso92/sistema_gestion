@@ -12,6 +12,8 @@
     int? empresaIdActual =
         ViewBag.EmpresaId as int?;
     string returnUrl = $"{Context.Request.PathBase}{Context.Request.Path}{Context.Request.QueryString}";
+    string ordenarPor = ViewBag.OrdenarPor?.ToString() ?? "apertura";
+    string direccion = ViewBag.Direccion?.ToString() ?? "desc";
 }
 
 <div class="container-fluid px-4 py-4">
@@ -163,17 +165,17 @@
 
                         <thead class="table-light">
                             <tr>
-                                <th class="ps-4">Caja</th>
-                                <th>Usuario</th>
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Caja", Columna = "caja", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Usuario", Columna = "usuario", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
 
                                 @if (User.IsInRole("SuperAdmin"))
                                 {
-                                    <th>Empresa</th>
+                                    <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Empresa", Columna = "empresa", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                                 }
 
-                                <th>Apertura</th>
-                                <th>Fondo fijo</th>
-                                <th>Estado</th>
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Apertura", Columna = "apertura", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Fondo fijo", Columna = "fondoFijo", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
+                                <partial name="_EncabezadoOrdenable" model='new EncabezadoOrdenableVM { Texto = "Estado", Columna = "estado", ColumnaActual = ordenarPor, DireccionActual = direccion }' />
                                 <th class="text-end pe-4">Acciones</th>
                             </tr>
                         </thead>
