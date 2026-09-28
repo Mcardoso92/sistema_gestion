@@ -154,6 +154,46 @@ Verificar como mínimo:
 - Enlace `https://www.veltika.com.ar`.
 - Logs y estado del App Pool.
 
+## Prueba de restauración del backup
+
+La validación real se realiza en una base temporal y no reemplaza ni detiene `Veltika_DB`.
+Copiar `Verificar-RestauracionBackupVeltika.ps1` a `C:\Scripts\Veltika` y ejecutar, como administrador, con un backup productivo reciente:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+    -File "C:\Scripts\Veltika\Verificar-RestauracionBackupVeltika.ps1" `
+    -ArchivoBackup "C:\Backups\Veltika\Veltika_DB_AAAAMMDD-HHMM.bak"
+```
+
+El script ejecuta `RESTORE VERIFYONLY`, restaura el archivo con un nombre temporal, comprueba su integridad mediante `DBCC CHECKDB`, verifica que quede `ONLINE` y elimina la base temporal. La prueba es satisfactoria únicamente cuando informa que el backup fue restaurado y verificado y que producción no fue modificada.
+
+La opción `-ConservarBaseTemporal` se reserva para un diagnóstico manual. No debe utilizarse en la verificación periódica normal.
+
+## Monitoreo y logs básicos
+
+El servidor ejecuta `Verificar-SaludVeltika.ps1` cada cinco minutos mediante la tarea programada `Veltika - Monitoreo de salud`. La verificación cubre:
+
+- sitio y App Pool de IIS iniciados;
+- respuesta HTTP 200 mediante HTTPS;
+- base `Veltika_DB` en estado `ONLINE`;
+- existencia, tamaño y antigüedad del último backup productivo.
+
+Cada ejecución se conserva durante 30 días en `C:\VeltikaLogs\Monitoreo\salud-AAAA-MM-DD.jsonl`. Los fallos también se registran como errores en el log `Application` del Visor de eventos, con origen `Veltika Monitor`.
+
+La instalación inicial se realiza una sola vez, como administrador:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+    -File "C:\Scripts\Veltika\Instalar-MonitoreoVeltika.ps1"
+```
+
+La comprobación manual puede ejecutarse en cualquier momento:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass `
+    -File "C:\Scripts\Veltika\Verificar-SaludVeltika.ps1"
+```
+
 ## Recuperación
 
 No continuar automáticamente después de un error. Para recuperar existen:
