@@ -11,6 +11,11 @@
 *.sln.docstates
 *.env
 
+# Configuracion local y secretos de desarrollo
+appsettings.Local.json
+appsettings.*.local.json
+*.secrets.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -267,6 +272,11 @@ ClientBin/
 *.dbproj.schemaview
 *.jfm
 *.pfx
+*.p12
+*.pem
+*.key
+*.cer
+*.crt
 *.publishsettings
 orleans.codegen.cs
 
@@ -290,6 +300,10 @@ UpgradeLog*.XML
 UpgradeLog*.htm
 ServiceFabricBackup/
 *.rptproj.bak
+
+# Backups y paquetes generados para deploy
+*.bak
+*.zip
 
 # SQL Server files
 *.mdf
