@@ -11,7 +11,9 @@ param(
     [ValidateSet("Machine", "AppPool")][string]$OrigenVariables = "Machine",
     [string]$ScriptBackup = "C:\Scripts\Veltika\Backup-Veltika.ps1",
     [string]$DirectorioBackups = "C:\VeltikaBackups",
-    [string]$PrefijoRespaldo = "Veltika"
+    [string]$PrefijoRespaldo = "Veltika",
+    [ValidateRange(1, 10)][int]$CantidadRespaldosConservar = 2,
+    [ValidateRange(128, 4096)][int]$MargenEspacioMB = 512
 )
 
 $ErrorActionPreference = "Stop"
@@ -124,6 +126,174 @@ function Verificar-BackupsAislados {
     }
 }
 
+function Obtener-TamanioDirectorio {
+    param([Parameter(Mandatory)][string]$Ruta)
+
+    if (-not (Test-Path -LiteralPath $Ruta -PathType Container)) { return [int64]0 }
+
+    $medicion = Get-ChildItem -LiteralPath $Ruta -Recurse -File -Force -ErrorAction Stop |
+        Measure-Object -Property Length -Sum
+
+    if ($null -eq $medicion.Sum) { return [int64]0 }
+    return [int64]$medicion.Sum
+}
+
+function Obtener-TamanioZipDescomprimido {
+    param([Parameter(Mandatory)][string]$RutaZip)
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archivo = [IO.Compression.ZipFile]::OpenRead($RutaZip)
+    try {
+        $medicion = $archivo.Entries | Measure-Object -Property Length -Sum
+        if ($null -eq $medicion.Sum) { return [int64]0 }
+        return [int64]$medicion.Sum
+    }
+    finally {
+        $archivo.Dispose()
+    }
+}
+
+function Obtener-TamanioAplicacionZip {
+    param([Parameter(Mandatory)][string]$RutaZip)
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archivo = [IO.Compression.ZipFile]::OpenRead($RutaZip)
+    try {
+        $medicion = $archivo.Entries |
+            Where-Object {
+                $rutaEntrada = $_.FullName.Replace('\', '/')
+                $rutaEntrada -like "Aplicacion/*" -and -not $rutaEntrada.EndsWith("/")
+            } |
+            Measure-Object -Property Length -Sum
+
+        if ($null -eq $medicion.Sum) { return [int64]0 }
+        return [int64]$medicion.Sum
+    }
+    finally {
+        $archivo.Dispose()
+    }
+}
+
+function Formatear-GB {
+    param([Parameter(Mandatory)][int64]$Bytes)
+    return "{0:N2} GB" -f ($Bytes / 1GB)
+}
+
+function Verificar-EspacioDisponible {
+    param(
+        [Parameter(Mandatory)][string]$RutaZip,
+        [Parameter(Mandatory)][string]$RutaActual,
+        [Parameter(Mandatory)][int]$MargenMB
+    )
+
+    $unidad = [IO.Path]::GetPathRoot([IO.Path]::GetFullPath($RutaActual))
+    $disco = [IO.DriveInfo]::new($unidad)
+    $tamanioActual = Obtener-TamanioDirectorio -Ruta $RutaActual
+    $tamanioUploads = Obtener-TamanioDirectorio -Ruta (Join-Path $RutaActual "wwwroot\uploads")
+    $tamanioZipExpandido = Obtener-TamanioZipDescomprimido -RutaZip $RutaZip
+    $tamanioAplicacionNueva = Obtener-TamanioAplicacionZip -RutaZip $RutaZip
+    $margen = [int64]$MargenMB * 1MB
+
+    # Durante el pico conviven la extraccion, el backup de archivos, la
+    # publicacion anterior y la copia nueva. La publicacion anterior es un
+    # movimiento dentro del mismo disco, por eso no suma espacio adicional.
+    $necesario = $tamanioZipExpandido + $tamanioActual + $tamanioAplicacionNueva + $tamanioUploads + $margen
+    $disponible = [int64]$disco.AvailableFreeSpace
+
+    Write-Host "Espacio disponible: $(Formatear-GB $disponible)"
+    Write-Host "Espacio requerido estimado: $(Formatear-GB $necesario)"
+
+    if ($disponible -lt $necesario) {
+        throw "Espacio insuficiente. Se requieren aproximadamente $(Formatear-GB $necesario) y hay $(Formatear-GB $disponible). No se detuvo IIS ni se modifico la aplicacion."
+    }
+}
+
+function Eliminar-DirectorioControlado {
+    param(
+        [Parameter(Mandatory)][IO.DirectoryInfo]$Directorio,
+        [Parameter(Mandatory)][string]$RaizPermitida
+    )
+
+    $raiz = [IO.Path]::GetFullPath($RaizPermitida).TrimEnd('\') + '\'
+    $destino = [IO.Path]::GetFullPath($Directorio.FullName)
+    if (-not $destino.StartsWith($raiz, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Se rechazo la eliminacion fuera de la raiz permitida: $destino"
+    }
+
+    Remove-Item -LiteralPath $destino -Recurse -Force
+    Write-Host "Eliminado: $destino"
+}
+
+function Aplicar-RetencionDirectorios {
+    param(
+        [Parameter(Mandatory)][string]$Raiz,
+        [Parameter(Mandatory)][string]$Filtro,
+        [Parameter(Mandatory)][int]$Conservar
+    )
+
+    if (-not (Test-Path -LiteralPath $Raiz -PathType Container)) { return }
+
+    Get-ChildItem -LiteralPath $Raiz -Directory -Filter $Filtro -Force |
+        Sort-Object -Property Name -Descending |
+        Select-Object -Skip $Conservar |
+        ForEach-Object {
+            Eliminar-DirectorioControlado -Directorio $_ -RaizPermitida $Raiz
+        }
+}
+
+function Aplicar-RetencionIis {
+    param(
+        [Parameter(Mandatory)][string]$Prefijo,
+        [Parameter(Mandatory)][int]$Conservar
+    )
+
+    $appcmd = "$env:windir\System32\inetsrv\appcmd.exe"
+    $patron = '^' + [Regex]::Escape($Prefijo) + '-\d{8}-\d{6}$'
+    $respaldos = @(& $appcmd list backup | ForEach-Object {
+        if ($_ -match '^BACKUP "([^"]+)"') {
+            # Guardamos el nombre antes de aplicar la segunda expresion regular,
+            # porque PowerShell reemplaza automaticamente el contenido de $matches.
+            $nombreBackup = $matches[1]
+            if ($nombreBackup -match $patron) {
+                $nombreBackup
+            }
+        }
+    })
+
+    $respaldos |
+        Sort-Object -Descending |
+        Select-Object -Skip $Conservar |
+        ForEach-Object {
+            & $appcmd delete backup $_ | Out-Host
+            if ($LASTEXITCODE -ne 0) { throw "No se pudo eliminar el backup IIS '$_'." }
+        }
+}
+
+function Aplicar-LimpiezaDeploy {
+    param(
+        [Parameter(Mandatory)][string]$RutaApp,
+        [Parameter(Mandatory)][string]$RutaBackups,
+        [Parameter(Mandatory)][string]$PrefijoIis,
+        [Parameter(Mandatory)][int]$Conservar,
+        [string]$TrabajoExcluir
+    )
+
+    $raizDeploy = "C:\Deploy"
+    if (Test-Path -LiteralPath $raizDeploy -PathType Container) {
+        Get-ChildItem -LiteralPath $raizDeploy -Directory -Filter "Trabajo-*" -Force |
+            Where-Object { -not $TrabajoExcluir -or $_.FullName -ine $TrabajoExcluir } |
+            ForEach-Object {
+                Eliminar-DirectorioControlado -Directorio $_ -RaizPermitida $raizDeploy
+            }
+    }
+
+    $padreAplicacion = Split-Path -Parent $RutaApp
+    $nombreAplicacion = Split-Path -Leaf $RutaApp
+    Aplicar-RetencionDirectorios -Raiz $padreAplicacion -Filtro "$nombreAplicacion-anterior-*" -Conservar $Conservar
+    Aplicar-RetencionDirectorios -Raiz $RutaBackups -Filtro "*-predeploy" -Conservar $Conservar
+    Aplicar-RetencionIis -Prefijo $PrefijoIis -Conservar $Conservar
+}
+
 Verificar-Administrador
 Import-Module WebAdministration
 Verificar-Variables -NombreAppPool $AppPool -Origen $OrigenVariables -BaseDatosEsperada $BaseDatos
@@ -132,6 +302,14 @@ if (-not (Test-Path -LiteralPath $PaqueteZip)) { throw "No se encontro el paquet
 
 $hashReal = (Get-FileHash -LiteralPath $PaqueteZip -Algorithm SHA256).Hash
 if ($hashReal -ne $HashEsperado.Trim()) { throw "El SHA256 del paquete no coincide. No se realizara el deploy." }
+
+Write-Host "=== DESTINO DEL DEPLOY ==="
+Write-Host "Sitio: $Sitio"
+Write-Host "App Pool: $AppPool"
+Write-Host "Base: $BaseDatos"
+Write-Host "Ruta: $RutaAplicacion"
+Write-Host "Retencion: $CantidadRespaldosConservar respaldos por tipo"
+Write-Host ""
 
 $confirmacion = Read-Host "Escribi DESPLEGAR para continuar"
 if ($confirmacion -cne "DESPLEGAR") { throw "Deploy cancelado." }
@@ -143,6 +321,19 @@ $directorioPadreAplicacion = Split-Path -Parent $RutaAplicacion
 $nombreAplicacion = Split-Path -Leaf $RutaAplicacion
 $rutaAnterior = Join-Path $directorioPadreAplicacion "$nombreAplicacion-anterior-$marca"
 $backupIis = "$PrefijoRespaldo-$marca"
+
+try {
+Write-Host "=== LIMPIEZA Y ESPACIO ==="
+Aplicar-LimpiezaDeploy `
+    -RutaApp $RutaAplicacion `
+    -RutaBackups $DirectorioBackups `
+    -PrefijoIis $PrefijoRespaldo `
+    -Conservar $CantidadRespaldosConservar
+
+Verificar-EspacioDisponible `
+    -RutaZip $PaqueteZip `
+    -RutaActual $RutaAplicacion `
+    -MargenMB $MargenEspacioMB
 
 New-Item -ItemType Directory -Path $directorioTrabajo -Force | Out-Null
 Expand-Archive -LiteralPath $PaqueteZip -DestinationPath $directorioTrabajo -Force
@@ -196,8 +387,25 @@ Write-Host "=== BACKUP POSTERIOR ==="
 & $ScriptBackup
 if (-not $?) { throw "La aplicacion funciona, pero fallo el backup posterior." }
 
+Write-Host "=== RETENCION FINAL ==="
+Aplicar-LimpiezaDeploy `
+    -RutaApp $RutaAplicacion `
+    -RutaBackups $DirectorioBackups `
+    -PrefijoIis $PrefijoRespaldo `
+    -Conservar $CantidadRespaldosConservar `
+    -TrabajoExcluir $directorioTrabajo
+
 Write-Host ""
 Write-Host "Deploy finalizado correctamente."
 Write-Host "Publicacion anterior: $rutaAnterior"
 Write-Host "Backup de archivos: $respaldoAplicacion"
 Write-Host "Backup de IIS: $backupIis"
+}
+finally {
+    # El directorio de trabajo nunca debe quedar acumulado, incluso cuando el
+    # deploy falla antes o despues de detener la aplicacion.
+    if (Test-Path -LiteralPath $directorioTrabajo -PathType Container) {
+        $trabajo = Get-Item -LiteralPath $directorioTrabajo -Force
+        Eliminar-DirectorioControlado -Directorio $trabajo -RaizPermitida "C:\Deploy"
+    }
+}

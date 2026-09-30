@@ -27,9 +27,6 @@ $parametrosQa = @{
 }
 
 Write-Host "=== DEPLOY VELTIKA QA ==="
-Write-Host "Sitio: Veltika-QA"
-Write-Host "Base: Veltika_QA_DB"
-Write-Host "Ruta: C:\inetpub\Veltika-QA"
 Write-Host "Produccion no sera utilizada por este comando."
 Write-Host ""
 

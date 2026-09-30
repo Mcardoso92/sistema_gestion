@@ -120,23 +120,29 @@ dotnet ef migrations script --idempotent `
 
 ### En el servidor
 
-1. Confirmar espacio libre.
-2. Ejecutar `Backup-Veltika.ps1`.
-3. Confirmar `.bak` local y copia en S3.
-4. Respaldar `C:\inetpub\Veltika`.
-5. Respaldar `applicationHost.config` e IIS con `appcmd`.
-6. Confirmar los nombres de variables sin mostrar valores.
-7. Extraer el ZIP fuera de `C:\inetpub`.
-8. Comparar SHA256.
-9. Detener sitio y App Pool.
-10. Aplicar SQL con `-E -C -I -b`.
-11. Ante un error SQL, no reemplazar archivos.
-12. Confirmar `__EFMigrationsHistory`.
-13. Renombrar la publicación anterior; no eliminarla.
-14. Copiar la nueva publicación.
-15. Recuperar uploads y otorgar `Modify` a `IIS AppPool\VeltikaPool` solo sobre esa carpeta.
-16. Reiniciar IIS y verificar HTTP 200.
-17. Ejecutar un backup SQL posterior.
+1. Mostrar explícitamente el sitio, App Pool, base y ruta de destino.
+2. Eliminar temporales `C:\Deploy\Trabajo-*` abandonados y aplicar la retención configurada.
+3. Calcular el espacio necesario para extracción, backup y publicación, con un margen adicional de 512 MB. Si no alcanza, cancelar antes de detener IIS.
+4. Ejecutar `Backup-Veltika.ps1`.
+5. Confirmar `.bak` local y copia en S3.
+6. Respaldar `C:\inetpub\Veltika`.
+7. Respaldar `applicationHost.config` e IIS con `appcmd`.
+8. Confirmar los nombres de variables sin mostrar valores.
+9. Extraer el ZIP fuera de `C:\inetpub`.
+10. Comparar SHA256.
+11. Detener sitio y App Pool.
+12. Aplicar SQL con `-E -C -I -b`.
+13. Ante un error SQL, no reemplazar archivos.
+14. Confirmar `__EFMigrationsHistory`.
+15. Renombrar la publicación anterior.
+16. Copiar la nueva publicación.
+17. Recuperar uploads y otorgar `Modify` a `IIS AppPool\VeltikaPool` solo sobre esa carpeta.
+18. Reiniciar IIS y verificar HTTP 200.
+19. Ejecutar un backup SQL posterior.
+20. Conservar únicamente los últimos 2 respaldos de publicación, archivos e IIS del ambiente desplegado.
+21. Eliminar siempre el directorio temporal del despliegue, incluso si el proceso falla.
+
+La retención no elimina backups SQL, archivos subidos por usuarios ni los históricos automáticos `CFGHISTORY_*` de IIS. Los parámetros `CantidadRespaldosConservar` y `MargenEspacioMB` permiten ajustar los valores predeterminados cuando exista una necesidad operativa concreta.
 
 ## Smoke test posterior
 
