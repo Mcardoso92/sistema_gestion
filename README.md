@@ -1,313 +1,206 @@
-# VELTIKA
+# Veltika
 
-> Sistema SaaS de gestión empresarial desarrollado con ASP.NET Core MVC.
+<p align="center">
+  <img src="saas/wwwroot/brand/logos/veltika-logo-horizontal.svg" alt="Veltika" width="260">
+</p>
 
-![Estado](https://img.shields.io/badge/Estado-En%20Desarrollo-blue)
-![.NET](https://img.shields.io/badge/.NET-9-purple)
-![ASP.NET Core MVC](https://img.shields.io/badge/ASP.NET%20Core-MVC-blueviolet)
-![Entity Framework Core](https://img.shields.io/badge/Entity%20Framework-Core-success)
-![SQL Server](https://img.shields.io/badge/SQL%20Server-Database-red)
+<p align="center">
+  Sistema SaaS de gestión para comercios, desarrollado con ASP.NET Core MVC y arquitectura multiempresa.
+</p>
 
----
+<p align="center">
+  <img src="https://img.shields.io/badge/Estado-Piloto-15558d" alt="Estado: Piloto">
+  <img src="https://img.shields.io/badge/.NET-9-512bd4" alt=".NET 9">
+  <img src="https://img.shields.io/badge/ASP.NET%20Core-MVC-512bd4" alt="ASP.NET Core MVC">
+  <img src="https://img.shields.io/badge/Entity%20Framework-Core-6c3483" alt="Entity Framework Core">
+  <img src="https://img.shields.io/badge/SQL%20Server-Database-cc2927" alt="SQL Server">
+</p>
 
-# 📖 Descripción
+## Descripción
 
-**VELTIKA** es un sistema SaaS de gestión empresarial (ERP) desarrollado como proyecto personal con el objetivo de profundizar conocimientos en **ASP.NET Core MVC**, **Entity Framework Core** y **ASP.NET Identity**, aplicando buenas prácticas de desarrollo, arquitectura y seguridad.
+**Veltika** centraliza la operación cotidiana de pequeños comercios en una única plataforma: ventas, compras, inventario, caja, clientes, proveedores y reportes.
 
-El sistema implementa una arquitectura **multiempresa**, donde cada organización administra exclusivamente su propia información mediante un aislamiento completo por empresa y un esquema de autorización basado en roles.
+El producto utiliza una arquitectura **multiempresa**. Cada organización trabaja con sus propios usuarios y datos, con aislamiento por empresa y autorización basada en roles. Veltika se encuentra en una etapa de **validación y piloto**, con foco en consolidar la versión 1.0 a partir del uso real.
 
-El desarrollo del proyecto se organiza mediante **Sprints** e **Issues** utilizando GitHub como herramienta de planificación y seguimiento.
+El proyecto nació como una iniciativa de aprendizaje y evolucionó hasta convertirse en un producto SaaS funcional, desplegado en ambientes separados de producción y QA.
 
----
+## Propuesta de valor
 
-# 🎯 Objetivos del proyecto
+- Reunir la información comercial y operativa en un solo lugar.
+- Mantener trazabilidad de ventas, compras, stock y movimientos financieros.
+- Ofrecer una experiencia consistente y accesible para tareas frecuentes.
+- Facilitar la toma de decisiones mediante indicadores y reportes.
+- Permitir que distintas empresas operen de forma aislada sobre la misma aplicación.
 
-- Aplicar el patrón de arquitectura MVC.
-- Desarrollar un sistema SaaS multiempresa.
-- Implementar autenticación y autorización con ASP.NET Identity.
-- Aplicar buenas prácticas con Entity Framework Core.
-- Diseñar una arquitectura escalable y mantenible.
-- Construir una base sólida para futuros módulos comerciales.
+## Módulos actuales
 
----
+- **Empresas y usuarios:** administración de empresas, usuarios, roles, estados y permisos.
+- **Productos y categorías:** catálogo, precios, costos, imágenes, categorías e importación de productos.
+- **Clientes y proveedores:** datos comerciales, estado, historial y búsqueda.
+- **Ventas / POS:** búsqueda de productos y clientes, múltiples pagos, cobros y seguimiento de saldos.
+- **Compras:** registro de compras, productos, proveedores, pagos y seguimiento de deuda.
+- **Stock:** control de existencias, ajustes e historial de movimientos.
+- **Caja:** cajas, medios de pago, turnos, movimientos, transferencias y regularizaciones.
+- **Devoluciones y reintegros:** devoluciones de compras, reintegros de ventas y proveedores, con sus anulaciones.
+- **Reportes:** análisis de ventas, stock, productos y clientes, con filtros y exportación cuando corresponde.
+- **Dashboard:** resumen operativo, indicadores y evolución reciente del negocio.
+- **Configuración de empresa:** identidad visual y preferencias propias de cada comercio.
+- **Notificaciones:** avisos internos vinculados con eventos relevantes del sistema.
 
-# 🚀 Tecnologías utilizadas
+## Experiencia de uso
 
+- Diseño responsive y consistente entre módulos.
+- Buscadores dinámicos y filtros combinables.
+- Tablas paginadas y ordenables.
+- Formularios con validaciones y mensajes en español.
+- Guías de ayuda contextuales.
+- Conservación del contexto de navegación al volver de una operación.
+- Interfaz alineada con la identidad visual de Veltika.
+
+## Stack técnico
+
+- .NET 9
 - ASP.NET Core MVC
-- .NET 8
-- Entity Framework Core
-- ASP.NET Identity
+- Entity Framework Core 9
+- ASP.NET Core Identity
 - SQL Server
 - LINQ
 - Bootstrap 5
-- Material Symbols
-- Fluent API
+- Razor Views y View Components
+- ClosedXML para generación de archivos Excel
+- MailKit para correo electrónico
+- SkiaSharp para procesamiento de imágenes
 
----
+## Arquitectura
 
-# 🏗 Arquitectura
-
-El proyecto sigue el patrón **Model - View - Controller (MVC)**.
-
-La solución se encuentra organizada en:
+La aplicación mantiene el patrón MVC y separa las responsabilidades principales en:
 
 ```text
-Controllers
-Models
-ViewModels
-Views
-Data
-Migrations
-wwwroot
+saas/
+├── Controllers/       # Entrada HTTP, autorización y coordinación de operaciones
+├── Services/          # Lógica compartida y servicios de aplicación
+├── Models/            # Entidades del dominio
+├── ViewModel/         # Modelos específicos para vistas y operaciones
+├── Views/             # Interfaz Razor MVC
+├── ViewComponents/    # Componentes visuales reutilizables
+├── Data/              # DbContext, configuración y datos iniciales controlados
+├── Migrations/        # Evolución versionada del esquema de base de datos
+├── Configuracion/     # Configuración transversal de la aplicación
+├── Helpers/           # Utilidades compartidas
+├── Settings/          # Opciones tipadas de configuración
+└── wwwroot/           # Estilos, scripts y recursos públicos
 ```
 
-Además se utilizan:
+Entre las decisiones implementadas se encuentran:
 
-- ViewModels específicos para cada operación CRUD.
-- Entity Framework Core (Code First).
-- Fluent API para la configuración del modelo.
-- ASP.NET Identity para autenticación y autorización.
-- Soft Delete para preservar la integridad de la información.
+- Entity Framework Core con migraciones y configuración Fluent API.
+- Servicios reutilizables para operaciones compartidas entre módulos.
+- ViewModels específicos para no exponer directamente las entidades en formularios complejos.
+- Bajas lógicas y trazabilidad en los módulos donde corresponde.
+- Componentes y estilos centralizados para mantener consistencia visual.
 
----
+## Seguridad y aislamiento
 
-# ✨ Funcionalidades implementadas
+- Autenticación y gestión de usuarios mediante ASP.NET Core Identity.
+- Autorización basada en roles.
+- Aislamiento de información por empresa.
+- Validaciones de permisos y pertenencia del lado servidor.
+- Validaciones de entrada mediante ViewModels, Data Annotations y reglas de negocio.
+- Protección de cookies, bloqueo por intentos fallidos y limitación de solicitudes de autenticación.
+- Encabezados de seguridad HTTP y HTTPS obligatorio fuera del ambiente de desarrollo.
+- Configuración sensible mediante variables de entorno o User Secrets, sin valores reales en el repositorio.
+- Inicialización controlada de roles, sin credenciales predeterminadas versionadas.
 
-## 🔐 Seguridad
+## Instalación local
 
-- Autenticación mediante ASP.NET Identity.
-- Autorización basada en Roles.
-- Arquitectura Multiempresa.
-- Restricción de acceso por Empresa.
-- Restricción de acceso por Rol.
-- Protección contra acceso directo mediante URL.
-- Validaciones de permisos en Controllers.
-- Bloqueo de acceso para usuarios pertenecientes a empresas inactivas.
+### Requisitos
 
----
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0)
+- SQL Server o SQL Server Express
+- Herramientas de Entity Framework Core 9
 
-## 📦 Gestión de datos
+### Pasos
 
-- CRUD completo.
-- Soft Delete.
-- Reactivación de registros.
-- Validaciones de negocio.
-- Validaciones mediante DataAnnotations.
-- Mensajes de éxito y error unificados.
-- Prevención de registros duplicados.
+1. Clonar el repositorio:
 
----
+   ```bash
+   git clone https://github.com/Mcardoso92/sistema_gestion.git
+   cd sistema_gestion/saas
+   ```
 
-## 🎨 Experiencia de usuario
+2. Restaurar las dependencias:
 
-- Buscadores dinámicos.
-- Filtros combinables.
-- Diseño responsive.
-- Interfaz unificada entre todos los módulos.
-- Breadcrumbs.
-- Material Symbols.
-- Mensajes de ayuda contextuales.
+   ```bash
+   dotnet restore
+   ```
 
----
+3. Instalar la herramienta de migraciones si todavía no está disponible:
 
-# 📦 Módulos implementados
+   ```bash
+   dotnet tool install --global dotnet-ef --version 9.0.16
+   ```
 
-## 🏢 Empresas
+4. Configurar una conexión local sin modificar ni versionar archivos con secretos:
 
-- CRUD completo.
-- Soft Delete.
-- Reactivación.
-- Buscador.
-- Filtro por Estado.
+   ```bash
+   dotnet user-secrets set "ConnectionStrings:SaasDbContext" "Server=.\\SQLEXPRESS;Database=Saas_DB;Integrated Security=true;Trust Server Certificate=true;"
+   ```
 
----
+5. Aplicar las migraciones:
 
-## 📂 Categorías
+   ```bash
+   dotnet ef database update
+   ```
 
-- CRUD completo.
-- Soft Delete.
-- Reactivación.
-- Buscador.
-- Filtro por Estado.
-- Filtro por Empresa.
+6. Ejecutar la aplicación:
 
----
+   ```bash
+   dotnet run
+   ```
 
-## 📦 Productos
+La aplicación crea los roles necesarios al iniciar. Las cuentas se registran mediante los flujos controlados del sistema; el repositorio no incluye usuarios ni contraseñas predeterminadas.
 
-- CRUD completo.
-- Soft Delete.
-- Reactivación.
-- Buscador.
-- Filtros por Estado, Empresa y Categoría.
+## Configuración sensible
 
----
+Los valores reales de conexión, correo y demás secretos deben configurarse mediante:
 
-## 👥 Usuarios
+- **User Secrets** durante el desarrollo local.
+- **Variables de entorno** en QA y producción.
 
-- CRUD completo.
-- ASP.NET Identity.
-- Gestión de Roles.
-- Buscador.
-- Filtros por Estado, Rol y Empresa.
-- Restricciones por Empresa.
-- Restricciones por Rol.
+No deben incorporarse al repositorio cadenas de conexión reales, contraseñas, certificados, backups ni paquetes de despliegue. El `.gitignore` incluye protecciones para estos archivos.
 
----
+## Capturas
 
-# 🔐 Modelo de seguridad
+Esta sección está preparada para incorporar capturas actuales del producto durante el piloto. Antes de publicar una imagen se deben utilizar datos ficticios y verificar que no aparezcan usuarios, comercios, correos, documentos ni información operativa real.
 
-El sistema implementa un esquema de autorización basado en Roles.
+Capturas previstas:
 
-## SuperAdmin
+- Dashboard general.
+- Punto de venta.
+- Control de stock.
+- Gestión de caja.
+- Reportes.
 
-Tiene acceso completo al sistema.
+## Estado y roadmap
 
-Puede administrar:
+### Veltika 1.0
 
-- Empresas.
-- Categorías.
-- Productos.
-- Usuarios.
+La etapa actual está enfocada en consolidación funcional, QA, estabilización, centralización de componentes y validación con usuarios reales.
 
----
+### Programa Piloto 2026
 
-## AdminEmpresa
+El piloto permitirá validar los flujos principales, detectar oportunidades de mejora y priorizar el backlog con evidencia de uso.
 
-Puede administrar únicamente la información perteneciente a su empresa.
+### Próximas etapas
 
-No puede:
+- Mejoras post-MVP registradas y priorizadas en el backlog del proyecto.
+- Evolución continua de rendimiento, seguridad, experiencia de uso y operación.
+- **Facturación** como próximo gran módulo previsto; todavía no forma parte de las funcionalidades implementadas.
 
-- Acceder a información de otras empresas.
-- Administrar usuarios SuperAdmin.
-- Asignar el rol SuperAdmin.
-- Modificar su propio rol.
-- Desactivar su propio usuario.
+## Autor
+
+**Mariano Cardoso** · [GitHub](https://github.com/Mcardoso92)
 
 ---
 
-## Empresas inactivas
-
-Cuando una empresa se encuentra inactiva:
-
-- Conserva toda su información.
-- Sus usuarios no pueden iniciar sesión.
-- Puede reactivarse posteriormente.
-- No aparece disponible en formularios de creación.
-
----
-
-# 🗄 Base de datos
-
-El proyecto utiliza **Entity Framework Core Code First**.
-
-Características implementadas:
-
-- Migraciones.
-- Fluent API.
-- Relaciones entre entidades.
-- Índices únicos.
-- Configuración de precisión decimal.
-- Inicialización de colecciones.
-
----
-
-# 📈 Estado del proyecto
-
-## ✅ Sprint 1
-
-- Empresas.
-- Categorías.
-- Productos.
-- Usuarios.
-
----
-
-## ✅ Sprint 1.5
-
-- Refactorización completa.
-- Optimización del código.
-- Seguridad.
-- Soft Delete.
-- Reactivación.
-- Buscadores.
-- Filtros.
-- Validaciones.
-- Revisión general del proyecto.
-
----
-
-## 🚧 Próximo Sprint
-
-### Sprint 2
-
-- Clientes.
-- Punto de Venta.
-- Ventas.
-- Detalle de Venta.
-
----
-
-# 📷 Capturas
-
-Las capturas del sistema serán incorporadas una vez finalizado el Sprint 2.
-
----
-
-# ⚙ Instalación
-
-Clonar el repositorio:
-
-```bash
-git clone https://github.com/Mcardoso92/sistema_gestion.git
-```
-
-Ingresar al proyecto:
-
-```bash
-cd sistema_gestion/saas
-```
-
-Restaurar dependencias:
-
-```bash
-dotnet restore
-```
-
-Configurar la cadena de conexión en:
-
-```text
-appsettings.json
-```
-
-Aplicar migraciones:
-
-```bash
-dotnet ef database update
-```
-
-Ejecutar la aplicación:
-
-```bash
-dotnet run
-```
-
----
-
-# 📅 Roadmap
-
-- ✅ Sprint 1 – Infraestructura y módulos administrativos.
-- ✅ Sprint 1.5 – Refactorización, seguridad y optimización.
-- 🚧 Sprint 2 – Ventas.
-- ⏳ Sprint 3 – Compras e Inventario.
-- ⏳ Sprint 4 – Reportes y Dashboard.
-
----
-
-# 👨‍💻 Autor
-
-**Mariano Cardoso**
-
-Proyecto desarrollado con fines de aprendizaje, práctica profesional y portfolio.
-
-GitHub: https://github.com/Mcardoso92
+Veltika es un producto en evolución. La documentación refleja el estado actual del sistema y se actualiza junto con sus funcionalidades.
