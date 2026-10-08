@@ -99,7 +99,7 @@ public class ProductoControllerTests
         Producto productoPersistido = await context.Productos.FindAsync(1) ?? throw new InvalidOperationException();
         Assert.Equal(17, productoPersistido.Stock);
         Assert.Equal(100, productoPersistido.PrecioCosto);
-        Assert.Empty(context.CambiosCostoProducto);
+        Assert.Empty(context.CambiosValorProducto);
     }
 
     private static async Task<Usuario> PrepararDatos(SaasDbContext context)
@@ -134,6 +134,7 @@ public class ProductoControllerTests
             userManager,
             new ImagenServicePrueba(),
             new StockProductoService(),
+            new HistorialValorProductoService(context),
             new FechaHoraServicePrueba());
         controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
         return controller;

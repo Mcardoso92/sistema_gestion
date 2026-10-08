@@ -34,7 +34,7 @@ namespace saas.Data
         public DbSet<ReintegroProveedor> ReintegrosProveedor { get; set; } = null!;
         public DbSet<TransferenciaCaja> TransferenciasCaja { get; set; } = null!;
         public DbSet<MovimientoCaja> MovimientosCaja { get; set; } = null!;
-        public DbSet<CambioCostoProducto> CambiosCostoProducto { get; set; } = null!;
+        public DbSet<CambioValorProducto> CambiosValorProducto { get; set; } = null!;
         public DbSet<RevisionNotificacion> RevisionesNotificacion { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -192,28 +192,34 @@ namespace saas.Data
                 .HasForeignKey(d => d.CompraId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<CambioCostoProducto>()
+            modelBuilder.Entity<CambioValorProducto>()
                 .HasOne(c => c.Producto)
                 .WithMany()
                 .HasForeignKey(c => c.ProductoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<CambioCostoProducto>()
+            modelBuilder.Entity<CambioValorProducto>()
                 .HasOne(c => c.Empresa)
                 .WithMany()
                 .HasForeignKey(c => c.EmpresaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<CambioCostoProducto>()
+            modelBuilder.Entity<CambioValorProducto>()
                 .HasOne(c => c.Usuario)
                 .WithMany()
                 .HasForeignKey(c => c.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<CambioCostoProducto>()
+            modelBuilder.Entity<CambioValorProducto>()
                 .HasOne(c => c.Compra)
                 .WithMany()
                 .HasForeignKey(c => c.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CambioValorProducto>()
+                .HasOne(c => c.CambioRevertido)
+                .WithMany()
+                .HasForeignKey(c => c.CambioRevertidoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DetalleCompra>()
@@ -980,8 +986,13 @@ namespace saas.Data
             modelBuilder.Entity<MovimientoCaja>()
                 .HasIndex(m => m.TransferenciaCajaId);
 
-            modelBuilder.Entity<CambioCostoProducto>()
+            modelBuilder.Entity<CambioValorProducto>()
                 .HasIndex(c => new { c.EmpresaId, c.ProductoId, c.Fecha });
+
+            modelBuilder.Entity<CambioValorProducto>()
+                .HasIndex(c => c.CambioRevertidoId)
+                .IsUnique()
+                .HasFilter("[CambioRevertidoId] IS NOT NULL");
 
             modelBuilder.Entity<RevisionNotificacion>()
                 .HasIndex(r => new { r.UsuarioId, r.EmpresaId })
@@ -1048,12 +1059,12 @@ namespace saas.Data
                 .Property(d => d.PrecioVentaNuevo)
                 .HasPrecision(18, 2);
 
-            modelBuilder.Entity<CambioCostoProducto>()
-                .Property(c => c.CostoAnterior)
+            modelBuilder.Entity<CambioValorProducto>()
+                .Property(c => c.ValorAnterior)
                 .HasPrecision(18, 2);
 
-            modelBuilder.Entity<CambioCostoProducto>()
-                .Property(c => c.CostoNuevo)
+            modelBuilder.Entity<CambioValorProducto>()
+                .Property(c => c.ValorNuevo)
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<DevolucionCompra>()

@@ -22,6 +22,7 @@ namespace saas.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly CompraSaldoService _compraSaldoService;
         private readonly StockProductoService _stockProductoService;
+        private readonly HistorialValorProductoService _historialValorProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public CompraController(
@@ -29,12 +30,14 @@ namespace saas.Controllers
             UserManager<Usuario> userManager,
             CompraSaldoService compraSaldoService,
             StockProductoService stockProductoService,
+            HistorialValorProductoService historialValorProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _compraSaldoService = compraSaldoService;
             _stockProductoService = stockProductoService;
+            _historialValorProductoService = historialValorProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -660,6 +663,7 @@ namespace saas.Controllers
                     ProveedorId = proveedor.Id,
                     UsuarioId = usuario.Id
                 };
+                Guid operacionHistorialCompra = Guid.NewGuid();
 
                 foreach (var detalleVM in compraVM.Detalles)
                 {
@@ -691,18 +695,16 @@ namespace saas.Controllers
 
                     if (producto.PrecioCosto != detalleVM.PrecioUnitario)
                     {
-                        _context.CambiosCostoProducto.Add(
-                            new CambioCostoProducto
-                            {
-                                Producto = producto,
-                                EmpresaId = empresaCompraId,
-                                UsuarioId = usuario.Id,
-                                Compra = compra,
-                                CostoAnterior = producto.PrecioCosto,
-                                CostoNuevo = detalleVM.PrecioUnitario,
-                                Fecha = fechaCompra,
-                                Origen = OrigenCambioCostoProducto.Compra
-                            });
+                        _historialValorProductoService.Registrar(
+                            producto,
+                            usuario.Id,
+                            TipoValorProducto.Costo,
+                            producto.PrecioCosto,
+                            detalleVM.PrecioUnitario,
+                            fechaCompra,
+                            OrigenCambioValorProducto.Compra,
+                            compra: compra,
+                            operacionId: operacionHistorialCompra);
 
                         producto.PrecioCosto =
                             detalleVM.PrecioUnitario;
@@ -710,6 +712,17 @@ namespace saas.Controllers
 
                     if (precioVentaNuevo.HasValue)
                     {
+                        _historialValorProductoService.Registrar(
+                            producto,
+                            usuario.Id,
+                            TipoValorProducto.PrecioVenta,
+                            precioVentaAnterior!.Value,
+                            precioVentaNuevo.Value,
+                            fechaCompra,
+                            OrigenCambioValorProducto.Compra,
+                            compra: compra,
+                            operacionId: operacionHistorialCompra);
+
                         producto.PrecioVenta =
                             precioVentaNuevo.Value;
                     }
@@ -1077,6 +1090,7 @@ namespace saas.Controllers
                 }
 
                 DateTime fechaAnulacion = _fechaHora.UtcAhora;
+                Guid operacionHistorialAnulacion = Guid.NewGuid();
 
                 foreach (var detalle in compra.Detalles)
                 {
@@ -1098,19 +1112,17 @@ namespace saas.Controllers
                     if (!existeCompraCostoPosterior &&
                         producto.PrecioCosto == detalle.PrecioUnitario)
                     {
-                        _context.CambiosCostoProducto.Add(
-                            new CambioCostoProducto
-                            {
-                                ProductoId = producto.Id,
-                                EmpresaId = compra.EmpresaId,
-                                UsuarioId = usuario.Id,
-                                CompraId = compra.Id,
-                                CostoAnterior = producto.PrecioCosto,
-                                CostoNuevo = detalle.PrecioCostoAnterior,
-                                Fecha = fechaAnulacion,
-                                Origen = OrigenCambioCostoProducto.AnulacionCompra,
-                                Motivo = "Restauración automática por anulación de la compra."
-                            });
+                        _historialValorProductoService.Registrar(
+                            producto,
+                            usuario.Id,
+                            TipoValorProducto.Costo,
+                            producto.PrecioCosto,
+                            detalle.PrecioCostoAnterior,
+                            fechaAnulacion,
+                            OrigenCambioValorProducto.AnulacionCompra,
+                            "Restauración automática por anulación de la compra.",
+                            compra,
+                            operacionHistorialAnulacion);
 
                         producto.PrecioCosto =
                             detalle.PrecioCostoAnterior;
@@ -1136,6 +1148,18 @@ namespace saas.Controllers
                         if (!existeCambioVentaPosterior &&
                             producto.PrecioVenta == detalle.PrecioVentaNuevo.Value)
                         {
+                            _historialValorProductoService.Registrar(
+                                producto,
+                                usuario.Id,
+                                TipoValorProducto.PrecioVenta,
+                                producto.PrecioVenta,
+                                detalle.PrecioVentaAnterior.Value,
+                                fechaAnulacion,
+                                OrigenCambioValorProducto.AnulacionCompra,
+                                "Restauración automática por anulación de la compra.",
+                                compra,
+                                operacionHistorialAnulacion);
+
                             producto.PrecioVenta =
                                 detalle.PrecioVentaAnterior.Value;
                         }

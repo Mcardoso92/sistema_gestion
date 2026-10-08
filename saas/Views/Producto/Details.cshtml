@@ -95,19 +95,22 @@
                 </div>
             </div>
             @{
-                var cambiosCosto =
-                    ViewBag.CambiosCosto as List<saas.Models.CambioCostoProducto>
-                    ?? new List<saas.Models.CambioCostoProducto>();
+                var cambiosValor =
+                    ViewBag.CambiosValor as List<saas.Models.CambioValorProducto>
+                    ?? new List<saas.Models.CambioValorProducto>();
+                var cambiosRevertibles =
+                    ViewBag.CambiosRevertibles as HashSet<int>
+                    ?? new HashSet<int>();
             }
             <div class="card table-card mt-4">
                 <div class="card-header">
-                    Historial de costo
+                    Historial de precios
                 </div>
                 <div class="card-body p-0">
-                    @if (cambiosCosto.Count == 0)
+                    @if (cambiosValor.Count == 0)
                     {
                         <p class="text-muted p-4 mb-0">
-                            Todavía no hay cambios de costo registrados.
+                            Todavía no hay cambios de precios registrados.
                         </p>
                     }
                     else
@@ -118,30 +121,69 @@
                                     <tr>
                                         <th>Fecha</th>
                                         <th>Origen</th>
+                                        <th>Valor</th>
                                         <th>Usuario</th>
                                         <th class="text-end">Anterior</th>
                                         <th class="text-end">Nuevo</th>
                                         <th>Motivo</th>
+                                        <th>Operación</th>
+                                        <th class="text-end">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var cambio in cambiosCosto)
+                                    @foreach (var cambio in cambiosValor)
                                     {
                                         string origen = cambio.Origen switch
                                         {
-                                            saas.Models.Enums.OrigenCambioCostoProducto.Compra => "Compra",
-                                            saas.Models.Enums.OrigenCambioCostoProducto.EdicionManual => "Edición manual",
-                                            saas.Models.Enums.OrigenCambioCostoProducto.AnulacionCompra => "Anulación de compra",
-                                            _ => "Cambio de costo"
+                                            saas.Models.Enums.OrigenCambioValorProducto.Compra => "Compra",
+                                            saas.Models.Enums.OrigenCambioValorProducto.EdicionManual => "Edición manual",
+                                            saas.Models.Enums.OrigenCambioValorProducto.AnulacionCompra => "Anulación de compra",
+                                            saas.Models.Enums.OrigenCambioValorProducto.Reversion => "Reversión",
+                                            _ => "Cambio de precio"
                                         };
+
+                                        string tipoValor = cambio.TipoValor == saas.Models.Enums.TipoValorProducto.Costo
+                                            ? "Costo"
+                                            : "Precio de venta";
 
                                         <tr>
                                             <td>@FechaHora.ConvertirAHoraLocal(cambio.Fecha).ToString("dd/MM/yyyy HH:mm")</td>
                                             <td>@origen</td>
+                                            <td>@tipoValor</td>
                                             <td>@cambio.Usuario.Nombre @cambio.Usuario.Apellido</td>
-                                            <td class="text-end">@cambio.CostoAnterior.ToString("C")</td>
-                                            <td class="text-end">@cambio.CostoNuevo.ToString("C")</td>
+                                            <td class="text-end">@cambio.ValorAnterior.ToString("C")</td>
+                                            <td class="text-end">@cambio.ValorNuevo.ToString("C")</td>
                                             <td>@(cambio.Motivo ?? "Automático")</td>
+                                            <td>
+                                                @if (cambio.CompraId.HasValue)
+                                                {
+                                                    <span>Compra #@cambio.CompraId</span>
+                                                }
+                                                else if (cambio.OperacionId.HasValue)
+                                                {
+                                                    <span title="@cambio.OperacionId">Lote @cambio.OperacionId.Value.ToString()[..8]</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Individual</span>
+                                                }
+                                            </td>
+                                            <td class="text-end">
+                                                @if (cambiosRevertibles.Contains(cambio.Id))
+                                                {
+                                                    <form asp-action="RevertirCambioValor"
+                                                          method="post"
+                                                          class="d-inline"
+                                                          onsubmit="return confirm('¿Confirma que desea restaurar el valor anterior? La reversión quedará registrada en el historial.');">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="cambioId" value="@cambio.Id" />
+                                                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-warning">
+                                                            Revertir
+                                                        </button>
+                                                    </form>
+                                                }
+                                            </td>
                                         </tr>
                                     }
                                 </tbody>

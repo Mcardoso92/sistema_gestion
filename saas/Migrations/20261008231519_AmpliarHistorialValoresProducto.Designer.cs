@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using saas.Data;
 
@@ -11,9 +12,11 @@ using saas.Data;
 namespace saas.Migrations
 {
     [DbContext(typeof(SaasDbContext))]
-    partial class SaasDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261008231519_AmpliarHistorialValoresProducto")]
+    partial class AmpliarHistorialValoresProducto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -228,9 +231,6 @@ namespace saas.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CambioRevertidoId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("CompraId")
                         .HasColumnType("int");
 
@@ -243,9 +243,6 @@ namespace saas.Migrations
                     b.Property<string>("Motivo")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<Guid?>("OperacionId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Origen")
                         .HasColumnType("int");
@@ -271,10 +268,6 @@ namespace saas.Migrations
                         .HasColumnName("CostoNuevo");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CambioRevertidoId")
-                        .IsUnique()
-                        .HasFilter("[CambioRevertidoId] IS NOT NULL");
 
                     b.HasIndex("CompraId");
 
@@ -1767,11 +1760,6 @@ namespace saas.Migrations
 
             modelBuilder.Entity("saas.Models.CambioValorProducto", b =>
                 {
-                    b.HasOne("saas.Models.CambioValorProducto", "CambioRevertido")
-                        .WithMany()
-                        .HasForeignKey("CambioRevertidoId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("saas.Models.Compra", "Compra")
                         .WithMany()
                         .HasForeignKey("CompraId")
@@ -1794,8 +1782,6 @@ namespace saas.Migrations
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("CambioRevertido");
 
                     b.Navigation("Compra");
 

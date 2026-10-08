@@ -19,6 +19,7 @@ namespace saas.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly IImagenService _imagenService;
         private readonly StockProductoService _stockProductoService;
+        private readonly HistorialValorProductoService _historialValorProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public ProductoController(
@@ -26,12 +27,14 @@ namespace saas.Controllers
             UserManager<Usuario> userManager,
             IImagenService imagenService,
             StockProductoService stockProductoService,
+            HistorialValorProductoService historialValorProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _imagenService = imagenService;
             _stockProductoService = stockProductoService;
+            _historialValorProductoService = historialValorProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -187,7 +190,7 @@ namespace saas.Controllers
                 return NotFound();
             }
 
-            ViewBag.CambiosCosto = await _context.CambiosCostoProducto
+            List<CambioValorProducto> cambiosValor = await _context.CambiosValorProducto
                 .AsNoTracking()
                 .Where(c =>
                     c.ProductoId == producto.Id &&
@@ -197,9 +200,79 @@ namespace saas.Controllers
                 .ThenByDescending(c => c.Id)
                 .ToListAsync();
 
+            HashSet<int> cambiosRevertidos = cambiosValor
+                .Where(c => c.CambioRevertidoId.HasValue)
+                .Select(c => c.CambioRevertidoId!.Value)
+                .ToHashSet();
+
+            // Solo el último evento de cada valor puede ofrecer reversión. La
+            // acción POST repite estas comprobaciones antes de guardar.
+            HashSet<int> cambiosRevertibles = cambiosValor
+                .GroupBy(c => c.TipoValor)
+                .Select(g => g.First())
+                .Where(c =>
+                    c.Origen == OrigenCambioValorProducto.EdicionManual &&
+                    !cambiosRevertidos.Contains(c.Id) &&
+                    (c.TipoValor == TipoValorProducto.Costo
+                        ? producto.PrecioCosto
+                        : producto.PrecioVenta) == c.ValorNuevo)
+                .Select(c => c.Id)
+                .ToHashSet();
+
+            ViewBag.CambiosValor = cambiosValor;
+            ViewBag.CambiosRevertibles = cambiosRevertibles;
+
             PrepararReturnUrl(returnUrl);
 
             return View(producto);
+        }
+
+        // La reversión no elimina el evento original: restaura el valor y crea
+        // un nuevo evento vinculado, siempre que no existan cambios posteriores.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RevertirCambioValor(
+            int cambioId,
+            string? returnUrl = null)
+        {
+            string? returnUrlValido = PrepararReturnUrl(returnUrl);
+            Usuario? usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Challenge();
+            }
+
+            CambioValorProducto? cambio = await _context.CambiosValorProducto
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == cambioId);
+
+            if (cambio == null)
+            {
+                return NotFound();
+            }
+
+            bool esSuperAdmin = await _userManager.IsInRoleAsync(usuario, "SuperAdmin");
+
+            if (!esSuperAdmin && cambio.EmpresaId != usuario.EmpresaId)
+            {
+                return NotFound();
+            }
+
+            ResultadoReversionValorProducto resultado =
+                await _historialValorProductoService.RevertirAsync(
+                    cambio.Id,
+                    cambio.EmpresaId,
+                    usuario.Id,
+                    _fechaHora.UtcAhora);
+
+            TempData[resultado.Exito ? "Success" : "Error"] = resultado.Exito
+                ? "El cambio de precio fue revertido correctamente."
+                : resultado.Error;
+
+            return RedirectToAction(
+                nameof(Details),
+                new { id = cambio.ProductoId, returnUrl = returnUrlValido });
         }
 
         // GET: Producto/Create
@@ -494,13 +567,15 @@ namespace saas.Controllers
 
             bool cambiaPrecioCosto =
                 producto.PrecioCosto != productoDb.PrecioCosto;
+            bool cambiaPrecioVenta =
+                producto.PrecioVenta != productoDb.PrecioVenta;
 
-            if (cambiaPrecioCosto &&
+            if ((cambiaPrecioCosto || cambiaPrecioVenta) &&
                 string.IsNullOrWhiteSpace(motivoCambioCosto))
             {
                 ModelState.AddModelError(
                     "motivoCambioCosto",
-                    "Debe indicar el motivo del cambio manual de costo.");
+                    "Debe indicar el motivo del cambio manual de precios.");
             }
             else if (motivoCambioCosto?.Length > 500)
             {
@@ -597,21 +672,36 @@ namespace saas.Controllers
                 productoDb.CodigoBarra = producto.CodigoBarra;
                 productoDb.Descripcion = producto.Descripcion;
                 productoDb.CategoriaId = producto.CategoriaId;
+                Guid? operacionPreciosId = cambiaPrecioCosto || cambiaPrecioVenta
+                    ? Guid.NewGuid()
+                    : null;
 
                 if (cambiaPrecioCosto)
                 {
-                    _context.CambiosCostoProducto.Add(
-                        new CambioCostoProducto
-                        {
-                            ProductoId = productoDb.Id,
-                            EmpresaId = productoDb.EmpresaId,
-                            UsuarioId = usuario.Id,
-                            CostoAnterior = productoDb.PrecioCosto,
-                            CostoNuevo = producto.PrecioCosto,
-                            Fecha = _fechaHora.UtcAhora,
-                            Origen = OrigenCambioCostoProducto.EdicionManual,
-                            Motivo = motivoCambioCosto!.Trim()
-                        });
+                    _historialValorProductoService.Registrar(
+                        productoDb,
+                        usuario.Id,
+                        TipoValorProducto.Costo,
+                        productoDb.PrecioCosto,
+                        producto.PrecioCosto,
+                        _fechaHora.UtcAhora,
+                        OrigenCambioValorProducto.EdicionManual,
+                        motivoCambioCosto,
+                        operacionId: operacionPreciosId);
+                }
+
+                if (cambiaPrecioVenta)
+                {
+                    _historialValorProductoService.Registrar(
+                        productoDb,
+                        usuario.Id,
+                        TipoValorProducto.PrecioVenta,
+                        productoDb.PrecioVenta,
+                        producto.PrecioVenta,
+                        _fechaHora.UtcAhora,
+                        OrigenCambioValorProducto.EdicionManual,
+                        motivoCambioCosto,
+                        operacionId: operacionPreciosId);
                 }
 
                 productoDb.PrecioCosto = producto.PrecioCosto;
