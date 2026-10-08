@@ -22,6 +22,21 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    const controlaStock = document.getElementById("ControlaStock");
+    const camposStock = document.querySelectorAll("[data-stock-field]");
+
+    if (controlaStock && camposStock.length > 0) {
+        // Una sola regla visual compartida por Crear y Editar; la validación definitiva permanece en el servidor.
+        const actualizarCamposStock = () => {
+            camposStock.forEach(campo => {
+                campo.hidden = !controlaStock.checked;
+            });
+        };
+
+        controlaStock.addEventListener("change", actualizarCamposStock);
+        actualizarCamposStock();
+    }
+
     const botonNuevaCategoria =
         document.getElementById("btnNuevaCategoria");
     const modalNuevaCategoria =

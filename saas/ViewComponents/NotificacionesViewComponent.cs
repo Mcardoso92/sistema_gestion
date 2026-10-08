@@ -51,7 +51,10 @@ namespace saas.ViewComponents
 
             IQueryable<Producto> consulta = _context.Productos
                 .AsNoTracking()
-                .Where(p => p.Estado && p.Stock <= p.PuntoReposicion);
+                .Where(p =>
+                    p.Estado &&
+                    p.ControlaStock &&
+                    p.Stock <= p.PuntoReposicion);
 
             if (!esSuperAdmin)
             {

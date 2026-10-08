@@ -74,14 +74,28 @@
                             </div>
                             <span asp-validation-for="PrecioVenta" class="text-danger"></span>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="ControlaStock"
+                                       class="form-check-input status-switch"
+                                       role="switch" />
+                                <label asp-for="ControlaStock" class="form-check-label fw-semibold">
+                                    Controla Stock
+                                </label>
+                            </div>
+                            <span asp-validation-for="ControlaStock" class="text-danger"></span>
+                            <div class="form-text">
+                                Solo puede desactivarse cuando el stock actual es 0.
+                            </div>
+                        </div>
+                        <div class="col-md-3" data-stock-field>
                             <label class="form-label">Stock Actual</label>
                             <input value="@Model.Stock" class="form-control" disabled/>
                             <div class="form-text">
                                 El stock se modifica desde el módulo Stock.
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-3" data-stock-field>
                             <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
                             <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" step="1" min="0"/>
                             <span asp-validation-for="PuntoReposicion" class="text-danger"></span>

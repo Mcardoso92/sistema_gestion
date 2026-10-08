@@ -129,6 +129,11 @@
 
     const carrito = [];
 
+    // Centraliza en el POS la misma regla que valida el servidor.
+    function tieneStockSuficiente(detalle, cantidad = detalle.cantidad) {
+        return !detalle.controlaStock || cantidad <= detalle.stockDisponible;
+    }
+
     let temporizadorProductos;
     let temporizadorClientes;
     let productosEncontrados = [];
@@ -197,8 +202,7 @@
 
     function actualizarEstadoConfirmacion() {
         const stockValido = carrito.every(detalle =>
-            detalle.cantidad > 0 &&
-            detalle.cantidad <= detalle.stockDisponible);
+            detalle.cantidad > 0 && tieneStockSuficiente(detalle));
 
         const pagos = Array.from(
             pagosContainer.querySelectorAll(".pago-item"));
@@ -702,6 +706,9 @@
                 fila.querySelector('input[name$=".StockDisponible"]')?.value ?? 0
             );
 
+            const controlaStock =
+                fila.querySelector('input[name$=".ControlaStock"]')?.value === "true";
+
             if (productoId > 0) {
                 carrito.push({
                     productoId,
@@ -709,7 +716,8 @@
                     codigoBarra,
                     precioUnitario,
                     cantidad,
-                    stockDisponible
+                    stockDisponible,
+                    controlaStock
                 });
             }
         });
@@ -786,8 +794,7 @@
     }
 
     function crearFilaProducto(detalle, indice) {
-        const stockSuficiente =
-            detalle.cantidad <= detalle.stockDisponible;
+        const stockSuficiente = tieneStockSuficiente(detalle);
 
         const subtotal =
             detalle.precioUnitario * detalle.cantidad;
@@ -816,7 +823,9 @@
 
         fila.appendChild(
             crearCeldaTexto(
-                detalle.stockDisponible.toString(),
+                detalle.controlaStock
+                    ? detalle.stockDisponible.toString()
+                    : "No controla",
                 "text-center small"
             )
         );
@@ -918,7 +927,9 @@
         const inputCantidad = document.createElement("input");
         inputCantidad.type = "number";
         inputCantidad.min = "1";
-        inputCantidad.max = detalle.stockDisponible.toString();
+        if (detalle.controlaStock) {
+            inputCantidad.max = detalle.stockDisponible.toString();
+        }
         inputCantidad.value = detalle.cantidad;
         inputCantidad.name = `Detalles[${indice}].Cantidad`;
         inputCantidad.className =
@@ -1003,8 +1014,9 @@
 
         if (productoExistente) {
             if (
-                productoExistente.cantidad + 1 >
-                productoExistente.stockDisponible
+                !tieneStockSuficiente(
+                    productoExistente,
+                    productoExistente.cantidad + 1)
             ) {
                 mostrarMensaje(
                     `No hay stock suficiente de "${productoExistente.productoNombre}". ` +
@@ -1018,8 +1030,9 @@
             productoExistente.cantidad++;
         } else {
             const stockDisponible = Number(producto.stockDisponible);
+            const controlaStock = Boolean(producto.controlaStock);
 
-            if (stockDisponible <= 0) {
+            if (controlaStock && stockDisponible <= 0) {
                 mostrarMensaje(
                     `El producto "${producto.nombre}" no tiene stock disponible.`,
                     "warning"
@@ -1034,7 +1047,8 @@
                 codigoBarra: producto.codigoBarra ?? null,
                 precioUnitario: Number(producto.precioVenta),
                 cantidad: 1,
-                stockDisponible
+                stockDisponible,
+                controlaStock
             });
         }
 
@@ -1051,7 +1065,7 @@
             return;
         }
 
-        if (detalle.cantidad + 1 > detalle.stockDisponible) {
+        if (!tieneStockSuficiente(detalle, detalle.cantidad + 1)) {
             mostrarMensaje(
                 `No hay stock suficiente de "${detalle.productoNombre}". ` +
                 `Stock disponible: ${detalle.stockDisponible}.`,
@@ -1096,7 +1110,7 @@
             return;
         }
 
-        if (nuevaCantidad > detalle.stockDisponible) {
+        if (!tieneStockSuficiente(detalle, nuevaCantidad)) {
             mostrarMensaje(
                 `No hay stock suficiente de "${detalle.productoNombre}". ` +
                 `Stock disponible: ${detalle.stockDisponible}.`,
@@ -1254,13 +1268,14 @@
 
             const stock = document.createElement("div");
             stock.className =
-                Number(producto.stockDisponible) > 0
+                !producto.controlaStock || Number(producto.stockDisponible) > 0
                     ? "text-muted"
                     : "text-danger";
 
             stock.style.fontSize = "0.75rem";
-            stock.textContent =
-                `Stock: ${producto.stockDisponible}`;
+            stock.textContent = producto.controlaStock
+                ? `Stock: ${producto.stockDisponible}`
+                : "Sin control de stock";
 
             valores.append(precio, stock);
             contenido.append(datos, valores);
@@ -1925,8 +1940,7 @@
         const stockInvalido = carrito.some(
             detalle =>
                 detalle.cantidad < 1 ||
-                detalle.cantidad >
-                detalle.stockDisponible
+                !tieneStockSuficiente(detalle)
         );
 
         if (stockInvalido) {

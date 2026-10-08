@@ -1007,6 +1007,11 @@ namespace saas.Data
                 .Property(p => p.PrecioVenta)
                 .HasPrecision(18, 2);
 
+            // Mantiene el comportamiento actual para productos existentes y para altas externas al formulario.
+            modelBuilder.Entity<Producto>()
+                .Property(p => p.ControlaStock)
+                .HasDefaultValue(true);
+
             modelBuilder.Entity<Venta>()
                 .Property(v => v.Total)
                 .HasPrecision(18, 2);

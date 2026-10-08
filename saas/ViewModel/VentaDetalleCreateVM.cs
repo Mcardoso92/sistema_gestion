@@ -24,6 +24,9 @@ namespace saas.ViewModel
         public int StockDisponible { get; set; }
 
         [ValidateNever]
+        public bool ControlaStock { get; set; }
+
+        [ValidateNever]
         public decimal Subtotal { get; set; }
 
         [ValidateNever]

@@ -21,17 +21,20 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly VentaSaldoService _ventaSaldoService;
+        private readonly StockProductoService _stockProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public VentaController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
             VentaSaldoService ventaSaldoService,
+            StockProductoService stockProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _ventaSaldoService = ventaSaldoService;
+            _stockProductoService = stockProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -563,7 +566,7 @@ namespace saas.Controllers
                     var producto =
                         productosPorId[detalleVM.ProductoId];
 
-                    if (producto.Stock < detalleVM.Cantidad)
+                    if (!_stockProductoService.TieneDisponible(producto, detalleVM.Cantidad))
                     {
                         ModelState.AddModelError(
                             nameof(ventaVM.Detalles),
@@ -751,28 +754,19 @@ namespace saas.Controllers
                             Subtotal = subtotal
                         });
 
-                    int stockAnterior =
-                        producto.Stock;
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarSalida(
+                            producto,
+                            detalleVM.Cantidad,
+                            empresaVentaId,
+                            TipoMovimientoStock.Venta,
+                            venta.Fecha,
+                            usuario.Id);
 
-                    int stockPosterior =
-                        stockAnterior -
-                        detalleVM.Cantidad;
-
-                    producto.Stock =
-                        stockPosterior;
-
-                    venta.MovimientosStock.Add(
-                        new MovimientoStock
-                        {
-                            ProductoId = producto.Id,
-                            EmpresaId = empresaVentaId,
-                            Tipo = TipoMovimientoStock.Venta,
-                            Cantidad = detalleVM.Cantidad,
-                            StockAnterior = stockAnterior,
-                            StockPosterior = stockPosterior,
-                            Fecha = venta.Fecha,
-                            UsuarioId = usuario.Id
-                        });
+                    if (movimientoStock != null)
+                    {
+                        venta.MovimientosStock.Add(movimientoStock);
+                    }
                 }
 
                 _context.Ventas.Add(venta);
@@ -1247,22 +1241,19 @@ namespace saas.Controllers
 
                 foreach (var detalle in venta.Detalles)
                 {
-                    int stockAnterior = detalle.Producto.Stock;
-                    int stockPosterior = stockAnterior + detalle.Cantidad;
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarEntrada(
+                            detalle.Producto,
+                            detalle.Cantidad,
+                            venta.EmpresaId,
+                            TipoMovimientoStock.AnulacionVenta,
+                            fechaAnulacion,
+                            usuario.Id);
 
-                    detalle.Producto.Stock = stockPosterior;
-
-                    venta.MovimientosStock.Add(new MovimientoStock
+                    if (movimientoStock != null)
                     {
-                        ProductoId = detalle.ProductoId,
-                        EmpresaId = venta.EmpresaId,
-                        Tipo = TipoMovimientoStock.AnulacionVenta,
-                        Cantidad = detalle.Cantidad,
-                        StockAnterior = stockAnterior,
-                        StockPosterior = stockPosterior,
-                        Fecha = fechaAnulacion,
-                        UsuarioId = usuario.Id
-                    });
+                        venta.MovimientosStock.Add(movimientoStock);
+                    }
                 }
 
                 venta.Estado = false;
@@ -1370,7 +1361,8 @@ namespace saas.Controllers
                     Nombre = p.Nombre,
                     CodigoBarra = p.CodigoBarra,
                     PrecioVenta = p.PrecioVenta,
-                    StockDisponible = p.Stock
+                    StockDisponible = p.Stock,
+                    ControlaStock = p.ControlaStock
                 })
                 .ToListAsync();
 
@@ -1640,11 +1632,12 @@ namespace saas.Controllers
                             Cantidad = d.Cantidad,
                             PrecioUnitario = producto.PrecioVenta,
                             StockDisponible = producto.Stock,
+                            ControlaStock = producto.ControlaStock,
                             Subtotal =
                                 producto.PrecioVenta * d.Cantidad,
                             StockSuficiente =
                                 d.Cantidad > 0 &&
-                                d.Cantidad <= producto.Stock
+                                _stockProductoService.TieneDisponible(producto, d.Cantidad)
                         };
                     })
                     .ToList();

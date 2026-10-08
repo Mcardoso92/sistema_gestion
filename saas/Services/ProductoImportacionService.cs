@@ -14,15 +14,18 @@ namespace saas.Services
         private static readonly TimeSpan DuracionVistaPrevia = TimeSpan.FromMinutes(30);
         private readonly SaasDbContext _context;
         private readonly IMemoryCache _cache;
+        private readonly StockProductoService _stockProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public ProductoImportacionService(
             SaasDbContext context,
             IMemoryCache cache,
+            StockProductoService stockProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _cache = cache;
+            _stockProductoService = stockProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -142,6 +145,7 @@ namespace saas.Services
                         PrecioVenta = fila.PrecioVenta,
                         Stock = fila.StockInicial,
                         PuntoReposicion = fila.PuntoReposicion,
+                        ControlaStock = true,
                         Descripcion = fila.Descripcion,
                         Estado = true,
                         FechaAlta = fecha,
@@ -150,21 +154,18 @@ namespace saas.Services
 
                     _context.Productos.Add(producto);
 
-                    if (fila.StockInicial > 0)
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarStockInicial(
+                            producto,
+                            empresaId,
+                            fecha,
+                            usuarioId,
+                            "Stock inicial por importación");
+
+                    if (movimientoStock != null)
                     {
-                        // La relación con Producto permite guardar el alta y su trazabilidad juntas sin depender todavía del ID definitivo.
-                        _context.MovimientosStock.Add(new MovimientoStock
-                        {
-                            Producto = producto,
-                            EmpresaId = empresaId,
-                            Tipo = TipoMovimientoStock.StockInicial,
-                            Cantidad = fila.StockInicial,
-                            StockAnterior = 0,
-                            StockPosterior = fila.StockInicial,
-                            Motivo = "Stock inicial por importación",
-                            Fecha = fecha,
-                            UsuarioId = usuarioId
-                        });
+                        // La relación permite guardar el producto y su trazabilidad en la misma operación.
+                        _context.MovimientosStock.Add(movimientoStock);
                     }
                 }
 

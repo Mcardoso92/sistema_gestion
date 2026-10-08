@@ -314,6 +314,7 @@ public class VentaControllerTests
             context,
             userManager,
             new VentaSaldoService(context),
+            new StockProductoService(),
             new FechaHoraServicePrueba());
         var httpContext = new DefaultHttpContext
         {

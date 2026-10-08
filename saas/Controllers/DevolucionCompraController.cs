@@ -18,15 +18,18 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly StockProductoService _stockProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public DevolucionCompraController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
+            StockProductoService stockProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _stockProductoService = stockProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -434,8 +437,9 @@ namespace saas.Controllers
                             compraActual);
                     }
 
-                    if (detalleVM.CantidadDevolver >
-                        detalleCompra.Producto.Stock)
+                    if (!_stockProductoService.TieneDisponible(
+                        detalleCompra.Producto,
+                        detalleVM.CantidadDevolver))
                     {
                         await transaccion.RollbackAsync();
 
@@ -471,46 +475,20 @@ namespace saas.Controllers
                                 subtotal
                         });
 
-                    int stockAnterior =
-                        detalleCompra.Producto.Stock;
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarSalida(
+                            detalleCompra.Producto,
+                            detalleVM.CantidadDevolver,
+                            compraActual.EmpresaId,
+                            TipoMovimientoStock.DevolucionCompra,
+                            fechaDevolucion,
+                            usuario.Id,
+                            vm.Observaciones);
 
-                    int stockPosterior =
-                        stockAnterior -
-                        detalleVM.CantidadDevolver;
-
-                    detalleCompra.Producto.Stock =
-                        stockPosterior;
-
-                    devolucion.MovimientosStock.Add(
-                        new MovimientoStock
-                        {
-                            ProductoId =
-                                detalleCompra.ProductoId,
-
-                            EmpresaId =
-                                compraActual.EmpresaId,
-
-                            Tipo =
-                                TipoMovimientoStock.DevolucionCompra,
-
-                            Cantidad =
-                                detalleVM.CantidadDevolver,
-
-                            StockAnterior =
-                                stockAnterior,
-
-                            StockPosterior =
-                                stockPosterior,
-
-                            Motivo =
-                                vm.Observaciones,
-
-                            Fecha =
-                                fechaDevolucion,
-
-                            UsuarioId =
-                                usuario.Id
-                        });
+                    if (movimientoStock != null)
+                    {
+                        devolucion.MovimientosStock.Add(movimientoStock);
+                    }
 
                     totalDevolucion +=
                         subtotal;
@@ -792,47 +770,20 @@ namespace saas.Controllers
                 foreach (var detalle
                     in devolucionActual.Detalles)
                 {
-                    int stockAnterior =
-                        detalle.Producto.Stock;
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarEntrada(
+                            detalle.Producto,
+                            detalle.Cantidad,
+                            devolucionActual.EmpresaId,
+                            TipoMovimientoStock.AnulacionDevolucionCompra,
+                            fechaAnulacion,
+                            usuario.Id,
+                            vm.Motivo);
 
-                    int stockPosterior =
-                        stockAnterior +
-                        detalle.Cantidad;
-
-                    detalle.Producto.Stock =
-                        stockPosterior;
-
-                    devolucionActual.MovimientosStock.Add(
-                        new MovimientoStock
-                        {
-                            ProductoId =
-                                detalle.ProductoId,
-
-                            EmpresaId =
-                                devolucionActual.EmpresaId,
-
-                            Tipo =
-                                TipoMovimientoStock
-                                    .AnulacionDevolucionCompra,
-
-                            Cantidad =
-                                detalle.Cantidad,
-
-                            StockAnterior =
-                                stockAnterior,
-
-                            StockPosterior =
-                                stockPosterior,
-
-                            Motivo =
-                                vm.Motivo,
-
-                            Fecha =
-                                fechaAnulacion,
-
-                            UsuarioId =
-                                usuario.Id
-                        });
+                    if (movimientoStock != null)
+                    {
+                        devolucionActual.MovimientosStock.Add(movimientoStock);
+                    }
                 }
 
                 devolucionActual.Estado =

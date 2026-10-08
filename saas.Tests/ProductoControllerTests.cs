@@ -133,6 +133,7 @@ public class ProductoControllerTests
             context,
             userManager,
             new ImagenServicePrueba(),
+            new StockProductoService(),
             new FechaHoraServicePrueba());
         controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(identity) } };
         return controller;

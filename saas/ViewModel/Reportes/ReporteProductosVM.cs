@@ -52,6 +52,8 @@ namespace saas.ViewModel.Reportes
 
         public int Stock { get; set; }
 
+        public bool ControlaStock { get; set; }
+
         public bool Estado { get; set; }
     }
 }

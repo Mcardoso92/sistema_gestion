@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using saas.Controllers;
 using saas.Data;
 using saas.Models;
+using saas.Services;
 using saas.ViewModel;
 
 namespace saas.Tests;
@@ -108,6 +109,7 @@ public class MovimientoStockControllerTests
         var controller = new MovimientoStockController(
             context,
             userManager,
+            new StockProductoService(),
             new FechaHoraServicePrueba());
         controller.ControllerContext = new ControllerContext
         {

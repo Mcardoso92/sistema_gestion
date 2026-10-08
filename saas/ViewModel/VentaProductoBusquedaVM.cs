@@ -7,5 +7,6 @@
         public string? CodigoBarra { get; set; }
         public decimal PrecioVenta { get; set; }
         public int StockDisponible { get; set; }
+        public bool ControlaStock { get; set; }
     }
 }

@@ -362,7 +362,9 @@ namespace saas.Controllers
 
             IQueryable<Producto> consulta = _context.Productos
                 .AsNoTracking()
-                .Where(p => p.Estado);
+                .Where(p =>
+                    p.Estado &&
+                    p.ControlaStock);
 
             if (esSuperAdmin)
             {
@@ -469,7 +471,11 @@ namespace saas.Controllers
                 situacion = "todos";
             }
 
-            IQueryable<Producto> consulta = _context.Productos.AsNoTracking().Where(p => p.Estado);
+            IQueryable<Producto> consulta = _context.Productos
+                .AsNoTracking()
+                .Where(p =>
+                    p.Estado &&
+                    p.ControlaStock);
 
             if (esSuperAdmin)
             {
@@ -722,6 +728,7 @@ namespace saas.Controllers
                             p.PrecioCosto * 100
                         : 0,
                     Stock = p.Stock,
+                    ControlaStock = p.ControlaStock,
                     Estado = p.Estado
                 })
                 .ToListAsync();
@@ -801,6 +808,7 @@ namespace saas.Controllers
                         ? (p.PrecioVenta - p.PrecioCosto) / p.PrecioCosto * 100
                         : 0,
                     Stock = p.Stock,
+                    ControlaStock = p.ControlaStock,
                     Estado = p.Estado
                 })
                 .ToListAsync();
@@ -830,7 +838,14 @@ namespace saas.Controllers
                 hoja.Cell(fila, 6).Value = productos[i].PrecioVenta;
                 hoja.Cell(fila, 7).Value = productos[i].MargenImporte;
                 hoja.Cell(fila, 8).Value = productos[i].MargenPorcentaje;
-                hoja.Cell(fila, 9).Value = productos[i].Stock;
+                if (productos[i].ControlaStock)
+                {
+                    hoja.Cell(fila, 9).Value = productos[i].Stock;
+                }
+                else
+                {
+                    hoja.Cell(fila, 9).Value = "No controla";
+                }
                 hoja.Cell(fila, 10).Value = productos[i].Estado ? "Activo" : "Inactivo";
             }
 

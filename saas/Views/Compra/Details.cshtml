@@ -734,7 +734,7 @@
                 <h2 class="help-guide-title">Guía de Ayuda</h2>
                 <div class="help-guide-item">
                     <span class="material-symbols-outlined help-guide-item__icon">inventory_2</span>
-                    <div><h3 class="help-guide-item__title">Stock</h3><p class="help-guide-item__text">Al registrar la compra, las cantidades se incorporaron automáticamente al stock.</p></div>
+                    <div><h3 class="help-guide-item__title">Stock</h3><p class="help-guide-item__text">Las cantidades se incorporan al inventario únicamente en los productos que controlan stock.</p></div>
                 </div>
                 <div class="help-guide-item">
                     <span class="material-symbols-outlined help-guide-item__icon">payments</span>
@@ -762,7 +762,7 @@
                 <div class="modal-body">
                     <p class="mb-2">¿Confirmás la anulación de la compra <strong>#@Model.Id</strong>?</p>
                     <p class="text-muted-custom text-sm mb-0">
-                        La operación intentará revertir el stock y los precios correspondientes. Si no existe stock suficiente, la anulación será rechazada.
+                        La operación intentará revertir los precios y, cuando corresponda, el stock. Si un producto controlado no tiene existencias suficientes, la anulación será rechazada.
                     </p>
                 </div>
 

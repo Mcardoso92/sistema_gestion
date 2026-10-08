@@ -18,17 +18,20 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly IImagenService _imagenService;
+        private readonly StockProductoService _stockProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public ProductoController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
             IImagenService imagenService,
+            StockProductoService stockProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _imagenService = imagenService;
+            _stockProductoService = stockProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -232,7 +235,7 @@ namespace saas.Controllers
         // POST: Producto/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,Stock,PuntoReposicion,EmpresaId")] Producto producto, IFormFile? imagenArchivo)
+        public async Task<IActionResult> Create([Bind("CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,Stock,PuntoReposicion,ControlaStock,EmpresaId")] Producto producto, IFormFile? imagenArchivo)
         {
             var usuario = await _userManager.GetUserAsync(User);
 
@@ -253,6 +256,12 @@ namespace saas.Controllers
                 }
 
                 producto.CodigoBarra = NormalizarCodigoBarra(producto.CodigoBarra);
+
+                if (!producto.ControlaStock)
+                {
+                    producto.Stock = 0;
+                    producto.PuntoReposicion = 0;
+                }
 
                 if (!ModelState.IsValid)
                 {
@@ -345,23 +354,16 @@ namespace saas.Controllers
                     await _context.SaveChangesAsync();
                 }
 
-                if (producto.Stock > 0)
+                MovimientoStock? movimientoStock =
+                    _stockProductoService.RegistrarStockInicial(
+                        producto,
+                        producto.EmpresaId,
+                        fecha,
+                        usuario.Id);
+
+                if (movimientoStock != null)
                 {
-                    var movimientoStock = new MovimientoStock
-                    {
-                        ProductoId = producto.Id,
-                        EmpresaId = producto.EmpresaId,
-                        Tipo = TipoMovimientoStock.StockInicial,
-                        Cantidad = producto.Stock,
-                        StockAnterior = 0,
-                        StockPosterior = producto.Stock,
-                        Motivo = "Stock inicial",
-                        Fecha = fecha,
-                        UsuarioId = usuario.Id
-                    };
-
                     _context.MovimientosStock.Add(movimientoStock);
-
                     await _context.SaveChangesAsync();
                 }
 
@@ -432,7 +434,7 @@ namespace saas.Controllers
         // POST: Producto/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,PuntoReposicion,Estado,EmpresaId")] Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false, string? motivoCambioCosto = null, string? returnUrl = null)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CodigoBarra,Nombre,Descripcion,CategoriaId,PrecioCosto,PrecioVenta,PuntoReposicion,ControlaStock,Estado,EmpresaId")] Producto producto, IFormFile? imagenArchivo, bool eliminarImagen = false, string? motivoCambioCosto = null, string? returnUrl = null)
         {
             string? returnUrlValido = PrepararReturnUrl(returnUrl);
 
@@ -477,6 +479,18 @@ namespace saas.Controllers
             producto.CodigoBarra = NormalizarCodigoBarra(producto.CodigoBarra);
 
             ViewBag.MotivoCambioCosto = motivoCambioCosto;
+
+            if (productoDb.ControlaStock && !producto.ControlaStock && productoDb.Stock != 0)
+            {
+                ModelState.AddModelError(
+                    nameof(Producto.ControlaStock),
+                    "Para dejar de controlar existencias, el stock actual debe ser 0.");
+            }
+
+            if (!producto.ControlaStock)
+            {
+                producto.PuntoReposicion = 0;
+            }
 
             bool cambiaPrecioCosto =
                 producto.PrecioCosto != productoDb.PrecioCosto;
@@ -603,6 +617,7 @@ namespace saas.Controllers
                 productoDb.PrecioCosto = producto.PrecioCosto;
                 productoDb.PrecioVenta = producto.PrecioVenta;
                 productoDb.PuntoReposicion = producto.PuntoReposicion;
+                productoDb.ControlaStock = producto.ControlaStock;
                 productoDb.Estado = producto.Estado;
                 productoDb.EmpresaId = producto.EmpresaId;
 

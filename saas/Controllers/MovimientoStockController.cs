@@ -18,15 +18,18 @@ namespace saas.Controllers
     {
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
+        private readonly StockProductoService _stockProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public MovimientoStockController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
+            StockProductoService stockProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
+            _stockProductoService = stockProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -47,7 +50,8 @@ namespace saas.Controllers
             IQueryable<Producto> consulta = _context.Productos
                 .AsNoTracking()
                 .Include(p => p.Categoria)
-                .Include(p => p.Empresa);
+                .Include(p => p.Empresa)
+                .Where(p => p.ControlaStock);
 
             if (!esSuperAdmin)
             {
@@ -197,6 +201,14 @@ namespace saas.Controllers
                 return Redirect(urlOrigen);
             }
 
+            if (!producto.ControlaStock)
+            {
+                TempData["Error"] = "Este producto no controla stock y no admite ajustes de inventario.";
+                string urlOrigen = NavegacionContextual.ObtenerReturnUrlLocal(Url, returnUrl)
+                    ?? Url.Action(nameof(Index))!;
+                return Redirect(urlOrigen);
+            }
+
             var ajusteVM = new StockAjusteVM
             {
                 ProductoId = producto.Id,
@@ -243,6 +255,13 @@ namespace saas.Controllers
                 return View(ajusteVM);
             }
 
+            if (!producto.ControlaStock)
+            {
+                ModelState.AddModelError("", "Este producto no controla stock y no admite ajustes de inventario.");
+                ViewData["ReturnUrl"] = urlOrigen;
+                return View(ajusteVM);
+            }
+
             if (!ModelState.IsValid)
             {
                 ViewData["ReturnUrl"] = urlOrigen;
@@ -262,15 +281,29 @@ namespace saas.Controllers
                 await _context.Entry(producto).ReloadAsync();
 
                 stockAnterior = producto.Stock;
-                int stockPosterior;
                 TipoMovimientoStock tipoMovimiento;
+                MovimientoStock? movimiento;
+
+                if (!producto.ControlaStock)
+                {
+                    await transaction.RollbackAsync();
+                    ModelState.AddModelError("", "Este producto dejó de controlar stock y ya no admite ajustes.");
+                    ViewData["ReturnUrl"] = urlOrigen;
+                    return View(ajusteVM);
+                }
 
                 switch (ajusteVM.Tipo)
                 {
                     case TipoAjusteStockVM.Entrada:
-                        stockPosterior = checked(
-                            stockAnterior + ajusteVM.Cantidad);
                         tipoMovimiento = TipoMovimientoStock.AjusteEntrada;
+                        movimiento = _stockProductoService.RegistrarEntrada(
+                            producto,
+                            ajusteVM.Cantidad,
+                            producto.EmpresaId,
+                            tipoMovimiento,
+                            _fechaHora.UtcAhora,
+                            usuario.Id,
+                            ajusteVM.Motivo.Trim());
                         break;
 
                     case TipoAjusteStockVM.Salida:
@@ -287,8 +320,15 @@ namespace saas.Controllers
                             return View(ajusteVM);
                         }
 
-                        stockPosterior = stockAnterior - ajusteVM.Cantidad;
                         tipoMovimiento = TipoMovimientoStock.AjusteSalida;
+                        movimiento = _stockProductoService.RegistrarSalida(
+                            producto,
+                            ajusteVM.Cantidad,
+                            producto.EmpresaId,
+                            tipoMovimiento,
+                            _fechaHora.UtcAhora,
+                            usuario.Id,
+                            ajusteVM.Motivo.Trim());
                         break;
 
                     default:
@@ -302,24 +342,7 @@ namespace saas.Controllers
                         return View(ajusteVM);
                 }
 
-                DateTime fecha = _fechaHora.UtcAhora;
-
-                producto.Stock = stockPosterior;
-
-                var movimiento = new MovimientoStock
-                {
-                    ProductoId = producto.Id,
-                    EmpresaId = producto.EmpresaId,
-                    Tipo = tipoMovimiento,
-                    Cantidad = ajusteVM.Cantidad,
-                    StockAnterior = stockAnterior,
-                    StockPosterior = stockPosterior,
-                    Motivo = ajusteVM.Motivo.Trim(),
-                    Fecha = fecha,
-                    UsuarioId = usuario.Id
-                };
-
-                _context.MovimientosStock.Add(movimiento);
+                _context.MovimientosStock.Add(movimiento!);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

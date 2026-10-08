@@ -92,7 +92,9 @@ namespace saas.Controllers
             int cantidadVentasMes = await ventasMes.CountAsync();
 
             var productosStockBajo = await productos
-                .Where(p => p.Stock <= p.PuntoReposicion)
+                .Where(p =>
+                    p.ControlaStock &&
+                    p.Stock <= p.PuntoReposicion)
                 .OrderBy(p => p.Stock)
                 .ThenBy(p => p.Nombre)
                 .Take(5)

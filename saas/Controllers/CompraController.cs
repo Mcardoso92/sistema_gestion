@@ -21,17 +21,20 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly CompraSaldoService _compraSaldoService;
+        private readonly StockProductoService _stockProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public CompraController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
             CompraSaldoService compraSaldoService,
+            StockProductoService stockProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _compraSaldoService = compraSaldoService;
+            _stockProductoService = stockProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -686,12 +689,6 @@ namespace saas.Controllers
                         PrecioVentaNuevo = precioVentaNuevo
                     });
 
-                    int stockAnterior = producto.Stock;
-                    int stockPosterior =
-                        stockAnterior + detalleVM.Cantidad;
-
-                    producto.Stock = stockPosterior;
-
                     if (producto.PrecioCosto != detalleVM.PrecioUnitario)
                     {
                         _context.CambiosCostoProducto.Add(
@@ -717,17 +714,19 @@ namespace saas.Controllers
                             precioVentaNuevo.Value;
                     }
 
-                    compra.MovimientosStock.Add(new MovimientoStock
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarEntrada(
+                            producto,
+                            detalleVM.Cantidad,
+                            empresaCompraId,
+                            TipoMovimientoStock.Compra,
+                            fechaCompra,
+                            usuario.Id);
+
+                    if (movimientoStock != null)
                     {
-                        ProductoId = producto.Id,
-                        EmpresaId = empresaCompraId,
-                        Tipo = TipoMovimientoStock.Compra,
-                        Cantidad = detalleVM.Cantidad,
-                        StockAnterior = stockAnterior,
-                        StockPosterior = stockPosterior,
-                        Fecha = fechaCompra,
-                        UsuarioId = usuario.Id
-                    });
+                        compra.MovimientosStock.Add(movimientoStock);
+                    }
 
                     totalCompra += subtotal;
                 }
@@ -1060,7 +1059,9 @@ namespace saas.Controllers
 
                 foreach (var detalle in compra.Detalles)
                 {
-                    if (detalle.Producto.Stock < detalle.Cantidad)
+                    if (!_stockProductoService.TieneDisponible(
+                        detalle.Producto,
+                        detalle.Cantidad))
                     {
                         await transaccion.RollbackAsync();
 
@@ -1080,11 +1081,6 @@ namespace saas.Controllers
                 foreach (var detalle in compra.Detalles)
                 {
                     var producto = detalle.Producto;
-
-                    int stockAnterior = producto.Stock;
-                    int stockPosterior = stockAnterior - detalle.Cantidad;
-
-                    producto.Stock = stockPosterior;
 
                     bool existeCompraCostoPosterior =
                         await _context.DetallesCompra
@@ -1145,17 +1141,19 @@ namespace saas.Controllers
                         }
                     }
 
-                    compra.MovimientosStock.Add(new MovimientoStock
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarSalida(
+                            producto,
+                            detalle.Cantidad,
+                            compra.EmpresaId,
+                            TipoMovimientoStock.AnulacionCompra,
+                            fechaAnulacion,
+                            usuario.Id);
+
+                    if (movimientoStock != null)
                     {
-                        ProductoId = producto.Id,
-                        EmpresaId = compra.EmpresaId,
-                        Tipo = TipoMovimientoStock.AnulacionCompra,
-                        Cantidad = detalle.Cantidad,
-                        StockAnterior = stockAnterior,
-                        StockPosterior = stockPosterior,
-                        Fecha = fechaAnulacion,
-                        UsuarioId = usuario.Id
-                    });
+                        compra.MovimientosStock.Add(movimientoStock);
+                    }
                 }
 
                 compra.Estado = false;

@@ -19,6 +19,7 @@ namespace saas.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly CajaSaldoService _cajaSaldoService;
         private readonly VentaSaldoService _ventaSaldoService;
+        private readonly StockProductoService _stockProductoService;
         private readonly IFechaHoraService _fechaHora;
 
         public ReintegroVentaController(
@@ -26,12 +27,14 @@ namespace saas.Controllers
             UserManager<Usuario> userManager,
             CajaSaldoService cajaSaldoService,
             VentaSaldoService ventaSaldoService,
+            StockProductoService stockProductoService,
             IFechaHoraService fechaHora)
         {
             _context = context;
             _userManager = userManager;
             _cajaSaldoService = cajaSaldoService;
             _ventaSaldoService = ventaSaldoService;
+            _stockProductoService = stockProductoService;
             _fechaHora = fechaHora;
         }
 
@@ -634,54 +637,22 @@ namespace saas.Controllers
                                 detalle.ProductoId)
                             .Producto;
 
-                    int stockAnterior =
-                        producto.Stock;
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarEntrada(
+                            producto,
+                            detalle.Cantidad,
+                            venta.EmpresaId,
+                            TipoMovimientoStock.ReintegroVenta,
+                            fecha,
+                            usuario.Id,
+                            $"Reintegro de venta #{venta.Id}",
+                            venta.Id,
+                            reintegroVentaId: reintegro.Id);
 
-                    producto.Stock +=
-                        detalle.Cantidad;
-
-                    var movimientoStock =
-                        new MovimientoStock
-                        {
-                            ProductoId =
-                                producto.Id,
-
-                            EmpresaId =
-                                venta.EmpresaId,
-
-                            Tipo =
-                                TipoMovimientoStock.ReintegroVenta,
-
-                            Cantidad =
-                                detalle.Cantidad,
-
-                            StockAnterior =
-                                stockAnterior,
-
-                            StockPosterior =
-                                producto.Stock,
-
-                            Motivo =
-                                $"Reintegro de venta #{venta.Id}",
-
-                            Fecha =
-                                fecha,
-
-                            UsuarioId =
-                                usuario.Id,
-
-                            VentaId =
-                                venta.Id,
-
-                            CompraId =
-                                null,
-
-                            ReintegroVentaId =
-                                reintegro.Id
-                        };
-
-                    _context.MovimientosStock.Add(
-                        movimientoStock);
+                    if (movimientoStock != null)
+                    {
+                        _context.MovimientosStock.Add(movimientoStock);
+                    }
                 }
 
                 var movimientoCaja =
@@ -959,8 +930,9 @@ namespace saas.Controllers
 
             foreach (var detalle in reintegro.Detalles)
             {
-                if (detalle.Producto.Stock <
-                    detalle.Cantidad)
+                if (!_stockProductoService.TieneDisponible(
+                    detalle.Producto,
+                    detalle.Cantidad))
                 {
                     ModelState.AddModelError(
                         "",
@@ -987,8 +959,9 @@ namespace saas.Controllers
                 // Revalidamos stock dentro de la transacción.
                 foreach (var detalle in reintegro.Detalles)
                 {
-                    if (detalle.Producto.Stock <
-                        detalle.Cantidad)
+                    if (!_stockProductoService.TieneDisponible(
+                        detalle.Producto,
+                        detalle.Cantidad))
                     {
                         await transaccion.RollbackAsync();
 
@@ -1057,55 +1030,22 @@ namespace saas.Controllers
 
                 foreach (var detalle in reintegro.Detalles)
                 {
-                    int stockAnterior =
-                        detalle.Producto.Stock;
+                    MovimientoStock? movimientoStock =
+                        _stockProductoService.RegistrarSalida(
+                            detalle.Producto,
+                            detalle.Cantidad,
+                            reintegro.EmpresaId,
+                            TipoMovimientoStock.AnulacionReintegroVenta,
+                            fecha,
+                            usuario.Id,
+                            $"Anulación reintegro #{reintegro.Id} - Venta #{reintegro.VentaId}",
+                            reintegro.VentaId,
+                            reintegroVentaId: reintegro.Id);
 
-                    int stockPosterior =
-                        stockAnterior -
-                        detalle.Cantidad;
-
-                    detalle.Producto.Stock =
-                        stockPosterior;
-
-                    _context.MovimientosStock.Add(
-                        new MovimientoStock
-                        {
-                            ProductoId =
-                                detalle.ProductoId,
-
-                            EmpresaId =
-                                reintegro.EmpresaId,
-
-                            Tipo =
-                                TipoMovimientoStock.AnulacionReintegroVenta,
-
-                            Cantidad =
-                                detalle.Cantidad,
-
-                            StockAnterior =
-                                stockAnterior,
-
-                            StockPosterior =
-                                stockPosterior,
-
-                            Motivo =
-                                $"Anulación reintegro #{reintegro.Id} - Venta #{reintegro.VentaId}",
-
-                            Fecha =
-                                fecha,
-
-                            UsuarioId =
-                                usuario.Id,
-
-                            VentaId =
-                                reintegro.VentaId,
-
-                            CompraId =
-                                null,
-
-                            ReintegroVentaId =
-                                reintegro.Id
-                        });
+                    if (movimientoStock != null)
+                    {
+                        _context.MovimientosStock.Add(movimientoStock);
+                    }
                 }
 
                 var movimientoReversion =

@@ -52,13 +52,20 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <label asp-for="Stock" class="form-label">Stock actual</label>
-                            <input asp-for="Stock" class="form-control" placeholder="0" type="number" readonly />
+                            <label class="form-label">Control de stock</label>
+                            <input class="form-control" value="@(Model.ControlaStock ? "Sí" : "No")" readonly />
                         </div>
-                        <div class="col-md-3">
-                            <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
-                            <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" readonly />
-                        </div>
+                        @if (Model.ControlaStock)
+                        {
+                            <div class="col-md-3">
+                                <label asp-for="Stock" class="form-label">Stock actual</label>
+                                <input asp-for="Stock" class="form-control" placeholder="0" type="number" readonly />
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="PuntoReposicion" class="form-label">Punto de Reposicion</label>
+                                <input asp-for="PuntoReposicion" class="form-control" placeholder="0" type="number" readonly />
+                            </div>
+                        }
                         @if (User.IsInRole("SuperAdmin"))
                         {
                             <div class="col-md-6">
@@ -161,7 +168,7 @@
                     <span class="material-symbols-outlined help-guide-item__icon">inventory_2</span>
                     <div>
                         <h3 class="help-guide-item__title">Gestión de Stock</h3>
-                        <p class="help-guide-item__text">El stock inicial será cargado en el almacén principal por defecto. Puede ajustarlo más tarde desde el módulo de Inventarios.</p>
+                        <p class="help-guide-item__text">Los productos que controlan existencias pueden ajustarse desde el módulo de Inventarios.</p>
                     </div>
                 </div>
 
