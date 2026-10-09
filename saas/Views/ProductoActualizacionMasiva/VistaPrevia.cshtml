@@ -1,0 +1,76 @@
+@using saas.Models.Enums
+@model saas.ViewModel.ProductoActualizacionMasiva.ProductoActualizacionMasivaVistaPreviaVM
+
+@{
+    ViewData["Title"] = "Vista previa de actualización";
+    string ajuste = Model.TipoAjuste == TipoAjustePrecioProducto.Porcentaje
+        ? $"{Model.ValorAjuste:N2}%"
+        : Model.ValorAjuste.ToString("C");
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="page-header">
+        <div class="page-header-content">
+            <a asp-action="Index" asp-route-empresaId="@Model.EmpresaId" class="text-decoration-none text-secondary">← Modificar criterios</a>
+            <h1 class="page-title mt-2">Vista previa de actualización</h1>
+            <p class="page-subtitle">Revisá los valores anteriores y resultantes antes de confirmar.</p>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="card metric-card h-100"><div class="card-body">
+            <div class="text-secondary small">Productos afectados</div><div class="fs-3 fw-semibold">@Model.TotalProductos</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card metric-card h-100"><div class="card-body">
+            <div class="text-secondary small">Ajuste</div><div class="fs-3 fw-semibold">@ajuste</div>
+        </div></div></div>
+        <div class="col-md-4"><div class="card metric-card h-100"><div class="card-body">
+            <div class="text-secondary small">Motivo</div><div class="fw-semibold">@Model.Motivo</div>
+        </div></div></div>
+    </div>
+
+    <div class="alert alert-warning">
+        Verificá cuidadosamente esta lista. La actualización se aplicará a todos los productos mostrados en una única operación.
+    </div>
+
+    <div class="card table-card mb-4">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Categoría</th>
+                        <th class="text-end">Costo anterior</th>
+                        <th class="text-end">Costo resultante</th>
+                        <th class="text-end">Venta anterior</th>
+                        <th class="text-end">Venta resultante</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var producto in Model.Productos)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@producto.Nombre</td>
+                            <td>@producto.Categoria</td>
+                            <td class="text-end">@producto.CostoAnterior.ToString("C")</td>
+                            <td class="text-end @(producto.ModificaCosto ? "fw-semibold text-primary" : "text-secondary")">@producto.CostoNuevo.ToString("C")</td>
+                            <td class="text-end">@producto.VentaAnterior.ToString("C")</td>
+                            <td class="text-end @(producto.ModificaVenta ? "fw-semibold text-primary" : "text-secondary")">@producto.VentaNueva.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a asp-action="Index" asp-route-empresaId="@Model.EmpresaId" class="btn btn-v-outline">Cancelar</a>
+        <form asp-action="Confirmar" method="post"
+              onsubmit="return confirm('¿Confirma la actualización masiva de @Model.TotalProductos productos?');">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="token" value="@Model.Token" />
+            <input type="hidden" name="empresaId" value="@Model.EmpresaId" />
+            <button type="submit" class="btn btn-v-primary">Confirmar actualización</button>
+        </form>
+    </div>
+</main>

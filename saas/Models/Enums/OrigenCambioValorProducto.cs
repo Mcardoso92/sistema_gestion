@@ -5,6 +5,7 @@ namespace saas.Models.Enums
         Compra = 1,
         EdicionManual = 2,
         AnulacionCompra = 3,
-        Reversion = 4
+        Reversion = 4,
+        ActualizacionMasiva = 5
     }
 }

@@ -1,0 +1,126 @@
+@using saas.Models.Enums
+@model saas.ViewModel.ProductoActualizacionMasiva.ProductoActualizacionMasivaVM
+
+@{
+    ViewData["Title"] = "Actualización masiva de precios";
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Actualización masiva de precios</h1>
+            <p class="page-subtitle">Configurá el ajuste y revisá todos los resultados antes de aplicarlo.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <div class="card form-card">
+                <div class="card-body p-4">
+                    <form asp-action="Previsualizar" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row g-3">
+                            @if (User.IsInRole("SuperAdmin"))
+                            {
+                                <div class="col-md-6">
+                                    <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                                    <select asp-for="EmpresaId" asp-items="ViewBag.Empresas" class="form-select"
+                                            onchange="window.location.href='@Url.Action("Index")?empresaId=' + this.value">
+                                    </select>
+                                    <span asp-validation-for="EmpresaId" class="text-danger"></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <input asp-for="EmpresaId" type="hidden" />
+                            }
+
+                            <div class="col-md-6">
+                                <label asp-for="CategoriaId" class="form-label">Categoría</label>
+                                <select asp-for="CategoriaId" asp-items="ViewBag.Categorias" class="form-select">
+                                    <option value="">Todas las categorías</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Busqueda" class="form-label">Buscar productos</label>
+                                <input asp-for="Busqueda" class="form-control" placeholder="Nombre o código de barras" />
+                                <span asp-validation-for="Busqueda" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Campo" class="form-label">Valor a modificar</label>
+                                <select asp-for="Campo" class="form-select">
+                                    <option value="@CampoAjustePrecioProducto.PrecioVenta">Precio de venta</option>
+                                    <option value="@CampoAjustePrecioProducto.PrecioCosto">Precio de costo</option>
+                                    <option value="@CampoAjustePrecioProducto.Ambos">Costo y venta</option>
+                                </select>
+                                <span asp-validation-for="Campo" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="TipoAjuste" class="form-label">Tipo de ajuste</label>
+                                <select asp-for="TipoAjuste" class="form-select">
+                                    <option value="@TipoAjustePrecioProducto.Porcentaje">Por porcentaje</option>
+                                    <option value="@TipoAjustePrecioProducto.ImporteFijo">Por importe fijo</option>
+                                </select>
+                                <span asp-validation-for="TipoAjuste" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="ValorAjuste" class="form-label">Ajuste</label>
+                                <input asp-for="ValorAjuste" class="form-control" inputmode="decimal" placeholder="Ej.: 10 o -5" />
+                                <span asp-validation-for="ValorAjuste" class="text-danger"></span>
+                                <div class="form-text">Use un valor negativo para reducir precios.</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Motivo" class="form-label">Motivo</label>
+                                <textarea asp-for="Motivo" class="form-control" rows="3" maxlength="500"
+                                          placeholder="Ej.: Actualización de lista del proveedor"></textarea>
+                                <span asp-validation-for="Motivo" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12 form-actions mt-4 border-top pt-4">
+                                <a asp-controller="Producto" asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                                <button type="submit" class="btn btn-v-primary">Previsualizar cambios</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">filter_alt</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Alcance</h3>
+                        <p class="help-guide-item__text">Solo se incluyen productos activos de la empresa y filtros seleccionados.</p>
+                    </div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">calculate</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Redondeo</h3>
+                        <p class="help-guide-item__text">Los resultados se redondean a dos decimales.</p>
+                    </div>
+                </div>
+                <div class="help-guide-item">
+                    <span class="material-symbols-outlined help-guide-item__icon">preview</span>
+                    <div>
+                        <h3 class="help-guide-item__title">Sin cambios inmediatos</h3>
+                        <p class="help-guide-item__text">Nada se modifica hasta revisar la vista previa y confirmar.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
