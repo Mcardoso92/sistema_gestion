@@ -41,5 +41,9 @@ namespace saas.Models
         public int? DevolucionCompraId { get; set; }
         [ValidateNever]
         public DevolucionCompra? DevolucionCompra { get; set; }
+        public int? InventarioFisicoId { get; set; }
+
+        [ValidateNever]
+        public InventarioFisico? InventarioFisico { get; set; }
     }
 }

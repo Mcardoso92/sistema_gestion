@@ -1,0 +1,82 @@
+@using saas.Models.Enums
+@model IEnumerable<saas.Models.InventarioFisico>
+@inject saas.Services.IFechaHoraService FechaHora
+
+@{
+    ViewData["Title"] = "Inventarios físicos";
+    int? empresaId = ViewBag.EmpresaId as int?;
+}
+
+<main class="container-fluid px-4 py-5">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Inventarios físicos</h1>
+            <p class="page-subtitle">Conteos físicos y conciliaciones trazables de stock.</p>
+        </div>
+        <div class="page-actions">
+            <a asp-controller="MovimientoStock" asp-action="Index" class="btn btn-v-outline">Volver a stock</a>
+            <a asp-action="Create" asp-route-empresaId="@empresaId" class="btn btn-create-action">
+                <span class="material-symbols-outlined">add_circle</span>
+                <span>Nuevo inventario</span>
+            </a>
+        </div>
+    </div>
+
+    @if (User.IsInRole("SuperAdmin"))
+    {
+        <div class="card filter-card mb-4">
+            <div class="card-body p-3">
+                <form method="get" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="empresaId" class="form-label">Empresa</label>
+                        <select id="empresaId" name="empresaId" asp-items="ViewBag.Empresas" class="form-select">
+                            <option value="">Todas las empresas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-auto"><button class="btn btn-filter-search" type="submit">Buscar</button></div>
+                </form>
+            </div>
+        </div>
+    }
+
+    <div class="card table-card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead><tr><th>Sesión</th><th>Inicio</th><th>Empresa</th><th>Usuario</th><th>Productos</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="7" class="text-center text-secondary py-5">Todavía no hay sesiones de inventario.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var inventario in Model)
+                        {
+                            string estado = inventario.Estado switch
+                            {
+                                EstadoInventarioFisico.Abierto => "Abierto",
+                                EstadoInventarioFisico.Confirmado => "Confirmado",
+                                _ => "Cancelado"
+                            };
+                            string clase = inventario.Estado switch
+                            {
+                                EstadoInventarioFisico.Abierto => "text-bg-warning",
+                                EstadoInventarioFisico.Confirmado => "text-bg-success",
+                                _ => "text-bg-secondary"
+                            };
+                            <tr>
+                                <td class="fw-semibold">#@inventario.Id</td>
+                                <td>@FechaHora.ConvertirAHoraLocal(inventario.FechaInicio).ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@inventario.Empresa.Nombre</td>
+                                <td>@inventario.UsuarioInicio.Nombre @inventario.UsuarioInicio.Apellido</td>
+                                <td>@inventario.Detalles.Count</td>
+                                <td><span class="badge @clase">@estado</span></td>
+                                <td class="text-end"><a asp-action="Details" asp-route-id="@inventario.Id" class="btn btn-sm btn-v-outline">Ver detalle</a></td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>

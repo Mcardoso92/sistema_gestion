@@ -57,6 +57,7 @@ builder.Services.AddScoped<CompraSaldoService>();
 builder.Services.AddScoped<StockProductoService>();
 builder.Services.AddScoped<HistorialValorProductoService>();
 builder.Services.AddScoped<IProductoActualizacionMasivaService, ProductoActualizacionMasivaService>();
+builder.Services.AddScoped<InventarioFisicoService>();
 builder.Services.AddScoped<EmpresaInicializacionService>();
 builder.Services.AddScoped<ClienteAltaService>();
 builder.Services.AddScoped<ProveedorAltaService>();

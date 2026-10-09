@@ -1,0 +1,122 @@
+@model saas.ViewModel.InventarioFisico.InventarioFisicoCrearVM
+
+@{
+    ViewData["Title"] = "Nuevo inventario físico";
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Nuevo inventario físico</h1>
+            <p class="page-subtitle">Seleccioná los productos que participarán del conteo.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <form id="inventarioForm" asp-action="Create" method="post">
+                <input asp-for="PaginaActual" type="hidden" />
+                @foreach (int productoId in Model.ProductosIds.Where(id => Model.Productos.All(p => p.Id != id)))
+                {
+                    <input type="hidden" name="ProductosIds" value="@productoId" />
+                }
+
+                <div class="card filter-card mb-4"><div class="card-body p-3">
+                <div class="row g-3 align-items-end">
+                    @if (User.IsInRole("SuperAdmin"))
+                    {
+                        <div class="col-md-3">
+                            <label asp-for="EmpresaId" class="form-label">Empresa</label>
+                            <select asp-for="EmpresaId" asp-items="ViewBag.Empresas" class="form-select"></select>
+                        </div>
+                    }
+                    else
+                    {
+                        <input asp-for="EmpresaId" type="hidden" />
+                    }
+                    <div class="col-md-3">
+                        <label asp-for="CategoriaId" class="form-label">Categoría</label>
+                        <select asp-for="CategoriaId" asp-items="ViewBag.Categorias" class="form-select"><option value="">Todas</option></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Busqueda" class="form-label">Buscar producto</label>
+                        <input asp-for="Busqueda" class="form-control" placeholder="Nombre o código" />
+                    </div>
+                    <div class="col-md-auto"><button type="submit" asp-action="Preparar" asp-route-pagina="1" class="btn btn-filter-search">Filtrar</button></div>
+                </div>
+            </div></div>
+
+            <div class="card form-card">
+                <div class="card-body p-4">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-4">
+                            <label asp-for="Motivo" class="form-label">Motivo</label>
+                            <input asp-for="Motivo" class="form-control" maxlength="250" placeholder="Ej.: Inventario general de octubre" />
+                            <span asp-validation-for="Motivo" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h2 class="h6 fw-bold mb-0">Productos disponibles</h2>
+                            <button type="button" id="seleccionarTodos" class="btn btn-sm btn-v-outline">Seleccionar página</button>
+                        </div>
+                        @Html.ValidationMessageFor(m => m.ProductosIds, null, new { @class = "text-danger d-block mb-2" })
+
+                        <div class="card table-card">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0 align-middle">
+                                    <thead><tr><th class="text-center">Seleccionar</th><th>Producto</th><th>Categoría</th><th class="text-end">Stock teórico</th></tr></thead>
+                                    <tbody>
+                                        @if (Model.Productos.Count == 0)
+                                        {
+                                            <tr><td colspan="4" class="text-center text-secondary py-4">No hay productos para los filtros seleccionados.</td></tr>
+                                        }
+                                        else
+                                        {
+                                            @foreach (var producto in Model.Productos)
+                                            {
+                                                <tr>
+                                                    <td class="text-center"><input class="form-check-input producto-check" type="checkbox" name="ProductosIds" value="@producto.Id" checked="@Model.ProductosIds.Contains(producto.Id)" /></td>
+                                                    <td><div class="fw-semibold">@producto.Nombre</div><div class="text-secondary small">@(producto.CodigoBarra ?? "Sin código")</div></td>
+                                                    <td>@producto.Categoria</td>
+                                                    <td class="text-end">@producto.Stock</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = Model.PaginaActual, TotalPaginas = Model.TotalPaginas, TotalRegistros = Model.TotalProductos, NombreSingular = "producto encontrado", NombrePlural = "productos encontrados", FormularioId = "inventarioForm", AccionFormulario = "Preparar", NombreCampoPagina = "pagina" }' />
+                        </div>
+
+                        <div class="form-actions mt-4 border-top pt-4">
+                            <a asp-action="Index" class="btn btn-v-outline">Cancelar</a>
+                            <button type="submit" class="btn btn-v-primary">Iniciar inventario</button>
+                        </div>
+                </div>
+            </div>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">inventory</span><div><h3 class="help-guide-item__title">Sin modificar stock</h3><p class="help-guide-item__text">Iniciar la sesión solo guarda una fotografía del stock teórico.</p></div></div>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">edit_note</span><div><h3 class="help-guide-item__title">Reconteo</h3><p class="help-guide-item__text">Las cantidades físicas pueden guardarse y corregirse mientras la sesión esté abierta.</p></div></div>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">sync_problem</span><div><h3 class="help-guide-item__title">Cambios posteriores</h3><p class="help-guide-item__text">Si hay ventas, compras o ajustes durante el conteo, la confirmación se bloquea.</p></div></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('seleccionarTodos')?.addEventListener('click', function () {
+            const checks = Array.from(document.querySelectorAll('.producto-check'));
+            const seleccionar = checks.some(check => !check.checked);
+            checks.forEach(check => check.checked = seleccionar);
+            this.textContent = seleccionar ? 'Quitar selección de página' : 'Seleccionar página';
+        });
+    </script>
+}

@@ -1,0 +1,110 @@
+@using saas.Models.Enums
+@model saas.ViewModel.InventarioFisico.InventarioFisicoDetailsVM
+
+@{
+    ViewData["Title"] = $"Inventario #{Model.Id}";
+    string estado = Model.Estado switch { EstadoInventarioFisico.Abierto => "Abierto", EstadoInventarioFisico.Confirmado => "Confirmado", _ => "Cancelado" };
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Inventario #@Model.Id</h1>
+            <p class="page-subtitle">@Model.Empresa · @estado</p>
+        </div>
+        <div class="page-actions"><a asp-action="Index" asp-route-empresaId="@Model.EmpresaId" class="btn btn-v-outline">Volver</a></div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-8">
+            <div class="card detail-card mb-4"><div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4"><div class="text-secondary small">Inicio</div><div class="fw-semibold">@Model.FechaInicio.ToString("dd/MM/yyyy HH:mm")</div></div>
+                    <div class="col-md-4"><div class="text-secondary small">Iniciado por</div><div class="fw-semibold">@Model.UsuarioInicio</div></div>
+                    <div class="col-md-4"><div class="text-secondary small">Motivo</div><div class="fw-semibold">@Model.Motivo</div></div>
+                    @if (Model.FechaConfirmacion.HasValue)
+                    {
+                        <div class="col-md-4"><div class="text-secondary small">Confirmación</div><div class="fw-semibold">@Model.FechaConfirmacion.Value.ToString("dd/MM/yyyy HH:mm")</div></div>
+                        <div class="col-md-4"><div class="text-secondary small">Confirmado por</div><div class="fw-semibold">@Model.UsuarioConfirmacion</div></div>
+                    }
+                </div>
+            </div></div>
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="Id" type="hidden" />
+                <div class="card table-card">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead><tr><th>Producto</th><th>Categoría</th><th class="text-end">Teórico</th><th class="text-end">Contado</th><th class="text-end">Diferencia</th></tr></thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.Detalles.Count; i++)
+                                {
+                                    <tr>
+                                        <td><input asp-for="Detalles[i].DetalleId" type="hidden" /><div class="fw-semibold">@Model.Detalles[i].Producto</div><div class="text-secondary small">@(Model.Detalles[i].CodigoBarra ?? "Sin código")</div></td>
+                                        <td>@Model.Detalles[i].Categoria</td>
+                                        <td class="text-end stock-teorico">@Model.Detalles[i].StockTeorico</td>
+                                        <td class="text-end">
+                                            @if (Model.EstaAbierto)
+                                            {
+                                                <input asp-for="Detalles[i].StockContado" min="0" class="form-control form-control-sm text-end stock-contado ms-auto" style="max-width: 120px" />
+                                            }
+                                            else
+                                            {
+                                                <span>@(Model.Detalles[i].StockContado?.ToString() ?? "-")</span>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-semibold diferencia">@(Model.Detalles[i].Diferencia?.ToString("+0;-0;0") ?? "-")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                @if (Model.EstaAbierto)
+                {
+                    <div class="form-actions mt-4">
+                        <button type="submit" formaction="@Url.Action("GuardarConteo")" class="btn btn-v-outline">Guardar conteo</button>
+                        <button type="submit" formaction="@Url.Action("Confirmar")" class="btn btn-v-primary" onclick="return confirm('¿Confirma la conciliación? Se generarán movimientos por todas las diferencias.');">Confirmar conciliación</button>
+                    </div>
+                }
+            </form>
+
+            @if (Model.EstaAbierto)
+            {
+                <form asp-action="Cancelar" asp-route-id="@Model.Id" method="post" class="mt-3 text-end" onsubmit="return confirm('¿Cancelar esta sesión? El stock no será modificado.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">Cancelar inventario</button>
+                </form>
+            }
+        </div>
+
+        <div class="col-lg-4">
+            <div class="help-guide-panel">
+                <h2 class="help-guide-title">Guía de Ayuda</h2>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">fact_check</span><div><h3 class="help-guide-item__title">Cantidad física</h3><p class="help-guide-item__text">Ingresá la cantidad realmente contada para cada producto.</p></div></div>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">save</span><div><h3 class="help-guide-item__title">Guardar no ajusta</h3><p class="help-guide-item__text">Podés guardar avances y recontar sin modificar el stock.</p></div></div>
+                <div class="help-guide-item"><span class="material-symbols-outlined help-guide-item__icon">verified</span><div><h3 class="help-guide-item__title">Confirmación</h3><p class="help-guide-item__text">Solo la confirmación genera movimientos de entrada o salida.</p></div></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+@if (Model.EstaAbierto)
+{
+    <script>
+        document.querySelectorAll('.stock-contado').forEach(input => {
+            const actualizar = () => {
+                const fila = input.closest('tr');
+                const teorico = Number(fila.querySelector('.stock-teorico').textContent.trim());
+                const diferencia = fila.querySelector('.diferencia');
+                if (input.value === '') { diferencia.textContent = '-'; return; }
+                const valor = Number(input.value) - teorico;
+                diferencia.textContent = valor > 0 ? `+${valor}` : `${valor}`;
+            };
+            input.addEventListener('input', actualizar);
+            actualizar();
+        });
+    </script>
+}

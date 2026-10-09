@@ -36,6 +36,8 @@ namespace saas.Data
         public DbSet<MovimientoCaja> MovimientosCaja { get; set; } = null!;
         public DbSet<CambioValorProducto> CambiosValorProducto { get; set; } = null!;
         public DbSet<RevisionNotificacion> RevisionesNotificacion { get; set; } = null!;
+        public DbSet<InventarioFisico> InventariosFisicos { get; set; } = null!;
+        public DbSet<DetalleInventarioFisico> DetallesInventarioFisico { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -214,6 +216,42 @@ namespace saas.Data
                 .HasOne(c => c.Compra)
                 .WithMany()
                 .HasForeignKey(c => c.CompraId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<InventarioFisico>()
+                .HasOne(i => i.Empresa)
+                .WithMany()
+                .HasForeignKey(i => i.EmpresaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<InventarioFisico>()
+                .HasOne(i => i.UsuarioInicio)
+                .WithMany()
+                .HasForeignKey(i => i.UsuarioInicioId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<InventarioFisico>()
+                .HasOne(i => i.UsuarioConfirmacion)
+                .WithMany()
+                .HasForeignKey(i => i.UsuarioConfirmacionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleInventarioFisico>()
+                .HasOne(d => d.InventarioFisico)
+                .WithMany(i => i.Detalles)
+                .HasForeignKey(d => d.InventarioFisicoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DetalleInventarioFisico>()
+                .HasOne(d => d.Producto)
+                .WithMany()
+                .HasForeignKey(d => d.ProductoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MovimientoStock>()
+                .HasOne(m => m.InventarioFisico)
+                .WithMany()
+                .HasForeignKey(m => m.InventarioFisicoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CambioValorProducto>()
@@ -993,6 +1031,15 @@ namespace saas.Data
                 .HasIndex(c => c.CambioRevertidoId)
                 .IsUnique()
                 .HasFilter("[CambioRevertidoId] IS NOT NULL");
+
+            modelBuilder.Entity<InventarioFisico>()
+                .HasIndex(i => i.EmpresaId)
+                .IsUnique()
+                .HasFilter("[Estado] = 1");
+
+            modelBuilder.Entity<DetalleInventarioFisico>()
+                .HasIndex(d => new { d.InventarioFisicoId, d.ProductoId })
+                .IsUnique();
 
             modelBuilder.Entity<RevisionNotificacion>()
                 .HasIndex(r => new { r.UsuarioId, r.EmpresaId })

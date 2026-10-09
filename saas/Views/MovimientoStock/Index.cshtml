@@ -18,6 +18,12 @@
                 Supervise y gestione el inventario de productos en tiempo real.
             </p>
         </div>
+        <div class="page-actions">
+            <a asp-controller="InventarioFisico" asp-action="Index" asp-route-empresaId="@Model.EmpresaId" class="btn btn-v-outline d-flex align-items-center gap-2">
+                <span class="material-symbols-outlined">inventory</span>
+                <span>Inventario físico</span>
+            </a>
+        </div>
     </div>
 
     <!-- Filtros -->

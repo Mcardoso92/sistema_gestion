@@ -15,9 +15,35 @@
     @if (Model.TotalPaginas > 1)
     {
         <div class="pagination-controls d-flex align-items-center gap-2">
-            <a href="@urlAnterior" class="btn btn-sm btn-pagination @(Model.PaginaActual <= 1 ? "disabled" : "")">Anterior</a>
+            @if (string.IsNullOrWhiteSpace(Model.FormularioId))
+            {
+                <a href="@urlAnterior" class="btn btn-sm btn-pagination @(Model.PaginaActual <= 1 ? "disabled" : "")">Anterior</a>
+            }
+            else
+            {
+                <button type="submit"
+                        form="@Model.FormularioId"
+                        formaction="@Url.Action(Model.AccionFormulario)"
+                        name="@Model.NombreCampoPagina"
+                        value="@(Model.PaginaActual - 1)"
+                        class="btn btn-sm btn-pagination"
+                        disabled="@(Model.PaginaActual <= 1)">Anterior</button>
+            }
             <span class="small text-secondary">Página @Model.PaginaActual de @Model.TotalPaginas</span>
-            <a href="@urlSiguiente" class="btn btn-sm btn-pagination @(Model.PaginaActual >= Model.TotalPaginas ? "disabled" : "")">Siguiente</a>
+            @if (string.IsNullOrWhiteSpace(Model.FormularioId))
+            {
+                <a href="@urlSiguiente" class="btn btn-sm btn-pagination @(Model.PaginaActual >= Model.TotalPaginas ? "disabled" : "")">Siguiente</a>
+            }
+            else
+            {
+                <button type="submit"
+                        form="@Model.FormularioId"
+                        formaction="@Url.Action(Model.AccionFormulario)"
+                        name="@Model.NombreCampoPagina"
+                        value="@(Model.PaginaActual + 1)"
+                        class="btn btn-sm btn-pagination"
+                        disabled="@(Model.PaginaActual >= Model.TotalPaginas)">Siguiente</button>
+            }
         </div>
     }
 
