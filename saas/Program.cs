@@ -55,6 +55,7 @@ builder.Services.AddScoped<CajaSaldoService>();
 builder.Services.AddScoped<VentaSaldoService>();
 builder.Services.AddScoped<CompraSaldoService>();
 builder.Services.AddScoped<BienvenidaUsuarioService>();
+builder.Services.AddScoped<OnboardingEmpresaService>();
 builder.Services.AddScoped<CuentaCorrienteService>();
 builder.Services.AddScoped<StockProductoService>();
 builder.Services.AddScoped<HistorialValorProductoService>();

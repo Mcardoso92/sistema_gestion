@@ -1,0 +1,112 @@
+@model saas.ViewModel.Dashboard.OnboardingEmpresaVM
+
+<section class="content-card mb-4 js-onboarding"
+         data-finalizar-url="@Url.Action("FinalizarOnboarding", "Dashboard")">
+    <div class="content-card__header flex-column flex-sm-row align-items-start align-items-sm-center">
+        <div>
+            <h2 class="section-title mb-1">Primeros pasos en Veltika</h2>
+            <p class="text-caption mb-0">Completá estas acciones para comenzar a gestionar tu negocio.</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="status-badge @(Model.Completado ? "status-active" : "status-pending")">
+                @Model.PasosCompletados/3 completados
+            </span>
+            <button type="button"
+                    class="btn btn-sm btn-v-outline js-onboarding-toggle"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#onboardingContenido"
+                    aria-expanded="true"
+                    aria-controls="onboardingContenido">
+                Minimizar
+            </button>
+        </div>
+    </div>
+
+    <div class="collapse show" id="onboardingContenido">
+        <div class="p-4 pt-0">
+            <div class="progress mb-4" role="progressbar"
+                 aria-label="Progreso de primeros pasos"
+                 aria-valuenow="@Model.Porcentaje"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+                <div class="progress-bar" style="width: @(Model.Porcentaje)%">
+                    @Model.Porcentaje%
+                </div>
+            </div>
+
+            @if (Model.Completado)
+            {
+                <div class="alert alert-success mb-4" role="status">
+                    <div class="fw-semibold">¡Tu negocio ya está en marcha! 🎉</div>
+                    <div>Ya completaste los primeros pasos para comenzar a gestionar tu comercio con Veltika.</div>
+                </div>
+            }
+
+            <div class="d-grid gap-3">
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 border rounded-3 p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="material-symbols-outlined @(Model.ProductoCreado ? "text-success" : "text-secondary")">
+                            @(Model.ProductoCreado ? "check_circle" : "radio_button_unchecked")
+                        </span>
+                        <div>
+                            <div class="fw-semibold">Cargar el primer producto</div>
+                            <div class="text-secondary small">Agregá los productos que vendés.</div>
+                        </div>
+                    </div>
+                    @if (!Model.ProductoCreado)
+                    {
+                        <a asp-controller="Producto" asp-action="Create" class="btn btn-sm btn-v-outline align-self-md-center">Crear producto</a>
+                    }
+                </div>
+
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 border rounded-3 p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="material-symbols-outlined @(Model.CajaAbierta ? "text-success" : "text-secondary")">
+                            @(Model.CajaAbierta ? "check_circle" : "radio_button_unchecked")
+                        </span>
+                        <div>
+                            <div class="fw-semibold">Abrir la primera caja</div>
+                            <div class="text-secondary small">Registrá tu primera apertura de turno.</div>
+                        </div>
+                    </div>
+                    @if (!Model.CajaAbierta)
+                    {
+                        <a asp-controller="Caja" asp-action="Index" class="btn btn-sm btn-v-outline align-self-md-center">Ir a Caja</a>
+                    }
+                </div>
+
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 border rounded-3 p-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="material-symbols-outlined @(Model.VentaRegistrada ? "text-success" : "text-secondary")">
+                            @(Model.VentaRegistrada ? "check_circle" : "radio_button_unchecked")
+                        </span>
+                        <div>
+                            <div class="fw-semibold">Registrar la primera venta</div>
+                            <div class="text-secondary small">Conocé cómo funciona el punto de venta.</div>
+                        </div>
+                    </div>
+                    @if (!Model.VentaRegistrada)
+                    {
+                        <a asp-controller="Venta" asp-action="Create" class="btn btn-sm btn-v-outline align-self-md-center">Ir al punto de venta</a>
+                    }
+                </div>
+            </div>
+
+            @if (Model.Completado)
+            {
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="button" class="btn btn-v-primary js-onboarding-finalizar">Finalizar</button>
+                </div>
+            }
+
+            <div class="alert alert-danger d-none mt-3 mb-0 js-onboarding-error" role="alert">
+                No pudimos finalizar los primeros pasos. Actualizá la página e intentá nuevamente.
+            </div>
+
+            <form class="d-none js-onboarding-token">
+                @Html.AntiForgeryToken()
+            </form>
+        </div>
+    </div>
+</section>

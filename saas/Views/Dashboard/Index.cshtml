@@ -27,6 +27,11 @@
         }
     </div>
 
+    @if (Model.Onboarding != null)
+    {
+        <partial name="_OnboardingPrimerosPasos" model="Model.Onboarding" />
+    }
+
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="metric-card metric-card--featured">
@@ -284,5 +289,9 @@
     @if (Model.MostrarBienvenida)
     {
         <script src="~/js/bienvenida.js" asp-append-version="true"></script>
+    }
+    @if (Model.Onboarding != null)
+    {
+        <script src="~/js/onboarding.js" asp-append-version="true"></script>
     }
 }

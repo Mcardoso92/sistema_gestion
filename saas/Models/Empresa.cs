@@ -10,6 +10,9 @@ namespace saas.Models
         [StringLength(50, ErrorMessage = "Máximo 50 caracteres.")]
         public string Nombre { get; set; } = null!;
         public bool Estado { get; set; }
+        // Las empresas existentes no reciben retroactivamente el onboarding.
+        // El registro público lo habilita explícitamente para cada empresa nueva.
+        public bool OnboardingFinalizado { get; set; } = true;
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
         public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();

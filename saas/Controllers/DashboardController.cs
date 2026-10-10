@@ -16,17 +16,20 @@ namespace saas.Controllers
         private readonly UserManager<Usuario> _userManager;
         private readonly IFechaHoraService _fechaHora;
         private readonly BienvenidaUsuarioService _bienvenidaUsuarioService;
+        private readonly OnboardingEmpresaService _onboardingEmpresaService;
 
         public DashboardController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
             IFechaHoraService fechaHora,
-            BienvenidaUsuarioService bienvenidaUsuarioService)
+            BienvenidaUsuarioService bienvenidaUsuarioService,
+            OnboardingEmpresaService onboardingEmpresaService)
         {
             _context = context;
             _userManager = userManager;
             _fechaHora = fechaHora;
             _bienvenidaUsuarioService = bienvenidaUsuarioService;
+            _onboardingEmpresaService = onboardingEmpresaService;
         }
 
         public async Task<IActionResult> Index()
@@ -206,6 +209,9 @@ namespace saas.Controllers
             var vm = new DashboardVM
             {
                 MostrarBienvenida = !usuario.BienvenidaVisualizada,
+                Onboarding = esSuperAdmin
+                    ? null
+                    : await _onboardingEmpresaService.ObtenerEstadoAsync(usuario.EmpresaId),
                 TotalVentasDia = totalVentasDia,
                 CantidadVentasDia = cantidadVentasDia,
                 TotalVentasMes = totalVentasMes,
@@ -235,6 +241,29 @@ namespace saas.Controllers
             await _bienvenidaUsuarioService.MarcarComoVisualizadaAsync(usuario.Id);
 
             return NoContent();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FinalizarOnboarding()
+        {
+            Usuario? usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            if (await _userManager.IsInRoleAsync(usuario, "SuperAdmin"))
+            {
+                return Forbid();
+            }
+
+            bool finalizado = await _onboardingEmpresaService.FinalizarAsync(usuario.EmpresaId);
+
+            return finalizado
+                ? NoContent()
+                : BadRequest(new { mensaje = "Todavía hay pasos pendientes." });
         }
     }
 }

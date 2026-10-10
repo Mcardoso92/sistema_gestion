@@ -1061,6 +1061,7 @@ namespace saas.Controllers
                 {
                     Nombre = model.EmpresaNombre,
                     Estado = true,
+                    OnboardingFinalizado = false,
                     FechaAlta = fechaAlta
                 };
 
