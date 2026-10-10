@@ -23,7 +23,6 @@ namespace saas.Services
                 .Select(e => new OnboardingEmpresaVM
                 {
                     ProductoCreado = e.Productos.Any(p => p.Estado),
-                    CajaAbierta = e.TurnosCaja.Any(),
                     VentaRegistrada = e.Ventas.Any(v => v.Estado)
                 })
                 .SingleOrDefaultAsync();
@@ -47,13 +46,11 @@ namespace saas.Services
             bool productoCreado = await _context.Productos.AnyAsync(p =>
                 p.EmpresaId == empresaId &&
                 p.Estado);
-            bool cajaAbierta = await _context.TurnosCaja.AnyAsync(t =>
-                t.EmpresaId == empresaId);
             bool ventaRegistrada = await _context.Ventas.AnyAsync(v =>
                 v.EmpresaId == empresaId &&
                 v.Estado);
 
-            if (!productoCreado || !cajaAbierta || !ventaRegistrada)
+            if (!productoCreado || !ventaRegistrada)
             {
                 return false;
             }

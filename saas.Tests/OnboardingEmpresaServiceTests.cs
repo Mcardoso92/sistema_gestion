@@ -1,5 +1,4 @@
 using saas.Models;
-using saas.Models.Enums;
 using saas.Services;
 
 namespace saas.Tests;
@@ -15,11 +14,6 @@ public class OnboardingEmpresaServiceTests
         {
             Id = 1, EmpresaId = 1, CategoriaId = 1, Nombre = "Producto", Estado = true
         });
-        context.TurnosCaja.Add(new TurnoCaja
-        {
-            Id = 1, EmpresaId = 1, CajaId = 1, UsuarioAperturaId = "u",
-            FechaApertura = DateTime.UtcNow, Estado = EstadoTurnoCaja.Cerrado
-        });
         context.Ventas.AddRange(
             new Venta { Id = 1, EmpresaId = 1, UsuarioId = "u", Total = 10, Estado = false },
             new Venta { Id = 2, EmpresaId = 1, UsuarioId = "u", Total = 10, Estado = true });
@@ -30,10 +24,9 @@ public class OnboardingEmpresaServiceTests
 
         Assert.NotNull(estado);
         Assert.True(estado.ProductoCreado);
-        Assert.True(estado.CajaAbierta);
         Assert.True(estado.VentaRegistrada);
         Assert.True(estado.Completado);
-        Assert.Equal(3, estado.PasosCompletados);
+        Assert.Equal(2, estado.PasosCompletados);
         Assert.Equal(100, estado.Porcentaje);
     }
 
@@ -50,7 +43,7 @@ public class OnboardingEmpresaServiceTests
     }
 
     [Fact]
-    public async Task FinalizarAsync_SoloFinalizaCuandoLosTresPasosEstanCompletos()
+    public async Task FinalizarAsync_SoloFinalizaCuandoLosDosPasosEstanCompletos()
     {
         await using var context = TestDbContextFactory.Crear();
         context.Empresas.Add(CrearEmpresa(1, onboardingFinalizado: false));
@@ -64,11 +57,6 @@ public class OnboardingEmpresaServiceTests
         context.Productos.Add(new Producto
         {
             Id = 1, EmpresaId = 1, CategoriaId = 1, Nombre = "Producto", Estado = true
-        });
-        context.TurnosCaja.Add(new TurnoCaja
-        {
-            Id = 1, EmpresaId = 1, CajaId = 1, UsuarioAperturaId = "u",
-            FechaApertura = DateTime.UtcNow, Estado = EstadoTurnoCaja.Abierto
         });
         context.Ventas.Add(new Venta
         {

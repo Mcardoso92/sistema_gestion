@@ -27,18 +27,15 @@
     {
         public bool ProductoCreado { get; set; }
 
-        public bool CajaAbierta { get; set; }
-
         public bool VentaRegistrada { get; set; }
 
         public int PasosCompletados =>
             (ProductoCreado ? 1 : 0) +
-            (CajaAbierta ? 1 : 0) +
             (VentaRegistrada ? 1 : 0);
 
-        public bool Completado => PasosCompletados == 3;
+        public bool Completado => PasosCompletados == 2;
 
-        public int Porcentaje => PasosCompletados * 100 / 3;
+        public int Porcentaje => PasosCompletados * 100 / 2;
     }
 
     public class ProductoStockBajoVM
