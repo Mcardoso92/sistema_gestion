@@ -116,6 +116,13 @@
                         <div class="col-12 form-actions mt-5 border-top pt-4">
                             <a href="@urlVolver" class="btn btn-v-outline">Volver</a>
 
+                            <a asp-controller="CuentaCorriente"
+                               asp-action="Cliente"
+                               asp-route-id="@Model.Id"
+                               class="btn btn-v-outline">
+                                Cuenta corriente
+                            </a>
+
                             <a asp-action="Edit"
                                asp-route-id="@Model.Id"
                                class="btn btn-v-primary">

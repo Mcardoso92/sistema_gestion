@@ -23,6 +23,7 @@
 
             <div class="d-flex gap-2">
                 <a href="@urlVolver" class="btn btn-v-outline">Volver</a>
+                <a asp-controller="CuentaCorriente" asp-action="Proveedor" asp-route-id="@Model.Id" class="btn btn-v-outline">Cuenta corriente</a>
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-v-primary">Editar Proveedor</a>
             </div>
         </div>

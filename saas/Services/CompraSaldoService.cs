@@ -4,6 +4,10 @@ using saas.Models.Enums;
 
 namespace saas.Services
 {
+    public sealed record PosicionProveedor(
+        decimal SaldoPendiente,
+        decimal SaldoARecuperar);
+
     public class CompraSaldoService
     {
         private readonly SaasDbContext _context;
@@ -99,6 +103,46 @@ namespace saas.Services
             return Math.Max(
                 0,
                 excesoPagado - totalReintegrado);
+        }
+
+        public async Task<PosicionProveedor> ObtenerPosicionProveedor(
+            int proveedorId,
+            int empresaId)
+        {
+            var posiciones = await _context.Compras
+                .AsNoTracking()
+                .Where(c =>
+                    c.ProveedorId == proveedorId &&
+                    c.EmpresaId == empresaId &&
+                    c.Estado)
+                .Select(c => new
+                {
+                    c.Total,
+                    TotalDevuelto = c.DevolucionesCompra
+                        .Where(d => d.Estado)
+                        .Sum(d => (decimal?)d.Total) ?? 0,
+                    TotalPagado = c.PagosProveedor
+                        .Where(p => p.Estado == EstadoPago.Activo)
+                        .Sum(p => (decimal?)p.Importe) ?? 0,
+                    TotalReintegrado = c.ReintegrosProveedor
+                        .Where(r => r.Estado == EstadoReintegro.Activo)
+                        .Sum(r => (decimal?)r.Importe) ?? 0
+                })
+                .ToListAsync();
+
+            decimal saldoPendiente = 0;
+            decimal saldoARecuperar = 0;
+
+            foreach (var posicion in posiciones)
+            {
+                decimal totalNeto = Math.Max(0, posicion.Total - posicion.TotalDevuelto);
+                saldoPendiente += Math.Max(0, totalNeto - posicion.TotalPagado);
+                saldoARecuperar += Math.Max(
+                    0,
+                    posicion.TotalPagado - totalNeto - posicion.TotalReintegrado);
+            }
+
+            return new PosicionProveedor(saldoPendiente, saldoARecuperar);
         }
     }
 }

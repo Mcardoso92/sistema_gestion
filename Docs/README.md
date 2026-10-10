@@ -187,6 +187,8 @@ ADR vigentes:
 12. `ADR-012-SQLServer.md`
 13. `ADR-013-CodeFirst.md`
 16. `ADR-016-Identity.md`
+17. `ADR-017-Fecha-hora-y-zona-horaria.md`
+18. `ADR-018-Cuentas-corrientes-como-proyeccion.md`
 
 ADR históricos/supersedidos conservados intencionalmente:
 

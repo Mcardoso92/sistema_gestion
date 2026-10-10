@@ -41,6 +41,28 @@ namespace saas.Services
                 totalVenta - totalCobrado);
         }
 
+        public async Task<decimal> ObtenerSaldoPendienteCliente(
+            int clienteId,
+            int empresaId)
+        {
+            var saldos = await _context.Ventas
+                .AsNoTracking()
+                .Where(v =>
+                    v.ClienteId == clienteId &&
+                    v.EmpresaId == empresaId &&
+                    v.Estado)
+                .Select(v => new
+                {
+                    v.Total,
+                    TotalCobrado = v.CobrosVenta
+                        .Where(c => c.Estado == EstadoCobro.Activo)
+                        .Sum(c => (decimal?)c.Importe) ?? 0
+                })
+                .ToListAsync();
+
+            return saldos.Sum(s => Math.Max(0, s.Total - s.TotalCobrado));
+        }
+
         public async Task<decimal> ObtenerTotalReintegrado(
             int ventaId)
         {

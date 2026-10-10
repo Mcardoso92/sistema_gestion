@@ -1,0 +1,137 @@
+@model saas.ViewModel.CuentaCorriente.CuentaCorrienteVM
+
+@{
+    string tipoTitular = Model.EsCliente ? "cliente" : "proveedor";
+    string controladorTitular = Model.EsCliente ? "Cliente" : "Proveedor";
+    ViewData["Title"] = $"Cuenta corriente de {tipoTitular}";
+}
+
+<main class="container-fluid px-4 py-4">
+    <div class="page-header">
+        <div class="page-header-content">
+            <h1 class="page-title">Cuenta corriente de @tipoTitular</h1>
+            <p class="page-subtitle">@Model.Titular · @Model.Empresa</p>
+        </div>
+        <div class="page-actions">
+            <a asp-controller="@controladorTitular" asp-action="Details" asp-route-id="@Model.TitularId" class="btn btn-v-outline">
+                Volver al @tipoTitular
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 @(Model.EsCliente ? "col-lg-6" : "col-lg-4")">
+            <div class="metric-card metric-card--featured h-100">
+                <div class="metric-card__icon metric-card__icon--warning">
+                    <span class="material-symbols-outlined">account_balance_wallet</span>
+                </div>
+                <div>
+                    <div class="metric-card__label">@(Model.EsCliente ? "Saldo por cobrar" : "Saldo por pagar")</div>
+                    <div class="metric-card__value summary-value--currency">@Model.SaldoPendiente.ToString("C")</div>
+                    <div class="metric-card__detail">Calculado desde operaciones activas</div>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.EsCliente)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="metric-card metric-card--featured h-100">
+                    <div class="metric-card__icon metric-card__icon--success">
+                        <span class="material-symbols-outlined">currency_exchange</span>
+                    </div>
+                    <div>
+                        <div class="metric-card__label">Saldo a recuperar</div>
+                        <div class="metric-card__value summary-value--currency">@Model.SaldoARecuperar.ToString("C")</div>
+                        <div class="metric-card__detail">Importes pendientes del proveedor</div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-md-6 @(Model.EsCliente ? "col-lg-6" : "col-lg-4")">
+            <div class="metric-card metric-card--featured h-100">
+                <div class="metric-card__icon metric-card__icon--info">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                </div>
+                <div>
+                    <div class="metric-card__label">Movimientos</div>
+                    <div class="metric-card__value">@Model.TotalRegistros</div>
+                    <div class="metric-card__detail">Según el filtro seleccionado</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card filter-card mb-4">
+        <div class="card-body p-3">
+            <form method="get" class="row g-3 align-items-end">
+                <input type="hidden" name="id" value="@Model.TitularId" />
+                <div class="col-md-4">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select id="estado" name="estado" class="form-select">
+                        <option value="todos" selected="@(Model.EstadoFiltro == "todos")">Todos</option>
+                        <option value="activos" selected="@(Model.EstadoFiltro == "activos")">Activos</option>
+                        <option value="anulados" selected="@(Model.EstadoFiltro == "anulados")">Anulados</option>
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-filter-search">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card table-card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Movimiento</th>
+                        <th>Referencia</th>
+                        <th class="text-end">Importe</th>
+                        <th class="text-end">Efecto</th>
+                        <th class="text-end">Saldo</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Movimientos.Count == 0)
+                    {
+                        <tr><td colspan="8" class="text-center text-secondary py-5">No hay movimientos para mostrar.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var movimiento in Model.Movimientos)
+                        {
+                            <tr>
+                                <td>@FechaHora.ConvertirAHoraLocal(movimiento.Fecha).ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-semibold">@movimiento.Tipo</td>
+                                <td>@movimiento.Referencia</td>
+                                <td class="text-end">@movimiento.Importe.ToString("C")</td>
+                                <td class="text-end fw-semibold @(movimiento.EfectoSaldo > 0 ? "text-danger" : movimiento.EfectoSaldo < 0 ? "text-success" : "text-secondary")">
+                                    @(movimiento.EfectoSaldo > 0 ? "+" : string.Empty)@movimiento.EfectoSaldo.ToString("C")
+                                </td>
+                                <td class="text-end fw-semibold">@movimiento.SaldoResultante.ToString("C")</td>
+                                <td>
+                                    <span class="status-badge @(movimiento.Activo ? "status-active" : "status-inactive")">
+                                        @(movimiento.Activo ? "Activo" : "Anulado")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-controller="@movimiento.ControladorReferencia"
+                                       asp-action="Details"
+                                       asp-route-id="@movimiento.IdReferencia"
+                                       class="btn btn-sm btn-v-outline">Ver</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+        <partial name="_Paginacion" model='new PaginacionVM { PaginaActual = Model.PaginaActual, TotalPaginas = Model.TotalPaginas, TotalRegistros = Model.TotalRegistros, NombreSingular = "movimiento encontrado", NombrePlural = "movimientos encontrados" }' />
+    </div>
+</main>
