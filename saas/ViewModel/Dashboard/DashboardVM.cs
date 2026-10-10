@@ -2,6 +2,8 @@
 {
     public class DashboardVM
     {
+        public bool MostrarBienvenida { get; set; }
+
         public decimal TotalVentasDia { get; set; }
 
         public int CantidadVentasDia { get; set; }

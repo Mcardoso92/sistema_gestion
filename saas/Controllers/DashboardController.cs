@@ -15,15 +15,18 @@ namespace saas.Controllers
         private readonly SaasDbContext _context;
         private readonly UserManager<Usuario> _userManager;
         private readonly IFechaHoraService _fechaHora;
+        private readonly BienvenidaUsuarioService _bienvenidaUsuarioService;
 
         public DashboardController(
             SaasDbContext context,
             UserManager<Usuario> userManager,
-            IFechaHoraService fechaHora)
+            IFechaHoraService fechaHora,
+            BienvenidaUsuarioService bienvenidaUsuarioService)
         {
             _context = context;
             _userManager = userManager;
             _fechaHora = fechaHora;
+            _bienvenidaUsuarioService = bienvenidaUsuarioService;
         }
 
         public async Task<IActionResult> Index()
@@ -202,6 +205,7 @@ namespace saas.Controllers
 
             var vm = new DashboardVM
             {
+                MostrarBienvenida = !usuario.BienvenidaVisualizada,
                 TotalVentasDia = totalVentasDia,
                 CantidadVentasDia = cantidadVentasDia,
                 TotalVentasMes = totalVentasMes,
@@ -215,6 +219,22 @@ namespace saas.Controllers
             ViewBag.EsVistaGlobal = esSuperAdmin;
 
             return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompletarBienvenida()
+        {
+            Usuario? usuario = await _userManager.GetUserAsync(User);
+
+            if (usuario == null)
+            {
+                return Unauthorized();
+            }
+
+            await _bienvenidaUsuarioService.MarcarComoVisualizadaAsync(usuario.Id);
+
+            return NoContent();
         }
     }
 }

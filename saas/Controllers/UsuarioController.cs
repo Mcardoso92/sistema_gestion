@@ -1077,6 +1077,7 @@ namespace saas.Controllers
                     Apellido = model.Apellido,
                     EmpresaId = empresa.Id,
                     Estado = true,
+                    BienvenidaVisualizada = false,
                     FechaAlta = fechaAlta
                 };
 

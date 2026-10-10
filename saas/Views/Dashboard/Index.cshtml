@@ -274,3 +274,15 @@
         </div>
     </div>
 </main>
+
+@if (Model.MostrarBienvenida)
+{
+    <partial name="_BienvenidaModal" />
+}
+
+@section Scripts {
+    @if (Model.MostrarBienvenida)
+    {
+        <script src="~/js/bienvenida.js" asp-append-version="true"></script>
+    }
+}

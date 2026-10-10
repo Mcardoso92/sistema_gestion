@@ -17,6 +17,9 @@ namespace saas.Models
         public int EmpresaId { get; set; }
         public Empresa Empresa { get; set; } = null!;
         public bool Estado { get; set; }
+        // Los usuarios existentes y los creados desde Administración no reciben
+        // retroactivamente el flujo pensado para una empresa recién registrada.
+        public bool BienvenidaVisualizada { get; set; } = true;
         [DataType(DataType.Date)]
         public DateTime FechaAlta { get; set; }
         [ValidateNever]
